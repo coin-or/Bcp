@@ -292,6 +292,8 @@ INSTDEPFILES = $(BCPINSTDEPFILES) $(USERINSTDEPFILES)
 
 bcps : $(USERTARGETDIR)/bcps
 bcpp : $(USERTARGETDIR)/bcpp
+sbcps : $(USERTARGETDIR)/sbcps
+sbcpp : $(USERTARGETDIR)/sbcpp
 
 ebcps : $(USERTARGETDIR)/ebcps
 ebcpp : $(USERTARGETDIR)/ebcpp
@@ -305,6 +307,14 @@ $(USERTARGETDIR)/bcpp $(USERTARGETDIR)/bcps : $(ALLOBJFILES)
 	@echo ""
 	@mkdir -p $(USERTARGETDIR)
 	@$(CXX) $(CXXFLAGS) -o $@ $(ALLOBJFILES) $(LDFLAGS) $(SYSLD) -lm
+
+$(USERTARGETDIR)/sbcpp $(USERTARGETDIR)/sbcps : $(ALLOBJFILES)
+	@rm -rf Junk
+	@echo ""
+	@echo "Linking $(notdir $@) ..."
+	@echo ""
+	@mkdir -p $(USERTARGETDIR)
+	$(CXX) $(STATICSYSLD) $(CXXFLAGS) -o $@ $(ALLOBJFILES) $(LDFLAGS) -lm
 
 $(USERTARGETDIR)/pbcps : $(ALLOBJFILES)
 	@rm -rf Junk
