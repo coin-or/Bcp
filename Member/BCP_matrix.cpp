@@ -212,8 +212,9 @@ BCP_lp_relax::BCP_createColumnOrderedMatrix(BCP_vec<BCP_row*>& rows,
   
   for (i = 0; i < rownum; ++i)
     nzcnt += rows[i]->getNumElements();
+  OsiPackedMatrix::clear();
   OsiPackedMatrix::reserve(rownum, nzcnt);
-  OsiPackedMatrix::setDimensions(rownum, CLB.size());
+  OsiPackedMatrix::setDimensions(0, CLB.size());
   _RowLowerBound.reserve(rownum);
   _RowUpperBound.reserve(rownum);
   for (i = 0; i < rownum; ++i) {
@@ -262,8 +263,9 @@ BCP_lp_relax::BCP_createRowOrderedMatrix(BCP_vec<BCP_col*>& cols,
   
   for (i = 0; i < colnum; ++i)
     nzcnt += cols[i]->getNumElements();
+  OsiPackedMatrix::clear();
   OsiPackedMatrix::reserve(colnum, nzcnt);
-  OsiPackedMatrix::setDimensions(RLB.size(), colnum);
+  OsiPackedMatrix::setDimensions(RLB.size(), 0);
   _ColLowerBound.reserve(colnum);
   _ColUpperBound.reserve(colnum);
   _Objective.reserve(colnum);
