@@ -26,6 +26,11 @@
 #  include "BCP_MACH.hpp"
 #endif
 
+#if (defined(__GNUC__) && defined(__FreeBSD__))
+#  include "BCP_freebsd.hpp"
+#endif
+
+
 #if defined(_MSC_VER) && (_MSC_VER > 1300)
 #  include "BCP_msvc.hpp"
 #endif
