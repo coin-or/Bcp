@@ -300,6 +300,7 @@ esbcps : $(USERTARGETDIR)/esbcps
 esbcpp : $(USERTARGETDIR)/esbcpp
 
 pbcps : $(USERTARGETDIR)/pbcps
+pbcpp : $(USERTARGETDIR)/pbcpp
 
 $(USERTARGETDIR)/bcpp $(USERTARGETDIR)/bcps : $(ALLOBJFILES)
 	@rm -rf Junk
@@ -317,13 +318,13 @@ $(USERTARGETDIR)/sbcpp $(USERTARGETDIR)/sbcps : $(ALLOBJFILES)
 	@mkdir -p $(USERTARGETDIR)
 	$(CXX) $(STATICSYSLD) $(CXXFLAGS) -o $@ $(ALLOBJFILES) $(LDFLAGS) -lm
 
-$(USERTARGETDIR)/pbcps : $(ALLOBJFILES)
+$(USERTARGETDIR)/pbcpp $(USERTARGETDIR)/pbcps : $(ALLOBJFILES)
 	@rm -rf Junk
 	@echo ""
 	@echo "Linking $(notdir $@) ..."
 	@echo ""
 	@mkdir -p $(USERTARGETDIR)
-	@purify $(CXX) $(CXXFLAGS) -o $@ $(ALLOBJFILES) \
+	@purify -logfile=./%v.%p $(CXX) $(CXXFLAGS) -o $@ $(ALLOBJFILES) \
 		$(LDFLAGS) $(SYSLD) -lm
 
 $(USERTARGETDIR)/ebcpp $(USERTARGETDIR)/ebcps : $(ALLOBJFILES)
