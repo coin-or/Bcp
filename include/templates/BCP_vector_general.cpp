@@ -15,7 +15,7 @@ BCP_vec<T>::deallocate() {
       while (finish != start) {
 	 BCP_DESTROY(--finish);
       }
-      std::operator delete(start);
+      ::operator delete(start);
    }
 }
 
