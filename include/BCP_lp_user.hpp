@@ -10,6 +10,7 @@
 #include "OsiSolverInterface.hpp"
 
 #include "BCP_os.hpp"
+#include "BCP_USER.hpp"
 
 #include "BCP_buffer.hpp"
 #include "BCP_vector.hpp"
@@ -202,6 +203,13 @@ public:
       /** Unpack an algorithmic cut */
       virtual BCP_cut_algo*
       unpack_cut_algo(BCP_buffer& buf);
+
+      /** Pack an user data */
+      virtual void
+      pack_user_data(const BCP_user_data* ud, BCP_buffer& buf);
+      /** Unpack an user data */
+      virtual BCP_user_data*
+      unpack_user_data(BCP_buffer& buf);
     /*@}*/
   /*@}*/
 
@@ -773,6 +781,12 @@ public:
     */
     virtual void
     set_actions_for_children(BCP_presolved_lp_brobj* best);
+
+    /** For each child create a user data object and put it into the
+	appropriate entry in uds. When this function is called uds 
+     */
+    virtual void
+    set_user_data_for_children(BCP_presolved_lp_brobj* best);
   /*@}*/
       
   //===========================================================================

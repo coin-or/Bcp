@@ -12,6 +12,7 @@
 //#############################################################################
 
 class BCP_warmstart;
+class BCP_user_data;
 
 //#############################################################################
 
@@ -53,17 +54,17 @@ public:
    /**@name Data members */
    /*@{*/
    /** */
-   BCP_problem_core_change     core_as_change;
+   BCP_problem_core_change  core_as_change;
    /** */
-   BCP_vec<BCP_IndexType>  added_vars_index;
+   BCP_vec<BCP_IndexType>   added_vars_index;
    /** */
-   BCP_vec<BCP_obj_change> added_vars_desc;
+   BCP_vec<BCP_obj_change>  added_vars_desc;
    /** */
-   BCP_vec<BCP_IndexType>  added_cuts_index;
+   BCP_vec<BCP_IndexType>   added_cuts_index;
    /** */
-   BCP_vec<BCP_obj_change> added_cuts_desc;
+   BCP_vec<BCP_obj_change>  added_cuts_desc;
    /** */
-   BCP_indexed_pricing_list   indexed_pricing;
+   BCP_indexed_pricing_list indexed_pricing;
    /** */
    BCP_warmstart* warmstart;
    /*@}*/
@@ -79,7 +80,8 @@ public:
       added_cuts_index(),
       added_cuts_desc(),
       indexed_pricing(),
-      warmstart(0) {}
+      warmstart(0)
+   {}
    /** */
    ~BCP_lp_parent();
    /*@}*/
@@ -153,6 +155,9 @@ public:
    // lower bound on the lp when columns were added the last time.
    /** */
    BCP_vec<double> lb_at_cutgen;
+   /** Data the user wants to pass along with the search tree node. For now it
+       cannot be stored wrt. the parent. */
+   BCP_user_data* user_data;
    /*@}*/
 
 public:
@@ -166,7 +171,8 @@ public:
       dive(BCP_DoNotDive), colgen(BCP_DoNotGenerateColumns_Fathom),
       quality(-DBL_MAX), true_lower_bound(-DBL_MAX), vars(), cuts(),
       indexed_pricing(),
-      warmstart(0) {}
+      warmstart(0),
+      user_data(0) {}
    /** */
    ~BCP_lp_node();
    /*@}*/

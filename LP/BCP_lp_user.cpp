@@ -185,6 +185,22 @@ BCP_lp_user::unpack_cut_algo(BCP_buffer& buf)
 BCP_lp_user::unpack_cut_algo() invoked but not overridden!\n");
 }
 
+//-----------------------------------------------------------------------------
+void
+BCP_lp_user::pack_user_data(const BCP_user_data* ud, BCP_buffer& buf)
+{
+  throw BCP_fatal_error("\
+BCP_lp_user::pack_user_data() invoked but not overridden!\n");
+}
+
+//-----------------------------------------------------------------------------
+BCP_user_data*
+BCP_lp_user::unpack_user_data(BCP_buffer& buf)
+{
+  throw BCP_fatal_error("\
+BCP_lp_user::unpack_user_data() invoked but not overridden!\n");
+}
+
 //#############################################################################
 
 OsiSolverInterface * 
@@ -1259,6 +1275,16 @@ BCP_lp_user::set_actions_for_children(BCP_presolved_lp_brobj* best)
   // mark the ind-th to be kept (if not over ub)
   if (! p->over_ub(best->lpres(ind).objval()))
     action[ind] = BCP_KeepChild;
+}
+
+//#############################################################################
+
+void
+BCP_lp_user::set_user_data_for_children(BCP_presolved_lp_brobj* best)
+{
+  if (p->param(BCP_lp_par::ReportWhenDefaultIsExecuted)) {
+    printf(" LP: Default set_user_data_for_children() executed.\n");
+  }
 }
 
 //#############################################################################

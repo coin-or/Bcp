@@ -264,6 +264,11 @@ void BCP_tm_send_node(BCP_tm_prob& p, const BCP_tm_node* node,
    if (has_data)
       p.user->pack_warmstart(desc->warmstart, buf);
 
+   has_data = node->_user_data != 0;
+   buf.pack(has_data);
+   if (has_data)
+      p.user->pack_user_data(node->_user_data, buf);
+
    p.msg_env->send(node->lp, msgtag, buf);
 
 #ifdef BCP__DUMP_PROCINFO

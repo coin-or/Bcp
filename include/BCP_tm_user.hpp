@@ -171,6 +171,13 @@ public:
       /** Unpack an algorithmic cut */
       virtual BCP_cut_algo*
       unpack_cut_algo(BCP_buffer& buf);
+
+      /** Pack an user data */
+      virtual void
+      pack_user_data(const BCP_user_data* ud, BCP_buffer& buf);
+      /** Unpack an user data */
+      virtual BCP_user_data*
+      unpack_user_data(BCP_buffer& buf);
     /*@}*/
   /*@}*/
 
@@ -197,12 +204,13 @@ public:
         init_new_phase() method of this class then column
         generation should be performed according to \c pricing_status.
 
-        Default: empty method, meaning that no variables/cuts are added and no
-        pricing should be done.
+        Default: empty method, meaning that no variables/cuts are added, there
+	is no user data and no pricing should be done.
     */
      virtual void
      create_root(BCP_vec<BCP_var*>& added_vars,
 		 BCP_vec<BCP_cut*>& added_cuts,
+		 BCP_user_data*& user_data,
 		 BCP_pricing_status& pricing_status);
   /*@}*/
 

@@ -196,8 +196,7 @@ BCP_tm_main(BCP_message_environment* msg_env,
    // p.user->create_root(), b/c the root might contain extra vars/cuts and
    // it's better if we take care of inserting them into the appropriate data
    // structures.
-   BCP_node_change* root_desc = BCP_tm_create_root(p);
-   BCP_tm_node* root = new BCP_tm_node(0, root_desc);
+   BCP_tm_node* root = BCP_tm_create_root(p);
 
    p.next_phase_nodes.push_back(root);
    p.search_tree.insert(root);
@@ -344,46 +343,47 @@ BCP_tm_unpack_root_cut(BCP_tm_prob& tm)
 
 //#############################################################################
 
-BCP_node_change* BCP_tm_create_root(BCP_tm_prob& p)
+BCP_tm_node* BCP_tm_create_root(BCP_tm_prob& p)
 {
    BCP_vec<BCP_var*> added_vars;
    BCP_vec<BCP_cut*> added_cuts;
+   BCP_user_data* user_data = 0;
    BCP_pricing_status pricing_status = BCP_PriceNothing;
 
    // If the root cuts are saved then read them in
-  const BCP_string& cutfile = p.param(BCP_tm_par::ReadRootCutsFrom);
-  if (cutfile.length() > 0) {
-    BCP_buffer& buf = p.msg_buf;
-    buf.clear();
-    FILE* f = fopen(cutfile.c_str(), "r");
-    size_t size;
-    if (fread(&size, 1, sizeof(size), f) != sizeof(size))
-      throw BCP_fatal_error("ReadRootCutsFrom read error.\n");
-    char * data = new char[size];
-    if (fread(data, 1, size, f) != size)
-      throw BCP_fatal_error("ReadRootCutsFrom read error.\n");
-    fclose(f);
-    buf.set_content(data, size, 0, BCP_Msg_NoMessage);
-    delete[] data;
+   const BCP_string& cutfile = p.param(BCP_tm_par::ReadRootCutsFrom);
+   if (cutfile.length() > 0) {
+      BCP_buffer& buf = p.msg_buf;
+      buf.clear();
+      FILE* f = fopen(cutfile.c_str(), "r");
+      size_t size;
+      if (fread(&size, 1, sizeof(size), f) != sizeof(size))
+	 throw BCP_fatal_error("ReadRootCutsFrom read error.\n");
+      char * data = new char[size];
+      if (fread(data, 1, size, f) != size)
+	 throw BCP_fatal_error("ReadRootCutsFrom read error.\n");
+      fclose(f);
+      buf.set_content(data, size, 0, BCP_Msg_NoMessage);
+      delete[] data;
+      
+      int num;
+      buf.unpack(num);
+      added_cuts.reserve(added_cuts.size() + num);
+      for (int i = 0; i < num; ++i) {
+	 added_cuts.unchecked_push_back(BCP_tm_unpack_root_cut(p));
+      }
+   }
 
-    int num;
-    buf.unpack(num);
-    added_cuts.reserve(added_cuts.size() + num);
-    for (int i = 0; i < num; ++i) {
-      added_cuts.unchecked_push_back(BCP_tm_unpack_root_cut(p));
-    }
-  }
+   p.user->create_root(added_vars, added_cuts, user_data, pricing_status);
 
-   p.user->create_root(added_vars, added_cuts, pricing_status);
-
-   BCP_node_change* root = new BCP_node_change;
-   root->core_change._storage = BCP_Storage_WrtCore;
-   root->indexed_pricing.set_status(pricing_status);
+   BCP_node_change* root_changes = new BCP_node_change;
+   root_changes->core_change._storage = BCP_Storage_WrtCore;
+   root_changes->indexed_pricing.set_status(pricing_status);
 
    if (added_vars.size() > 0) {
       BCP_vec<BCP_var*>::iterator vi = added_vars.begin();
       const BCP_vec<BCP_var*>::iterator lastvi = added_vars.end();
-      root->var_change._change.reserve(added_vars.size());
+      root_changes->var_change._change.reserve(added_vars.size());
       BCP_IndexType i = p.next_var_index_set_start;
       while (vi != lastvi) {
 	 BCP_var* var = *vi;
@@ -394,32 +394,36 @@ BCP_node_change* BCP_tm_create_root(BCP_tm_prob& p)
 	    var->set_lb(floor(var->lb()+1e-8));
 	    var->set_ub(ceil(var->ub()-1e-8));
 	 }
-	 root->var_change._change.
+	 root_changes->var_change._change.
 	    unchecked_push_back(BCP_obj_change(var->lb(), var->ub(),
 					       var->status()));
 	 ++vi;
       }
       p.next_var_index_set_start = i;
-      root->var_change._new_vars.swap(added_vars);
+      root_changes->var_change._new_vars.swap(added_vars);
    }
 
    if (added_cuts.size() > 0) {
       BCP_vec<BCP_cut*>::iterator ci = added_cuts.begin();
       const BCP_vec<BCP_cut*>::iterator lastci = added_cuts.end();
-      root->cut_change._change.reserve(added_cuts.size());
+      root_changes->cut_change._change.reserve(added_cuts.size());
       BCP_IndexType i = p.next_cut_index_set_start;
       while (ci != lastci) {
 	 BCP_cut* cut = *ci;
 	 p.cuts[i] = cut;
 	 cut->set_bcpind(i++);
-	 root->cut_change._change.
+	 root_changes->cut_change._change.
 	    unchecked_push_back(BCP_obj_change(cut->lb(), cut->ub(),
 					       cut->status()));
 	 ++ci;
       }
       p.next_cut_index_set_start = i;
-      root->cut_change._new_cuts.swap(added_cuts);
+      root_changes->cut_change._new_cuts.swap(added_cuts);
    }
+
+   BCP_tm_node* root = new BCP_tm_node(0, root_changes);
+
+   root->_user_data = user_data;
 
    return root;
 }

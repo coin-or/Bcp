@@ -290,6 +290,11 @@ BCP_lp_perform_strong_branching(BCP_lp_prob& p,
    // Look at the candidates one-by-one and presolve them.
    BCP_vec<BCP_lp_branching_object*>::iterator cani;
 
+   if (p.param(BCP_lp_par::MaxPresolveIter) > 0) {
+      lp->setIntParam(OsiMaxNumIterationHotStart,
+		      p.param(BCP_lp_par::MaxPresolveIter));
+   }
+
    printf("\nLP: Starting strong branching:\n\n");
 
    for (cani = candidates.begin(); cani != candidates.end(); ++cani){
@@ -456,7 +461,8 @@ LP: Strong branching is disabled but more than one candidate is selected.\n\
 	 printf("LP:   Every child is returned because of not diving.\n");
       }
    }
-   // finally throw out the fathomable ones. This can be done only if nothing
+
+   // now throw out the fathomable ones. This can be done only if nothing
    // needs to be priced, there already is an upper bound and strong branching
    // was enabled (otherwise we don't have the LPs solved)
    if (p.param(BCP_lp_par::MaxPresolveIter) >= 0) {
@@ -470,6 +476,10 @@ LP: Strong branching is disabled but more than one candidate is selected.\n\
       BCP_print_brobj_stat(p, orig_colnum, candidates.size(), selected,
 			   best_presolved);
    }
+
+   // finally get the user data for the children
+   best_presolved->initialize_user_data();
+   p.user->set_user_data_for_children(best_presolved);
    
    // Now just resolve the LP to get what'll be sent to the TM.
    p.user->modify_lp_parameters(p.lp_solver, false);
@@ -541,6 +551,9 @@ BCP_lp_make_parent_from_node(BCP_lp_prob& p)
    parent.warmstart = node.warmstart;
    node.warmstart = 0;
    node.tm_storage.warmstart = BCP_Storage_WrtParent;
+
+   delete node.user_data;
+   node.user_data = 0;
 }
 
 //#############################################################################
@@ -627,6 +640,8 @@ BCP_lp_branch(BCP_lp_prob& p)
       if (can->implied_cut_pos)
 	 cuts.set_lb_ub(*can->implied_cut_pos,can->implied_cut_bd_child(keep));
    }
+   p.node->user_data = best_presolved->user_data()[keep];
+   best_presolved->user_data()[keep] = 0;
 
    // Get rid of best_presolved
    delete best_presolved->candidate();

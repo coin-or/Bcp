@@ -24,7 +24,7 @@ class BCP_var;
 class BCP_cut;
 class BCP_problem_core;
 class BCP_problem_core_change;
-class BCP_node_change;
+class BCP_tm_node;
 class BCP_var_set_change;
 class BCP_cut_set_change;
 class USER_packing;
@@ -38,7 +38,7 @@ BCP_tm_parse_command_line(BCP_tm_prob& p,
 // BCP_tm_main.cpp
 bool BCP_tm_do_one_phase(BCP_tm_prob& p);
 BCP_problem_core* BCP_tm_create_core(BCP_tm_prob& p);
-BCP_node_change* BCP_tm_create_root(BCP_tm_prob& p);
+BCP_tm_node* BCP_tm_create_root(BCP_tm_prob& p);
 void BCP_tm_tasks_before_new_phase(BCP_tm_prob& p);
 void BCP_tm_trim_tree_wrapper(BCP_tm_prob& p, const bool between_phases);
 

@@ -39,6 +39,8 @@ class BCP_proc_id;
 
 class BCP_tm_node;
 
+class BCP_user_data;
+
 //#############################################################################
 
 template class BCP_vec<BCP_var*>;
@@ -62,6 +64,8 @@ template class BCP_vec<BCP_lp_branching_object*>;
 template class BCP_vec<BCP_proc_id*>;
 
 template class BCP_vec<BCP_tm_node*>;
+
+template class BCP_vec<BCP_user_data*>;
 
 //#############################################################################
 

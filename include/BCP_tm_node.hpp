@@ -35,6 +35,7 @@ enum BCP_tm_node_status{
 
 class BCP_proc_id;
 class BCP_node_change;
+class BCP_user_data;
 
 class BCP_tm_node;
 class BCP_tm_prob;
@@ -73,6 +74,8 @@ public:
    /** */
    BCP_tm_node* _parent;
    /** */
+   BCP_user_data* _user_data;
+   /** */
    int _birth_index;
    /** */
    BCP_vec<BCP_tm_node*> _children;
@@ -108,6 +111,7 @@ public:
       _true_lower_bound(-DBL_MAX),
       _desc(desc),
       _parent(0),
+      _user_data(0),
       _birth_index(-1),
       _children(),
       lp(0), cg(0), cp(0), vg(0), vp(0),
@@ -127,6 +131,7 @@ public:
       _true_lower_bound(-DBL_MAX),
       _desc(desc),
       _parent(0),
+      _user_data(0),
       _birth_index(-1),
       _children(),
       lp(0), cg(0), cp(0), vg(0), vp(0),
@@ -177,7 +182,7 @@ public:
    // the data will be deleted later.
    int mark_descendants_for_deletion();
    /** */
-   inline void child_num(int num) { _children.reserve(num); }
+   inline void reserve_child_num(int num) { _children.reserve(num); }
    /** */
    inline void new_child(BCP_tm_node* node) { _children.push_back(node); }
    /*@}*/

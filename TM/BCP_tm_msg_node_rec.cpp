@@ -121,6 +121,10 @@ BCP_tm_unpack_node_description: received node is different from processed.\n");
       buf.unpack(has_data);
       if (has_data)
 	 desc->warmstart = p.user->unpack_warmstart(buf);
+      // user data
+      buf.unpack(has_data);
+      if (has_data)
+	 node->_user_data = p.user->unpack_user_data(buf);
    }
 
    p.active_nodes[p.slaves.lp->index_of_proc(node->lp)] = 0;
@@ -341,19 +345,29 @@ BCP_tm_unpack_branching_info(BCP_tm_prob& p, BCP_buffer& buf,
    BCP_diving_status dive; // the old diving status
 
    BCP_vec<BCP_child_action> action;
-
+   BCP_vec<BCP_user_data*> user_data;
    BCP_vec<double> lpobj;
    BCP_vec<double> qualities;
 
    buf.unpack(dive).unpack(action).unpack(qualities).unpack(lpobj);
-   BCP_internal_brobj* brobj = new BCP_internal_brobj;
 
+   const int child_num = action.size();
+   user_data.insert(user_data.end(), child_num, 0);
+   for (int i = 0; i < child_num; ++i) {
+      int has_user_data = 0;
+      buf.unpack(has_user_data);
+      if (has_user_data == 1) {
+	 user_data[i] = p.user->unpack_user_data(buf);
+      }
+   }
+
+   BCP_internal_brobj* brobj = new BCP_internal_brobj;
    brobj->unpack(buf);
 
    // generate the children
    const int bvarnum = p.core->varnum();
    const int bcutnum = p.core->cutnum();
-   node->child_num(brobj->child_num());
+   node->reserve_child_num(brobj->child_num());
    int keep = -1;
    BCP_tm_node* child = 0;
    BCP_node_change* desc;
@@ -380,7 +394,7 @@ BCP_tm_unpack_branching_info(BCP_tm_prob& p, BCP_buffer& buf,
       }
    }
 
-   for (i = 0; i < brobj->child_num(); ++i){
+   for (i = 0; i < child_num; ++i){
       desc = new BCP_node_change;
       BCP_tm_create_core_change(desc, bvarnum, bcutnum,	brobj, i);
       BCP_tm_create_var_change(desc, nodedesc, bvarnum, brobj, i);

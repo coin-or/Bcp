@@ -24,6 +24,7 @@ static inline void BCP_lp_pack_indexed_pricing(BCP_lp_prob& p);
 static inline void BCP_lp_pack_warmstart(BCP_lp_prob& p,
 					 BCP_vec<int>& del_vars,
 					 BCP_vec<int>& del_cuts);
+static inline void BCP_lp_pack_user_data(BCP_lp_prob& p);
 
 //-----------------------------------------------------------------------------
 
@@ -196,6 +197,18 @@ BCP_lp_pack_warmstart(BCP_lp_prob& p,
 
 //#############################################################################
 
+static inline void BCP_lp_pack_user_data(BCP_lp_prob& p)
+{
+   bool has_data = p.node->user_data != 0;
+   p.msg_buf.pack(has_data);
+
+   if (has_data) {
+      p.user->pack_user_data(p.node->user_data, p.msg_buf);
+   }
+}
+
+//#############################################################################
+
 static inline int
 BCP_lp_pack_branching_info(BCP_lp_prob& p, BCP_presolved_lp_brobj* lp_brobj)
 {
@@ -212,10 +225,20 @@ BCP_lp_pack_branching_info(BCP_lp_prob& p, BCP_presolved_lp_brobj* lp_brobj)
    BCP_vec<double> qualities(lpobj);
 
    const BCP_vec<BCP_child_action>& action = lp_brobj->action();
+   const BCP_vec<BCP_user_data*>& user_data = lp_brobj->user_data();
 
    // now pack all those stuff
    BCP_buffer& buf = p.msg_buf;
    buf.pack(p.node->dive).pack(action).pack(qualities).pack(lpobj);
+
+   for (int i = 0; i < child_num; ++i) {
+      const int has_user_data = user_data[i] == 0 ? 0 : 1;
+      buf.pack(has_user_data);
+      if (has_user_data == 1) {
+	 p.user->pack_user_data(user_data[i], buf);
+      }
+   }
+
    BCP_internal_brobj int_brobj(*lp_brobj->candidate());
    int_brobj.pack(buf);
 
@@ -276,6 +299,7 @@ LP: there is ws info in BCP_lp_send_node_description()!\n");
       CoinWarmStart* ws = p.lp_solver->getWarmStart();
       p.node->warmstart = BCP_lp_convert_CoinWarmStart(p, ws);
       BCP_lp_pack_warmstart(p, del_vars, del_cuts);
+      BCP_lp_pack_user_data(p);
    }
 
    int keep = -1;

@@ -8,6 +8,7 @@
 #include "BCP_enum_branch.hpp"
 #include "BCP_vector.hpp"
 #include "BCP_lp_result.hpp"
+#include "BCP_USER.hpp"
 
 //#############################################################################
 
@@ -289,9 +290,12 @@ private:
    BCP_vec<BCP_lp_result*> _lpres;
    // what to do with each child
    /** The action to be taken for each child (send back to the TM, keep for
-      diving, prune it). Note that this last member is created if and only if
+      diving, prune it). Note that this member is created if and only if
       the object is selected for branching. */
    BCP_vec<BCP_child_action>* _child_action;
+   /** The user data to be passed around with the child nodes. Note that this
+      member is created if and only if the object is selected for branching. */
+   BCP_vec<BCP_user_data*>* _user_data;
    /*@}*/
 
 public:
@@ -300,7 +304,7 @@ public:
    /** The only one way to construct a presolved branching object is to create
        it from a regular branching object.*/
    explicit BCP_presolved_lp_brobj(BCP_lp_branching_object* candidate) :
-     _candidate(candidate),  _lpres(), _child_action(0) {
+     _candidate(candidate),  _lpres(), _child_action(0), _user_data(0) {
 	 _lpres.reserve(candidate->child_num);
 	 for (int i = candidate->child_num; i; --i)
 	    _lpres.unchecked_push_back(new BCP_lp_result);
@@ -309,7 +313,13 @@ public:
        simply deletes every member (deletes every lpres in the vector). */
    ~BCP_presolved_lp_brobj() {
       purge_ptr_vector(_lpres);
-      delete _child_action;
+      if (_child_action) {
+	 delete _child_action;
+      }
+      if (_user_data) {
+	 purge_ptr_vector(*_user_data);
+	 delete _user_data;
+      }
    }
    /*@}*/
 
@@ -336,6 +346,18 @@ public:
    inline const BCP_vec<BCP_child_action>& action() const {
       return *_child_action;
    }
+
+   /** Return a reference to the user data vector. A non-const method is
+       needed, since this is the easiest way to set the entries. Maybe it'd be
+       cleaner to have a separate set method... */
+   inline BCP_vec<BCP_user_data*>& user_data() {
+      return *_user_data;
+   }
+   /** Return a const reference to the user data vector. */
+   inline const BCP_vec<BCP_user_data*>& user_data() const {
+      return *_user_data;
+   }
+
    /** Return true if every children can be fathomed. (The lower bound for
        each is above <code>objval_limit</code>.) */
    const bool fathomable(const double objval_limit) const;
@@ -352,6 +374,12 @@ public:
       _child_action = new BCP_vec<BCP_child_action>(_candidate->child_num,
 						    BCP_ReturnChild);
    }
+   /** Initialize the vector of user data to be a NULL pointer for every
+       children */
+   inline void initialize_user_data() {
+      _user_data = new BCP_vec<BCP_user_data*>(_candidate->child_num, 0);
+   }
+   
    inline void initialize_lower_bound(const double val) {
       for (int i = _candidate->child_num - 1; i >= 0; --i) {
 	 _lpres[i]->fake_objective_value(val);

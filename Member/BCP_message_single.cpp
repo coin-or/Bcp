@@ -134,8 +134,7 @@ BCP_single_environment::register_process()
    // p.user->create_root(), b/c the root might contain extra vars/cuts and
    // it's better if we take care of inserting them into the appropriate data
    // structures.
-   BCP_node_change* root_desc = BCP_tm_create_root(*_tm_prob);
-   BCP_tm_node* root = new BCP_tm_node(0, root_desc);
+   BCP_tm_node* root = BCP_tm_create_root(*_tm_prob);
 
    _tm_prob->next_phase_nodes.push_back(root);
    _tm_prob->search_tree.insert(root);
@@ -312,7 +311,7 @@ BCP_single_environment::register_process()
 
    // everything is done
    BCP_tm_wrapup(_tm_prob, _lp_prob, _cg_prob, _vg_prob, true);
-//    sleep(7200);
+   // sleep(7200);
 
    delete _lp_prob;
 

@@ -11,6 +11,13 @@ class BCP_buffer;
 
 //#############################################################################
 
+class BCP_user_data {
+public:
+   virtual ~BCP_user_data() {}
+};
+
+//#############################################################################
+
 class BCP_tm_user;
 class BCP_lp_user;
 class BCP_vg_user;
