@@ -222,7 +222,7 @@ LP:   Terminating and fathoming due to proven high cost.\n",
 	 const int size = gsol->_vars.size();
 	 for (int i = 0; i < size; ++i) {
 	    if (gsol->_vars[i]->bcpind() == 0)
-	       gsol->_vars[i]->set_bcpind(BCP_lp_next_var_index(p));
+	       gsol->_vars[i]->set_bcpind(-BCP_lp_next_var_index(p));
 	 }
       }
 
