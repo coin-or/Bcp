@@ -261,7 +261,7 @@ bool BCP_tm_do_one_phase(BCP_tm_prob& p)
       p.msg_env->receive(BCP_AnyProcess, BCP_Msg_AnyMessage, buf,
 			 p.slaves.lp->busy_num() == 0 ?
 			 0 : p.param(BCP_tm_par::TmTimeout));
-      BCP_tm_process_message(p, buf);
+      p.process_message();
    }
    return false;
 }
@@ -276,32 +276,29 @@ BCP_problem_core* BCP_tm_create_core(BCP_tm_prob& p)
 
    p.user->initialize_core(bvars, bcuts, matrix);
 
-   if (bvars.size() > 0) {
-      BCP_vec<BCP_var_core*>::iterator vi = bvars.begin();
-      const BCP_vec<BCP_var_core*>::iterator lastvi = bvars.end();
+   const int bvarnum = bvars.size();
+   if (bvarnum > 0) {
       BCP_IndexType i = p.next_var_index_set_start;
-      while (vi != lastvi) {
-	 BCP_var* var = *vi;
-	 p.vars[i] = var;
-	 var->set_bcpind(i++);
+      for (i = 0; i < bvarnum; ++i) {
+	 BCP_var_core* var = bvars[i];
 	 // make certain that the bounds of integer vars is integer...
 	 if (var->var_type() != BCP_ContinuousVar) {
 	    var->set_lb(floor(var->lb()+1e-8));
 	    var->set_ub(ceil(var->ub()-1e-8));
 	 }
-	 ++vi;
+	 var->set_bcpind(i);
+	 p.vars[i] = new BCP_var_core(*var);
       }
       p.next_var_index_set_start = i;
    }
 
-   if (bcuts.size() > 0) {
-      BCP_vec<BCP_cut_core*>::iterator ci = bcuts.begin();
-      const BCP_vec<BCP_cut_core*>::iterator lastci = bcuts.end();
+   const int bcutnum = bcuts.size();
+   if (bcutnum > 0) {
       BCP_IndexType i = p.next_cut_index_set_start;
-      while (ci != lastci) {
-	 p.cuts[i] = *ci;
-	 (*ci)->set_bcpind(i++);
-	 ++ci;
+      for (i = 0; i < bcutnum; ++i) {
+	 BCP_cut_core* cut = bcuts[i];
+	 cut->set_bcpind(i);
+	 p.cuts[i] = new BCP_cut_core(*cut);
       }
       p.next_cut_index_set_start = i;
    }
@@ -450,7 +447,8 @@ void BCP_tm_tasks_before_new_phase(BCP_tm_prob& p)
 	 // note that pricing the root won't mess up ANYTHING in the storage
 	 // of the root, except that it'll send back the new indexed_pricing
 	 // field correctly put together, so just unpacking it in
-	 // BCP_tm_process_message will create a correct new root description.
+	 // BCP_tm_prob::process_message will create a correct new root
+	 // description.
 	 p.flags.root_pricing_unpacked = false;
 	 p.current_phase_colgen = BCP_GenerateColumns;
 	 root = p.search_tree.root();

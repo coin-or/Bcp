@@ -35,16 +35,11 @@ BCP_tm_prob::~BCP_tm_prob()
    
    delete feas_sol;
 
-   // base vars/cuts will be deleted when base is deleted
    std::map<BCP_IndexType, BCP_var*>::iterator vari = vars.begin();
-   for (int i = core->varnum(); i; --i)
-      ++vari;
    while (vari != vars.end()) {
       delete (vari++)->second;
    }
    std::map<BCP_IndexType, BCP_cut*>::iterator cuti = cuts.begin();
-   for (int i = core->cutnum(); i; --i)
-      ++cuti;
    while (cuti != cuts.end()) {
       delete (cuti++)->second;
    }
