@@ -10,6 +10,7 @@ typedef int BCP_IndexType;
 
 #if defined(__GNUC__)
 
+#  include <sys/time.h> // just because sys/resource.h needs it...
 #  include <sys/resource.h> // for setpriority()
 #  ifndef __USE_BSD
 #    define __USE_BSD  // to get gethostname() from unistd.h
