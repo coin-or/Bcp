@@ -211,23 +211,14 @@ public:
       return *this;
     }
     /// 
-    void set_entry(const chr_params key, const char * val) {
-      cpar[key] = atoi(val.c_str()); }
-    ///
     void set_entry(const chr_params key, const char val) {
       cpar[key] = val; }
     ///
     void set_entry(const chr_params key, const bool val) {
       cpar[key] = val; }
     ///
-    void set_entry(const int_params key, const char * val) {
-      ipar[key] = atoi(val.c_str()); }
-    ///
     void set_entry(const int_params key, const int val) {
       ipar[key] = val; }
-    ///
-    void set_entry(const dbl_params key, const char * val) {
-      dpar[key] = atof(val.c_str()); }
     ///
     void set_entry(const dbl_params key, const double val) {
       dpar[key] = val; }
