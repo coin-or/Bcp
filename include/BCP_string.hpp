@@ -6,6 +6,7 @@
 // This file is fully docified.
 
 #include <cstring>
+#include "BCP_os.hpp"
 
 /** This class is a very simple impelementation of a constant length string.
     Using it one can avoid some memory errors related to using functions
@@ -26,14 +27,18 @@ public:
    /* The default constructor creates an empty sting. */
    BCP_string() : _len(0), _data(0) {};
    /* Create a <code>BCP_string</code> from a C style string. */
-   BCP_string(const char * str) :
-      _len(strlen(str)), _data(new char[strlen(str)+1]) {
+   BCP_string(const char * str) {
+      BCP_DEFAULT_NAMESPACE;
+      _len = strlen(str);
+      _data = new char[_len+1];
       memcpy(_data, str, _len);
       _data[_len] = 0;
    }
    /* Make a copy of the argument string. */
-   BCP_string(const BCP_string& str) :
-      _len(str.length()), _data(new char[str.length()+1]) {
+   BCP_string(const BCP_string& str) {
+      BCP_DEFAULT_NAMESPACE;
+      _len = str.length();
+      _data = new char[_len+1];
       memcpy(_data, str.c_str(), _len);
       _data[_len] = 0;
    }
@@ -44,6 +49,7 @@ public:
    /* This methods replaces the current <code>BCP_string</code> with one
       create from the first <code>len</code> bytes in <code>source</code>. */
    BCP_string& assign(const char * source, const int len) {
+      BCP_DEFAULT_NAMESPACE;
       delete[] _data;
       _len = len;
       _data = new char[_len+1];
@@ -59,6 +65,7 @@ public:
    /* replace the current <code>BCP_string</code> with a copy of the argument
       C style string. */ 
    BCP_string& operator= (const char * str) {
+      BCP_DEFAULT_NAMESPACE;
       return assign(str, strlen(str));
    }
 
@@ -66,6 +73,7 @@ public:
 
 /** Equality tester for a <code>BCP_string</code> and a C style string. */
 inline bool operator==(const BCP_string& s0, const char* s1) {
+   BCP_DEFAULT_NAMESPACE;
    if (s0.c_str() == 0)
       return s1 == 0;
    return s1 == 0 ? false : (strcmp(s0.c_str(), s1) == 0);

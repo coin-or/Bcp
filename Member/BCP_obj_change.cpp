@@ -1,5 +1,6 @@
 // Copyright (C) 2000, International Business Machines
 // Corporation and others.  All Rights Reserved.
+#include <CoinDistance.hpp>
 #include "BCP_error.hpp"
 #include "BCP_buffer.hpp"
 #include "BCP_temporary.hpp"
@@ -106,7 +107,7 @@ BCP_var_set_change::BCP_var_set_change(BCP_vec<BCP_var*>::const_iterator first,
    _del_change_pos(), _change(), _new_vars()
 {
    if (first != last) {
-      const int added_var_num = std::distance(first, last);
+      const int added_var_num = coinDistance(first, last);
       _change.reserve(added_var_num);
       _new_vars.reserve(added_var_num);
       while (first != last) {
@@ -129,7 +130,7 @@ BCP_var_set_change(BCP_vec<BCP_var*>::const_iterator first,
    _storage(BCP_Storage_WrtParent), _deleted_num(0),
    _del_change_pos(), _change(), _new_vars()
 {
-   const int new_added_num = std::distance(first, last);
+   const int new_added_num = coinDistance(first, last);
    const int old_added_num = added_bcpind.size();
    _del_change_pos.reserve(old_added_num);
 
@@ -209,7 +210,7 @@ BCP_cut_set_change::BCP_cut_set_change(BCP_vec<BCP_cut*>::const_iterator first,
    _del_change_pos(), _change(), _new_cuts()
 {
    if (first != last) {
-      const int added_cut_num = std::distance(first, last);
+      const int added_cut_num = coinDistance(first, last);
       _change.reserve(added_cut_num);
       _new_cuts.reserve(added_cut_num);
       while (first != last) {
@@ -232,7 +233,7 @@ BCP_cut_set_change(BCP_vec<BCP_cut*>::const_iterator first,
    _storage(BCP_Storage_WrtParent), _deleted_num(0),
    _del_change_pos(), _change(), _new_cuts()
 {
-   const int new_added_num = std::distance(first, last);
+   const int new_added_num = coinDistance(first, last);
    const int old_added_num = added_bcpind.size();
    _del_change_pos.reserve(old_added_num);
 

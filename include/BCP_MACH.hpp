@@ -10,7 +10,6 @@ typedef int BCP_IndexType;
 
 #if defined(__GNUC__)
 
-#  include <sys/time.h>     // for gettimeofday()
 #  include <sys/resource.h> // for setpriority()
 #  ifndef __USE_BSD
 #    define __USE_BSD  // to get gethostname() from unistd.h
@@ -20,6 +19,7 @@ typedef int BCP_IndexType;
 #    include <unistd.h>
 #  endif
 #  define BCP_PtrDiff       int
+#  define BCP_DEFAULT_NAMESPACE
 
 #  if (__GNUC__ >= 3)
 

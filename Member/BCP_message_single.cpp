@@ -1,12 +1,11 @@
 // Copyright (C) 2000, International Business Machines
 // Corporation and others.  All Rights Reserved.
-//#include <unistd.h>
+
 #include <cstdio>
-#include <ctime>
 
 #include "BCP_USER.hpp"
-
 #include "BCP_timeout.hpp"
+
 #include "BCP_error.hpp"
 #include "BCP_buffer.hpp"
 #include "BCP_vector.hpp"

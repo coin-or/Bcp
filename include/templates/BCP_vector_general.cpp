@@ -9,7 +9,7 @@
 
 //#############################################################################
 
-template <class T> inline void
+template <class T> void
 BCP_vec<T>::deallocate() {
    if (start) {
       while (finish != start) {

@@ -6,13 +6,12 @@
 // This file is fully docified.
 // There's nothing to docify...
 
-#include <sys/time.h>     // for gettimeofday()
 #include <sys/resource.h>     // for getrusage()
-
 #include <unistd.h>       // for setpriority() and gethostname()
 typedef int BCP_IndexType;
 
 #if defined(__GNUC__)
+#  define BCP_DEFAULT_NAMESPACE
 
 #  define NEED_IMPLICIT_TEMPLATE_FUNCTIONS 1
 #  define NEED_IMPLICIT_TEMPLATE_CLASSES 1

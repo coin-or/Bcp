@@ -7,7 +7,8 @@
 
 #include <cstdio>
 #include <cstdlib>
-#include <stdarg.h>
+#include <cstdarg>
+#include "BCP_os.hpp"
 
 /** 
     Currently there isn't any error handling in BCP. When an object of this
@@ -28,10 +29,11 @@ public:
    }
 #endif
    BCP_fatal_error(const char * format, ...) {
-	   va_list valist;
-	   va_start(valist,format);
+      BCP_DEFAULT_NAMESPACE;
+      va_list valist;
+      va_start(valist,format);
       vprintf(format, valist);
-	  va_end(valist);
+      va_end(valist);
       fflush(0);
       abort();
    }

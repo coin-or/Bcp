@@ -4,7 +4,7 @@
 #include <numeric>
 #include <algorithm>
 
-#include "BCP_simul_sort.hpp"
+#include "CoinSort.hpp"
 #include "BCP_vector.hpp"
 #include "BCP_lp_branch.hpp"
 #include "BCP_temporary.hpp"
@@ -42,7 +42,7 @@ static void BCP_reorder_pos(const int child_num,
    for (int i = 0; i < size; ++i)
       perm.unchecked_push_back(i);
    // order the pair list based on the first entry (pos)
-   BCP_simul_sort(positions.begin(), positions.end(), perm.begin());
+   CoinSort_2(positions.begin(), positions.end(), perm.begin());
 
    // apply the permutation to each block in bounds
    BCP_temp_vec<double> tmp_new_bd(bounds.size());

@@ -10,7 +10,6 @@ typedef int BCP_IndexType;
 
 #if defined(__GNUC__)
 
-#  include <sys/time.h>     // for gettimeofday()
 // # include <sys/resource.h> // for setpriority()
 #  define setpriority(x,y,z) 
 #  define BCP_USE_RUSAGE 0
@@ -22,6 +21,7 @@ typedef int BCP_IndexType;
 #    include <unistd.h>
 #  endif
 #  define BCP_PtrDiff       int
+#  define BCP_DEFAULT_NAMESPACE
 
 #  if (__GNUC__ >= 3)
 

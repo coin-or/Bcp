@@ -9,16 +9,16 @@
 #include <iostream>
 #include <fstream>
 #include <string>
-#if defined(__GNUC__)
-#  if (__GNUC__ >= 3)
+#include <algorithm>
+#if defined(__GNUC__) && (__GNUC__ >= 3)
 #    include <sstream>
 #    include <locale>
-#  else
+#    define BCP_STRINGSTREAM std::istringstream
+#else
 #    include <strstream>
 #    include <cctype>
-#  endif
+#    define BCP_STRINGSTREAM std::istrstream
 #endif
-#include <algorithm>
 
 #include "BCP_error.hpp"
 #include "BCP_string.hpp"
@@ -393,11 +393,7 @@ BCP_parameters::read_from_stream   Finished scanning parameter stream.\n\n");
 	  }
 	  argstring += "\n";
        }
-#if defined(__GNUC__) && (__GNUC__ >=3)
-       std::istringstream parstream(argstring.c_str());
-#else
-       std::istrstream parstream(argstring.c_str());
-#endif
+       BCP_STRINGSTREAM parstream(argstring.c_str());
        read_from_stream(parstream);
     }
   /*@}*/

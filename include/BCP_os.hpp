@@ -18,7 +18,7 @@
 #  include "BCP_aix43.hpp"
 #endif
 
-#if defined(__GNUC__) && defined(__sparc) && defined(__sun)
+#if defined(__sparc) && defined(__sun)
 #  include "BCP_sunos.hpp"
 #endif
 

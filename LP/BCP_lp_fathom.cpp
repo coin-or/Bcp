@@ -3,8 +3,8 @@
 #include <numeric>
 
 #include "CoinHelperFunctions.hpp"
+#include "CoinSort.hpp"
 
-#include "BCP_simul_sort.hpp"
 #include "BCP_temporary.hpp"
 #include "BCP_matrix.hpp"
 #include "BCP_lp_node.hpp"
@@ -156,9 +156,9 @@ LP:   Fathoming node (discovered tdf & high cost)\n",
 	    BCP_vec<int>& perm = tmp_perm.vec();
 	    for (i = 0; i < vars_to_add_size; ++i)
 	       perm.unchecked_push_back(i);
-	    BCP_simul_sort(rc.begin(), rc.end(), perm.begin());
+	    CoinSort_2(rc.begin(), rc.end(), perm.begin());
 	    const double rc_cutoff = rc[max_var];
-	    BCP_simul_sort(perm.begin(), perm.end(), rc.begin());
+	    CoinSort_2(perm.begin(), perm.end(), rc.begin());
 	    for (i = 0, j = 0; i < vars_to_add_size; ++i) {
 	       if (rc[i] <= rc_cutoff) {
 		  perm[j++] = i;
