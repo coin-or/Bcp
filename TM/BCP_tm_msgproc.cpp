@@ -440,14 +440,10 @@ Unknown message in BCP_tm_prob::process_message.\n");
 
    if (time_is_over) {
      const double lb = search_tree.true_lower_bound(search_tree.root());
-     printf("TM: Time has ran out... %.3f secs\n", t);
-     printf("TM: Best lower bound in this phase: %f\n", lb);
-     BCP_lp_statistics dummy_stat;
-     user->display_final_information(dummy_stat);
-     fflush(0);
-     BCP_tm_save_root_cuts(this);
-     BCP_tm_stop_processes(*this);
-     exit(0);
+     BCP_fatal_error::abort_on_error = false;
+     throw BCP_fatal_error("\
+TM: Time has ran out.\n\
+TM: Best lower bound in this phase: %f\n", lb);
    }
 }
 

@@ -255,7 +255,13 @@ bool BCP_tm_do_one_phase(BCP_tm_prob& p)
       p.msg_env->receive(BCP_AnyProcess, BCP_Msg_AnyMessage, buf,
 			 p.slaves.lp->busy_num() == 0 ?
 			 0 : p.param(BCP_tm_par::TmTimeout));
-      p.process_message();
+      try {
+	 p.process_message();
+      }
+      catch (BCP_fatal_error& err) {
+	 // something is baaaad... e.g. timeout
+	 return true;
+      }
    }
    return false;
 }

@@ -286,28 +286,35 @@ BCP_single_environment::register_process()
    //==========================================================================
    // Back to TM
    bool something_died = false;
-   for ( _tm_prob->phase = 0; true ; ++_tm_prob->phase) {
-      // insert the nodes in next_phase_nodes into candidates, print out some
-      // statistics about the previous phase (if there was one) and do some
-      // other stuff, too.
-      BCP_tm_tasks_before_new_phase(*_tm_prob);
-      // do one phase 
-      // While there are nodes waiting to be processed (or being processed) we
-      // don't go to the next phase
-      something_died = false;
-      while (! _tm_prob->candidates.empty() ||
-	     _tm_prob->slaves.lp->busy_num() > 0){
-	 // Fill up as many free LP processes as we can
-	 if (BCP_tm_start_new_nodes(*_tm_prob) == BCP_NodeStart_Error)
-	    // Error indicates that something has died
+   try {
+      for ( _tm_prob->phase = 0; true ; ++_tm_prob->phase) {
+	 // insert the nodes in next_phase_nodes into candidates, print out
+	 // some statistics about the previous phase (if there was one) and do
+	 // some other stuff, too.
+	 BCP_tm_tasks_before_new_phase(*_tm_prob);
+	 // do one phase 
+	 // While there are nodes waiting to be processed (or being processed)
+	 // we don't go to the next phase
+	 something_died = false;
+	 while (! _tm_prob->candidates.empty() ||
+		_tm_prob->slaves.lp->busy_num() > 0){
+	    // Fill up as many free LP processes as we can
+	    if (BCP_tm_start_new_nodes(*_tm_prob) == BCP_NodeStart_Error) {
+	       // Error indicates that something has died
+	       something_died = true;
+	       break;
+	    }
+	    // No need to process messages, they have all been processed
+	    // (single environment!) Also all the "processes" are alive.
+	 }
+	 // If nothing is left for the next phase or if something has died
+	 // then quit the infinite loop.
+	 if (_tm_prob->next_phase_nodes.size() == 0 || something_died)
 	    break;
-	 // No need to process messages, they have all been processed (single
-	 // environment!) Also all the "processes" are alive.
       }
-      // If nothing is left for the next phase or if something has died then
-      // quit the infinite loop.
-      if (_tm_prob->next_phase_nodes.size() == 0 || something_died)
-	 break;
+   }
+   catch (BCP_fatal_error& err) {
+      // there can be only one, a timeout
    }
 
    // everything is done
