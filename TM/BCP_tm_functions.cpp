@@ -348,13 +348,21 @@ void BCP_sanity_checks(BCP_tm_prob& p)
    if (p.core->varnum() == 0 &&
        root_desc->var_change.added_num() == 0) {
       // *FIXME* : kill all the processes
-      throw BCP_fatal_error("There are no vars neither in core or in root!\n");
+      throw BCP_fatal_error("\
+          There are no vars either in core nor in root!\n\n\
+A possible source of this error is that the argument list for the\n\
+create_root() method has changed. Now there's an extra user_data\n\
+argument. Please, update your own implementation of create_root().\n");
    }
 
    if (p.core->cutnum() == 0 &&
        root_desc->cut_change.added_num() == 0) {
       // *FIXME* : kill all the processes
-      throw BCP_fatal_error("There are no cuts neither in core or in root!\n");
+      throw BCP_fatal_error("\
+          There are no cuts neither in core nor in root!\n\n\
+A possible source of this error is that the argument list for the\n\
+create_root() method has changed. Now there's an extra user_data\n\
+argument. Please, update your own implementation of create_root().\n");
    }
 
    if (! (root_desc->indexed_pricing.get_status() & BCP_PriceIndexedVars) &&
