@@ -1,0 +1,123 @@
+% Copyright (C) 2001, International Business Machines
+% Corporation, Ted Ralphs and others. All Rights Reserved.
+
+\documentclass[openany,twoside,11pt]{book}
+
+\setlength{\parindent}{0in}
+\setlength{\parskip}{0.15in}
+\setlength{\oddsidemargin}{0.5in}
+\setlength{\evensidemargin}{0in}
+\setlength{\topmargin}{0in}
+\setlength{\textwidth}{6in}
+
+\usepackage{mathenv}
+\usepackage{graphicx}
+%\usepackage{epsfig}
+
+\newcommand{\be}{\begin{enumerate}}
+\newcommand{\ee}{\end{enumerate}}
+\newcommand{\bc}{\begin{center}}
+\newcommand{\ec}{\end{center}}
+\newcommand{\bt}{\begin{tabular}}
+\newcommand{\et}{\end{tabular}}
+\newcommand{\bd}{\begin{description}}
+\newcommand{\ed}{\end{description}}
+\newcommand{\bi}{\begin{itemize}}
+\newcommand{\ei}{\end{itemize}}
+\newcommand{\bv}{\begin{verbatim}}
+\newcommand{\ev}{\end{verbatim}}
+\newcommand{\functiondef}[1]{\subsubsection{#1}}
+
+\renewcommand{\functiondef}[1]{\item[\Large $\triangleright$] {\bf \Large #1}}
+\newcommand{\describe}{\item[Description:] \hfill}
+\newcommand{\args}{\item[Arguments:] \hfill}
+\newcommand{\returns}{\item[Return values:] \hfill}
+\newcommand{\postp}{\item[Post-processing:] \hfill}
+\newcommand{\nopostp}{\item[Post-processing:] None \hfill}
+
+\newcommand{\BB}{{\sc COIN/BCP}}
+\newcommand{\TM}{{\sc TreeManager}}
+\newcommand{\LP}{{\sc LP}}
+\newcommand{\ra}{$\rightarrow$}
+
+\newcommand{\eqsep}{\hspace{.25em}}
+\newcommand{\commentout}[1]{}
+\newcommand{\code}[1]{{\tt #1}}
+
+\begin{document}
+
+\title{\BB\ User's Manual}
+\author{
+T.K. Ralphs\thanks{Department of Industrial and Manufacturing Systems 
+Engineering, Lehigh University, Bethlehem, PA 18015, {\tt
+tkralphs@lehigh.edu}, {\tt http://www.lehigh.edu/\~{ }tkr2}} 
+\and
+L. Lad\'anyi\thanks{Department of Mathematical Sciences, 
+IBM T.J. Watson Research Center, Yorktown Heights,
+NY 10598} \\
+}
+\maketitle
+
+\newpage
+
+\thispagestyle{empty}
+
+\vspace*{3in}
+\begin{center}
+{\copyright 2001 International Business Machines Corporation, Ted
+Ralphs and others. All right reserved.}
+\end{center}
+
+\newpage
+
+\tableofcontents
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Insert here the references that are not referred to anywhere, but we want
+% them to be listed anyway.
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{tabbing}
+%\cite{B:ahuja-magnanti-orlin} \kill
+%\cite{B:cook-lovasz-seymour} \kill
+\end{tabbing}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\chapter{Introduction}
+\label{man-intro}
+\input{man-intro}
+
+
+\chapter{Getting Started: Sample Compiling}
+\label{getting-started}
+\input{man-getting-started}
+
+\chapter{Developing Applications with \BB}
+\label{development}
+\input{man-develop}
+
+%\chapter{Sample Application: The Max Cut Problem}
+%\label{sample}
+%\input{man-maxcut}
+
+\chapter{Sample Application: The MKC Problem}
+\label{sample-mkc}
+\input{man-mkc}
+
+\chapter{Sample Application: The Maximum Cut Problem}
+\label{sample-mcp}
+\input{man-mcp}
+
+
+%\chapter{\BB\ Parameters}
+%\label{params}
+%\input{man-param}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Bibliography
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\bibliographystyle{plain}
+\bibliography{biblio}
+
+\end{document}

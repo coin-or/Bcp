@@ -1,0 +1,142 @@
+Short term:
+===========
+
+- slowly increase number of added cuts until the number of leftover cuts go
+  down to a sane level
+
+- put up a web page with a table indicating success compilations for 
+  OS / compiler / solver
+
+- check OSL page:
+  www6.software.ibm.com/sos
+
+- check warnings of doxygen
+
+- make it possible to build without *any* user code and it should default to
+  reading in an mps file and solve it with B&B
+
+- create a readme file for BCP which is essentially same as the manual
+  instruction for compiling the sample implementation
+
+- command line options
+
+- add a new method that tests whether a globally valid cut is violated by a
+  feasible solution.
+
+- if forced to abandon an LP then automatically write an mps file.
+
+- add verbosity level and specify which flags it turns on.
+
+- logical_fixing ==> tighten_lp and both for vars and cuts
+
+===============================================================================
+
+Mid term:
+=========
+
+- add logging (so the tree can be read from file)
+
+- add a method that tests that a node that has opt solution is not fathomed 
+
+- create stubs in a separate user application (need not compile!)
+
+- make it possible to add user descriptions to the nodes
+
+===============================================================================
+
+Long term:
+==========
+
+- rename the Member subdir 
+
+- make a shared memory version with OPENMP (like the cplex parallel B&B) 
+
+- rename Bcp-common to BcpCommon
+
+- Bcp should catch exceptions thrown in the user code
+
+###############################################################################
+###############################################################################
+
+Done:
+=====
+
+- change (un)pack_initial_info to (un)pack_module_data
+
+- merge tree_node_comp() and init_new_phase into one
+
+- cut mip from every class, replace with nothing or with "problem", e.g.,
+  (un)pack_feasible_solution, BCP_problem_core.
+
+- rename the Config subdir to NetConfig in Bcp (instead of in Bcp-common)
+  and create the sample config file with comments
+
+- if have only one solver defined than that should be the default solver
+  interface
+
+- change prepare_for_optimization to modify_lp_parameters and add a bool
+  argument to indicate whether before strong branching
+
+- MUST be possible to specify the parameter file on the command line.
+
+- for the MaxCut create a sample.dat file and a sample.par file
+
+- delete process_init_message_from_tm()
+
+- add writeMps to OsiSolverInterface
+
+- GET MAILMAN WORKING!!! and create separate bcp mailing lists
+
+- rewrite the fathoming procedure!!!
+
+- make a parameter for wich search tree node comparison should be used.
+
+- keep 3 methods for indexed vars/cuts, but instead of the current third, use
+  the expand one.
+
+- rename uind to indexed
+
+- make a flowchart when each method is executed.
+
+- rename expand_xx to cuts_to_rows and vars_to_cols
+
+- naming: select_branching_candidates / compare_branching_candidates (obviously
+  presolved... )
+
+- naming: 'var' everywhere instead of variable
+
+- get rid of BCP_{warmstart,var_algo,cut_algo}_unpack objects as well as the 
+  USER_class object.
+
+- change BCP_solution_gen to BCP_solution_generic
+
+- check what's hapenning on the top of BCP_vg_main.cpp
+
+- there are methods to access phase/level/index/iteration_count
+
+- get rid of bool_array_par
+
+- user should be able to change parameters in the methods without resorting to
+  invoke the getXxProblemPtr() method. Let the Bcp_xx_user classes have a
+  set/get_parameter method.
+
+- change BCP_xx_user so that the user doesn't have to include other files
+  (not quite, but close...)
+
+- make MKC to compile
+
+- modify the documentation to reflect that the LP solver is initialize in
+  BCP_lp_user.
+
+- compiled for Solaris
+
+- Maxcut:
+  - in exact algorithm find components
+  - check at readtime for parallel edges and collapse them
+
+- compile for AIX
+
+- Maxcut:
+  - test connectivity at the beginning, add MST with 0 cost if necessary
+
+- clear up what's happening with lb/ub/st for vars and cuts

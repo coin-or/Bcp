@@ -1,0 +1,20 @@
+# The following operations can be done with the pvm configurator program:
+
+# Kill a running process:
+BCP_delete_proc	      t80006
+
+# Delete a machine from the virtual machine:
+BCP_delete_machine    mach1
+# Add machines to the virtual machine:
+BCP_add_machine	      mach2
+BCP_add_machine	      mach3
+BCP_add_machine	      mach4
+
+# Start an LP process on the specified machine:
+BCP_lp_process	      mach2
+
+# Start an CG process on the specified machine:
+BCP_lp_process	      mach3
+
+# Start an VG process on the specified machine:
+BCP_lp_process	      mach4
