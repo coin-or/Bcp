@@ -133,7 +133,6 @@ BCP_INSTSRC  =
 
 BCP_SRC +=	BCP_lp_param.cpp
 BCP_SRC +=	BCP_USER.cpp
-BCP_SRC +=	BCP_timeout.cpp
 BCP_SRC +=	BCP_node_change.cpp
 BCP_SRC +=	BCP_warmstart_basis.cpp
 BCP_SRC +=	BCP_warmstart_dual.cpp
