@@ -46,13 +46,15 @@ BCP_print_brobj_stat(BCP_lp_prob& p,
 static inline void
 BCP_print_brobj_stat(BCP_lp_prob& p,
 		     const int orig_varnum,
-		     const int candidate_num,
+		     const int candidate_num, const int selected,
 		     const BCP_presolved_lp_brobj* best_presolved)
 {
    const BCP_lp_branching_object* can = best_presolved->candidate();
 
    if (p.param(BCP_lp_par::LpVerb_StrongBranchResult)) {
-      printf("LP:   Out of %i Strong Branching selected:", candidate_num);
+      printf("\nLP:   SB selected candidate %i out of %i.\n\n",
+	     selected, candidate_num);
+      printf("LP:   The selected object is:");
       if (p.param(BCP_lp_par::LpVerb_StrongBranchPositions)) {
 	 can->print_branching_info(orig_varnum,
 				   p.lp_result->x(),
@@ -239,7 +241,7 @@ BCP_mark_result_of_strong_branching(BCP_lp_prob& p,
 
 //#############################################################################
 
-static inline void
+static inline int
 BCP_lp_perform_strong_branching(BCP_lp_prob& p,
 				BCP_vec<BCP_lp_branching_object*>& candidates,
 				BCP_presolved_lp_brobj*& best_presolved)
@@ -362,9 +364,13 @@ BCP_lp_perform_strong_branching(BCP_lp_prob& p,
    // silently go out of scope and we'll be left with a pointer to the final
    // candidate in best_presolved).
    BCP_lp_branching_object* can = best_presolved->candidate();
-   for (cani = candidates.begin(); cani != candidates.end(); ++cani) {
-      if (*cani != can)
+   int selected = 0;
+   for (i=0, cani=candidates.begin(); cani != candidates.end(); ++cani, ++i) {
+      if (*cani != can) {
 	 delete *cani;
+      } else {
+	 selected = i;
+      }
    }
 
    // Mark the cols/rows of the OTHER candidates as removable
@@ -375,6 +381,8 @@ BCP_lp_perform_strong_branching(BCP_lp_prob& p,
  			       true /* to force deletion */);
    
    delete ws;
+
+   return selected;
 }
 
 //#############################################################################
@@ -414,7 +422,8 @@ BCP_lp_select_branching_object: branching forced but no candidates selected\n");
    const int orig_colnum = p.node->vars.size();
 
    // if branching candidates are not presolved then choose the first branching
-   // candidate as the best candidate. 
+   // candidate as the best candidate.
+   int selected = 0;
    if (p.param(BCP_lp_par::MaxPresolveIter) < 0) {
       if (candidates.size() > 1) {
 	 printf("\
@@ -431,7 +440,7 @@ LP: Strong branching is disabled but more than one candidate is selected.\n\
       best_presolved = new BCP_presolved_lp_brobj(candidates[0]);
       best_presolved->initialize_lower_bound(p.node->true_lower_bound);
    } else {
-      BCP_lp_perform_strong_branching(p, candidates, best_presolved);
+      selected =BCP_lp_perform_strong_branching(p, candidates, best_presolved);
    }
 
    const BCP_lp_branching_object* can = best_presolved->candidate();
@@ -464,7 +473,8 @@ LP: Strong branching is disabled but more than one candidate is selected.\n\
 	       action[i] = BCP_FathomChild;
 	 }
       }
-      BCP_print_brobj_stat(p, orig_colnum, candidates.size(), best_presolved);
+      BCP_print_brobj_stat(p, orig_colnum, candidates.size(), selected,
+			   best_presolved);
    }
    
    // Now just resolve the LP to get what'll be sent to the TM.
