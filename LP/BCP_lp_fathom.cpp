@@ -68,11 +68,12 @@ BCP_lp_perform_fathom(BCP_lp_prob& p, const char* msg, BCP_message_tag msgtag)
    BCP_lp_send_node_description(p, 0, msgtag);
    BCP_lp_clean_up_node(p);
 }
-   
 
 //#############################################################################
 
-// the primal must be infeas or OverUB.
+// the primal is infeas when this function is called. Still, we must first try
+// to achive TDF, before trying to restore feasibility.
+// *THINK*: Maybe we don't have to? Rethink the indexed vars, too...
 
 bool BCP_lp_fathom(BCP_lp_prob& p, const bool from_repricing)
 {

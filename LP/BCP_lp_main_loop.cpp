@@ -18,7 +18,7 @@ void BCP_lp_main_loop(BCP_lp_prob& p)
    // argument flag for a number of functions. of course, here we invoke those
    // functions from the main loop, but this flag must be tru if the functions
    // are invoked from repricing. hence the flag is set here to false.
-   const bool not_from_main_loop = false; 
+   const bool from_repricing = false; 
 
    /*------------------------------------------------------------------------*
     * The main loop -- continue solving relaxations until no new cuts
@@ -108,18 +108,7 @@ LP:   Terminating and fathoming due to proven high cost.\n",
       if (tc & BCP_ProvenPrimalInf) {
 	 if (p.param(BCP_lp_par::LpVerb_FathomInfo))
 	    printf("LP:   Primal feasibility lost.\n");
-	 if (BCP_lp_fathom(p, not_from_main_loop)) {
-	    return;
-	 }
-	 varset_changed = true;
-	 continue;
-      }
-
-      if (((tc & BCP_ProvenOptimal) && p.over_ub(lpres.objval())) ||
-	  (tc & BCP_DualObjLimReached)) {
-	 if (p.param(BCP_lp_par::LpVerb_FathomInfo))
-	    printf("LP:   Terminating due to high cost.\n");
-	 if (BCP_lp_fathom(p, not_from_main_loop)) {
+	 if (BCP_lp_fathom(p, from_repricing)) {
 	    return;
 	 }
 	 varset_changed = true;
@@ -199,10 +188,10 @@ LP:   Terminating and fathoming due to proven high cost.\n",
 
       // Generate and receive the cuts
       const int cuts_to_add_cnt =
-	 BCP_lp_generate_cuts(p, varset_changed, not_from_main_loop);
+	 BCP_lp_generate_cuts(p, varset_changed, from_repricing);
       // Generate and receive the vars
       const int vars_to_add_cnt =
-	 BCP_lp_generate_vars(p, cutset_changed, not_from_main_loop);
+	 BCP_lp_generate_vars(p, cutset_changed, from_repricing);
 
       if (! fix_vars_while_external_processes_working) {
 	 if (BCP_lp_fix_vars(p)) {
@@ -229,14 +218,11 @@ LP:   Terminating and fathoming due to proven high cost.\n",
       if (sol != NULL) {
 	p.user->send_feasible_solution(sol);
 	delete sol;
-	if (p.over_ub(lpres.objval())) {
-	  if (p.param(BCP_lp_par::LpVerb_FathomInfo))
-	    printf("LP:   Terminating due to high cost (good heur soln!).\n");
-	  if (BCP_lp_fathom(p, not_from_main_loop)) {
-	    return;
-	  }
-	  varset_changed = true;
-	  continue;
+	if (p.over_ub(p.node->true_lower_bound)) {
+	   BCP_lp_perform_fathom(p, "\
+LP:   Terminating and fathoming due to proven high cost (good heur soln!).\n",
+				 BCP_Msg_NodeDescription_Discarded);
+	   return;
 	}
       }
 
