@@ -62,6 +62,7 @@ BCP_tm_user::unpack_feasible_solution(BCP_buffer& buf)
     buf.unpack(val);
     buf.unpack(bcpind);
     BCP_var* var = p->unpack_var_without_bcpind(buf);
+    var->set_bcpind(bcpind);
     soln->add_entry(var, val);
   }
 
