@@ -32,7 +32,7 @@ static void
 BCP_tm_unpack_branching_info(BCP_tm_prob& p, BCP_buffer& buf,
 			     BCP_tm_node* node);
 static inline BCP_diving_status
-BCP_tm_shall_we_dive(BCP_tm_prob& p, const double lower_bound);
+BCP_tm_shall_we_dive(BCP_tm_prob& p, const double quality);
 
 //#############################################################################
 
@@ -51,32 +51,38 @@ BCP_tm_unpack_node_description(BCP_tm_prob& p, BCP_buffer& buf)
 BCP_tm_unpack_node_description: received node is different from processed.\n");
    }
 
-   // get the new lb for this node
-   buf.unpack(node->_lower_bound);
+   // get the quality and new lb for this node
+   buf.unpack(node->_quality).unpack(node->_true_lower_bound);
 
-   // wipe out any previous description of this node and create a new one
+   // wipe out any previous description of this node and create a new one if
+   // the description is sent over
    delete node->_desc;   node->_desc = 0;
-   BCP_node_change* desc = new BCP_node_change;
-   node->_desc = desc;
+   bool desc_sent = false;
+   buf.unpack(desc_sent);
 
-   // unpack core_change
-   if (p.core->varnum() + p.core->cutnum() > 0)
-      desc->core_change.unpack(buf);
+   if (desc_sent) {
+      BCP_node_change* desc = new BCP_node_change;
+      node->_desc = desc;
 
-   // get the variables and cuts. unpack takes care of checking explicitness,
-   // and returns how many algo objects are there in ..._set that do not yet
-   // have internal index.
-   p.unpack_var_set_change(desc->var_change);
-   p.unpack_cut_set_change(desc->cut_change);
+      // unpack core_change
+      if (p.core->varnum() + p.core->cutnum() > 0)
+	 desc->core_change.unpack(buf);
 
-   // pricing status
-   desc->indexed_pricing.unpack(buf);
+      // get the variables and cuts. unpack takes care of checking
+      // explicitness, and returns how many algo objects are there in ..._set
+      // that do not yet have internal index.
+      p.unpack_var_set_change(desc->var_change);
+      p.unpack_cut_set_change(desc->cut_change);
 
-   // warmstart info
-   bool has_data;
-   buf.unpack(has_data);
-   if (has_data)
-      desc->warmstart = p.user->unpack_warmstart(buf);
+      // pricing status
+      desc->indexed_pricing.unpack(buf);
+
+      // warmstart info
+      bool has_data;
+      buf.unpack(has_data);
+      if (has_data)
+	 desc->warmstart = p.user->unpack_warmstart(buf);
+   }
 
    p.active_nodes[p.slaves.lp->index_of_proc(node->lp)] = 0;
 
@@ -86,30 +92,30 @@ BCP_tm_unpack_node_description: received node is different from processed.\n");
 //#############################################################################
 
 static inline BCP_diving_status
-BCP_tm_shall_we_dive(BCP_tm_prob& p, const double lower_bound)
+BCP_tm_shall_we_dive(BCP_tm_prob& p, const double quality)
 {
    if (rand() < p.param(BCP_tm_par::UnconditionalDiveProbability) * RAND_MAX)
       return BCP_DoDive;
 
    const double ratio = p.has_ub() ?
-      p.param(BCP_tm_par::LBRatioToAllowDiving_HasUB) :
-      p.param(BCP_tm_par::LBRatioToAllowDiving_NoUB);
+      p.param(BCP_tm_par::QualityRatioToAllowDiving_HasUB) :
+      p.param(BCP_tm_par::QualityRatioToAllowDiving_NoUB);
 
    if (ratio < 0)
       return BCP_DoNotDive;
 
-   const double toplb = p.candidates.top()->lower_bound();
+   const double topq = p.candidates.top()->quality();
 
-   if (lower_bound <= toplb)
+   if (quality <= topq)
       return BCP_TestBeforeDive;
 
-   if (toplb > 0) {
-      if (lower_bound / toplb < ratio) return BCP_TestBeforeDive;
-   } else if (toplb == 0) {
-      if (lower_bound < ratio)	       return BCP_TestBeforeDive;
+   if (topq > 0) {
+      if (quality / topq < ratio) return BCP_TestBeforeDive;
+   } else if (topq == 0) {
+      if (quality < ratio)        return BCP_TestBeforeDive;
    } else {
-      if (lower_bound < 0 &&
-	  toplb / lower_bound < ratio) return BCP_TestBeforeDive;
+      if (quality < 0 &&
+	  topq / quality < ratio) return BCP_TestBeforeDive;
    }
 
    return BCP_DoNotDive;
@@ -297,10 +303,12 @@ BCP_tm_unpack_branching_info(BCP_tm_prob& p, BCP_buffer& buf,
 
    BCP_vec<BCP_child_action> action;
 
-   BCP_temp_vec<double> tmp_lower_bounds;
-   BCP_vec<double>& lower_bounds = tmp_lower_bounds.vec();
+   BCP_temp_vec<double> tmp_lpobj;
+   BCP_vec<double>& lpobj = tmp_lpobj.vec();
+   BCP_temp_vec<double> tmp_qualities;
+   BCP_vec<double>& qualities = tmp_qualities.vec();
 
-   buf.unpack(dive).unpack(action).unpack(lower_bounds);
+   buf.unpack(dive).unpack(action).unpack(qualities).unpack(lpobj);
    BCP_internal_brobj* brobj = new BCP_internal_brobj;
 
    brobj->unpack(buf);
@@ -350,7 +358,10 @@ BCP_tm_unpack_branching_info(BCP_tm_prob& p, BCP_buffer& buf,
 
       child = new BCP_tm_node(node->level() + 1, desc);
       p.search_tree.insert(child); // this sets _index
-      child->_lower_bound = lower_bounds[i];
+      child->_quality = qualities[i];
+      child->_true_lower_bound =
+	 p.param(BCP_tm_par::LpValueIsTrueLowerBound) ?
+	 lpobj[i] : node->true_lower_bound();
       child->_parent = node;
       child->_birth_index = node->child_num();
       node->new_child(child);
@@ -365,7 +376,7 @@ BCP_tm_unpack_branching_info(BCP_tm_prob& p, BCP_buffer& buf,
 	 keep = i;
 	 break;
        case BCP_FathomChild:
-	 child->status = BCP_PrunedNode;
+	 child->status = BCP_PrunedNode_Discarded;
 	 break;
       }
       // inherit var/cut pools
@@ -381,7 +392,7 @@ BCP_tm_unpack_branching_info(BCP_tm_prob& p, BCP_buffer& buf,
 	 // we've got to answer
 	 buf.clear();
 	 if (dive == BCP_TestBeforeDive)
-	    dive = BCP_tm_shall_we_dive(p, child->lower_bound());
+	    dive = BCP_tm_shall_we_dive(p, child->quality());
 	 buf.pack(dive);
 	 if (dive != BCP_DoNotDive){
 	    child->status = BCP_ActiveNode;

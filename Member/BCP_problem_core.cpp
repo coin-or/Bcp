@@ -163,11 +163,18 @@ BCP_problem_core_change::BCP_problem_core_change(int bvarnum,
 {
    _storage = BCP_Storage_Explicit;
    var_ch.reserve(bvarnum);
+#if 0
    BCP_var_set::const_iterator vari;
    const BCP_var_set::const_iterator lastvari = vars.entry(bvarnum);
    for (vari = vars.begin(); vari != lastvari; ++vari)
       var_ch.unchecked_push_back(BCP_obj_change((*vari)->lb(), (*vari)->ub(),
 						(*vari)->status()));
+#else
+   for (int i = 0; i < bvarnum; ++i) {
+      const BCP_var* v = vars[i];
+      var_ch.unchecked_push_back(BCP_obj_change(v->lb(),v->ub(), v->status()));
+   }
+#endif
    cut_ch.reserve(bcutnum);
    BCP_cut_set::const_iterator cuti;
    const BCP_cut_set::const_iterator lastcuti = cuts.entry(bcutnum);

@@ -1,4 +1,4 @@
-USERROOT := $(PWD)
+USERROOT := $(shell pwd)
 
 ##############################################################################
 
@@ -39,7 +39,7 @@ endif
 INCDIRS := $(DETECTINCDIRS)
 LIBDIRS := $(DETECTLIBDIRS)
 LIBS    := $(DETECTLIBNAMES)
-DEFINES := $(SOLVERDEFINES)
+DEFINES := $(DETECTDEFINES)
 
 ##############################################################################
 
@@ -63,8 +63,6 @@ endif
 CXXFLAGS += -DBCP_COMM_PROTOCOL_$(COMM_PROTOCOL)
 
 ##############################################################################
-#  Include the user specific makefile
-##############################################################################
 
 INCDIRS += $(USER_INC_DIRS)
 LIBDIRS += $(USER_LIB_DIRS)
@@ -74,10 +72,8 @@ DEFINES += $(USER_DEFINES)
 ##############################################################################
 
 LDFLAGS := $(addprefix -L,$(LIBDIRS))
+LDFLAGS += $(if ${SHLINKPREFIX},$(addprefix ${SHLINKPREFIX},${LIBDIRS}),)
 LDFLAGS += $(patsubst lib%,-l%,$(basename $(LIBS)))
-ifneq ($(SHLINKPREFIX),)
-    LDFLAGS += $(addprefix $(SHLINKPREFIX),$(LIBDIRS))
-endif
 
 ##############################################################################
 ##############################################################################
@@ -113,7 +109,7 @@ VPATH  = ${SRCDIR}
 
 CXXFLAGS += $(USERFLAGS)
 
-CXXFLAGS += -I- $(addprefix -I,$(INCDIRS)) $(addprefix -D,$(DEFINES)) 
+CXXFLAGS += $(addprefix -I,$(INCDIRS)) $(addprefix -D,$(DEFINES)) 
 
 ##############################################################################
 ##############################################################################
@@ -153,6 +149,8 @@ BCP_SRC +=	BCP_tm_node.cpp
 BCP_SRC +=	BCP_tm_user.cpp
 BCP_SRC +=	BCP_tm.cpp
 BCP_SRC +=	BCP_tm_param.cpp
+BCP_SRC +=	BCP_warmstart_pack.cpp
+BCP_SRC +=	BCP_process.cpp
 BCP_SRC +=	
 # Files related to LP
 BCP_SRC +=	BCP_lp_main.cpp
@@ -199,7 +197,7 @@ endif
 BCP_SRC +=	BCP_message_single.cpp
 
 
-# ifeq ($(findstring COIN_USE_OSL, $(SOLVERDEFINES)),COIN_USE_OSL)
+# ifeq ($(findstring COIN_USE_OSL, $(DETECTDEFINES)),COIN_USE_OSL)
 #	BCP_SRC +=	oslSolver.cpp
 #	BCP_SRC +=	oslvolume.cpp
 #	BCP_INSTSRC  += osl_INST.cpp
@@ -323,7 +321,7 @@ $(USERTARGETDIR)/ebcpp $(USERTARGETDIR)/ebcps : $(ALLOBJFILES)
 	@echo "Linking $(notdir $@) ..."
 	@echo ""
 	@mkdir -p $(USERTARGETDIR)
-	@$(CXX) $(CXXFLAGS) -o $@ $(ALLOBJFILES) 
+	@$(CXX) $(CXXFLAGS) -o $@ $(ALLOBJFILES) \
 		$(LDFLAGS) $(SYSLD) $(EFENCE) -lm
 
 clean :

@@ -169,6 +169,7 @@ BCP_lp_prob::unpack_var()
     var = user->unpack_var_algo(msg_buf);
     var->set_var_type(var_t);
     var->change_bounds(lb, ub);
+    var->set_obj(obj);
     break;
   default:
     throw BCP_fatal_error("BCP_lp_prob::_unpack_var(): unexpected obj_t.\n");

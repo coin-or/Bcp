@@ -47,7 +47,6 @@ void BCP_tm_trim_tree_wrapper(BCP_tm_prob& p, const bool between_phases);
 void BCP_tm_idle_processes(BCP_tm_prob& p);
 void BCP_tm_stop_processes(BCP_tm_prob& p);
 void BCP_tm_start_processes(BCP_tm_prob& p);
-void BCP_tm_process_message(BCP_tm_prob& p, BCP_buffer& buf);
 bool BCP_tm_test_machine(BCP_tm_prob& p);
 void BCP_tm_remove_lp(BCP_tm_prob& p, const int index);
 void BCP_tm_remove_cg(BCP_tm_prob& p, const int index);

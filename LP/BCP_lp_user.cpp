@@ -17,6 +17,7 @@
 #include "BCP_lp_branch.hpp"
 #include "BCP_problem_core.hpp"
 #include "BCP_solution.hpp"
+#include "BCP_functions.hpp"
 
 //#############################################################################
 // Informational methods for the user
@@ -65,7 +66,8 @@ BCP_lp_user::send_feasible_solution(const BCP_solution* sol)
 
   // update the UB if necessary
   const double objval = sol->objective_value();
-  if (! p->param(BCP_lp_par::SolveLpToOptimality) && p->ub(objval))
+  const bool over_ub = p->ub(objval);
+  if (! p->param(BCP_lp_par::SolveLpToOptimality) && over_ub)
     p->lp_solver->setDblParam(OsiDualObjectiveLimit, objval-p->granularity());
 }
 
@@ -131,63 +133,25 @@ BCP_lp_user::unpack_module_data(BCP_buffer & buf)
 
 //#############################################################################
 
-#if defined(COIN_USE_VOL)
-
-#include "BCP_warmstart_dual.hpp"
 void
 BCP_lp_user::pack_warmstart(const BCP_warmstart* ws, BCP_buffer& buf)
 {
   if (p->param(BCP_lp_par::ReportWhenDefaultIsExecuted)) {
     printf(" LP: Default BCP_lp_user::pack_warmstart() executed.\n");
   }
-  const BCP_warmstart_dual* dws = dynamic_cast<const BCP_warmstart_dual*>(ws);
-  if (!dws) {
-    throw BCP_fatal_error("\
-COIN_USE_VOL defined but BCP_lp_user::pack_warmstart() is invoked\n\
-with a non-BCP_warmstart_dual object.\n");
-  }
-  dws->pack(buf);
+  BCP_pack_warmstart(ws, buf);
 }
+
 //-----------------------------------------------------------------------------
+
 BCP_warmstart*
 BCP_lp_user::unpack_warmstart(BCP_buffer& buf)
 {
   if (p->param(BCP_lp_par::ReportWhenDefaultIsExecuted)) {
     printf(" LP: Default BCP_lp_user::unpack_warmstart() executed.\n");
   }
-  return new BCP_warmstart_dual(buf);
+  return BCP_unpack_warmstart(buf);
 }
-
-#elif defined(COIN_USE_CPX) || defined(COIN_USE_OSL) //========================
-      
-#include "BCP_warmstart_basis.hpp"
-void
-BCP_lp_user::pack_warmstart(const BCP_warmstart* ws, BCP_buffer& buf)
-{
-  if (p->param(BCP_lp_par::ReportWhenDefaultIsExecuted)) {
-    printf(" LP: Default BCP_lp_user::pack_warmstart() executed.\n");
-  }
-  const BCP_warmstart_basis* bws = dynamic_cast<const BCP_warmstart_basis*>(ws);
-  if (!bws) {
-    throw BCP_fatal_error("\
-COIN_USE_VOL defined but BCP_lp_user::pack_warmstart() is invoked\n\
-with a non-BCP_warmstart_basis object.\n");
-  }
-  bws->pack(buf);
-}
-//-----------------------------------------------------------------------------
-BCP_warmstart*
-BCP_lp_user::unpack_warmstart(BCP_buffer& buf)
-{
-  if (p->param(BCP_lp_par::ReportWhenDefaultIsExecuted)) {
-    printf(" LP: Default BCP_lp_user::unpack_warmstart() executed.\n");
-  }
-  return new BCP_warmstart_basis(buf);
-}
-
-#elif defined(COIN_USE_XPR) //=================================================
-
-#endif
 
 //#############################################################################
 
@@ -290,6 +254,39 @@ BCP_lp_user::modify_lp_parameters(OsiSolverInterface* lp,
 }
 
 //#############################################################################
+// Generating a true lower bound
+double
+BCP_lp_user::compute_lower_bound(const double old_lower_bound,
+				 const BCP_lp_result& lpres,
+				 const BCP_vec<BCP_var*>& vars,
+				 const BCP_vec<BCP_cut*>& cuts)
+{
+   // If columns are to be generated then we can't say anything, just return
+   // the current lower bound
+   if (p->node->colgen != BCP_DoNotGenerateColumns_Fathom)
+      return old_lower_bound;
+
+   // Otherwise we got the examine the termination code and the objective
+   // value of the LP solution
+   const int tc = lpres.termcode();
+   if (tc & BCP_ProvenOptimal)
+      return lpres.objval();
+
+   // The limit (the upper bound) on the dual objective is proven to be
+   // reached, but the objval might not reflect this! (the LP solver may not
+   // make the last iteration that pushes objval over the limit). So we return
+   // a high value ourselves.
+   if (tc & BCP_DualObjLimReached)
+      return p->ub() + 1e-5;
+
+   // We can't say anything in any other case
+   // (BCP_ProvenPrimalInf | BCP_ProvenDualInf | BCP_PrimalObjLimReached |
+   //  BCP_TimeLimit | BCP_Abandoned), not to mention that some of these are
+   //  impossible. Just return the current bound.
+   return old_lower_bound;
+}
+
+//#############################################################################
 // Feasibility testing
 BCP_solution*
 BCP_lp_user::test_feasibility(const BCP_lp_result& lpres,
@@ -318,11 +315,19 @@ BCP_lp_user::test_feasibility(const BCP_lp_result& lpres,
 
 //-----------------------------------------------------------------------------
 
-BCP_solution*
+BCP_solution_generic*
 BCP_lp_user::test_binary(const BCP_lp_result& lpres,
 			 const BCP_vec<BCP_var*>& vars,
 			 const double etol) const
 {
+  if (p->param(BCP_lp_par::ReportWhenDefaultIsExecuted)) {
+    printf(" LP: Default test_binary() executed.\n");
+  }
+  // Do anything only if the termination code is sensible
+  const int tc = lpres.termcode();
+  if (! (tc & BCP_ProvenOptimal))
+     return 0;
+
   const double * x = lpres.x();
   const int varnum = vars.size();
   int i;
@@ -333,7 +338,8 @@ BCP_lp_user::test_binary(const BCP_lp_result& lpres,
       return(NULL);
   }
 
-  BCP_solution_generic* sol = new BCP_solution_generic;
+  // This solution does not own the pointers to the variables
+  BCP_solution_generic* sol = new BCP_solution_generic(false); 
   double obj = 0;
   for (i = 0 ; i < varnum; ++i) {
     if (x[i] > 1 - etol) {
@@ -345,11 +351,19 @@ BCP_lp_user::test_binary(const BCP_lp_result& lpres,
   return sol;
 }
 //-----------------------------------------------------------------------------
-BCP_solution*
+BCP_solution_generic*
 BCP_lp_user::test_integral(const BCP_lp_result& lpres,
 			   const BCP_vec<BCP_var*>& vars,
 			   const double etol) const
 {
+  if (p->param(BCP_lp_par::ReportWhenDefaultIsExecuted)) {
+    printf(" LP: Default test_integral() executed.\n");
+  }
+  // Do anything only if the termination code is sensible
+  const int tc = lpres.termcode();
+  if (! (tc & BCP_ProvenOptimal))
+     return 0;
+
   const double * x = lpres.x();
   const int varnum = vars.size();
   int i;
@@ -365,7 +379,8 @@ BCP_lp_user::test_integral(const BCP_lp_result& lpres,
       return(NULL);
   }
   
-  BCP_solution_generic* sol = new BCP_solution_generic;
+  // This solution does not own the pointers to the variables
+  BCP_solution_generic* sol = new BCP_solution_generic(false);
   double obj = 0;
   for (i = 0 ; i < varnum; ++i) {
     val = floor(x[i] + 0.5);
@@ -378,11 +393,19 @@ BCP_lp_user::test_integral(const BCP_lp_result& lpres,
   return sol;
 }
 //-----------------------------------------------------------------------------
-BCP_solution*
+BCP_solution_generic*
 BCP_lp_user::test_full(const BCP_lp_result& lpres,
 		       const BCP_vec<BCP_var*>& vars,
 		       const double etol) const
 {
+  if (p->param(BCP_lp_par::ReportWhenDefaultIsExecuted)) {
+    printf(" LP: Default test_full() executed.\n");
+  }
+  // Do anything only if the termination code is sensible
+  const int tc = lpres.termcode();
+  if (! (tc & BCP_ProvenOptimal))
+     return 0;
+
   const double * x = lpres.x();
   const int varnum = vars.size();
   const double etol1 = 1 - etol;
@@ -409,7 +432,8 @@ BCP_lp_user::test_full(const BCP_lp_result& lpres,
     }
   }
 
-  BCP_solution_generic* sol = new BCP_solution_generic;
+  // This solution does not own the pointers to the variables
+  BCP_solution_generic* sol = new BCP_solution_generic(false);
   double obj = 0;
   for (i = 0 ; i < varnum; ++i) {
     val = x[i];
@@ -452,7 +476,7 @@ BCP_lp_user::pack_feasible_solution(BCP_buffer& buf, const BCP_solution* sol)
   const BCP_vec<BCP_var*> solvars = gensol->_vars;
   const BCP_vec<double> values = gensol->_values;
   const int size = solvars.size();
-  buf.pack(sol->objective_value()).pack(size);
+  buf.pack(size);
   BCP_lp_prob* p = getLpProblemPointer();
   for (int i = 0; i < size; ++i) {
     buf.pack(values[i]);
@@ -731,10 +755,19 @@ BCP_lp_user::logical_fixing(const BCP_lp_result& lpres,
 
 //#############################################################################
 void
-BCP_lp_user::reduced_cost_fixing(const double* dj, const double gap,
+BCP_lp_user::reduced_cost_fixing(const double* dj, const double* x,
+				 const double gap,
 				 BCP_vec<BCP_var*>& vars, int& newly_changed)
 {
   newly_changed = 0;
+  const bool atZero = get_param(BCP_lp_par::DoReducedCostFixingAtZero);
+  const bool atAny = get_param(BCP_lp_par::DoReducedCostFixingAtAnything);
+
+  if (! atZero && ! atAny)
+     return;
+
+  double petol = 0.0;
+  p->lp_solver->getDblParam(OsiPrimalTolerance, petol);
 
   // If the gap is negative that means that we are above the limit, so
   // don't do anything.
@@ -753,13 +786,13 @@ BCP_lp_user::reduced_cost_fixing(const double* dj, const double gap,
 
   // *FIXME* : If we knew that there are integral vars only, then
   // we could leave out the test for BCP_ContinuousVar...
-  for (int i = 0; i < varnum; ++i){
+  for (int i = 0; i < varnum; ++i) {
     BCP_var* var = vars[i];
     if (! var->is_fixed() && var->var_type() != BCP_ContinuousVar){
       if (dj[i] > 0) {
 	const double lb = var->lb();
 	const double new_ub = lb + floor(gap / dj[i]);
-	if (new_ub < var->ub()) {
+	if (new_ub < var->ub() && (atAny || CoinAbs(x[i])<petol) ) {
 	  vars[i]->set_ub(new_ub);
 	  changed_indices.unchecked_push_back(i);
 	  changed_bounds.unchecked_push_back(lb);
@@ -768,7 +801,7 @@ BCP_lp_user::reduced_cost_fixing(const double* dj, const double gap,
       } else if (dj[i] < 0) {
 	const double ub = var->ub();
 	const double new_lb = ub - floor(gap / (-dj[i]));
-	if (new_lb > var->lb()) {
+	if (new_lb > var->lb() && (atAny || CoinAbs(x[i])<petol) ) {
 	  vars[i]->set_lb(new_lb);
 	  changed_indices.unchecked_push_back(i);
 	  changed_bounds.unchecked_push_back(new_lb);
@@ -815,6 +848,20 @@ select_branching_candidates(const BCP_lp_result& lpres,
 			p->param(BCP_lp_par::StrongBranch_CloseToOneNum),
 			p->param(BCP_lp_par::IntegerTolerance),
 			cans);
+  // Get rid of duplicates in cans
+  BCP_vec<int> brvars;
+  brvars.reserve(cans.size());
+  for (size_t i = 0; i < cans.size(); ) {
+     const int brvar = (*cans[i]->forced_var_pos)[0];
+     if (std::find(brvars.begin(), brvars.end(), brvar) == brvars.end()) {
+	brvars.unchecked_push_back(brvar);
+	++i;
+     } else {
+	std::swap(cans[i], cans.back());
+	cans.pop_back();
+     }
+  }
+  
   if (cans.size() == 0) {
     throw BCP_fatal_error("\
  LP : No var/cut in pool but couldn't select branching object.\n");
@@ -858,11 +905,11 @@ BCP_lp_user::branch_close_to_half(const BCP_lp_result& lpres,
     // check if the next var violates MIP feasibility
     if ((*vi)->var_type() == BCP_ContinuousVar)
       continue;
-    val = abs(*xi - .5 - floor(*xi));
+    val = CoinAbs(*xi - .5 - floor(*xi));
     if (val > etol5)
       continue;
     // if not, insert it into the list
-    const double cost = abs(objcoeff[pos]);
+    const double cost = CoinAbs(objcoeff[pos]);
     for (i = k - 1; i >= 0; --i) {
       if (select_val[i] < val ||
 	  (select_val[i] == val && select_cost[i] >= cost))
@@ -881,7 +928,7 @@ BCP_lp_user::branch_close_to_half(const BCP_lp_result& lpres,
     // check if the next var violates MIP feasibility
     if ((*vi)->var_type() == BCP_ContinuousVar)
       continue;
-    val = abs(*xi - .5 - floor(*xi));
+    val = CoinAbs(*xi - .5 - floor(*xi));
     if (val > etol5)
       continue;
     // if not, insert it into the list
@@ -969,6 +1016,8 @@ BCP_lp_user::branch_close_to_one(const BCP_lp_result& lpres,
     // check if the next var violates MIP feasibility
     if ((*vi)->var_type() == BCP_ContinuousVar)
       continue;
+    if (*xi < etol)
+       continue;
     val = 1 - *xi;
     if (val < etol)
       continue;
@@ -982,6 +1031,8 @@ BCP_lp_user::branch_close_to_one(const BCP_lp_result& lpres,
     // check if the next var violates MIP feasibility
     if ((*vi)->var_type() == BCP_ContinuousVar)
       continue;
+    if (*xi < etol)
+       continue;
     val = 1 - *xi;
     if (val < etol)
       continue;
@@ -1229,3 +1280,5 @@ BCP_lp_user::purge_slack_pool(const BCP_vec<BCP_cut*>& slack_pool,
     break;
   }
 }
+
+//#############################################################################

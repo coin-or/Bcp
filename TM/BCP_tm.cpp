@@ -35,16 +35,11 @@ BCP_tm_prob::~BCP_tm_prob()
    
    delete feas_sol;
 
-   // base vars/cuts will be deleted when base is deleted
    std::map<BCP_IndexType, BCP_var*>::iterator vari = vars.begin();
-   for (int i = core->varnum(); i; --i)
-      ++vari;
    while (vari != vars.end()) {
       delete (vari++)->second;
    }
    std::map<BCP_IndexType, BCP_cut*>::iterator cuti = cuts.begin();
-   for (int i = core->cutnum(); i; --i)
-      ++cuti;
    while (cuti != cuts.end()) {
       delete (cuti++)->second;
    }
@@ -109,6 +104,7 @@ BCP_tm_prob::unpack_var_without_bcpind(BCP_buffer& buf)
      var = user->unpack_var_algo(buf);
      var->set_var_type(var_t);
      var->change_bounds(lb, ub);
+     var->set_obj(obj);
      break;
    default:
      throw BCP_fatal_error("BCP_tm_prob::_unpack_var(): unexpected obj_t.\n");

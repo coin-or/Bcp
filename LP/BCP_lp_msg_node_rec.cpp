@@ -317,8 +317,8 @@ BCP_lp_unpack_active_node: parent's or node's warmstart is non-0.\n");
 
    BCP_lp_node& node = *p.node;
    // unpack a few essential data
-   buf.unpack(node.colgen)
-      .unpack(node.index).unpack(node.level).unpack(node.lower_bound)
+   buf.unpack(node.colgen).unpack(node.index).unpack(node.level)
+      .unpack(node.quality).unpack(node.true_lower_bound)
       .unpack(node.dive);
 
    // unpack process information
