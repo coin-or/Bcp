@@ -396,37 +396,22 @@ public:
 		BCP_vec<double>& RLB, BCP_vec<double>& RUB,
 		double extra_gap, double extra_major);
 
+   /** Create an LP relaxation of the given ordering by copying the content
+       of the arguments to the LP relaxation. */
+   BCP_lp_relax(const bool colordered,
+		const BCP_vec<int>& VB, const BCP_vec<int>& EI,
+		const BCP_vec<double>& EV, const BCP_vec<double>& OBJ,
+		const BCP_vec<double>& CLB, const BCP_vec<double>& CUB,
+		const BCP_vec<double>& RLB, const BCP_vec<double>& RUB);
    /** Create an LP relaxation of the given ordering by assigning the content
        of the arguments to the LP relaxation. When the constructor returns the
-       content of the arguments will be whatever the default constructor for
-       that argument creates. <br>
-       NOTE: There is a dirty trick here in the implementation (messing up the
-       BCP_vecs' start data members), but everything works out OK...       
+       content of the arguments will be NULL pointers. <br>
    */
    BCP_lp_relax(const bool colordered,
-		BCP_vec<int>& VB, BCP_vec<int>& EI, BCP_vec<double>& EV,
-		BCP_vec<double>& OBJ,
-		BCP_vec<double>& CLB, BCP_vec<double>& CUB,
-		BCP_vec<double>& RLB, BCP_vec<double>& RUB) :
-     OsiPackedMatrix(),
-     _Objective(), _ColLowerBound(), _ColUpperBound(),
-     _RowLowerBound(), _RowUpperBound()
-   {
-     int* length = NULL;
-     int rownum = RLB.size();
-     int colnum = CLB.size();
-     int nznum = EI.size();
-     int* vb = VB.begin();
-     int* ei = EI.begin();
-     double* ev = EV.begin();
-     OsiPackedMatrix::assignMatrix(colordered, rownum, colnum, nznum,
-				   ev, ei, vb, length);
-     _Objective.swap(OBJ);
-     _ColLowerBound.swap(CLB);
-     _ColUpperBound.swap(CUB);
-     _RowLowerBound.swap(RLB);
-     _RowUpperBound.swap(RUB);
-   }
+		const int rownum, const int colnum, const int nznum,
+		int*& VB, int*& EI, double*& EV,
+		double*& OBJ, double*& CLB, double*& CUB,
+		double*& RLB, double*& RUB);
 
    /** The destructor deletes the data members */
    ~BCP_lp_relax() {}

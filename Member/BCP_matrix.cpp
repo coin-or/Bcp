@@ -249,3 +249,47 @@ BCP_lp_relax::BCP_lp_relax(BCP_vec<BCP_col*>& cols,
   setExtraMajor(extra_major);
   BCP_createRowOrderedMatrix(cols, RLB, RUB);
 }
+
+//-----------------------------------------------------------------------------
+
+BCP_lp_relax::BCP_lp_relax(const bool colordered,
+			   const BCP_vec<int>& VB, const BCP_vec<int>& EI,
+			   const BCP_vec<double>& EV,
+			   const BCP_vec<double>& OBJ,
+			   const BCP_vec<double>& CLB,
+			   const BCP_vec<double>& CUB,
+			   const BCP_vec<double>& RLB,
+			   const BCP_vec<double>& RUB) :
+   OsiPackedMatrix(),
+   _Objective(OBJ), _ColLowerBound(CLB), _ColUpperBound(CUB),
+   _RowLowerBound(RLB), _RowUpperBound(RUB)
+{
+   const int minor = colordered ? RLB.size() : CLB.size();
+   const int major = colordered ? CLB.size() : RLB.size();
+   OsiPackedMatrix::copyOf(colordered, minor, major, EI.size(),
+			   EV.begin(), EI.begin(), VB.begin(), 0);
+}
+
+//-----------------------------------------------------------------------------
+
+BCP_lp_relax::BCP_lp_relax(const bool colordered,
+			   const int rownum, const int colnum, const int nznum,
+			   int*& VB, int*& EI, double*& EV,
+			   double*& OBJ, double*& CLB, double*& CUB,
+			   double*& RLB, double*& RUB) :
+   OsiPackedMatrix(),
+   _Objective(OBJ, OBJ+colnum),
+   _ColLowerBound(CLB, CLB+colnum), _ColUpperBound(CUB, CUB+colnum),
+   _RowLowerBound(RLB, RLB+rownum), _RowUpperBound(RUB, RUB+rownum)
+{
+   const int minor = colordered ? rownum : colnum;
+   const int major = colordered ? colnum : rownum;
+   int * nullp = 0;
+   OsiPackedMatrix::assignMatrix(colordered, minor, major, nznum,
+				 EV, EI, VB, nullp);
+   delete[] OBJ; OBJ = 0;
+   delete[] CLB; CLB = 0;
+   delete[] CUB; CUB = 0;
+   delete[] RLB; RLB = 0;
+   delete[] RUB; RUB = 0;
+}
