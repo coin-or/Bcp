@@ -299,7 +299,7 @@ This is absurd.\n", MAX_PARAM_LINE_LENGTH);
 	 if (keyword == end_of_line) // empty line
 	    continue;
 	 // ctmp = std::find_if(keyword, end_of_line, isspace);
-	 for (ctmp = line; ctmp < end_of_line; ++ctmp) {
+	 for (ctmp = keyword; ctmp < end_of_line; ++ctmp) {
 	    if (isspace(*ctmp))
 	       break;
 	 }
@@ -308,7 +308,7 @@ This is absurd.\n", MAX_PARAM_LINE_LENGTH);
 	 *ctmp++ = 0; // terminate the keyword with a 0 character
 
 	 // value = std::find_if(ctmp, end_of_line, isgraph);
-	 for (value = line; value < end_of_line; ++value) {
+	 for (value = ctmp; value < end_of_line; ++value) {
 	    if (isgraph(*value))
 	       break;
 	 }
@@ -316,7 +316,7 @@ This is absurd.\n", MAX_PARAM_LINE_LENGTH);
 	    continue;
 
 	 // ctmp = std::find_if(value, end_of_line, isspace);
-	 for (ctmp = line; ctmp < end_of_line; ++ctmp) {
+	 for (ctmp = value; ctmp < end_of_line; ++ctmp) {
 	    if (isspace(*ctmp))
 	       break;
 	 }
