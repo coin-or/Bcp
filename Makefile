@@ -1,3 +1,10 @@
+ifeq ($(origin BCPROOT),undefined)
+    $(error \
+You must not run `make` from the Bcp subdirectory. \
+In the Makefile of your application set BCPROOT, include \
+$${BCPROOT}/Makefile and run `make` (or `make clean`, etc) from there)
+endif
+
 USERROOT := $(shell pwd)
 
 ##############################################################################
