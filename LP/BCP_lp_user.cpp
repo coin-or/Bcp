@@ -247,10 +247,6 @@ BCP_lp_user::compute_lower_bound(const double old_lower_bound,
 				 const BCP_vec<BCP_var*>& vars,
 				 const BCP_vec<BCP_cut*>& cuts)
 {
-   if (p->param(BCP_lp_par::LpValueIsTrueLowerBound)) {
-      return CoinMax(old_lower_bound, lpres.objval());
-   }
-
    // If columns are to be generated then we can't say anything, just return
    // the current lower bound
    if (p->node->colgen != BCP_DoNotGenerateColumns_Fathom)
