@@ -168,26 +168,41 @@ void BCP_tm_notify_processes(BCP_tm_prob& p)
 {
    // Notify the processes what kind of process they are and also send over
    // the appropriate parameters
-   BCP_tm_send_process_type_and_params(p,
-				       p.slaves.lp->procs().begin(),
-				       p.slaves.lp->procs().end(),
-				       BCP_ProcessType_LP);
-   BCP_tm_send_process_type_and_params(p,
-				       p.slaves.cg->procs().begin(),
-				       p.slaves.cg->procs().end(),
-				       BCP_ProcessType_CG);
-   BCP_tm_send_process_type_and_params(p,
-				       p.slaves.vg->procs().begin(),
-				       p.slaves.vg->procs().end(),
-				       BCP_ProcessType_VG);
-   BCP_tm_send_process_type_and_params(p,
-				       p.slaves.cp->procs().begin(),
-				       p.slaves.cp->procs().end(),
-				       BCP_ProcessType_CP);
-   BCP_tm_send_process_type_and_params(p,
-				       p.slaves.vp->procs().begin(),
-				       p.slaves.vp->procs().end(),
-				       BCP_ProcessType_VP);
+  if (p.slaves.lp) {
+    BCP_tm_send_process_type_and_params(p,
+					p.slaves.lp->procs().begin(),
+					p.slaves.lp->procs().end(),
+					BCP_ProcessType_LP);
+  }
+  
+  if (p.slaves.cg) {
+    BCP_tm_send_process_type_and_params(p,
+					p.slaves.cg->procs().begin(),
+					p.slaves.cg->procs().end(),
+					BCP_ProcessType_CG);
+  }
+
+  if (p.slaves.vg) {
+    BCP_tm_send_process_type_and_params(p,
+					p.slaves.vg->procs().begin(),
+					p.slaves.vg->procs().end(),
+					BCP_ProcessType_VG);
+  }
+
+  if (p.slaves.cp) {
+    BCP_tm_send_process_type_and_params(p,
+					p.slaves.cp->procs().begin(),
+					p.slaves.cp->procs().end(),
+					BCP_ProcessType_CP);
+  }
+
+  if (p.slaves.vp) {
+    BCP_tm_send_process_type_and_params(p,
+					p.slaves.vp->procs().begin(),
+					p.slaves.vp->procs().end(),
+					BCP_ProcessType_VP);
+  }
+
 }
    
 //#############################################################################
