@@ -25,7 +25,7 @@ int BCP_lp_user::current_phase() const     { return p->phase; }
 int BCP_lp_user::current_level() const     { return p->node->level; }
 int BCP_lp_user::current_index() const     { return p->node->index; }
 int BCP_lp_user::current_iteration() const { return p->node->iteration_count; }
-BCP_user_data* BCP_lp_user::get_user_data  { return p->node->user_data; }
+BCP_user_data* BCP_lp_user::get_user_data() { return p->node->user_data; }
 //#############################################################################
 // Informational methods for the user
 /* Methods to get/set BCP parameters on the fly */
