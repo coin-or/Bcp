@@ -5,6 +5,7 @@
 
 // This file is fully docified.
 
+#include <string>
 #include <cstdio>
 #include <cstdlib>
 #include <cstdarg>
@@ -28,6 +29,11 @@ public:
       abort();
    }
 #endif
+   BCP_fatal_error(const std::string& str) {
+      printf("%s", str.c_str());
+      fflush(0);
+      abort();
+   }
    BCP_fatal_error(const char * format, ...) {
       BCP_DEFAULT_NAMESPACE;
       va_list valist;
