@@ -296,6 +296,8 @@ sbcpp : $(USERTARGETDIR)/sbcpp
 
 ebcps : $(USERTARGETDIR)/ebcps
 ebcpp : $(USERTARGETDIR)/ebcpp
+esbcps : $(USERTARGETDIR)/esbcps
+esbcpp : $(USERTARGETDIR)/esbcpp
 
 pbcps : $(USERTARGETDIR)/pbcps
 
@@ -332,6 +334,15 @@ $(USERTARGETDIR)/ebcpp $(USERTARGETDIR)/ebcps : $(ALLOBJFILES)
 	@mkdir -p $(USERTARGETDIR)
 	@$(CXX) $(CXXFLAGS) -o $@ $(ALLOBJFILES) \
 		$(LDFLAGS) $(SYSLD) $(EFENCE) -lm
+
+$(USERTARGETDIR)/esbcpp $(USERTARGETDIR)/esbcps : $(ALLOBJFILES)
+	@rm -rf Junk
+	@echo ""
+	@echo "Linking $(notdir $@) ..."
+	@echo ""
+	@mkdir -p $(USERTARGETDIR)
+	$(CXX) $(CXXFLAGS) -o $@ $(ALLOBJFILES) \
+		$(LDFLAGS) $(STATICSYSLD) $(EFENCE) -lm
 
 clean :
 	rm -rf Junk
