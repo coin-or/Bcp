@@ -122,9 +122,9 @@ BCP_tm_unpack_node_description: received node is different from processed.\n");
       if (has_data)
 	 desc->warmstart = p.user->unpack_warmstart(buf);
       // user data
+      delete node->_user_data;
       buf.unpack(has_data);
-      if (has_data)
-	 node->_user_data = p.user->unpack_user_data(buf);
+      node->_user_data = has_data ? p.user->unpack_user_data(buf) : 0;
    }
 
    p.active_nodes[p.slaves.lp->index_of_proc(node->lp)] = 0;
