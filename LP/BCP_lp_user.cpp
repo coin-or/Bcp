@@ -969,6 +969,8 @@ BCP_lp_user::branch_close_to_one(const BCP_lp_result& lpres,
     // check if the next var violates MIP feasibility
     if ((*vi)->var_type() == BCP_ContinuousVar)
       continue;
+    if (*xi < etol)
+       continue;
     val = 1 - *xi;
     if (val < etol)
       continue;
@@ -982,6 +984,8 @@ BCP_lp_user::branch_close_to_one(const BCP_lp_result& lpres,
     // check if the next var violates MIP feasibility
     if ((*vi)->var_type() == BCP_ContinuousVar)
       continue;
+    if (*xi < etol)
+       continue;
     val = 1 - *xi;
     if (val < etol)
       continue;
