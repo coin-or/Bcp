@@ -209,7 +209,6 @@ BCP_INSTSRC +=	BCP_INST_vector_gen.cpp
 BCP_INSTSRC +=	BCP_INST_vector_spec.cpp
 BCP_INSTSRC +=	BCP_INST_vector_ptr.cpp
 BCP_INSTSRC +=	BCP_INST_vector_ptr_purge.cpp
-BCP_INSTSRC +=	BCP_INST_temp.cpp
 BCP_INSTSRC +=
 BCP_INSTSRC +=	BCP_INST_system.cpp
 
