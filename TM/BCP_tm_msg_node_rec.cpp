@@ -3,6 +3,7 @@
 #include <cstdlib>
 #include <algorithm>
 
+#include "BCP_USER.hpp"
 #include "BCP_node_change.hpp"
 #include "BCP_warmstart.hpp"
 #include "BCP_branch.hpp"
