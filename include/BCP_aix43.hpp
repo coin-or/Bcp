@@ -6,13 +6,19 @@
 // This file is fully docified.
 // There's nothing to docify...
 
-#include <sys/resource.h>     // for getrusage()
-#include <unistd.h>       // for setpriority() and gethostname()
 typedef int BCP_IndexType;
 
 #if defined(__IBMCPP__) && (__IBMCPP__ >= 5)
+#  include <sys/resource.h>
+#  include <unistd.h>
 #  define BCP_DEFAULT_NAMESPACE
 #  define BCP_PtrDiff       long
+#    define NEED_TEMPLATE_CLASSES
+#    define NEED_TEMPLATE_FUNCTIONS
+// #    define NEED_STD_TEMPLATE_CLASSES
+// #    define NEED_STD_TEMPLATE_FUNCTIONS
+// #    define NEED_IMPLICIT_TEMPLATE_CLASSES
+// #    define NEED_IMPLICIT_TEMPLATE_FUNCTIONS
 #  define BCP_CONSTRUCT     std::_Construct
 #  define BCP_DESTROY       std::_Destroy
 #  define BCP_DESTROY_RANGE(first, last)	\
@@ -20,6 +26,7 @@ typedef int BCP_IndexType;
              do {				\
                 std::_Destroy(--last);		\
 	     } while (first != last);
+
 #endif
 
 #if defined(__GNUC__)
@@ -60,4 +67,4 @@ typedef int BCP_IndexType;
 
 #endif
 
-#endif
+#endif // #ifndef _BCP_AIX43
