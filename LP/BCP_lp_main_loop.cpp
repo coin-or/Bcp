@@ -1,7 +1,7 @@
 // Copyright (C) 2000, International Business Machines
 // Corporation and others.  All Rights Reserved.
 #include <cstdio>
-#include "BCP_timeout.hpp"
+#include "CoinTime.hpp"
 #include "BCP_message.hpp"
 #include "BCP_error.hpp"
 #include "BCP_lp_node.hpp"
@@ -49,7 +49,7 @@ void BCP_lp_main_loop(BCP_lp_prob& p)
 		p.node->iteration_count);
 
       // Solve the lp relaxation and get the results
-      time0 = BCP_time_since_epoch();
+      time0 = CoinCpuTime();
       BCP_lp_check_ub(p);
       p.user->modify_lp_parameters(p.lp_solver, false);
 #if 0
@@ -61,7 +61,7 @@ void BCP_lp_main_loop(BCP_lp_prob& p)
       p.lp_solver->resolve();
       lpres.get_results(*p.lp_solver);
       const int tc = lpres.termcode();
-      p.stat.time_lp_solving += BCP_time_since_epoch() - time0;
+      p.stat.time_lp_solving += CoinCpuTime() - time0;
 
       if (varset_changed) {
 	 p.node->lb_at_cutgen.clear();
@@ -85,9 +85,9 @@ void BCP_lp_main_loop(BCP_lp_prob& p)
       
       // Test feasibility (note that it might be infeasible, but the user
       // might want to generate a heur feas sol anyway)
-      time0 = BCP_time_since_epoch();
+      time0 = CoinCpuTime();
       BCP_lp_test_feasibility(p, lpres);
-      p.stat.time_feas_testing += BCP_time_since_epoch() - time0;
+      p.stat.time_feas_testing += CoinCpuTime() - time0;
 
       // Update the lower bound
       p.node->quality = lpres.objval();
@@ -203,10 +203,10 @@ LP:   Terminating and fathoming due to proven high cost.\n",
 	 }
       }
 
-      time0 = BCP_time_since_epoch();
+      time0 = CoinCpuTime();
       BCP_solution* sol =
 	p.user->generate_heuristic_solution(lpres, p.node->vars, p.node->cuts);
-      p.stat.time_heuristics += BCP_time_since_epoch() - time0;
+      p.stat.time_heuristics += CoinCpuTime() - time0;
       // If the sol is a generic sol then look through the vars in it, and
       // if any of them has 0 bcpindex then assign an index to it.
       BCP_solution_generic* gsol = dynamic_cast<BCP_solution_generic*>(sol);

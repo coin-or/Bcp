@@ -1,9 +1,9 @@
 // Copyright (C) 2000, International Business Machines
 // Corporation and others.  All Rights Reserved.
 #include <cstdio>
+#include "CoinTime.hpp"
 #include "BCP_lp_functions.hpp"
 #include "BCP_enum.hpp"
-#include "BCP_timeout.hpp"
 #include "BCP_lp_result.hpp"
 #include "BCP_lp_pool.hpp"
 #include "BCP_lp_user.hpp"
@@ -13,7 +13,7 @@
 int BCP_lp_generate_vars(BCP_lp_prob& p,
 			 bool cutset_changed, const bool from_repricing)
 {
-   double time0 = BCP_time_since_epoch();
+   double time0 = CoinCpuTime();
 
    BCP_lp_result& lpres = *p.lp_result;
    BCP_lp_var_pool& vp = *p.local_var_pool;
@@ -123,7 +123,7 @@ int BCP_lp_generate_vars(BCP_lp_prob& p,
 	 p.param(BCP_lp_par::FirstLP_AllVarsTimeout) :
 	 p.param(BCP_lp_par::LaterLP_AllVarsTimeout);
       double tout = vp.size() == 0 ? first_var_time_out : all_vars_time_out;
-      double tin = BCP_time_since_epoch();
+      double tin = CoinCpuTime();
 
       while(true){
 	 p.msg_buf.clear();
@@ -159,7 +159,7 @@ int BCP_lp_generate_vars(BCP_lp_prob& p,
 	 if (tout >= 0){
 	    // with this tout we'll read out the rest of the message queue
 	    // even if var generation times out.
-	    tout = std::max(0.0, tout - (BCP_time_since_epoch() - tin));
+	    tout = std::max(0.0, tout - (CoinCpuTime() - tin));
 	 }
       }
    }
@@ -186,7 +186,7 @@ LP: *WARNING*: There are vars with positive red cost in the local VP\n\
       }
    }
 
-   p.stat.time_var_generation += BCP_time_since_epoch() - time0;
+   p.stat.time_var_generation += CoinCpuTime() - time0;
 
    return vp.size();
 }
