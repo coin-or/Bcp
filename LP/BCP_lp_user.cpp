@@ -710,6 +710,8 @@ BCP_lp_user::select_vars_to_delete(const BCP_lp_result& lpres,
 				   const bool before_fathom,
 				   BCP_vec<int>& deletable)
 {
+   if (before_fathom && p->param(BCP_lp_par::NoCompressionAtFathom))
+      return;
    const int varnum = vars.size();
    for (int i = p->core->varnum(); i < varnum; ++i) {
       BCP_var *var = vars[i];
@@ -729,6 +731,8 @@ BCP_lp_user::select_cuts_to_delete(const BCP_lp_result& lpres,
 				   const bool before_fathom,
 				   BCP_vec<int>& deletable)
 {
+   if (before_fathom && p->param(BCP_lp_par::NoCompressionAtFathom))
+      return;
    const int cutnum = cuts.size();
    const int ineff_to_delete = p->param(BCP_lp_par::IneffectiveBeforeDelete);
    const double lb = lpres.objval();
