@@ -57,7 +57,7 @@ private:
   /**@name Data members holding information about the LP solution. */
   /*@{*/
     /** The termination code of the algorithm. */
-    BCP_termcode _termcode;
+    int _termcode;
     /** The number of iterations the algorithm took (however the
         algorithm used interprets "iteration"). */
     int     _iternum;
@@ -101,7 +101,7 @@ public:
      pointer. */
   /*@{*/
     ///
-    BCP_termcode  termcode() const { return _termcode; }
+    int           termcode() const { return _termcode; }
     ///
     int           iternum()  const { return _iternum; }
     ///		  

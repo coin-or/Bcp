@@ -59,7 +59,7 @@ void BCP_lp_main_loop(BCP_lp_prob& p)
       p.lp_solver->writeMps(fname, "mps");
 #endif
       lpres.get_results(*p.lp_solver);
-      const BCP_termcode tc = lpres.termcode();
+      const int tc = lpres.termcode();
       p.stat.time_lp_solving += BCP_time_since_epoch() - time0;
 
       if (varset_changed) {

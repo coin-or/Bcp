@@ -305,7 +305,7 @@ BCP_lp_user::compute_lower_bound(const double old_lower_bound,
 
    // Otherwise we got the examine the termination code and the objective
    // value of the LP solution
-   const BCP_termcode tc = lpres.termcode();
+   const int tc = lpres.termcode();
    if (tc & BCP_ProvenOptimal)
       return lpres.objval();
 
@@ -357,6 +357,14 @@ BCP_lp_user::test_binary(const BCP_lp_result& lpres,
 			 const BCP_vec<BCP_var*>& vars,
 			 const double etol) const
 {
+  if (p->param(BCP_lp_par::ReportWhenDefaultIsExecuted)) {
+    printf(" LP: Default test_binary() executed.\n");
+  }
+  // Do anything only if the termination code is sensible
+  const int tc = lpres.termcode();
+  if (! (tc & BCP_ProvenOptimal))
+     return 0;
+
   const double * x = lpres.x();
   const int varnum = vars.size();
   int i;
@@ -384,6 +392,14 @@ BCP_lp_user::test_integral(const BCP_lp_result& lpres,
 			   const BCP_vec<BCP_var*>& vars,
 			   const double etol) const
 {
+  if (p->param(BCP_lp_par::ReportWhenDefaultIsExecuted)) {
+    printf(" LP: Default test_integral() executed.\n");
+  }
+  // Do anything only if the termination code is sensible
+  const int tc = lpres.termcode();
+  if (! (tc & BCP_ProvenOptimal))
+     return 0;
+
   const double * x = lpres.x();
   const int varnum = vars.size();
   int i;
@@ -417,6 +433,14 @@ BCP_lp_user::test_full(const BCP_lp_result& lpres,
 		       const BCP_vec<BCP_var*>& vars,
 		       const double etol) const
 {
+  if (p->param(BCP_lp_par::ReportWhenDefaultIsExecuted)) {
+    printf(" LP: Default test_full() executed.\n");
+  }
+  // Do anything only if the termination code is sensible
+  const int tc = lpres.termcode();
+  if (! (tc & BCP_ProvenOptimal))
+     return 0;
+
   const double * x = lpres.x();
   const int varnum = vars.size();
   const double etol1 = 1 - etol;

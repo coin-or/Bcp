@@ -128,7 +128,12 @@ BCP_lp_branching_object::print_branching_info(const int orig_varnum,
    printf(" (");
    if (forced_var_pos) {
       const int ind = (*forced_var_pos)[0];
-      printf("%i,%.4f,%.4f", ind, x[ind], obj[ind]);
+      if (ind < orig_varnum) {
+	 printf("%i,%.4f,%.4f", ind, x[ind], obj[ind]);
+      } else {
+	 // must be a var added in branching
+	 printf(";%i,-,-", ind);
+      }
       const int size = forced_var_pos->size();
       for (int i = 1; i < size; ++i) {
 	 const int ind = (*forced_var_pos)[i];
@@ -155,7 +160,7 @@ BCP_lp_branching_object::print_branching_info(const int orig_varnum,
 void BCP_presolved_lp_brobj::fake_objective_values(const double itlim_objval)
 {
    for (int i = _candidate->child_num - 1; i >= 0; --i){
-      const BCP_termcode tc = _lpres[i]->termcode();
+      const int tc = _lpres[i]->termcode();
       if (tc & (BCP_ProvenPrimalInf | BCP_DualObjLimReached)) {
 	 _lpres[i]->fake_objective_value(DBL_MAX / 2);
 	 continue;
@@ -174,7 +179,7 @@ const bool BCP_presolved_lp_brobj::fathomable(const double objval_limit) const
    // If ALL descendants in cand terminated with primal infeasibility
    // or high cost, that proves that the current node can be fathomed.
    for (int i = _candidate->child_num - 1; i >= 0; --i) {
-      const BCP_termcode tc = _lpres[i]->termcode();
+      const int tc = _lpres[i]->termcode();
       if (! ((tc & BCP_ProvenPrimalInf) ||
 	     (tc & BCP_DualObjLimReached) ||
 	     ((tc & BCP_ProvenOptimal) && _lpres[i]->objval() > objval_limit)))

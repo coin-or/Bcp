@@ -5,7 +5,7 @@
 #include "OsiSolverInterface.hpp"
 #include "BCP_lp_result.hpp"
 
-static inline BCP_termcode BCP_getTermcode(OsiSolverInterface& lp)
+static inline int BCP_getTermcode(OsiSolverInterface& lp)
 {
    int tc = 0;
    tc |= (lp.isAbandoned() ? BCP_Abandoned : 0);
@@ -16,7 +16,7 @@ static inline BCP_termcode BCP_getTermcode(OsiSolverInterface& lp)
    tc |= (lp.isDualObjectiveLimitReached() ? BCP_DualObjLimReached : 0);
    tc |= (lp.isIterationLimitReached() ? BCP_IterationLimit : 0);
   
-  return static_cast<BCP_termcode>(tc);
+  return tc;
 }
 
 void
