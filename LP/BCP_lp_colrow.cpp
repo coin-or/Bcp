@@ -5,6 +5,7 @@
 #include <cmath>
 
 #include "CoinHelperFunctions.hpp"
+#include "CoinWarmStartBasis.hpp"
 
 #include "BCP_problem_core.hpp"
 #include "BCP_lp_node.hpp"
@@ -165,9 +166,13 @@ void BCP_lp_delete_cols_and_rows(BCP_lp_prob& p,
 
    BCP_lp_result& lpres = *p.lp_result;
    BCP_var_set& vars = p.node->vars;
-   const int varnum = vars.size();
+   const size_t varnum = vars.size();
    BCP_cut_set& cuts = p.node->cuts;
-   const int cutnum = cuts.size();
+   const size_t cutnum = cuts.size();
+
+   OsiSolverInterface* lp = p.lp_solver;
+   CoinWarmStart* ws = lp->getWarmStart();
+   CoinWarmStartBasis* bas = dynamic_cast<CoinWarmStartBasis*>(ws);
 
    BCP_vec<int> deletable;
    deletable.reserve(CoinMax(varnum, cutnum));
@@ -178,8 +183,13 @@ void BCP_lp_delete_cols_and_rows(BCP_lp_prob& p,
    del_num = deletable.size();
    if (del_num > 0 &&
        ((del_num > p.param(BCP_lp_par::DeletedColToCompress_Min) &&
-	 del_num > vars.size()*p.param(BCP_lp_par::DeletedColToCompress_Frac))
+	 del_num > varnum * p.param(BCP_lp_par::DeletedColToCompress_Frac))
 	|| force_delete)) {
+      // Make sure deletable is sorted and has unique entries
+      std::sort(deletable.begin(), deletable.end());
+      deletable.erase(std::unique(deletable.begin(), deletable.end()),
+		      deletable.end());
+      del_num = deletable.size();
       if (p.param(BCP_lp_par::LpVerb_MatrixCompression))
 	 printf("LP:   Deleting %i columns from the matrix.\n", del_num);
       if (can) {
@@ -188,7 +198,24 @@ void BCP_lp_delete_cols_and_rows(BCP_lp_prob& p,
 	 if (can->implied_var_pos)
 	    BCP_lp_reset_positions(deletable, *can->implied_var_pos, false);
       }
-      p.lp_solver->deleteCols(deletable.size(), deletable.begin());
+      if (bas) {
+	 BCP_vec<int> do_not_delete;
+	 for (int i = 0; i < del_num; ++i) {
+	    const int ind = deletable[i];
+	    const CoinWarmStartBasis::Status stat = bas->getStructStatus(ind);
+	    if (stat == CoinWarmStartBasis::basic ||
+		stat == CoinWarmStartBasis::isFree) {
+	       // No, this can't be deleted
+	       do_not_delete.push_back(i);
+	    }
+	 }
+	 if (! do_not_delete.empty()) {
+	    deletable.unchecked_erase_by_index(do_not_delete);
+	    del_num = deletable.size();
+	 }
+	 bas->deleteColumns(del_num, &deletable[0]);
+      }
+      p.lp_solver->deleteCols(del_num, &deletable[0]);
       purge_ptr_vector_by_index(dynamic_cast< BCP_vec<BCP_var*>& >(vars),
 				deletable.begin(), deletable.end());
       p.local_cut_pool->rows_are_valid(false);
@@ -215,11 +242,35 @@ void BCP_lp_delete_cols_and_rows(BCP_lp_prob& p,
 	 if (p.param(BCP_lp_par::BranchOnCuts))
 	    p.node->cuts.move_deletable_to_pool(deletable, p.slack_pool);
       }
-      p.lp_solver->deleteRows(deletable.size(), deletable.begin());
+      if (bas) {
+	 BCP_vec<int> do_not_delete;
+	 for (int i = 0; i < del_num; ++i) {
+	    const int ind = deletable[i];
+	    const CoinWarmStartBasis::Status stat = bas->getArtifStatus(ind);
+	    if (stat != CoinWarmStartBasis::basic) {
+	       // No, this can't be deleted
+	       do_not_delete.push_back(i);
+	    }
+	 }
+	 if (! do_not_delete.empty()) {
+	    deletable.unchecked_erase_by_index(do_not_delete);
+	    del_num = deletable.size();
+	 }
+	 bas->deleteRows(del_num, &deletable[0]);
+      }
+      p.lp_solver->deleteRows(deletable.size(), &deletable[0]);
       purge_ptr_vector_by_index(dynamic_cast< BCP_vec<BCP_cut*>& >(cuts),
 				deletable.begin(), deletable.end());
       p.node->lb_at_cutgen.erase_by_index(deletable);
       p.local_var_pool->cols_are_valid(false);
+   }
+
+   if (bas) {
+      if (varnum != vars.size() || cutnum != cuts.size()) {
+	 // if anything got deleted set the modified basis
+	 lp->setWarmStart(bas);
+      }
+      delete bas;
    }
 }
 
