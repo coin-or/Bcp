@@ -39,7 +39,7 @@ endif
 INCDIRS := $(DETECTINCDIRS)
 LIBDIRS := $(DETECTLIBDIRS)
 LIBS    := $(DETECTLIBNAMES)
-DEFINES := $(SOLVERDEFINES)
+DEFINES := $(DETECTDEFINES)
 
 ##############################################################################
 
@@ -195,7 +195,7 @@ endif
 BCP_SRC +=	BCP_message_single.cpp
 
 
-# ifeq ($(findstring COIN_USE_OSL, $(SOLVERDEFINES)),COIN_USE_OSL)
+# ifeq ($(findstring COIN_USE_OSL, $(DETECTDEFINES)),COIN_USE_OSL)
 #	BCP_SRC +=	oslSolver.cpp
 #	BCP_SRC +=	oslvolume.cpp
 #	BCP_INSTSRC  += osl_INST.cpp
