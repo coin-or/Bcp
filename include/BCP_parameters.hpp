@@ -8,6 +8,8 @@
 #include <utility> // for 'pair'
 #include <iostream.h>
 #include <fstream.h>
+#include <string>
+#include <strstream>
 #include <cctype>
 #include <algorithm>
 
@@ -242,10 +244,11 @@ public:
   /*@}*/
   //---------------------------------------------------------------------------
 
-  /**@name Read parameters from a file. */
+  /**@name Read parameters from a stream. */
   /*@{*/
-  /** Read the parameters from the file specified in the argument. 
+  /** Read the parameters from the stream specified in the argument.
 
+      The stream is interpreted as a lines separated by newline characters.
       The first word on each line is tested for match with the keywords
       specified in the create_keyword_list() method. If there is
       a match then the second word will be interpreted as the value for the
@@ -257,12 +260,7 @@ public:
       StringArrayPar, the value is appended to the list of strings in that
       array. 
   */
-    void read_from_file(const char * paramfile) {
-      // Open the parameter file
-      ifstream parstream(paramfile);
-      if (!parstream)
-	 throw BCP_fatal_error("Cannot open parameter file");
-
+    void read_from_stream(istream& parstream) {
       // Get the lines of the parameter file one-by-one and if a line contains
       // a (keyword, value) pair set the appropriate parameter
       const int MAX_PARAM_LINE_LENGTH = 1024;
@@ -271,6 +269,8 @@ public:
 
       BCP_vec< std::pair<BCP_string, BCP_parameter> >::const_iterator ind;
       BCP_vec<BCP_string>::const_iterator obs_ind;
+      printf("\
+BCP_parameters::read_from_stream   Scanning parameter stream.\n");
       while (parstream) {
 	 parstream.get(line, MAX_PARAM_LINE_LENGTH);
 	 if (parstream) {
@@ -302,12 +302,17 @@ This is absurd.\n", MAX_PARAM_LINE_LENGTH);
 	 *ctmp = 0; // terminate the value with a 0 character. this is good
 	            // even if ctmp == end_ofline
 
+	 //--------------- Check if the keyword is a param file ---------------
+	 if (strcmp(keyword, "ParamFile") == 0) {
+	    read_from_file(value);
+	 }
+
 	 //--------------- Find the parameter corresponding to  the keyword ---
 	 for (ind = keys.begin(); ind != keys.end(); ++ind) {
 	    if (ind->first == keyword) {
 	       // The keyword does exists
 	       // set_param(ind->second, value);    should work
-	       printf("keyword `%s' is found (%s).\n", keyword, value);
+	       printf("%s %s\n", keyword, value);
 	       set_entry((*ind).second, value);
 	       break;
 	    }
@@ -324,7 +329,41 @@ This is absurd.\n", MAX_PARAM_LINE_LENGTH);
 	    }
 	 }
       }
-      printf("\n");
+      printf("\
+BCP_parameters::read_from_stream   Finished scanning parameter stream.\n\n");
+    }
+  /*@}*/
+  //---------------------------------------------------------------------------
+
+  /**@name Read parameters from a file. */
+  /*@{*/
+    /** Simply invoke reading from a stream. */
+    void read_from_file(const char * paramfile) {
+      // Open the parameter file
+      ifstream parstream(paramfile);
+      if (!parstream)
+	 throw BCP_fatal_error("Cannot open parameter file");
+      read_from_stream(parstream);
+    }
+  /*@}*/
+  //---------------------------------------------------------------------------
+
+  /**@name Read parameters from the command line */
+  /*@{*/
+    /** Simply invoke reading from a stream. */
+    void read_from_arglist(const int argnum, const char * const * arglist) {
+       // create a stream
+       std::string argstring;
+       for (int i = 1; i < argnum; i += 2) {
+	  argstring += arglist[i];
+	  argstring += " ";
+	  if (i+1 < argnum) {
+	     argstring += arglist[i+1];
+	  }
+	  argstring += "\n";
+       }
+       istrstream parstream(argstring.c_str());
+       read_from_stream(parstream);
     }
   /*@}*/
   //---------------------------------------------------------------------------
