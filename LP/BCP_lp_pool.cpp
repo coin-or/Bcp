@@ -5,8 +5,9 @@
 void
 BCP_lp_waiting_row::compute_violation(const BCP_lp_result& lpres){
    const double lhs = _row->dotProduct(lpres.x());
-   _violation = std::max<double>( 0.0, std::max(_row->LowerBound()-lhs,
-						lhs-_row->UpperBound()));
+   _violation = std::max<double>( 0.0,
+				  std::max<double>(_row->LowerBound()-lhs,
+						   lhs-_row->UpperBound()));
 }
 
 int
