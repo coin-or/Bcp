@@ -51,7 +51,7 @@ BCP_lp_perform_fathom(BCP_lp_prob& p, const char* msg, BCP_message_tag msgtag)
    // Here we don't have col/row_indices to compress, we are from fathom and
    // we do want to force deletion.
    if (p.param(BCP_lp_par::SendFathomedNodeDesc)) {
-      BCP_lp_delete_cols_and_rows(p, 0, true, true);
+      BCP_lp_delete_cols_and_rows(p, 0, 0, 0, true, true);
    }
    BCP_lp_send_node_description(p, 0, msgtag);
    BCP_lp_clean_up_node(p);
@@ -130,7 +130,7 @@ LP:   Fathoming node (discovered not restorable inf.)\n",
 	    // not from fathom ('cos we do add columns, i.e., we are not going
 	    // to fathom the node after the call returns) and we don't want to
 	    // force deletion.
-	    BCP_lp_delete_cols_and_rows(p, 0, false, false);
+	    BCP_lp_delete_cols_and_rows(p, 0, 0, 0, false, false);
 	    return false;
 	 }
       } else { //############################################# over upper bound
@@ -189,7 +189,7 @@ LP:   Fathoming node (discovered tdf & high cost)\n",
 	 // not from fathom ('cos we do add columns, i.e., we are not going
 	 // to fathom the node after the call returns) and we don't want
 	 // to force deletion.
-	 BCP_lp_delete_cols_and_rows(p, 0, false, false);
+	 BCP_lp_delete_cols_and_rows(p, 0, 0, 0, false, false);
 	 return false;
       }
       break;

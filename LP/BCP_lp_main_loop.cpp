@@ -292,7 +292,7 @@ LP:   Terminating and fathoming due to proven high cost (good heur soln!).\n",
 	 // the args are: (p, col_indices, row_indices, force_delete).
 	 // Here we don't have col/row_indices to compress, we are not from
 	 // fathom and we don't want to force deletion.
-	 BCP_lp_delete_cols_and_rows(p, 0, false, false);
+	 BCP_lp_delete_cols_and_rows(p, 0, 0, 0, false, false);
 	 break;
       }
    }

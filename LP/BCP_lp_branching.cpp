@@ -382,7 +382,8 @@ BCP_lp_perform_strong_branching(BCP_lp_prob& p,
    BCP_mark_result_of_strong_branching(p, can, added_colnum, added_rownum);
    // Delete whatever cols/rows we want to delete. This function also updates
    // var/cut_positions !!!
-   BCP_lp_delete_cols_and_rows(p, can, false /* not from fathom */,
+   BCP_lp_delete_cols_and_rows(p, can, added_colnum, added_rownum,
+			       false /* not from fathom */,
  			       true /* to force deletion */);
    
    delete ws;

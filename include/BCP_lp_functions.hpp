@@ -96,6 +96,8 @@ bool BCP_lp_fix_vars(BCP_lp_prob& p);
 void BCP_lp_adjust_row_effectiveness(BCP_lp_prob& p);
 void BCP_lp_delete_cols_and_rows(BCP_lp_prob& p,
 				 BCP_lp_branching_object* can,
+				 const int added_colnum,
+				 const int added_rownum,
 				 const bool from_fathom,
 				 const bool force_delete);
 int BCP_lp_add_from_local_cut_pool(BCP_lp_prob& p);

@@ -153,8 +153,30 @@ BCP_lp_reset_positions(const BCP_vec<int>& deletable, BCP_vec<int>& pos,
 
 //#############################################################################
 
+void
+BCP_delete_unwanted_candidates(const int num, const int added_num,
+			       const BCP_vec<int>* pos,
+			       BCP_vec<int>& deletable)
+{
+   deletable.erase(std::lower_bound(deletable.begin(), deletable.end(),
+				    num-added_num), deletable.end());
+   for (int i = num - added_num; i < num; ++i) {
+      deletable.push_back(i);
+   }
+   if (pos && !pos->empty()) {
+      BCP_vec<int>::iterator ifirst = 
+	 std::lower_bound(deletable.begin(), deletable.end(), (*pos)[0]);
+      BCP_vec<int>::iterator ilast = 
+	 std::upper_bound(ifirst, deletable.end(), pos->back());
+      deletable.erase(ifirst, ilast);
+   }
+}
+
+//#############################################################################
 void BCP_lp_delete_cols_and_rows(BCP_lp_prob& p,
 				 BCP_lp_branching_object* can,
+				 const int added_colnum,
+				 const int added_rownum,
 				 const bool from_fathom,
 				 const bool force_delete)
 {
@@ -180,28 +202,28 @@ void BCP_lp_delete_cols_and_rows(BCP_lp_prob& p,
    // find out which columns could be deleted
    p.user->select_vars_to_delete(lpres, vars, cuts, from_fathom, deletable);
 
+   // clean up deletable
    del_num = deletable.size();
-   if (del_num > 0 &&
-       ((del_num > p.param(BCP_lp_par::DeletedColToCompress_Min) &&
-	 del_num > varnum * p.param(BCP_lp_par::DeletedColToCompress_Frac))
-	|| force_delete)) {
+   if (del_num > 0) {
       // Make sure deletable is sorted and has unique entries
       std::sort(deletable.begin(), deletable.end());
       deletable.erase(std::unique(deletable.begin(), deletable.end()),
 		      deletable.end());
       del_num = deletable.size();
-      if (p.param(BCP_lp_par::LpVerb_MatrixCompression))
-	 printf("LP:   Deleting %i columns from the matrix.\n", del_num);
-      if (can) {
-	 if (can->forced_var_pos)
-	    BCP_lp_reset_positions(deletable, *can->forced_var_pos, true);
-	 if (can->implied_var_pos)
-	    BCP_lp_reset_positions(deletable, *can->implied_var_pos, false);
+      if (can && added_colnum) {
+	 // make sure that all but can's added cols are to be deleted
+	 BCP_delete_unwanted_candidates(varnum, added_colnum,
+					can->forced_var_pos, deletable);
+	 del_num = deletable.size();
       }
       if (bas) {
+	 // If there's a basis throw out those from deletable which are in the
+	 // basis UNLESS they are unwanted candidates
 	 BCP_vec<int> do_not_delete;
 	 for (int i = 0; i < del_num; ++i) {
 	    const int ind = deletable[i];
+	    if (can && ind >= (int)(varnum - added_colnum))
+	       continue;
 	    const CoinWarmStartBasis::Status stat = bas->getStructStatus(ind);
 	    if (stat == CoinWarmStartBasis::basic ||
 		stat == CoinWarmStartBasis::isFree) {
@@ -213,6 +235,24 @@ void BCP_lp_delete_cols_and_rows(BCP_lp_prob& p,
 	    deletable.unchecked_erase_by_index(do_not_delete);
 	    del_num = deletable.size();
 	 }
+      }
+   }
+
+   int min_by_frac =
+     static_cast<int>(varnum * p.param(BCP_lp_par::DeletedColToCompress_Frac));
+   int min_to_del = force_delete ?
+     0 : CoinMax(p.param(BCP_lp_par::DeletedColToCompress_Min), min_by_frac);
+
+   if (del_num > min_to_del) {
+      if (p.param(BCP_lp_par::LpVerb_MatrixCompression))
+	 printf("LP:   Deleting %i columns from the matrix.\n", del_num);
+      if (can) {
+	 if (can->forced_var_pos)
+	    BCP_lp_reset_positions(deletable, *can->forced_var_pos, true);
+	 if (can->implied_var_pos)
+	    BCP_lp_reset_positions(deletable, *can->implied_var_pos, false);
+      }
+      if (bas) {
 	 bas->deleteColumns(del_num, &deletable[0]);
       }
       p.lp_solver->deleteCols(del_num, &deletable[0]);
@@ -225,11 +265,46 @@ void BCP_lp_delete_cols_and_rows(BCP_lp_prob& p,
    deletable.clear();
    p.user->select_cuts_to_delete(lpres, vars, cuts, from_fathom, deletable);
 
-   const int min_by_frac =
-     static_cast<int>(cutnum * p.param(BCP_lp_par::DeletedRowToCompress_Frac));
-   const int min_to_del = force_delete ?
-     0 : CoinMax(p.param(BCP_lp_par::DeletedRowToCompress_Min), min_by_frac);
+   // clean up deletable
    del_num = deletable.size();
+   if (del_num > 0) {
+      // Make sure deletable is sorted and has unique entries
+      std::sort(deletable.begin(), deletable.end());
+      deletable.erase(std::unique(deletable.begin(), deletable.end()),
+		      deletable.end());
+      del_num = deletable.size();
+      if (can && added_rownum) {
+	 // make sure that all but can's added rows are to be deleted
+	 BCP_delete_unwanted_candidates(cutnum, added_rownum,
+					can->forced_cut_pos, deletable);
+	 del_num = deletable.size();
+      }
+      if (bas) {
+	 // If there's a basis throw out those from deletable which are not in
+	 // the basis UNLESS they are unwanted candidates
+	 BCP_vec<int> do_not_delete;
+	 for (int i = 0; i < del_num; ++i) {
+	    const int ind = deletable[i];
+	    if (can && ind >= (int)(cutnum - added_rownum))
+	       continue;
+	    const CoinWarmStartBasis::Status stat = bas->getArtifStatus(ind);
+	    if (stat != CoinWarmStartBasis::basic) {
+	       // No, this can't be deleted
+	       do_not_delete.push_back(i);
+	    }
+	 }
+	 if (! do_not_delete.empty()) {
+	    deletable.unchecked_erase_by_index(do_not_delete);
+	    del_num = deletable.size();
+	 }
+      }
+   }
+
+   min_by_frac =
+     static_cast<int>(cutnum * p.param(BCP_lp_par::DeletedRowToCompress_Frac));
+   min_to_del = force_delete ?
+     0 : CoinMax(p.param(BCP_lp_par::DeletedRowToCompress_Min), min_by_frac);
+
    if (del_num > min_to_del) {
       if (p.param(BCP_lp_par::LpVerb_MatrixCompression))
 	 printf("LP:   Deleting %i rows from the matrix.\n", del_num);
@@ -243,19 +318,6 @@ void BCP_lp_delete_cols_and_rows(BCP_lp_prob& p,
 	    p.node->cuts.move_deletable_to_pool(deletable, p.slack_pool);
       }
       if (bas) {
-	 BCP_vec<int> do_not_delete;
-	 for (int i = 0; i < del_num; ++i) {
-	    const int ind = deletable[i];
-	    const CoinWarmStartBasis::Status stat = bas->getArtifStatus(ind);
-	    if (stat != CoinWarmStartBasis::basic) {
-	       // No, this can't be deleted
-	       do_not_delete.push_back(i);
-	    }
-	 }
-	 if (! do_not_delete.empty()) {
-	    deletable.unchecked_erase_by_index(do_not_delete);
-	    del_num = deletable.size();
-	 }
 	 bas->deleteRows(del_num, &deletable[0]);
       }
       p.lp_solver->deleteRows(deletable.size(), &deletable[0]);
