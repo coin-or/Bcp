@@ -6,10 +6,16 @@
 // This file is fully docified.
 
 #include <utility> // for 'pair'
-#include <iostream.h>
-#include <fstream.h>
+#include <iostream>
+#include <fstream>
 #include <string>
-#include <strstream>
+#if defined(__GNUC__)
+#  if (__GNUC__ >= 3)
+#    include <sstream>
+#  else
+#    include <strstream>
+#  endif
+#endif
 #include <cctype>
 #include <algorithm>
 
@@ -260,30 +266,27 @@ public:
       StringArrayPar, the value is appended to the list of strings in that
       array. 
   */
-    void read_from_stream(istream& parstream) {
+    void read_from_stream(std::istream& parstream) {
       // Get the lines of the parameter file one-by-one and if a line contains
       // a (keyword, value) pair set the appropriate parameter
       const int MAX_PARAM_LINE_LENGTH = 1024;
       char line[MAX_PARAM_LINE_LENGTH], *end_of_line, *keyword, *value, *ctmp;
-      char ch;
 
       BCP_vec< std::pair<BCP_string, BCP_parameter> >::const_iterator ind;
       BCP_vec<BCP_string>::const_iterator obs_ind;
       printf("\
 BCP_parameters::read_from_stream   Scanning parameter stream.\n");
-      while (parstream) {
-	 parstream.get(line, MAX_PARAM_LINE_LENGTH);
-	 if (parstream) {
-	    parstream.get(ch);
-	    if (ch != '\n') {
-	       sprintf(line, "\
+      while (!parstream.eof()) {
+	 parstream.getline(line, MAX_PARAM_LINE_LENGTH);
+	 const int len = strlen(line);
+	 if (len == MAX_PARAM_LINE_LENGTH - 1) {
+	    sprintf(line, "\
 There's a too long (>= %i characters) line in the parameter file.\n\
 This is absurd.\n", MAX_PARAM_LINE_LENGTH);
-	       throw BCP_fatal_error(line);
-	    }
+	    throw BCP_fatal_error(line);
 	 }
 
-	 end_of_line = line + strlen(line);
+	 end_of_line = line + len;
 
 	 //------------------------ First separate the keyword and value ------
 	 keyword = std::find_if(line, end_of_line, isgraph);
@@ -340,7 +343,7 @@ BCP_parameters::read_from_stream   Finished scanning parameter stream.\n\n");
     /** Simply invoke reading from a stream. */
     void read_from_file(const char * paramfile) {
       // Open the parameter file
-      ifstream parstream(paramfile);
+      std::ifstream parstream(paramfile);
       if (!parstream)
 	 throw BCP_fatal_error("Cannot open parameter file");
       read_from_stream(parstream);
@@ -362,7 +365,11 @@ BCP_parameters::read_from_stream   Finished scanning parameter stream.\n\n");
 	  }
 	  argstring += "\n";
        }
-       istrstream parstream(argstring.c_str());
+#if defined(__GNUC__) && (__GNUC__ >=3)
+       std::istringstream parstream(argstring.c_str());
+#else
+       std::istrstream parstream(argstring.c_str());
+#endif
        read_from_stream(parstream);
     }
   /*@}*/
