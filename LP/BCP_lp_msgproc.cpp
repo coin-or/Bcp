@@ -26,41 +26,43 @@ void BCP_lp_check_ub(BCP_lp_prob& p)
 
 //#############################################################################
 
-void BCP_lp_process_message(BCP_lp_prob& p, BCP_buffer& buf)
+void
+BCP_lp_prob::process_message()
 {
    BCP_cut* cut;
    BCP_var* var;
-   const BCP_proc_id * cpid = p.node->cp;
-   const BCP_proc_id * vpid = p.node->vp;
+   const BCP_proc_id * cpid = node->cp;
+   const BCP_proc_id * vpid = node->vp;
    bool dont_send_to_pool;
 
    int node_index;
    int node_itcnt;
 
-   switch (buf.msgtag()){
+   switch (msg_buf.msgtag()){
     case BCP_Msg_InitialUserInfo:
-      throw BCP_fatal_error("LP: BCP_Msg_InitialUserInfo arrived in BCP_lp_process_message().\n");
+      throw BCP_fatal_error("\
+LP: BCP_Msg_InitialUserInfo arrived in BCP_lp_prob::process_message().\n");
 
     case BCP_Msg_CutIndexSet:
-      buf.unpack(p.next_cut_index).unpack(p.last_cut_index);
+      msg_buf.unpack(next_cut_index).unpack(last_cut_index);
       break;
 
     case BCP_Msg_VarIndexSet:
-      buf.unpack(p.next_var_index).unpack(p.last_var_index);
+      msg_buf.unpack(next_var_index).unpack(last_var_index);
       break;
 
     case BCP_Msg_CutDescription:
-      cut = p.unpack_cut();
-      if (p.param(BCP_lp_par::CompareNewCutsToOldOnes)){
+      cut = unpack_cut();
+      if (param(BCP_lp_par::CompareNewCutsToOldOnes)){
 	 // check if we already have this cut in the local cut pool
-	 BCP_lp_cut_pool::iterator oldcut = p.local_cut_pool->begin();
-	 BCP_lp_cut_pool::iterator lastoldcut = p.local_cut_pool->end();
+	 BCP_lp_cut_pool::iterator oldcut = local_cut_pool->begin();
+	 BCP_lp_cut_pool::iterator lastoldcut = local_cut_pool->end();
 	 while (oldcut != lastoldcut){
-	    switch (p.user->compare_cuts((*oldcut)->cut(), cut)){
+	    switch (user->compare_cuts((*oldcut)->cut(), cut)){
 	     case BCP_FirstObjIsBetter:
 	     case BCP_ObjsAreSame:
 	       delete cut;   cut = 0;
-	       buf.clear();
+	       msg_buf.clear();
 	       return;
 	     case BCP_SecondObjIsBetter:
 	     case BCP_DifferentObjs:
@@ -71,28 +73,28 @@ void BCP_lp_process_message(BCP_lp_prob& p, BCP_buffer& buf)
       }
 
       dont_send_to_pool =
-	 (! cpid || (cpid && cpid->is_same_process(buf.sender())));
-      if (p.no_more_cuts_cnt >= 0){ // we are waiting for cuts
-	 BCP_lp_cut_pool& cp = *p.local_cut_pool;
+	 (! cpid || (cpid && cpid->is_same_process(msg_buf.sender())));
+      if (no_more_cuts_cnt >= 0){ // we are waiting for cuts
+	 BCP_lp_cut_pool& cp = *local_cut_pool;
 	 const int old_cp_size = cp.size();
 	 BCP_vec<BCP_row*> rows;
 	 rows.reserve(1);
 	 BCP_vec<BCP_cut*> cuts(1, cut);
-	 p.user->cuts_to_rows(p.node->vars, cuts, rows, *p.lp_result,
-			      cpid && cpid->is_same_process(buf.sender()) ?
-			      BCP_Object_FromPool : BCP_Object_FromGenerator,
-			      true);
+	 user->cuts_to_rows(node->vars, cuts, rows, *lp_result,
+			    cpid && cpid->is_same_process(msg_buf.sender()) ?
+			    BCP_Object_FromPool : BCP_Object_FromGenerator,
+			    true);
 	 const int cutnum = cuts.size();
 	 for (int i = 0; i < cutnum; ++i) {
 	    cut = cuts[i];
-	    cut->set_bcpind(-BCP_lp_next_cut_index(p));
+	    cut->set_bcpind(-BCP_lp_next_cut_index(*this));
 	    cut->dont_send_to_pool(dont_send_to_pool);
 	    cp.push_back(new BCP_lp_waiting_row(cut, rows[i]));
 	 }
 	 // compute the violation(s)
-	 cp.compute_violations(*p.lp_result, cp.entry(old_cp_size), cp.end());
+	 cp.compute_violations(*lp_result, cp.entry(old_cp_size), cp.end());
       }else{ // the cut arrived while we are waiting for new LP
-	 p.local_cut_pool->push_back(new BCP_lp_waiting_row(cut));
+	 local_cut_pool->push_back(new BCP_lp_waiting_row(cut));
       }
       break;
 
@@ -100,25 +102,25 @@ void BCP_lp_process_message(BCP_lp_prob& p, BCP_buffer& buf)
       // no more cuts can be generated for the current LP solution and hence
       // calculation can resume
       double cutgen_time;
-      buf.unpack(node_index).unpack(node_itcnt).unpack(cutgen_time);
-      p.stat.time_cut_generation += cutgen_time;
-      if (p.no_more_cuts_cnt >= 0 &&
-	  p.node->index == node_index && p.node->iteration_count == node_itcnt)
-	 p.no_more_cuts_cnt--;
+      msg_buf.unpack(node_index).unpack(node_itcnt).unpack(cutgen_time);
+      stat.time_cut_generation += cutgen_time;
+      if (no_more_cuts_cnt >= 0 &&
+	  node->index == node_index && node->iteration_count == node_itcnt)
+	 no_more_cuts_cnt--;
       break;
 
     case BCP_Msg_VarDescription:
-      var = p.unpack_var();
-      if (p.param(BCP_lp_par::CompareNewVarsToOldOnes)){
+      var = unpack_var();
+      if (param(BCP_lp_par::CompareNewVarsToOldOnes)){
 	 // check if we already have this var in the local var pool
-	 BCP_lp_var_pool::iterator oldvar = p.local_var_pool->begin();
-	 BCP_lp_var_pool::iterator lastoldvar = p.local_var_pool->end();
+	 BCP_lp_var_pool::iterator oldvar = local_var_pool->begin();
+	 BCP_lp_var_pool::iterator lastoldvar = local_var_pool->end();
 	 while (oldvar != lastoldvar){
-	    switch (p.user->compare_vars((*oldvar)->var(), var)){
+	    switch (user->compare_vars((*oldvar)->var(), var)){
 	     case BCP_FirstObjIsBetter:
 	     case BCP_ObjsAreSame:
 	       delete var;   var = 0;
-	       buf.clear();
+	       msg_buf.clear();
 	       return;
 	     case BCP_SecondObjIsBetter:
 	     case BCP_DifferentObjs:
@@ -129,28 +131,28 @@ void BCP_lp_process_message(BCP_lp_prob& p, BCP_buffer& buf)
       }
 
       dont_send_to_pool =
-	 (! vpid || (vpid && vpid->is_same_process(buf.sender())));
-      if (p.no_more_vars_cnt >= 0){ // we are waiting for vars
-	 BCP_lp_var_pool& vp = *p.local_var_pool;
+	 (! vpid || (vpid && vpid->is_same_process(msg_buf.sender())));
+      if (no_more_vars_cnt >= 0){ // we are waiting for vars
+	 BCP_lp_var_pool& vp = *local_var_pool;
 	 const int old_vp_size = vp.size();
 	 BCP_vec<BCP_col*> cols;
 	 cols.reserve(1);
 	 BCP_vec<BCP_var*> vars(1, var);
-	 p.user->vars_to_cols(p.node->cuts, vars, cols, *p.lp_result,
-			      vpid && vpid->is_same_process(buf.sender()) ?
-			      BCP_Object_FromPool : BCP_Object_FromGenerator,
-			      true);
+	 user->vars_to_cols(node->cuts, vars, cols, *lp_result,
+			    vpid && vpid->is_same_process(msg_buf.sender()) ?
+			    BCP_Object_FromPool : BCP_Object_FromGenerator,
+			    true);
 	 const int varnum = vars.size();
 	 for (int i = 0; i < varnum; ++i) {
 	    var = vars[i];
-	    var->set_bcpind(-BCP_lp_next_var_index(p));
+	    var->set_bcpind(-BCP_lp_next_var_index(*this));
 	    var->dont_send_to_pool(dont_send_to_pool);
 	    vp.push_back(new BCP_lp_waiting_col(var, cols[i]));
 	 }
 	 // compute the reduced_cost(s)
-	 vp.compute_red_costs(*p.lp_result, vp.entry(old_vp_size), vp.end());
+	 vp.compute_red_costs(*lp_result, vp.entry(old_vp_size), vp.end());
       }else{ // the var arrived while we are waiting for new LP
-	 p.local_var_pool->push_back(new BCP_lp_waiting_col(var));
+	 local_var_pool->push_back(new BCP_lp_waiting_col(var));
       }
       break;
 
@@ -158,70 +160,69 @@ void BCP_lp_process_message(BCP_lp_prob& p, BCP_buffer& buf)
       // no more vars can be generated for the current LP solution and hence
       // calculation can resume
       double vargen_time;
-      buf.unpack(node_index).unpack(node_itcnt).unpack(vargen_time);
-      p.stat.time_var_generation += vargen_time;
-      if (p.no_more_vars_cnt >= 0 &&
-	  p.node->index == node_index && p.node->iteration_count == node_itcnt)
-	 p.no_more_vars_cnt--;
+      msg_buf.unpack(node_index).unpack(node_itcnt).unpack(vargen_time);
+      stat.time_var_generation += vargen_time;
+      if (no_more_vars_cnt >= 0 &&
+	  node->index == node_index && node->iteration_count == node_itcnt)
+	 no_more_vars_cnt--;
       break;
 
     case BCP_Msg_UpperBound:
-      BCP_lp_process_ub_message(p, buf);
+      BCP_lp_process_ub_message(*this, msg_buf);
       break;
 
 #if 0
     case BCP_Msg_RootToPrice:
-      BCP_lp_unpack_active_node(p, buf);
+      BCP_lp_unpack_active_node(*this, msg_buf);
       // load the lp formulation into the lp solver
       BCP_lp_create_lp(p);
       BCP_lp_repricing(p);
-      p.lp_solver->unload_lp();
+      lp_solver->unload_lp();
       break;
 #endif
 
     case BCP_Msg_ActiveNodeData:
-      BCP_lp_unpack_active_node(p, buf);
+      BCP_lp_unpack_active_node(*this, msg_buf);
       // load the lp formulation into the lp solver
-      p.lp_solver = p.master_lp->clone();
-      if (! p.param(BCP_lp_par::SolveLpToOptimality))
-	 p.lp_solver->setDblParam(OsiDualObjectiveLimit,
-				  p.ub() - p.granularity());
-      BCP_lp_create_lp(p);
-      BCP_lp_main_loop(p);
-      delete p.lp_solver;
-      p.lp_solver = NULL;
+      lp_solver = master_lp->clone();
+      if (! param(BCP_lp_par::SolveLpToOptimality))
+	 lp_solver->setDblParam(OsiDualObjectiveLimit, ub() - granularity());
+      BCP_lp_create_lp(*this);
+      BCP_lp_main_loop(*this);
+      delete lp_solver;
+      lp_solver = NULL;
       break;
 
     case BCP_Msg_DivingInfo:
-      BCP_lp_unpack_diving_info(p, buf);
+      BCP_lp_unpack_diving_info(*this, msg_buf);
       break;
 
     case BCP_Msg_NextPhaseStarts:
-      buf.clear();
+      msg_buf.clear();
       // First send back timing data for the previous phase
-      p.stat.pack(buf);
-      p.msg_env->send(p.tree_manager, BCP_Msg_LpStatistics, buf);
-      p.phase++;
+      stat.pack(msg_buf);
+      msg_env->send(tree_manager, BCP_Msg_LpStatistics, msg_buf);
+      phase++;
       break;
 
     case BCP_Msg_FinishedBCP:
       // No need to clean up anything since the destructor of 'p' will do that.
       // However, send back the statistics.
-      p.stat.pack(buf);
-      p.msg_env->send(p.tree_manager, BCP_Msg_LpStatistics, buf);
+      stat.pack(msg_buf);
+      msg_env->send(tree_manager, BCP_Msg_LpStatistics, msg_buf);
       return;
 
 //     case BCP_Msg_UserMessageToLp:
-//       p.user->unpack_user_message(p, buf);
-//       buf.clear();
+//       user->unpack_user_message(*this, msg_buf);
+//       msg_buf.clear();
 //       break;
 
     default:
-      printf("Unknown message type arrived to LP: %i\n", buf.msgtag());
+      printf("Unknown message type arrived to LP: %i\n", msg_buf.msgtag());
       break;
    }
 
-   buf.clear();
+   msg_buf.clear();
 }
 
 //#############################################################################
@@ -239,7 +240,7 @@ BCP_lp_next_var_index(BCP_lp_prob& p)
       // the range still has length 0.
       if (p.next_var_index == p.last_var_index) {
 	 p.msg_env->receive(p.tree_manager, BCP_Msg_VarIndexSet, buf, -1);
-	 BCP_lp_process_message(p, buf);
+	 p.process_message();
       }
    }
    const BCP_IndexType tmp = p.next_var_index++;
@@ -261,7 +262,7 @@ BCP_lp_next_cut_index(BCP_lp_prob& p)
       // the range still has length 0.
       if (p.next_cut_index == p.last_cut_index) {
 	 p.msg_env->receive(p.tree_manager, BCP_Msg_CutIndexSet, buf, -1);
-	 BCP_lp_process_message(p, buf);
+	 p.process_message();
       }
    }
    const BCP_IndexType tmp = p.next_cut_index++;

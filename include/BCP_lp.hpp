@@ -14,6 +14,7 @@
 #include "BCP_parameters.hpp"
 
 #include "BCP_buffer.hpp"
+#include "BCP_process.hpp"
 
 //#############################################################################
 class BCP_lp_user;
@@ -93,7 +94,7 @@ public:
 
  */
 
-class BCP_lp_prob {
+class BCP_lp_prob : public BCP_process {
 private:
   /**@name Disabled methods */
   /*@{*/
@@ -109,7 +110,7 @@ public:
     /** */
     BCP_lp_prob();
     /** */
-    ~BCP_lp_prob();
+    virtual ~BCP_lp_prob();
   /*@}*/
 
 public:
@@ -290,6 +291,10 @@ public:
       }
     /*@}*/
   /*@}*/  // end of query methods 
+  //---------------------------------------------------------------------------
+  virtual BCP_buffer& get_message_buffer() { return msg_buf; }
+  virtual BCP_proc_id* get_parent() { return tree_manager; }
+  virtual void process_message();
 };
 
 #endif

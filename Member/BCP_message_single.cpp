@@ -29,20 +29,7 @@
 
 #include "BCP_tm.hpp"
 
-BCP_single_id BCP_single_environment::_tm_id(0);
-BCP_single_id BCP_single_environment::_lp_id(1);
-BCP_single_id BCP_single_environment::_cg_id(2);
-BCP_single_id BCP_single_environment::_vg_id(3);
-// BCP_single_id BCP_single_environment::_cp_id(4);
-// BCP_single_id BCP_single_environment::_vp_id(5);
-
-BCP_tm_prob* BCP_single_environment::_tm_prob = 0;
-BCP_lp_prob* BCP_single_environment::_lp_prob = 0;
-BCP_cg_prob* BCP_single_environment::_cg_prob = 0;
-BCP_vg_prob* BCP_single_environment::_vg_prob = 0;
-// BCP_cp_prob* BCP_single_environment::_cp_prob = 0;
-// BCP_vp_prob* BCP_single_environment::_vp_prob = 0;
-
+std::map<BCP_single_id, BCP_process*> BCP_single_environment::processes;
 
 //#############################################################################
 
@@ -94,14 +81,22 @@ BCP_single_environment::~BCP_single_environment()
 //-----------------------------------------------------------------------------
 
 BCP_proc_id*
-BCP_single_environment::register_process() {
+BCP_single_environment::register_process()
+{
    USER_initialize* user_init = BCP_user_init();
 
    // OK, the TM invoked registration. Now this function takes over and
    // becomes the driver for ALL `virtual' processes.
    //--------------------------------------------------------------------------
    // We start as it is in tm_main.cpp
-   _tm_prob = new BCP_tm_prob;
+   BCP_single_id _tm_id(0);
+   BCP_single_id _lp_id(1);
+   BCP_single_id _cg_id(2);
+   BCP_single_id _vg_id(3);
+//     BCP_single_id _cp_id(4);
+//     BCP_single_id _vp_id(5);
+   BCP_tm_prob* _tm_prob = new BCP_tm_prob;
+   processes[_tm_id] = _tm_prob;
    BCP_tm_parse_command_line(*_tm_prob, _argnum, _arglist);
    
    _tm_prob->msg_env = this;
@@ -172,15 +167,18 @@ BCP_single_environment::register_process() {
    _tm_prob->active_nodes.insert(_tm_prob->active_nodes.end(), 1, 0);
    //--------------------------------------------------------------------------
    // LP
-   _lp_prob = new BCP_lp_prob;
+   BCP_lp_prob* _lp_prob = new BCP_lp_prob;
+   processes[_lp_id] = _lp_prob;
    _lp_prob->msg_env = new BCP_single_environment(_lp_id);
    _lp_prob->tree_manager = &_tm_id;
    _tm_prob->slaves.lp = new BCP_proc_array;
    _tm_prob->slaves.lp->add_procs(first++, last++);
    //--------------------------------------------------------------------------
    // CG
+   BCP_cg_prob* _cg_prob = 0;
    if (_tm_prob->param(BCP_tm_par::CgProcessNum) > 0) {
       _cg_prob = new BCP_cg_prob;
+      processes[_cg_id] = _cg_prob;
       _cg_prob->msg_env = new BCP_single_environment(_cg_id);
       _cg_prob->tree_manager = &_tm_id;
       _tm_prob->slaves.cg = new BCP_proc_array;
@@ -188,8 +186,10 @@ BCP_single_environment::register_process() {
    }
    //--------------------------------------------------------------------------
    // VG
+   BCP_vg_prob* _vg_prob = 0;
    if (_tm_prob->param(BCP_tm_par::VgProcessNum) > 0) {
       _vg_prob = new BCP_vg_prob;
+      processes[_vg_id] = _vg_prob;
       _vg_prob->msg_env = new BCP_single_environment(_vg_id);
       _vg_prob->tree_manager = &_tm_id;
       _tm_prob->slaves.vg = new BCP_proc_array;
@@ -198,6 +198,7 @@ BCP_single_environment::register_process() {
    //--------------------------------------------------------------------------
    // CP
 //    _cp_prob = new BCP_cp_prob;
+//    processes[_cp_id] = _cp_prob;
 //    _cp_prob->msg_env = new BCP_single_environment(_cp_id);
 //    _cp_prob->tree_manager = &_tm_id;
 //    _tm_prob->slaves.cp = new BCP_proc_array;
@@ -205,6 +206,7 @@ BCP_single_environment::register_process() {
    //--------------------------------------------------------------------------
    // VP
 //    _vp_prob = new BCP_vp_prob;
+//    processes[_vp_id] = _vp_prob;
 //    _vp_prob->msg_env = new BCP_single_environment(_vp_id);
 //    _vp_prob->tree_manager = &_tm_id;
 //    _tm_prob->slaves.vp = new BCP_proc_array;
@@ -338,7 +340,8 @@ BCP_single_environment::register_process() {
 
 BCP_proc_id*
 BCP_single_environment::parent_process() {
-   return _my_id.pid() == _tm_id.pid() ? 0 : &_tm_id;
+   throw BCP_fatal_error("\
+BCP_single_environment::parent_process() invoked.\n");
 }
 
 bool
@@ -359,27 +362,12 @@ void
 BCP_single_environment::send(const BCP_proc_id* const target,
 			     const BCP_message_tag tag) {
    BCP_single_id* id = BCP_is_single_id(target, "send(2)");
-   if (id->is_same_process(&_tm_id)) {
-      _tm_prob->msg_buf.clear();
-      _tm_prob->msg_buf._sender = _my_id.clone();
-      _tm_prob->msg_buf._msgtag = tag;
-      BCP_tm_process_message(*_tm_prob, _tm_prob->msg_buf);
-      return;
-   }
-   if (id->is_same_process(&_lp_id)) {
-      _lp_prob->msg_buf.clear();
-      _lp_prob->msg_buf._sender = _my_id.clone();
-      _lp_prob->msg_buf._msgtag = tag;
-      BCP_lp_process_message(*_lp_prob, _lp_prob->msg_buf);
-      return;
-   }
-   if (id->is_same_process(&_cg_id)) {
-      _cg_prob->msg_buf.clear();
-      _cg_prob->msg_buf._sender = _my_id.clone();
-      _cg_prob->msg_buf._msgtag = tag;
-      BCP_cg_process_message(*_cg_prob, _cg_prob->msg_buf);
-      return;
-   }
+   BCP_process* target_process = processes[*id];
+   BCP_buffer& target_buf = target_process->get_message_buffer();
+   target_buf.clear();
+   target_buf._sender = _my_id.clone();
+   target_buf._msgtag = tag;
+   target_process->process_message();
 }
 
 void
@@ -387,27 +375,12 @@ BCP_single_environment::send(const BCP_proc_id* const target,
 			     const BCP_message_tag tag,
 			     const BCP_buffer& buf) {
    BCP_single_id* id = BCP_is_single_id(target, "send(3)");
-   if (id->is_same_process(&_tm_id)) {
-      _tm_prob->msg_buf = buf;
-      _tm_prob->msg_buf._sender = _my_id.clone();
-      _tm_prob->msg_buf._msgtag = tag;
-      BCP_tm_process_message(*_tm_prob, _tm_prob->msg_buf);
-      return;
-   }
-   if (id->is_same_process(&_lp_id)) {
-      _lp_prob->msg_buf = buf;
-      _lp_prob->msg_buf._sender = _my_id.clone();
-      _lp_prob->msg_buf._msgtag = tag;
-      BCP_lp_process_message(*_lp_prob, _lp_prob->msg_buf);
-      return;
-   }
-   if (id->is_same_process(&_cg_id)) {
-      _cg_prob->msg_buf = buf;
-      _cg_prob->msg_buf._sender = _my_id.clone();
-      _cg_prob->msg_buf._msgtag = tag;
-      BCP_cg_process_message(*_cg_prob, _cg_prob->msg_buf);
-      return;
-   }
+   BCP_process* target_process = processes[*id];
+   BCP_buffer& target_buf = target_process->get_message_buffer();
+   target_buf = buf;
+   target_buf._sender = _my_id.clone();
+   target_buf._msgtag = tag;
+   target_process->process_message();
 }
    
 //-----------------------------------------------------------------------------

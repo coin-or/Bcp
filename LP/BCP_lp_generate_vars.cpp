@@ -50,23 +50,9 @@ int BCP_lp_generate_vars(BCP_lp_prob& p,
    // Generate vars within the LP process
    BCP_vec<BCP_var*> new_vars;
    BCP_vec<BCP_col*> new_cols;
-   p.user->generate_vars_in_lp(lpres, p.node->vars, p.node->cuts,
-			       false /* not from fathom */,
-			       new_vars, new_cols);
+   BCP_price_vars(p, false /* not from fathom */, new_vars, new_cols);
    if (new_vars.size() > 0) {
       const int new_size = new_vars.size();
-      if (new_cols.size() != 0) {
-	 if (static_cast<int>(new_cols.size()) != new_size) {
-	    throw BCP_fatal_error("\
-LP: uneven new_vars/new_cols sizes in generate_cuts_in_lp().\n");
-	 }
-      } else {
-	 // expand the generated vars
-	 new_cols.reserve(new_size);
-	 p.user->vars_to_cols(p.node->cuts, new_vars, new_cols,
-			      lpres, BCP_Object_FromGenerator, false);
-      }
-
       vp.reserve(vp.size() + new_size);
       for (int i = 0; i < new_size; ++i) {
 	 new_vars[i]->set_bcpind(-BCP_lp_next_var_index(p));
@@ -163,7 +149,7 @@ LP: uneven new_vars/new_cols sizes in generate_cuts_in_lp().\n");
 		       all_vars_time_out : first_var_time_out));
 	    break;
 	 }
-	 BCP_lp_process_message(p, p.msg_buf);
+	 p.process_message();
 	 // break out if no more vars can come
 	 if (p.no_more_vars_cnt == 0)
 	    break;

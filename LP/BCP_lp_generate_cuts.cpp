@@ -153,7 +153,7 @@ LP: uneven new_cuts/new_rows sizes in generate_cuts_in_lp().\n");
 		       all_cuts_time_out : first_cut_time_out));
 	    break;
 	 }
-	 BCP_lp_process_message(p, p.msg_buf);
+	 p.process_message();
 	 // break out if no more cuts can come
 	 if (p.no_more_cuts_cnt == 0)
 	    break;

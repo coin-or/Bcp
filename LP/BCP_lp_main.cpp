@@ -113,7 +113,7 @@ void BCP_lp_main(BCP_message_environment* msg_env, USER_initialize* user_init,
       msg_env->receive(p.tree_manager, BCP_Msg_AnyMessage, p.msg_buf, -1);
       msgtag = p.msg_buf.msgtag();
       p.no_more_cuts_cnt = -1; // not waiting for cuts
-      BCP_lp_process_message(p, p.msg_buf);
+      p.process_message();
       if (msgtag == BCP_Msg_FinishedBCP)
 	 break;
    }

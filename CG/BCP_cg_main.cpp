@@ -98,40 +98,46 @@ void BCP_cg_main(BCP_message_environment* msg_env, USER_initialize* user_init,
 bool
 BCP_cg_process_message(BCP_cg_prob& p, BCP_buffer& buf)
 {
+   p.process_message();
+   return (p.msg_buf.msgtag() == BCP_Msg_FinishedBCP);
+}
+
+void
+BCP_cg_prob::process_message()
+{
    while (true) {
-      const BCP_message_tag msgtag = buf.msgtag();
+      const BCP_message_tag msgtag = msg_buf.msgtag();
       switch (msgtag) {
        case BCP_Msg_ForCG_PrimalNonzeros:
        case BCP_Msg_ForCG_PrimalFractions:
        case BCP_Msg_ForCG_PrimalFull:
        case BCP_Msg_ForCG_User:
-	 buf.unpack(p.node_level).unpack(p.node_index)
-	    .unpack(p.node_iteration);
-	 p.sender = buf.sender()->clone();
-	 p.user->unpack_primal_solution(buf);
+	 msg_buf.unpack(node_level).unpack(node_index).unpack(node_iteration);
+	 sender = msg_buf.sender()->clone();
+	 user->unpack_primal_solution(msg_buf);
 	 break;
 
        case BCP_Msg_UpperBound:
 	 double new_ub;
-	 buf.unpack(new_ub);
-	 if (new_ub < p.upper_bound)
-	    p.upper_bound = new_ub;
+	 msg_buf.unpack(new_ub);
+	 if (new_ub < upper_bound)
+	    upper_bound = new_ub;
 	 break;
 
        case BCP_Msg_NextPhaseStarts:
-	 p.phase++;
+	 phase++;
 	 break;
 
        case BCP_Msg_FinishedBCP:
-	 return true;
+	 return;
 
        default:
 	 // a bogus message
-	 printf("Unknown message type arrived to CG: %i\n", buf.msgtag());
+	 printf("Unknown message type arrived to CG: %i\n", msg_buf.msgtag());
       }
-      buf.clear();
+      msg_buf.clear();
 
-      if (p.probe_messages()) {
+      if (probe_messages()) {
 	 // if there's something interesting in the queue that overrides
 	 // the pervious message then just continue to get the next message
 	 continue;
@@ -144,14 +150,13 @@ BCP_cg_process_message(BCP_cg_prob& p, BCP_buffer& buf)
 	  msgtag == BCP_Msg_ForCG_PrimalFractions ||
 	  msgtag == BCP_Msg_ForCG_PrimalFull      ||
 	  msgtag == BCP_Msg_ForCG_User) {
-	 p.user->generate_cuts(p.vars, p.x);
+	 user->generate_cuts(vars, x);
 	 // upon return send a no more cuts message
 	 double timing = 0.0; // *FIXME*
-	 p.msg_buf.clear();
-	 p.msg_buf.pack(p.node_index).pack(p.node_iteration).pack(timing);
-	 p.msg_env->send(p.sender, BCP_Msg_NoMoreCuts, p.msg_buf);
+	 msg_buf.clear();
+	 msg_buf.pack(node_index).pack(node_iteration).pack(timing);
+	 msg_env->send(sender, BCP_Msg_NoMoreCuts, msg_buf);
       }
       break;
    }
-   return false;
 }

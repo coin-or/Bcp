@@ -22,6 +22,7 @@
 
 #include "BCP_buffer.hpp"
 #include "BCP_message.hpp"
+#include "BCP_process.hpp"
 
 //#############################################################################
 class BCP_warmstart;
@@ -119,7 +120,7 @@ struct BCP_tm_flags {
 
 /** NO OLD DOC */
 
-class BCP_tm_prob {
+class BCP_tm_prob : public BCP_process {
 private:
   /**@name Disabled methods */
   /*@{*/
@@ -160,7 +161,7 @@ public: // Data members
     BCP_tm_flags flags;
   /*@}*/
 
-  /**@name Message passing realted fields */
+  /**@name Message passing related fields */
   /*@{*/
     /** */
     BCP_buffer msg_buf;
@@ -223,7 +224,7 @@ public:
     /** */
     BCP_tm_prob();
     /** */
-    ~BCP_tm_prob();
+    virtual ~BCP_tm_prob();
   /*@}*/
 
 public:
@@ -291,6 +292,10 @@ public:
       return lb > upper_bound - param(BCP_tm_par::Granularity);
    }
    /*@}*/
+   //--------------------------------------------------------------------------
+   virtual BCP_buffer& get_message_buffer() { return msg_buf; }
+   virtual BCP_proc_id* get_parent() { return 0; }
+   virtual void process_message();
 };
 
 //#############################################################################

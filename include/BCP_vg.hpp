@@ -12,6 +12,7 @@
 #include "BCP_buffer.hpp"
 #include "BCP_vg_param.hpp"
 #include "BCP_parameters.hpp"
+#include "BCP_process.hpp"
 
 class BCP_vg_user;
 class BCP_message_environment;
@@ -27,7 +28,7 @@ class BCP_cut;
    (or member method) that's invoked within the VG process. 
 */
 
-class BCP_vg_prob {
+class BCP_vg_prob : public BCP_process {
 private:
    /**@name Disabled members */
    /*@{*/
@@ -98,7 +99,7 @@ public:
        state. */
    BCP_vg_prob();
    /** The destructor deletes everything. */
-   ~BCP_vg_prob();
+   virtual ~BCP_vg_prob();
    /*@}*/
 
    /**@name Query methods */
@@ -123,6 +124,10 @@ public:
    /** Unpack a cut. Invoked from the built-in
        BCP_vg_user::unpack_dual_solution(). */
    BCP_cut* unpack_cut();
+   //--------------------------------------------------------------------------
+   virtual BCP_buffer& get_message_buffer() { return msg_buf; }
+   virtual BCP_proc_id* get_parent() { return tree_manager; }
+   virtual void process_message();
 };
 
 // This function is used only internally.
