@@ -29,7 +29,6 @@ BCP_tm_prob::BCP_tm_prob() :
 BCP_tm_prob::~BCP_tm_prob()
 {
    delete user;
-   delete msg_env;
 
    delete lp_stat;
    
