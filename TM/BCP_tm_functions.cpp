@@ -309,23 +309,32 @@ TM: The final solution may not be optimal.\n\n");
 
    if (p.par.entry(BCP_tm_par::VerbosityShutUp)) {
       int i;
+      BCP_parameter_set<BCP_tm_par>& tmpar = p.par;
+      BCP_parameter_set<BCP_lp_par>& lppar = p.slave_pars.lp;
+      BCP_parameter_set<BCP_cg_par>& cgpar = p.slave_pars.cg;
+      BCP_parameter_set<BCP_vg_par>& vgpar = p.slave_pars.vg;
+      char treestat = tmpar.entry(BCP_tm_par::TmVerb_FinalStatistics);
+      char bestsol  = tmpar.entry(BCP_tm_par::TmVerb_BestFeasibleSolution);
       for (i = BCP_tm_par::TmVerb_First+1; i < BCP_tm_par::TmVerb_Last; ++i) {
-	 p.par.set_entry(static_cast<BCP_tm_par::chr_params>(i), false);
+	 tmpar.set_entry(static_cast<BCP_tm_par::chr_params>(i), false);
       }
       for (i = BCP_lp_par::LpVerb_First+1; i < BCP_lp_par::LpVerb_Last; ++i) {
-	 p.slave_pars.lp.set_entry(static_cast<BCP_lp_par::chr_params>(i),
-				   false);
+	 lppar.set_entry(static_cast<BCP_lp_par::chr_params>(i), false);
       }
       for (i = BCP_cg_par::CgVerb_First+1; i < BCP_cg_par::CgVerb_Last; ++i) {
-	 p.slave_pars.cg.set_entry(static_cast<BCP_cg_par::chr_params>(i),
-				   false);
+	 cgpar.set_entry(static_cast<BCP_cg_par::chr_params>(i), false);
       }
       /*
       for (i = BCP_vg_par::VgVerb_First+1; i < BCP_vg_par::VgVerb_Last; ++i) {
-	 p.slave_pars.vg.set_entry(static_cast<BCP_vg_par::chr_params>(i),
-	                           false);
+	 vgpar.set_entry(static_cast<BCP_vg_par::chr_params>(i), false);
       }
       */
+      tmpar.set_entry(BCP_tm_par::TmVerb_FinalStatistics, treestat);
+      tmpar.set_entry(BCP_tm_par::TmVerb_BestFeasibleSolution, bestsol);
+      tmpar.set_entry(BCP_tm_par::ReportWhenDefaultIsExecuted, false);
+      lppar.set_entry(BCP_lp_par::ReportWhenDefaultIsExecuted, false);
+      cgpar.set_entry(BCP_cg_par::ReportWhenDefaultIsExecuted, false);
+      vgpar.set_entry(BCP_vg_par::ReportWhenDefaultIsExecuted, false);
    }
 }
 

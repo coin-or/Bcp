@@ -135,4 +135,26 @@ BCP_node_queue::insert(BCP_tm_node* node)
   _pq[pos] = node;
 }
 
+//=============================================================================
+
+void
+BCP_node_queue::compare_to_UB(int& quality_above_UB, int& quality_below_UB)
+{
+   quality_above_UB = quality_below_UB = 0;
+   const int size = _pq.size();
+   if (! _p.has_ub()) {
+      quality_below_UB = size;
+      return;
+   }
+   const double threshold = _p.ub() - _p.granularity();
+      
+   for (int i = 1; i < size; ++i) {
+      if (_pq[i]->quality() <= threshold) {
+	 ++quality_below_UB;
+      } else {
+	 ++quality_above_UB;
+      }
+   }
+}
+
 //#############################################################################

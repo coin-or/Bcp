@@ -35,6 +35,46 @@ BCP_tm_shall_we_dive(BCP_tm_prob& p, const double quality);
 
 //#############################################################################
 
+static void
+BCP_tm_print_info_line(BCP_tm_prob& p, BCP_tm_node& node)
+{
+   const int freq = p.param(BCP_tm_par::TmVerb_SingleLineInfoFrequency);
+   if (freq == 0)
+      return;
+
+   static int lines = 0;
+   static int processed = 0;
+
+   if ((lines % 40) == 0) {
+      printf("\n");
+      printf("BCP: ");
+      printf(" Nodes  ");
+      printf(" Proc'd ");
+      printf("  BestUB   ");
+      printf(" LowestQ   ");
+      printf("AboveUB ");
+      printf("BelowUB ");
+      printf("\n");
+   }
+   ++processed;
+   if ((processed % freq) == 0 || processed == 1) {
+      ++lines;
+      int quality_above_UB;
+      int quality_below_UB;
+      printf("BCP: ");                                // 5
+      printf("%7i ", p.search_tree.size());           // 8
+      printf("%7i ", processed);                      // 8
+      printf("%10g ", p.ub());                        // 11
+      printf("%10g ", p.candidates.top()->_quality);  // 11
+      p.candidates.compare_to_UB(quality_above_UB, quality_below_UB);
+      printf("%7i ", quality_above_UB);               // 8
+      printf("%7i ", quality_below_UB);               // 8
+      printf("\n");
+   }
+}
+
+//#############################################################################
+
 static int
 BCP_tm_unpack_node_description(BCP_tm_prob& p, BCP_buffer& buf)
 {
@@ -446,6 +486,7 @@ void BCP_tm_unpack_node_with_branching_info(BCP_tm_prob& p, BCP_buffer& buf)
 {
    const int index = BCP_tm_unpack_node_description(p, buf);
    BCP_tm_unpack_branching_info(p, buf, p.search_tree[index]);
+   BCP_tm_print_info_line(p, *p.search_tree[index]);
    // BCP_tm_list_candidates(p);
 }
 
@@ -458,6 +499,7 @@ BCP_tm_node* BCP_tm_unpack_node_no_branching_info(BCP_tm_prob& p,
 
    // Mark the lp/cg/vg processes of the node as free
    BCP_tm_node* node = p.search_tree[index];
+   BCP_tm_print_info_line(p, *node);
    BCP_tm_free_procs_of_node(p, node);
 
    return node;

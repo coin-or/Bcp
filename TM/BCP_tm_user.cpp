@@ -197,32 +197,22 @@ BCP_tm_user::display_node_information(BCP_tree& search_tree,
 void
 BCP_tm_user::display_final_information(const BCP_lp_statistics& lp_stat)
 {
-   if (p->param(BCP_tm_par::TmVerb_RunningTime)) {
+   if (p->param(BCP_tm_par::TmVerb_FinalStatistics)) {
       printf("TM: Running time: %.3f\n",
 	     BCP_time_since_epoch() - p->start_time);
-   }
-
-   if (p->param(BCP_tm_par::TmVerb_TreeStatistics)) {
       printf("TM: search tree size: %i   max depth: %i\n",
 	     int(p->search_tree.size()), p->search_tree.maxdepth());
-   }
+      lp_stat.display();
 
-   const bool bval = p->param(BCP_tm_par::TmVerb_BestFeasibleSolutionValue);
-   const bool bsol = p->param(BCP_tm_par::TmVerb_BestFeasibleSolution);
-   if (bval || bsol) {
       if (! p->feas_sol) {
 	 printf("TM: No feasible solution is found\n");
       } else {
 	 printf("TM: The best solution found has value %f\n",
 		p->feas_sol->objective_value());
+	 if (p->param(BCP_tm_par::TmVerb_BestFeasibleSolution)) {
+	    p->user->display_feasible_solution(p->feas_sol);
+	 }
       }
-   }
-   if (bsol && p->feas_sol) {
-      p->user->display_feasible_solution(p->feas_sol);
-   }
-
-   if (p->param(BCP_tm_par::TmVerb_LpStatistics)) {
-      lp_stat.display();
    }
 }
     

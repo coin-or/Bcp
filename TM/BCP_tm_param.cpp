@@ -69,9 +69,6 @@ void BCP_parameter_set<BCP_tm_par>::create_keyword_list() {
    keys.push_back(make_pair(BCP_string("BCP_TmVerb_BetterFeasibleSolution"),
 			    BCP_parameter(BCP_CharPar,
 					  TmVerb_BetterFeasibleSolution)));
-   keys.push_back(make_pair(BCP_string("BCP_TmVerb_BestFeasibleSolutionValue"),
-			    BCP_parameter(BCP_CharPar,
-					  TmVerb_BestFeasibleSolutionValue)));
    keys.push_back(make_pair(BCP_string("BCP_TmVerb_BestFeasibleSolution"),
 			    BCP_parameter(BCP_CharPar,
 					  TmVerb_BestFeasibleSolution)));
@@ -87,15 +84,9 @@ void BCP_parameter_set<BCP_tm_par>::create_keyword_list() {
    keys.push_back(make_pair(BCP_string("BCP_TmVerb_TrimmedNum"),
 			    BCP_parameter(BCP_CharPar,
 					  TmVerb_TrimmedNum)));
-   keys.push_back(make_pair(BCP_string("BCP_TmVerb_RunningTime"),
+   keys.push_back(make_pair(BCP_string("BCP_TmVerb_FinalStatistics"),
 			    BCP_parameter(BCP_CharPar,
-					  TmVerb_RunningTime)));
-   keys.push_back(make_pair(BCP_string("BCP_TmVerb_LpStatistics"),
-			    BCP_parameter(BCP_CharPar,
-					  TmVerb_LpStatistics)));
-   keys.push_back(make_pair(BCP_string("BCP_TmVerb_TreeStatistics"),
-			    BCP_parameter(BCP_CharPar,
-					  TmVerb_TreeStatistics)));
+					  TmVerb_FinalStatistics)));
    keys.push_back(make_pair(BCP_string("BCP_TmVerb_ReportDefault"),
 			    BCP_parameter(BCP_CharPar,
 					  TmVerb_ReportDefault)));
@@ -232,15 +223,12 @@ void BCP_parameter_set<BCP_tm_par>::set_default_entries(){
    set_entry(TmVerb_AllFeasibleSolution, false);
    set_entry(TmVerb_BetterFeasibleSolutionValue, true);
    set_entry(TmVerb_BetterFeasibleSolution, false);
-   set_entry(TmVerb_BestFeasibleSolutionValue, true);
    set_entry(TmVerb_BestFeasibleSolution, true);
    set_entry(TmVerb_NewPhaseStart, true);
    set_entry(TmVerb_TrimmedNum, true);
    set_entry(TmVerb_TimeOfImprovingSolution, true);
    set_entry(TmVerb_PrunedNodeInfo, true);
-   set_entry(TmVerb_RunningTime, true);
-   set_entry(TmVerb_LpStatistics, true);
-   set_entry(TmVerb_TreeStatistics, true);
+   set_entry(TmVerb_FinalStatistics, true);
    set_entry(TmVerb_ReportDefault, true);
    //--------------------------------------------------------------------------
    // IntPar

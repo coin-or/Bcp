@@ -279,9 +279,12 @@ public:
   /** Delete the top member of the queue. */
   void pop();
 
-  /** Insert a new node into the queue. The reference to p is used to invoke
-      the search tree node comparison method. */
+  /** Insert a new node into the queue. */
   void insert(BCP_tm_node* node);
+
+  /** Find out how many candidates are below/above the current best upper
+      bound (including the granularity!). */
+   void compare_to_UB(int& quality_above_UB, int& quality_below_UB);
 };
 
 //#############################################################################

@@ -56,9 +56,10 @@ struct BCP_tm_par{
     TrimTreeBeforeNewPhase,
     /** A flag that instructs BCP to be (almost) absolutely silent. It zeros
 	out all the XxVerb flags <em>even if the verbosity flag is set to 1
-	later in the parameter file</em>. The only exception is
-	<code>TmVerb_SingleLineInfoFrequency</code> whose status is not
-	changed. Default: 0. */
+	later in the parameter file</em>. Exceptions (flags whose status is
+	not changed) are: <code>TmVerb_SingleLineInfoFrequency</code>,
+	<code>TmVerb_FinalStatistics</code> and
+	<code>TmVerb_BestFeasibleSolution</code>. Default: 0. */
     VerbosityShutUp,
     /** Verbosity flags for the tree manager */
     /*@{*/
@@ -77,9 +78,6 @@ struct BCP_tm_par{
 	  better integral feasible solution is found.
 	  (BCP_tm_prob::process_message) */
       TmVerb_BetterFeasibleSolution,
-      /** Print the value of the best feasible solution found after the entire
-	  serach tree is processed. (BCP_tm_wrapup) */
-      TmVerb_BestFeasibleSolutionValue,
       /** Invoke "display_feasible_solution" user routine for the best
 	  feasible solution after the entire tree is processed.
 	  (BCP_tm_wrapup) */
@@ -97,12 +95,9 @@ struct BCP_tm_par{
       /** Print the number of nodes trimmed between phases.
 	  (BCP_tm_trim_tree_wrapper) */
       TmVerb_TrimmedNum,
-      /** Total running time. */
-      TmVerb_RunningTime,
-      /** Print size and max depth of search tree. */
-      TmVerb_LpStatistics,
-      /** Print timing information about the lp process(es). */
-      TmVerb_TreeStatistics,
+      /** Print statistics: running time, tree size, best solution value. (For
+	  the best solution set <code>TmVerb_BestFeasibleSolution</code>. */
+      TmVerb_FinalStatistics,
       /** Print out a message when the default version of an overridable
 	  method is executed. Default: 1. */
       TmVerb_ReportDefault,
