@@ -189,7 +189,7 @@ BCP_pvm_environment::multicast(BCP_vec<BCP_proc_id*>::const_iterator beg,
 void
 BCP_pvm_environment::receive(const BCP_proc_id* const source,
 			     const BCP_message_tag tag, BCP_buffer& buf,
-			     const int timeout) {
+			     const double timeout) {
    buf.clear();
    delete buf._sender;   buf._sender = 0;
 
@@ -213,7 +213,8 @@ BCP_pvm_environment::receive(const BCP_proc_id* const source,
 	 check_error( bufid = pvm_recv(pid, msgtag), "receive() - recv");
       }
    } else {
-      tout.tv_sec = timeout / 1000000; tout.tv_usec = timeout % 1000000;
+      tout.tv_sec = static_cast<int>(floor(timeout));
+      tout.tv_usec = static_cast<int>(floor((timeout - tout.tv_sec)*1e6));
       check_error( bufid = pvm_trecv(pid, msgtag, &tout), "receive() - trecv");
    }
    if (! bufid) {

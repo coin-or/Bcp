@@ -461,7 +461,7 @@ BCP_single_environment::multicast(BCP_vec<BCP_proc_id*>::const_iterator beg,
 void
 BCP_single_environment::receive(const BCP_proc_id* const source,
 				const BCP_message_tag tag,
-				BCP_buffer& buf, const int timeout) {
+				BCP_buffer& buf, const double timeout) {
    // In the single_environment this is not really needed. Report if it's
    // called with anything but:
    //   BCP_UpperBound, BCP_Msg_DivingInfo or BCP_Msg_PricedRoot.

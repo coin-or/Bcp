@@ -80,7 +80,7 @@ public:
 
    void receive(const BCP_proc_id* const source,
 		const BCP_message_tag tag, BCP_buffer& buf,
-		const int timeout);
+		const double timeout);
    bool probe(const BCP_proc_id* const source,
 	      const BCP_message_tag tag);
 
