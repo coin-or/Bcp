@@ -7,6 +7,7 @@
 #if defined(BCP_COMM_PROTOCOL_PVM)
 
 #include "BCP_message_pvm.hpp"
+BCP_message_environment *
 USER_initialize::msgenv_init() {
   return new BCP_pvm_environment;
 }

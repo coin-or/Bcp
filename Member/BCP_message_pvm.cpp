@@ -2,6 +2,7 @@
 // Corporation and others.  All Rights Reserved.
 
 #include <cstdio>
+#include <cmath>
 #include <pvm3.h>
 
 #include "BCP_error.hpp"
