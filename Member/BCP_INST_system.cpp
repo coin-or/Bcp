@@ -1,16 +1,18 @@
 // Copyright (C) 2000, International Business Machines
 // Corporation and others.  All Rights Reserved.
 
-#include <vector>
-template class std::vector<double*>;
+#include "BCP_os.hpp"
 
-//-----------------------------------------------------------------------------
+#ifdef NEED_EXPLICIT_INSTANTIATION
 
 #include <algorithm>
 #include <numeric>
 #include <functional>
 
-#include "BCP_os.hpp"
+#include <vector>
+template class std::vector<double*>;
+
+//-----------------------------------------------------------------------------
 
 template int const *
 std::find_if(int const *, int const *, binder2nd< std::greater_equal<int> >);
@@ -179,3 +181,4 @@ template class std::_Rb_tree
 >;
 #endif
 
+#endif

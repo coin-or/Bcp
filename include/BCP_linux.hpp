@@ -26,10 +26,12 @@ typedef int BCP_IndexType;
 #  define NEED_IMPLICIT_TEMPLATE_CLASSES 1
 #  define BCP_PtrDiff       int
 #  if (__GNUC__ >= 3)
+// # define NEED_EXPLICIT_INSTANTIATION 1
 #    define BCP_CONSTRUCT     std::_Construct
 #    define BCP_DESTROY       std::_Destroy
 #    define BCP_DESTROY_RANGE std::_Destroy
 #  else
+#    define NEED_EXPLICIT_INSTANTIATION 1
 #    define BCP_CONSTRUCT     std::construct
 #    define BCP_DESTROY       std::destroy
 #    define BCP_DESTROY_RANGE std::destroy
