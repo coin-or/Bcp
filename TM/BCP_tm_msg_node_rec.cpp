@@ -54,29 +54,35 @@ BCP_tm_unpack_node_description: received node is different from processed.\n");
    // get the quality and new lb for this node
    buf.unpack(node->_quality).unpack(node->_true_lower_bound);
 
-   // wipe out any previous description of this node and create a new one
+   // wipe out any previous description of this node and create a new one if
+   // the description is sent over
    delete node->_desc;   node->_desc = 0;
-   BCP_node_change* desc = new BCP_node_change;
-   node->_desc = desc;
+   bool desc_sent = false;
+   buf.unpack(desc_sent);
 
-   // unpack core_change
-   if (p.core->varnum() + p.core->cutnum() > 0)
-      desc->core_change.unpack(buf);
+   if (desc_sent) {
+      BCP_node_change* desc = new BCP_node_change;
+      node->_desc = desc;
 
-   // get the variables and cuts. unpack takes care of checking explicitness,
-   // and returns how many algo objects are there in ..._set that do not yet
-   // have internal index.
-   p.unpack_var_set_change(desc->var_change);
-   p.unpack_cut_set_change(desc->cut_change);
+      // unpack core_change
+      if (p.core->varnum() + p.core->cutnum() > 0)
+	 desc->core_change.unpack(buf);
 
-   // pricing status
-   desc->indexed_pricing.unpack(buf);
+      // get the variables and cuts. unpack takes care of checking
+      // explicitness, and returns how many algo objects are there in ..._set
+      // that do not yet have internal index.
+      p.unpack_var_set_change(desc->var_change);
+      p.unpack_cut_set_change(desc->cut_change);
 
-   // warmstart info
-   bool has_data;
-   buf.unpack(has_data);
-   if (has_data)
-      desc->warmstart = p.user->unpack_warmstart(buf);
+      // pricing status
+      desc->indexed_pricing.unpack(buf);
+
+      // warmstart info
+      bool has_data;
+      buf.unpack(has_data);
+      if (has_data)
+	 desc->warmstart = p.user->unpack_warmstart(buf);
+   }
 
    p.active_nodes[p.slaves.lp->index_of_proc(node->lp)] = 0;
 
