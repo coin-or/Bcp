@@ -3,7 +3,6 @@
 #include <functional>
 
 #include "BCP_message.hpp"
-#include "BCP_temporary.hpp"
 #include "BCP_problem_core.hpp"
 #include "BCP_branch.hpp"
 #include "BCP_warmstart.hpp"
@@ -203,15 +202,14 @@ BCP_lp_pack_branching_info(BCP_lp_prob& p, BCP_presolved_lp_brobj* lp_brobj)
    const int child_num = lp_brobj->candidate()->child_num;
 
    // collect the lower bounds on the children
-   BCP_temp_vec<double> tmp_lpobj(child_num);
-   BCP_vec<double>& lpobj = tmp_lpobj.vec();
+   BCP_vec<double> lpobj;
+   lpobj.reserve(child_num);
    for (int i = 0; i < child_num; ++i) {
       lpobj.unchecked_push_back(lp_brobj->lpres(i).objval());
    }
 
    // The qualities are the same (for now) as the lpobjs
-   BCP_temp_vec<double> tmp_qualities(lpobj);
-   BCP_vec<double>& qualities = tmp_qualities.vec();
+   BCP_vec<double> qualities(lpobj);
 
    const BCP_vec<BCP_child_action>& action = lp_brobj->action();
 
@@ -259,12 +257,10 @@ int BCP_lp_send_node_description(BCP_lp_prob& p,
       // Pack the core (WrtCore, WrtParent or Explicit)
       BCP_lp_pack_core(p);  // BCP_problem_core_change
       // pack the indexed/algo var set change (or pack them explicitly)
-      BCP_temp_vec<int> tmp_del_vars;
-      BCP_vec<int>& del_vars = tmp_del_vars.vec();
+      BCP_vec<int> del_vars;
       BCP_lp_pack_noncore_vars(p, del_vars);
 
-      BCP_temp_vec<int> tmp_del_cuts;
-      BCP_vec<int>& del_cuts = tmp_del_cuts.vec();
+      BCP_vec<int> del_cuts;
       BCP_lp_pack_noncore_cuts(p, del_cuts);
 
       // pack the pricing status

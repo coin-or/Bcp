@@ -7,7 +7,6 @@
 #include "CoinSort.hpp"
 #include "BCP_vector.hpp"
 #include "BCP_lp_branch.hpp"
-#include "BCP_temporary.hpp"
 
 #include "OsiSolverInterface.hpp"
 
@@ -37,16 +36,16 @@ static void BCP_reorder_pos(const int child_num,
    if (size <= 1)
       return;
 
-   BCP_temp_vec<int> tmp_perm(size); // just allocates, doesn't construct
-   BCP_vec<int>& perm = tmp_perm.vec();
+   BCP_vec<int> perm;
+   perm.reserve(size);
    for (int i = 0; i < size; ++i)
       perm.unchecked_push_back(i);
    // order the pair list based on the first entry (pos)
    CoinSort_2(positions.begin(), positions.end(), perm.begin());
 
    // apply the permutation to each block in bounds
-   BCP_temp_vec<double> tmp_new_bd(bounds.size());
-   BCP_vec<double>& new_bd = tmp_new_bd.vec();
+   BCP_vec<double> new_bd;
+   new_bd.reserve(bounds.size());
    const BCP_vec<int>::const_iterator lastpos = perm.end();
    for (int i = 0; i < child_num; ++i){
       BCP_vec<double>::const_iterator old_bd = bounds.entry(2 * size * i);

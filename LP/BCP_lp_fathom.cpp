@@ -5,7 +5,6 @@
 #include "CoinHelperFunctions.hpp"
 #include "CoinSort.hpp"
 
-#include "BCP_temporary.hpp"
 #include "BCP_matrix.hpp"
 #include "BCP_lp_node.hpp"
 #include "BCP_lp_pool.hpp"
@@ -51,7 +50,9 @@ BCP_lp_perform_fathom(BCP_lp_prob& p, const char* msg, BCP_message_tag msgtag)
       printf("%s", msg);
    // Here we don't have col/row_indices to compress, we are from fathom and
    // we do want to force deletion.
-   BCP_lp_delete_cols_and_rows(p, 0, true, true);
+   if (p.param(BCP_lp_par::SendFathomedNodeDesc)) {
+      BCP_lp_delete_cols_and_rows(p, 0, true, true);
+   }
    BCP_lp_send_node_description(p, 0, msgtag);
    BCP_lp_clean_up_node(p);
 }
@@ -146,14 +147,13 @@ LP:   Fathoming node (discovered tdf & high cost)\n",
 	    // reorder the generated variables (and the corresponding
 	    // columns) based on the reduced costs of the columns
 	    const double * duals = p.lp_result->pi();
-	    BCP_temp_vec<double> tmp_rc(vars_to_add_size, 0.0);
-	    BCP_vec<double>& rc = tmp_rc.vec();
+	    BCP_vec<double> rc(vars_to_add_size, 0.0);
 	    for (i = 0; i < vars_to_add_size; ++i) {
 	       rc[i] = (cols_to_add[i]->Objective() -
 			cols_to_add[i]->dotProduct(duals));
 	    }
-	    BCP_temp_vec<int> tmp_perm(vars_to_add_size); //just reserve
-	    BCP_vec<int>& perm = tmp_perm.vec();
+	    BCP_vec<int> perm;
+	    perm.reserve(vars_to_add_size);
 	    for (i = 0; i < vars_to_add_size; ++i)
 	       perm.unchecked_push_back(i);
 	    CoinSort_2(rc.begin(), rc.end(), perm.begin());

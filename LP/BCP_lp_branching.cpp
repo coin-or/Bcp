@@ -9,7 +9,6 @@
 
 #include "BCP_timeout.hpp"
 #include "BCP_enum.hpp"
-#include "BCP_temporary.hpp"
 #include "BCP_matrix.hpp"
 #include "BCP_warmstart.hpp"
 #include "BCP_lp_result.hpp"
@@ -268,17 +267,13 @@ BCP_lp_perform_strong_branching(BCP_lp_prob& p,
    lp->markHotStart();
 
    // save the lower/upper bounds of every var/cut
-   BCP_temp_vec<double> tmp_rowbounds(2 * rownum, 0.0);
-   BCP_vec<double>& rowbounds = tmp_rowbounds.vec();
-
-   BCP_temp_vec<double> tmp_colbounds(2 * colnum, 0.0);
-   BCP_vec<double>& colbounds = tmp_colbounds.vec();
+   BCP_vec<double> rowbounds(2 * rownum, 0.0);
+   BCP_vec<double> colbounds(2 * colnum, 0.0);
 
    const int maxind = std::max(rownum, colnum);
-   BCP_temp_vec<int> tmp_all_indices(maxind);
-   BCP_vec<int>& all_indices = tmp_all_indices.vec();
+   BCP_vec<int> all_indices(maxind, 0);
    for (i = 0; i < maxind; ++i)
-      all_indices.unchecked_push_back(i);
+      all_indices[i] = i;
 
    const double * rlb_orig = lp->getRowLower();
    const double * rub_orig = lp->getRowUpper();
@@ -308,6 +303,12 @@ BCP_lp_perform_strong_branching(BCP_lp_prob& p,
       for (i = 0; i < can->child_num; ++i){
 	 can->apply_child_bd(lp, i);
 	 p.user->modify_lp_parameters(p.lp_solver, true);
+#if 0
+	 char fname[1000];
+	 sprintf(fname, "matrix-%i.%i.%i-child-%i",
+	      p.node->level, p.node->index, p.node->iteration_count, i);
+	 lp->writeMps(fname, "mps");
+#endif
 	 lp->solveFromHotStart();
 	 tmp_presolved->get_results(*lp, i);
 	 BCP_lp_test_feasibility(p, tmp_presolved->lpres(i));
@@ -371,7 +372,7 @@ BCP_lp_perform_strong_branching(BCP_lp_prob& p,
    // Delete whatever cols/rows we want to delete. This function also updates
    // var/cut_positions !!!
    BCP_lp_delete_cols_and_rows(p, can, false /* not from fathom */,
-			       true /* to force deletion */);
+ 			       true /* to force deletion */);
    
    delete ws;
 }
@@ -587,7 +588,6 @@ BCP_lp_branch(BCP_lp_prob& p)
       }
       delete best_presolved->candidate();
       delete best_presolved;
-      BCP_lp_delete_cols_and_rows(p, 0, true, true);
       BCP_lp_clean_up_node(p);
       return BCP_BranchingFathomedThisNode;
    }

@@ -1,6 +1,6 @@
 // Copyright (C) 2000, International Business Machines
 // Corporation and others.  All Rights Reserved.
-#include "BCP_temporary.hpp"
+
 #include "BCP_warmstart.hpp"
 #include "BCP_lp_result.hpp"
 #include "BCP_lp_node.hpp"
@@ -13,8 +13,7 @@
 
 void BCP_lp_purge_slack_pool(BCP_lp_prob& p)
 {
-   BCP_temp_vec<int> tmp_purge;
-   BCP_vec<int>& purge = tmp_purge.vec();
+   BCP_vec<int> purge;
    p.user->purge_slack_pool(p.slack_pool, purge);
    if (purge.size() > 0)
       purge_ptr_vector_by_index(p.slack_pool, purge.begin(), purge.end());
@@ -87,15 +86,10 @@ BCP_lp_prepare_for_new_node(BCP_lp_prob& p)
    BCP_var_set& vars = p.node->vars;
    BCP_cut_set& cuts = p.node->cuts;
 
-   BCP_temp_vec<int> tmp_var_changed_pos;
-   BCP_temp_vec<double> tmp_var_new_bd;
-   BCP_temp_vec<int> tmp_cut_changed_pos;
-   BCP_temp_vec<double> tmp_cut_new_bd;
-
-   BCP_vec<int>& vcp = tmp_var_changed_pos.vec();
-   BCP_vec<double>& vbd = tmp_var_new_bd.vec();
-   BCP_vec<int>& ccp = tmp_cut_changed_pos.vec();
-   BCP_vec<double>& cbd = tmp_cut_new_bd.vec();
+   BCP_vec<int> vcp;
+   BCP_vec<double> vbd;
+   BCP_vec<int> ccp;
+   BCP_vec<double> cbd;
 
    const int varnum = vars.size();
    BCP_vec<BCP_obj_status> vstat;

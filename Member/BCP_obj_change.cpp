@@ -3,7 +3,6 @@
 #include <CoinDistance.hpp>
 #include "BCP_error.hpp"
 #include "BCP_buffer.hpp"
-#include "BCP_temporary.hpp"
 #include "BCP_obj_change.hpp"
 #include "BCP_var.hpp"
 #include "BCP_cut.hpp"
@@ -134,8 +133,8 @@ BCP_var_set_change(BCP_vec<BCP_var*>::const_iterator first,
    const int old_added_num = added_bcpind.size();
    _del_change_pos.reserve(old_added_num);
 
-   BCP_temp_vec<int> tmp_chpos(new_added_num);
-   BCP_vec<int>& chpos = tmp_chpos.vec();
+   BCP_vec<int> chpos;
+   chpos.reserve(new_added_num);
 
    int i, j;
 
@@ -237,8 +236,8 @@ BCP_cut_set_change(BCP_vec<BCP_cut*>::const_iterator first,
    const int old_added_num = added_bcpind.size();
    _del_change_pos.reserve(old_added_num);
 
-   BCP_temp_vec<int> tmp_chpos(new_added_num);
-   BCP_vec<int>& chpos = tmp_chpos.vec();
+   BCP_vec<int> chpos;
+   chpos.reserve(new_added_num);
 
    int i, j;
 

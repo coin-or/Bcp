@@ -3,7 +3,6 @@
 #include <functional>
 
 #include "BCP_message.hpp"
-#include "BCP_temporary.hpp"
 #include "BCP_lp_user.hpp"
 #include "BCP_lp_node.hpp"
 #include "BCP_lp_pool.hpp"

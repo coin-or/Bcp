@@ -8,7 +8,6 @@
 #include "BCP_branch.hpp"
 #include "BCP_enum_branch.hpp"
 #include "BCP_message.hpp"
-#include "BCP_temporary.hpp"
 #include "BCP_vector.hpp"
 #include "BCP_tm.hpp"
 #include "BCP_tm_user.hpp"
@@ -303,10 +302,8 @@ BCP_tm_unpack_branching_info(BCP_tm_prob& p, BCP_buffer& buf,
 
    BCP_vec<BCP_child_action> action;
 
-   BCP_temp_vec<double> tmp_lpobj;
-   BCP_vec<double>& lpobj = tmp_lpobj.vec();
-   BCP_temp_vec<double> tmp_qualities;
-   BCP_vec<double>& qualities = tmp_qualities.vec();
+   BCP_vec<double> lpobj;
+   BCP_vec<double> qualities;
 
    buf.unpack(dive).unpack(action).unpack(qualities).unpack(lpobj);
    BCP_internal_brobj* brobj = new BCP_internal_brobj;

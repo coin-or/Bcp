@@ -6,7 +6,6 @@
 
 #include "CoinHelperFunctions.hpp"
 
-#include "BCP_temporary.hpp"
 #include "BCP_problem_core.hpp"
 #include "BCP_lp_node.hpp"
 #include "BCP_lp_result.hpp"
@@ -74,10 +73,8 @@ bool BCP_lp_fix_vars(BCP_lp_prob& p)
 
    bool lost_primal_feasibility = false;
 
-   BCP_temp_vec<int> tmp_changed_pos;
-   BCP_vec<int>& changed_pos = tmp_changed_pos.vec();
-   BCP_temp_vec<double> tmp_new_bd;
-   BCP_vec<double>& new_bd = tmp_new_bd.vec();
+   BCP_vec<int> changed_pos;
+   BCP_vec<double> new_bd;
 
    p.user->logical_fixing(lpres, vars, cuts, var_status, cut_status,
 			  p.var_bound_changes_since_logical_fixing,
@@ -130,14 +127,15 @@ bool BCP_lp_fix_vars(BCP_lp_prob& p)
 //#############################################################################
 
 static void
-BCP_lp_reset_positions(const BCP_vec<int>& deletable, BCP_vec<int>& pos)
+BCP_lp_reset_positions(const BCP_vec<int>& deletable, BCP_vec<int>& pos,
+		       const bool error_if_deletable)
 {
    int i, j;
    const int delnum = deletable.size();
    const int posnum = pos.size();
    for (i = 0, j = 0; i < delnum && j < posnum; ) {
 #ifdef PARANOID
-      if (deletable[i] == pos[j])
+      if (error_if_deletable && deletable[i] == pos[j])
 	 throw BCP_fatal_error("Bad pos in BCP_lp_reset_positions()\n");
 #endif
       if (deletable[i] < pos[j]) {
@@ -171,8 +169,7 @@ void BCP_lp_delete_cols_and_rows(BCP_lp_prob& p,
    BCP_cut_set& cuts = p.node->cuts;
    const int cutnum = cuts.size();
 
-   BCP_temp_vec<int> tmp_deletable;
-   BCP_vec<int>& deletable = tmp_deletable.vec();
+   BCP_vec<int> deletable;
    deletable.reserve(CoinMax(varnum, cutnum));
 
    // find out which columns could be deleted
@@ -187,9 +184,9 @@ void BCP_lp_delete_cols_and_rows(BCP_lp_prob& p,
 	 printf("LP:   Deleting %i columns from the matrix.\n", del_num);
       if (can) {
 	 if (can->forced_var_pos)
-	    BCP_lp_reset_positions(deletable, *can->forced_var_pos);
+	    BCP_lp_reset_positions(deletable, *can->forced_var_pos, true);
 	 if (can->implied_var_pos)
-	    BCP_lp_reset_positions(deletable, *can->implied_var_pos);
+	    BCP_lp_reset_positions(deletable, *can->implied_var_pos, false);
       }
       p.lp_solver->deleteCols(deletable.size(), deletable.begin());
       purge_ptr_vector_by_index(dynamic_cast< BCP_vec<BCP_var*>& >(vars),
@@ -211,9 +208,9 @@ void BCP_lp_delete_cols_and_rows(BCP_lp_prob& p,
 	 printf("LP:   Deleting %i rows from the matrix.\n", del_num);
       if (can) {
 	 if (can->forced_cut_pos)
-	    BCP_lp_reset_positions(deletable, *can->forced_cut_pos);
+	    BCP_lp_reset_positions(deletable, *can->forced_cut_pos, true);
 	 if (can->implied_cut_pos)
-	    BCP_lp_reset_positions(deletable, *can->implied_cut_pos);
+	    BCP_lp_reset_positions(deletable, *can->implied_cut_pos, false);
       } else {
 	 if (p.param(BCP_lp_par::BranchOnCuts))
 	    p.node->cuts.move_deletable_to_pool(deletable, p.slack_pool);
@@ -316,12 +313,10 @@ int BCP_lp_add_from_local_cut_pool(BCP_lp_prob& p)
    const CoinPackedVectorBase** rows =
      new const CoinPackedVectorBase*[added_rows];
 
-   BCP_temp_vec<double> tmp_rlb;
-   BCP_vec<double>& rlb = tmp_rlb.vec();
+   BCP_vec<double> rlb;
    rlb.reserve(added_rows);
 
-   BCP_temp_vec<double> tmp_rub;
-   BCP_vec<double>& rub = tmp_rub.vec();
+   BCP_vec<double> rub;
    rub.reserve(added_rows);
 
    p.node->cuts.reserve(p.node->cuts.size() + added_rows);
@@ -397,16 +392,13 @@ int BCP_lp_add_from_local_var_pool(BCP_lp_prob& p)
    const CoinPackedVectorBase** cols =
      new const CoinPackedVectorBase*[added_cols];
 
-   BCP_temp_vec<double> tmp_clb;
-   BCP_vec<double>& clb = tmp_clb.vec();
+   BCP_vec<double> clb;
    clb.reserve(added_cols);
 
-   BCP_temp_vec<double> tmp_cub;
-   BCP_vec<double>& cub = tmp_cub.vec();
+   BCP_vec<double> cub;
    cub.reserve(added_cols);
 
-   BCP_temp_vec<double> tmp_obj;
-   BCP_vec<double>& obj = tmp_obj.vec();
+   BCP_vec<double> obj;
    obj.reserve(added_cols);
 
    p.node->vars.reserve(p.node->vars.size() + added_cols);

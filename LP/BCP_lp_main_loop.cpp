@@ -52,13 +52,13 @@ void BCP_lp_main_loop(BCP_lp_prob& p)
       time0 = BCP_time_since_epoch();
       BCP_lp_check_ub(p);
       p.user->modify_lp_parameters(p.lp_solver, false);
-      p.lp_solver->resolve();
 #if 0
       char fname[1000];
       sprintf(fname, "matrix-%i.%i.%i",
 	      p.node->level, p.node->index, p.node->iteration_count);
       p.lp_solver->writeMps(fname, "mps");
 #endif
+      p.lp_solver->resolve();
       lpres.get_results(*p.lp_solver);
       const int tc = lpres.termcode();
       p.stat.time_lp_solving += BCP_time_since_epoch() - time0;

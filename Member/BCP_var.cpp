@@ -1,7 +1,6 @@
 // Copyright (C) 2000, International Business Machines
 // Corporation and others.  All Rights Reserved.
 #include "BCP_buffer.hpp"
-#include "BCP_temporary.hpp"
 #include "BCP_var.hpp"
 #include "BCP_branch.hpp"
 

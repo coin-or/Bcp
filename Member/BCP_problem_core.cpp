@@ -3,7 +3,6 @@
 // #include <functional>
 #include "BCP_error.hpp"
 #include "BCP_buffer.hpp"
-#include "BCP_temporary.hpp"
 #include "BCP_problem_core.hpp"
 #include "BCP_var.hpp"
 #include "BCP_cut.hpp"
@@ -262,16 +261,16 @@ BCP_problem_core_change::make_wrtcore_if_shorter() : nonequal sizes\n");
    int i;
 
    // save the positions of the changed vars / cuts
-   BCP_temp_vec<int> tmp_chvar(ecore.varnum());
-   BCP_vec<int>& chvar = tmp_chvar.vec();
+   BCP_vec<int> chvar;
+   chvar.reserve(ecore.varnum());
 
    const int bvarnum = var_ch.size();
    for (i = 0; i < bvarnum; ++i)
       if (var_ch[i] != ecore.var_ch[i])
 	 chvar.unchecked_push_back(i);
 
-   BCP_temp_vec<int> tmp_chcut(ecore.varnum());
-   BCP_vec<int>& chcut = tmp_chcut.vec();
+   BCP_vec<int> chcut;
+   chcut.reserve(ecore.cutnum());
 
    const int bcutnum = cut_ch.size();
    for (i = 0; i < bcutnum; ++i)

@@ -6,7 +6,6 @@
 
 #include "BCP_error.hpp"
 #include "BCP_USER.hpp"
-#include "BCP_temporary.hpp"
 #include "BCP_var.hpp"
 #include "BCP_cut.hpp"
 #include "BCP_lp_user.hpp"
@@ -466,8 +465,7 @@ BCP_lp_user::pack_primal_solution(BCP_buffer& buf,
     printf(" LP: Default pack_for_cg() executed.\n");
   }
 
-  BCP_temp_vec<int> tmp_coll;
-  BCP_vec<int>& coll = tmp_coll.vec();
+  BCP_vec<int> coll;
 
   const double petol = lpres.primalTolerance();
   const double * x = lpres.x();
@@ -518,8 +516,7 @@ BCP_lp_user::pack_dual_solution(BCP_buffer& buf,
     printf(" LP: Default pack_for_vg() executed.\n");
   }
 
-  BCP_temp_vec<int> tmp_coll;
-  BCP_vec<int>& coll = tmp_coll.vec();
+  BCP_vec<int> coll;
 
   const double detol = lpres.dualTolerance();
   const double * pi = lpres.pi();
@@ -578,8 +575,7 @@ BCP_lp_user::display_lp_solution(const BCP_lp_result& lpres,
   const double ietol = p->param(BCP_lp_par::IntegerTolerance);
 
   printf("  LP : Displaying solution :\n");
-  BCP_temp_vec<int> tmp_coll;
-  BCP_vec<int>& coll = tmp_coll.vec();
+  BCP_vec<int> coll;
   const double * x = lpres.x();
   select_nonzeros(x, x+vars.size(), ietol, coll);
   const int size = coll.size();
@@ -787,10 +783,10 @@ BCP_lp_user::reduced_cost_fixing(const double* dj, const double* x,
     return;
 
   const int varnum = vars.size();
-  BCP_temp_vec<int> tmp_changed_indices(varnum);
-  BCP_vec<int>& changed_indices = tmp_changed_indices.vec();
-  BCP_temp_vec<double> tmp_changed_bounds(2 * varnum);
-  BCP_vec<double>& changed_bounds = tmp_changed_bounds.vec();
+  BCP_vec<int> changed_indices;
+  changed_indices.reserve(varnum);
+  BCP_vec<double> changed_bounds;
+  changed_bounds.reserve(2 * varnum);
 
   // Note that when this function is called, we must have a dual
   // feasible dual solution. Therefore we can use the lagrangean
@@ -901,12 +897,9 @@ BCP_lp_user::branch_close_to_half(const BCP_lp_result& lpres,
   // and secondarily by cost)
   int to_select = 5*to_be_selected;
 
-  BCP_temp_vec<int> tmp_select_pos(to_select + 1, -1);
-  BCP_vec<int>& select_pos = tmp_select_pos.vec();
-  BCP_temp_vec<double> tmp_select_val(to_select + 1, 1.0);
-  BCP_vec<double>& select_val = tmp_select_val.vec();
-  BCP_temp_vec<double> tmp_select_cost(to_select + 1, -1e20);
-  BCP_vec<double>& select_cost = tmp_select_cost.vec();
+  BCP_vec<int> select_pos(to_select + 1, -1);
+  BCP_vec<double> select_val(to_select + 1, 1.0);
+  BCP_vec<double> select_cost(to_select + 1, -1e20);
 
   const double* objcoeff = p->lp_solver->getObjCoefficients();
 
@@ -971,8 +964,8 @@ BCP_lp_user::branch_close_to_half(const BCP_lp_result& lpres,
   // cost alone.
   if (k > to_be_selected) {
     BCP_vec<double>::iterator di;
-    BCP_temp_vec<int> tmp_new_pos(to_be_selected);
-    BCP_vec<int>& new_pos = tmp_new_pos.vec();
+    BCP_vec<int> new_pos;
+    new_pos.reserve(to_be_selected);
     BCP_vec<double>& new_cost = select_val;
     new_cost.clear();
     for (pos = 0; pos < to_be_selected; ++pos) {
@@ -1012,10 +1005,10 @@ BCP_lp_user::branch_close_to_one(const BCP_lp_result& lpres,
   const double * xi = x;
   const double * lastxi = x + vars.size();
 
-  BCP_temp_vec<int> tmp_select_pos(to_be_selected);
-  BCP_vec<int>& select_pos = tmp_select_pos.vec();
-  BCP_temp_vec<double> tmp_select_val(to_be_selected);
-  BCP_vec<double>& select_val = tmp_select_val.vec();
+  BCP_vec<int> select_pos;
+  select_pos.reserve(to_be_selected);
+  BCP_vec<double> select_val;
+  select_val.reserve(to_be_selected);
   BCP_vec<double>::iterator spv;
 
   double val;
@@ -1118,16 +1111,14 @@ compare_branching_candidates(BCP_presolved_lp_brobj* new_presolved,
   if (p->param(BCP_lp_par::BranchingObjectComparison) & BCP_Comparison_Objval){
     const double objetol = 1e-7;
       
-    BCP_temp_vec<double> tmp_new_obj;
-    BCP_vec<double>& new_obj = tmp_new_obj.vec();
+    BCP_vec<double> new_obj;
     new_presolved->get_lower_bounds(new_obj);
     std::sort(new_obj.begin(), new_obj.end());
     const int new_not_fathomed =
       new_obj.index(std::lower_bound(new_obj.begin(), new_obj.end(),
 				     DBL_MAX / 4));
 
-    BCP_temp_vec<double> tmp_old_obj;
-    BCP_vec<double>& old_obj = tmp_old_obj.vec();
+    BCP_vec<double> old_obj;
     old_presolved->get_lower_bounds(old_obj);
     std::sort(old_obj.begin(), old_obj.end());
     const int old_not_fathomed =

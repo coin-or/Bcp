@@ -3,7 +3,6 @@
 #include <cmath>
 
 #include "BCP_buffer.hpp"
-#include "BCP_temporary.hpp"
 #include "BCP_cut.hpp"
 #include "BCP_branch.hpp"
 

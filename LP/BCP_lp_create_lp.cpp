@@ -4,7 +4,6 @@
 #include "OsiSolverInterface.hpp"
 #include "CoinWarmStart.hpp"
 
-#include "BCP_temporary.hpp"
 #include "BCP_matrix.hpp"
 #include "BCP_problem_core.hpp"
 #include "BCP_warmstart.hpp"
@@ -38,8 +37,6 @@ void BCP_lp_create_lp(BCP_lp_prob& p)
     cols.reserve(varnum);
     p.user->vars_to_cols(cuts, vars, cols,
 			 *p.lp_result, BCP_Object_FromTreeManager, false);
-    // Gotta use `real' BCP_vec, no BCP_temp_vector, 'cos BCP_lp_relax()
-    // will take over them.
     BCP_vec<double> RLB;
     BCP_vec<double> RUB;
     RLB.reserve(cutnum);
@@ -120,15 +117,13 @@ void BCP_lp_create_lp(BCP_lp_prob& p)
 
   // Now fix the bounds
   const int num = std::max(varnum, cutnum);
-  BCP_temp_vec<int> tmp_ind;
-  BCP_vec<int>& ind = tmp_ind.vec();
+  BCP_vec<int> ind;
   ind.reserve(num);
   int i = -1;
   while (++i < num)
     ind.unchecked_push_back(i);
 
-  BCP_temp_vec<double> tmp_bd;
-  BCP_vec<double>& bd = tmp_bd.vec();
+  BCP_vec<double> bd;
   bd.reserve(2 * num);
   BCP_var_set::const_iterator vi = vars.begin();
   BCP_var_set::const_iterator lastvi = vars.end();

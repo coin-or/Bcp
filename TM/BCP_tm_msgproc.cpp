@@ -355,12 +355,20 @@ TM: Solution value: %f (best solution value so far: %f)\n",
 	    }
 	  }
 	  if (better) {
+	     bool wait_here = true;
+	     int i = 0;
+	     while (wait_here) {
+		i = 1-i;
+	     }
 	    ub(new_sol->objective_value());
 	    delete feas_sol;
 	    feas_sol = new_sol;
 	    msg_buf.clear();
 	    msg_buf.pack(new_sol->objective_value());
 	    msg_env->multicast(slaves.all, BCP_Msg_UpperBound, msg_buf);
+	     while (wait_here) {
+		i = 1-i;
+	     }
 	  } else {
 	    delete new_sol;
 	  }
