@@ -188,43 +188,13 @@ BCP_lp_user::unpack_cut_algo() invoked but not overridden!\n");
 
 //#############################################################################
 
-#if defined(COIN_USE_VOL)
-
-#include "OsiVolSolverInterface.hpp"
 OsiSolverInterface * 
 BCP_lp_user::initialize_solver_interface()
 {
-   return new OsiVolSolverInterface();
+   throw BCP_fatal_error("\
+BCP_lp_user::initialize_solver_interface() invoked but not overridden!\n");
+   return 0;
 }
-
-#elif defined(COIN_USE_CPX)
-
-#include "OsiCpxSolverInterface.hpp"
-OsiSolverInterface * 
-BCP_lp_user::initialize_solver_interface()
-{
-   return new OsiCpxSolverInterface();
-}
-
-#elif defined(COIN_USE_XPR)
-
-#include "OsiXprSolverInterface.hpp"
-OsiSolverInterface * 
-BCP_lp_user::initialize_solver_interface()
-{
-   return new OsiXprSolverInterface();
-}
-
-#elif defined(COIN_USE_OSL)
-
-#include "OsiOslSolverInterface.hpp"
-OsiSolverInterface * 
-BCP_lp_user::initialize_solver_interface()
-{
-   return new OsiOslSolverInterface();
-}
-
-#endif
 
 //#############################################################################
 void

@@ -2,7 +2,7 @@
 // Corporation and others.  All Rights Reserved.
 
 #include "OsiSolverInterface.hpp"
-#include "OsiWarmStart.hpp"
+#include "CoinWarmStart.hpp"
 
 #include "BCP_temporary.hpp"
 #include "BCP_matrix.hpp"
@@ -159,7 +159,7 @@ void BCP_lp_create_lp(BCP_lp_prob& p)
   // warmstarting info needed regarding this node, that info is what we'll
   // get at the end of processing the node. So delete the current ws info.
   if (p.node->warmstart) {
-    OsiWarmStart* ws = p.node->warmstart->convert_to_OsiWarmStart();
+    CoinWarmStart* ws = p.node->warmstart->convert_to_CoinWarmStart();
     p.lp_solver->setWarmStart(ws);
     delete ws;
     delete p.node->warmstart;

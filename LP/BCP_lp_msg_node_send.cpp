@@ -277,8 +277,8 @@ int BCP_lp_send_node_description(BCP_lp_prob& p,
 LP: there is ws info in BCP_lp_send_node_description()!\n");
       }
       // get and pack the warmstart info
-      OsiWarmStart* ws = p.lp_solver->getWarmStart();
-      p.node->warmstart = BCP_lp_convert_OsiWarmStart(p, ws);
+      CoinWarmStart* ws = p.lp_solver->getWarmStart();
+      p.node->warmstart = BCP_lp_convert_CoinWarmStart(p, ws);
       BCP_lp_pack_warmstart(p, del_vars, del_cuts);
    }
 

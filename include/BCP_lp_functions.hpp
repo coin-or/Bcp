@@ -15,7 +15,7 @@
 #include "BCP_vector.hpp"
 
 class OsiSolverInterface;
-class OsiWarmStart;
+class CoinWarmStart;
 
 class BCP_buffer;
 class BCP_lp_prob;
@@ -120,6 +120,6 @@ void BCP_lp_create_lp(BCP_lp_prob& p);
 // BCP_lp_create_warmstart.cpp
 // The calling functions will consider ws to be lost! This function should
 // either build it into the created BCP_warmstart or delete it.
-BCP_warmstart* BCP_lp_convert_OsiWarmStart(BCP_lp_prob& p, OsiWarmStart*& ws);
+BCP_warmstart* BCP_lp_convert_CoinWarmStart(BCP_lp_prob& p, CoinWarmStart*& ws);
 
 #endif

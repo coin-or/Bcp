@@ -11,7 +11,7 @@
 
 //#############################################################################
 
-class OsiWarmStart;
+class CoinWarmStart;
 
 //#############################################################################
 
@@ -27,7 +27,7 @@ public:
    virtual ~BCP_warmstart() {}
 
    /** Return an OsiWarmStart object that can be fed to the LP engine */
-   virtual OsiWarmStart* convert_to_OsiWarmStart() const = 0;
+   virtual CoinWarmStart* convert_to_CoinWarmStart() const = 0;
 
    /** Return how the warmstarting info is stored. */
    virtual BCP_storage_t storage() const = 0;

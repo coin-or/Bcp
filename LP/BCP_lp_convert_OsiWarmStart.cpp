@@ -1,21 +1,21 @@
 // Copyright (C) 2000, International Business Machines
 // Corporation and others.  All Rights Reserved.
 
-#include "OsiWarmStartDual.hpp"
-#include "OsiWarmStartBasis.hpp"
+#include "CoinWarmStartDual.hpp"
+#include "CoinWarmStartBasis.hpp"
 
 #include "BCP_lp_functions.hpp"
 #include "BCP_warmstart_dual.hpp"
 
 BCP_warmstart*
-BCP_lp_convert_OsiWarmStart(BCP_lp_prob& p, OsiWarmStart*& warmstart)
+BCP_lp_convert_CoinWarmStart(BCP_lp_prob& p, CoinWarmStart*& warmstart)
 {
   if (warmstart == NULL)
     return NULL;
 
   {
-    const OsiWarmStartDual* ws =
-      dynamic_cast<const OsiWarmStartDual*>(warmstart);
+    const CoinWarmStartDual* ws =
+      dynamic_cast<const CoinWarmStartDual*>(warmstart);
     if (ws != NULL) {
       const int size = ws->size();
       const double* dual = ws->dual();
@@ -27,8 +27,8 @@ BCP_lp_convert_OsiWarmStart(BCP_lp_prob& p, OsiWarmStart*& warmstart)
   }
 
   {
-    const OsiWarmStartBasis* ws =
-      dynamic_cast<const OsiWarmStartBasis*>(warmstart);
+    const CoinWarmStartBasis* ws =
+      dynamic_cast<const CoinWarmStartBasis*>(warmstart);
     if (ws != NULL) {
       // *FIXME* : want to convert it to BCP_warmstart_basis
       delete warmstart;

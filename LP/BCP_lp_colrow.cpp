@@ -322,8 +322,8 @@ int BCP_lp_add_from_local_cut_pool(BCP_lp_prob& p)
    BCP_lp_cut_pool::const_iterator cpi = first - 1;
 
    // create the row set
-   const OsiPackedVectorBase** rows =
-     new const OsiPackedVectorBase*[added_rows];
+   const CoinPackedVectorBase** rows =
+     new const CoinPackedVectorBase*[added_rows];
 
    BCP_temp_vec<double> tmp_rlb;
    BCP_vec<double>& rlb = tmp_rlb.vec();
@@ -403,8 +403,8 @@ int BCP_lp_add_from_local_var_pool(BCP_lp_prob& p)
    BCP_lp_var_pool::const_iterator vpi = first - 1;
 
    // create the col set
-   const OsiPackedVectorBase** cols =
-     new const OsiPackedVectorBase*[added_cols];
+   const CoinPackedVectorBase** cols =
+     new const CoinPackedVectorBase*[added_cols];
 
    BCP_temp_vec<double> tmp_clb;
    BCP_vec<double>& clb = tmp_clb.vec();

@@ -18,7 +18,7 @@ using std::fill;
 //#############################################################################
 
 BCP_lp_relax::BCP_lp_relax(const BCP_lp_relax& mat) :
-   OsiPackedMatrix(mat),
+   CoinPackedMatrix(mat),
    _Objective(mat._Objective),
    _ColLowerBound(mat._ColLowerBound),
    _ColUpperBound(mat._ColUpperBound),
@@ -30,7 +30,7 @@ BCP_lp_relax::BCP_lp_relax(const BCP_lp_relax& mat) :
 BCP_lp_relax&
 BCP_lp_relax::operator=(const BCP_lp_relax& mat)
 {
-   OsiPackedMatrix::operator=(mat);
+   CoinPackedMatrix::operator=(mat);
    _Objective = mat._Objective;
    _ColLowerBound = mat._ColLowerBound;
    _ColUpperBound = mat._ColUpperBound;
@@ -45,7 +45,7 @@ void
 BCP_lp_relax::reserve(const int MaxColNum, const int MaxRowNum,
 		      const int MaxNonzeros)
 {
-   OsiPackedMatrix::reserve(isColOrdered() ? MaxColNum : MaxRowNum,
+   CoinPackedMatrix::reserve(isColOrdered() ? MaxColNum : MaxRowNum,
 			    MaxNonzeros);
    _Objective.reserve(MaxColNum);
    _ColLowerBound.reserve(MaxColNum);
@@ -58,7 +58,7 @@ BCP_lp_relax::reserve(const int MaxColNum, const int MaxRowNum,
 
 void
 BCP_lp_relax::clear() {
-   OsiPackedMatrix::clear();
+   CoinPackedMatrix::clear();
    _ColLowerBound.clear();  _ColUpperBound.clear();  _Objective.clear();
    _RowLowerBound.clear();  _RowUpperBound.clear();
 }
@@ -66,7 +66,7 @@ BCP_lp_relax::clear() {
 //-----------------------------------------------------------------------------
 
 void
-BCP_lp_relax::copyOf(const OsiPackedMatrix& m,
+BCP_lp_relax::copyOf(const CoinPackedMatrix& m,
 		     const double* OBJ, const double* CLB, const double* CUB,
 		     const double* RLB, const double* RUB)
 {
@@ -79,13 +79,13 @@ BCP_lp_relax::copyOf(const OsiPackedMatrix& m,
    _RowLowerBound.insert(_RowLowerBound.end(), RLB, RLB+rownum);
    _RowUpperBound.insert(_RowUpperBound.end(), RUB, RUB+rownum);
 
-   OsiPackedMatrix::copyOf(m);
+   CoinPackedMatrix::copyOf(m);
 }
 
 //-----------------------------------------------------------------------------
 
 void
-BCP_lp_relax::assign(OsiPackedMatrix& m,
+BCP_lp_relax::assign(CoinPackedMatrix& m,
 		     double*& OBJ, double*& CLB, double*& CUB,
 		     double*& RLB, double*& RUB)
 {
@@ -108,8 +108,8 @@ BCP_lp_relax::assign(OsiPackedMatrix& m,
    delete[] RUB;
    RUB = 0;
    
-   OsiPackedMatrix::gutsOfDestructor();
-   OsiPackedMatrix::swap(m);
+   CoinPackedMatrix::gutsOfDestructor();
+   CoinPackedMatrix::swap(m);
 }
 
 //-----------------------------------------------------------------------------
@@ -212,14 +212,14 @@ BCP_lp_relax::BCP_createColumnOrderedMatrix(BCP_vec<BCP_row*>& rows,
   
   for (i = 0; i < rownum; ++i)
     nzcnt += rows[i]->getNumElements();
-  OsiPackedMatrix::clear();
-  OsiPackedMatrix::reserve(rownum, nzcnt);
-  OsiPackedMatrix::setDimensions(0, CLB.size());
+  CoinPackedMatrix::clear();
+  CoinPackedMatrix::reserve(rownum, nzcnt);
+  CoinPackedMatrix::setDimensions(0, CLB.size());
   _RowLowerBound.reserve(rownum);
   _RowUpperBound.reserve(rownum);
   for (i = 0; i < rownum; ++i) {
     BCP_row* row = rows[i];
-    OsiPackedMatrix::appendMajorVector(*row);
+    CoinPackedMatrix::appendMajorVector(*row);
     _RowLowerBound.unchecked_push_back(row->LowerBound());
     _RowUpperBound.unchecked_push_back(row->UpperBound());
   }
@@ -233,7 +233,7 @@ BCP_lp_relax::BCP_createColumnOrderedMatrix(BCP_vec<BCP_row*>& rows,
 BCP_lp_relax::BCP_lp_relax(BCP_vec<BCP_row*>& rows,
 			   BCP_vec<double>& CLB, BCP_vec<double>& CUB,
 			   BCP_vec<double>& OBJ) :
-  OsiPackedMatrix(false /*rowordered*/, 0, 0, 0, NULL, NULL, NULL, NULL)
+  CoinPackedMatrix(false /*rowordered*/, 0, 0, 0, NULL, NULL, NULL, NULL)
 {
   BCP_createColumnOrderedMatrix(rows, CLB, CUB, OBJ);
 }
@@ -244,7 +244,7 @@ BCP_lp_relax::BCP_lp_relax(BCP_vec<BCP_row*>& rows,
 			   BCP_vec<double>& CLB, BCP_vec<double>& CUB,
 			   BCP_vec<double>& OBJ,
 			   double extra_gap, double extra_major) :
-  OsiPackedMatrix(false /*rowordered*/, 0, 0, 0, NULL, NULL, NULL, NULL)
+  CoinPackedMatrix(false /*rowordered*/, 0, 0, 0, NULL, NULL, NULL, NULL)
 {
   setExtraGap(extra_gap);
   setExtraMajor(extra_major);
@@ -263,15 +263,15 @@ BCP_lp_relax::BCP_createRowOrderedMatrix(BCP_vec<BCP_col*>& cols,
   
   for (i = 0; i < colnum; ++i)
     nzcnt += cols[i]->getNumElements();
-  OsiPackedMatrix::clear();
-  OsiPackedMatrix::reserve(colnum, nzcnt);
-  OsiPackedMatrix::setDimensions(RLB.size(), 0);
+  CoinPackedMatrix::clear();
+  CoinPackedMatrix::reserve(colnum, nzcnt);
+  CoinPackedMatrix::setDimensions(RLB.size(), 0);
   _ColLowerBound.reserve(colnum);
   _ColUpperBound.reserve(colnum);
   _Objective.reserve(colnum);
   for (i = 0; i < colnum; ++i) {
     BCP_col* col = cols[i];
-    OsiPackedMatrix::appendMajorVector(*col);
+    CoinPackedMatrix::appendMajorVector(*col);
     _ColLowerBound.unchecked_push_back(col->LowerBound());
     _ColUpperBound.unchecked_push_back(col->UpperBound());
     _Objective.unchecked_push_back(col->Objective());
@@ -284,7 +284,7 @@ BCP_lp_relax::BCP_createRowOrderedMatrix(BCP_vec<BCP_col*>& cols,
 
 BCP_lp_relax::BCP_lp_relax(BCP_vec<BCP_col*>& cols,
 			   BCP_vec<double>& RLB, BCP_vec<double>& RUB) :
-  OsiPackedMatrix(true /*colordered*/, 0, 0, 0, NULL, NULL, NULL, NULL)
+  CoinPackedMatrix(true /*colordered*/, 0, 0, 0, NULL, NULL, NULL, NULL)
 {
   BCP_createRowOrderedMatrix(cols, RLB, RUB);
 }
@@ -294,7 +294,7 @@ BCP_lp_relax::BCP_lp_relax(BCP_vec<BCP_col*>& cols,
 BCP_lp_relax::BCP_lp_relax(BCP_vec<BCP_col*>& cols,
 			   BCP_vec<double>& RLB, BCP_vec<double>& RUB,
 			   double extra_gap, double extra_major) :
-  OsiPackedMatrix(true /*colordered*/, 0, 0, 0, NULL, NULL, NULL, NULL)
+  CoinPackedMatrix(true /*colordered*/, 0, 0, 0, NULL, NULL, NULL, NULL)
 {
   setExtraGap(extra_gap);
   setExtraMajor(extra_major);
@@ -311,13 +311,13 @@ BCP_lp_relax::BCP_lp_relax(const bool colordered,
 			   const BCP_vec<double>& CUB,
 			   const BCP_vec<double>& RLB,
 			   const BCP_vec<double>& RUB) :
-   OsiPackedMatrix(),
+   CoinPackedMatrix(),
    _Objective(OBJ), _ColLowerBound(CLB), _ColUpperBound(CUB),
    _RowLowerBound(RLB), _RowUpperBound(RUB)
 {
    const int minor = colordered ? RLB.size() : CLB.size();
    const int major = colordered ? CLB.size() : RLB.size();
-   OsiPackedMatrix::copyOf(colordered, minor, major, EI.size(),
+   CoinPackedMatrix::copyOf(colordered, minor, major, EI.size(),
 			   EV.begin(), EI.begin(), VB.begin(), 0);
 }
 
@@ -328,7 +328,7 @@ BCP_lp_relax::BCP_lp_relax(const bool colordered,
 			   int*& VB, int*& EI, double*& EV,
 			   double*& OBJ, double*& CLB, double*& CUB,
 			   double*& RLB, double*& RUB) :
-   OsiPackedMatrix(),
+   CoinPackedMatrix(),
    _Objective(OBJ, OBJ+colnum),
    _ColLowerBound(CLB, CLB+colnum), _ColUpperBound(CUB, CUB+colnum),
    _RowLowerBound(RLB, RLB+rownum), _RowUpperBound(RUB, RUB+rownum)
@@ -336,7 +336,7 @@ BCP_lp_relax::BCP_lp_relax(const bool colordered,
    const int minor = colordered ? rownum : colnum;
    const int major = colordered ? colnum : rownum;
    int * nullp = 0;
-   OsiPackedMatrix::assignMatrix(colordered, minor, major, nznum,
+   CoinPackedMatrix::assignMatrix(colordered, minor, major, nznum,
 				 EV, EI, VB, nullp);
    delete[] OBJ; OBJ = 0;
    delete[] CLB; CLB = 0;

@@ -38,7 +38,7 @@ BCP_lp_relax::pack(BCP_buffer& buf) const {
 
 void
 BCP_lp_relax::unpack(BCP_buffer& buf) {
-   OsiPackedMatrix::gutsOfDestructor();
+   CoinPackedMatrix::gutsOfDestructor();
 
    buf.unpack(colOrdered_)
       .unpack(extraGap_)

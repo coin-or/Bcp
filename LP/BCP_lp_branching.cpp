@@ -5,7 +5,7 @@
 #include <numeric>
 #include <utility> // for pair<>
 
-#include "OsiWarmStart.hpp"
+#include "CoinWarmStart.hpp"
 
 #include "BCP_timeout.hpp"
 #include "BCP_enum.hpp"
@@ -262,7 +262,7 @@ BCP_lp_perform_strong_branching(BCP_lp_prob& p,
 
    int i, j; // loop variable
 
-   const OsiWarmStart * ws = p.lp_solver->getWarmStart();
+   const CoinWarmStart * ws = p.lp_solver->getWarmStart();
 
    // prepare for strong branching
    lp->markHotStart();

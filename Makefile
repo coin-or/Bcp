@@ -36,10 +36,10 @@ endif
 
 ###############################################################################
 
-INCDIRS := $(DETECTINCDIRS)
-LIBDIRS := $(DETECTLIBDIRS)
-LIBS    := $(DETECTLIBNAMES)
-DEFINES := $(DETECTDEFINES)
+INCDIRS := $(IncDir)
+LIBDIRS := $(LibDir)
+LIBS    := $(LibName)
+DEFINES := $(Define)
 
 ##############################################################################
 
