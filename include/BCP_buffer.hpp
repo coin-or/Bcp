@@ -256,9 +256,22 @@ public:
    }
 
    /** Pack a <code>BCP_string</code> into the buffer. */
+   BCP_buffer& pack(const BCP_string& value){
+      // must define here, 'cos in BCP_message.C we have only templated members
+      int len = value.length();
+      make_fit( sizeof(int) + len );
+      memcpy(_data + _size, &len, sizeof(int));
+      _size += sizeof(int);
+      if (len > 0){
+	 memcpy(_data + _size, value.c_str(), len);
+	 _size += len;
+      }
+      return *this;
+   }
+   /** Pack a <code>BCP_string</code> into the buffer. */
    BCP_buffer& pack(BCP_string& value){
       // must define here, 'cos in BCP_message.C we have only templated members
-      const int len = value.length();
+      int len = value.length();
       make_fit( sizeof(int) + len );
       memcpy(_data + _size, &len, sizeof(int));
       _size += sizeof(int);
