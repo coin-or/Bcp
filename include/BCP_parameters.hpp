@@ -333,6 +333,9 @@ This is absurd.\n", MAX_PARAM_LINE_LENGTH);
 	    int val = atoi(value);
 	    quiet = (val != 0);
 	 }
+	 
+	 //--------------- Expand the value (look for keywords) ---------------
+	 std::string value_expanded = expand(value);
 
 	 //--------------- Find the parameter corresponding to  the keyword ---
 	 for (ind = keys.begin(); ind != keys.end(); ++ind) {
@@ -340,9 +343,9 @@ This is absurd.\n", MAX_PARAM_LINE_LENGTH);
 	       // The keyword does exists
 	       // set_param(ind->second, value);    should work
 	       if (!quiet) {
-		  printf("%s %s\n", keyword, value);
+		  printf("%s %s\n", keyword, value_expanded.c_str());
 	       }
-	       set_entry((*ind).second, value);
+	       set_entry((*ind).second, value_expanded.c_str());
 	       break;
 	    }
 	 }
@@ -363,6 +366,62 @@ This is absurd.\n", MAX_PARAM_LINE_LENGTH);
 BCP_parameters::read_from_stream   Finished scanning parameter stream.\n\n");
       }
     }
+
+
+  /*@}*/
+  //---------------------------------------------------------------------------
+  /**@name Expand parameter value (look for environment vars). */
+  /*@{*/
+  std::string expand(const char* value){
+
+    std::cout << "expand( " << value << " ) : ";
+    
+    const int MAX_PARAM_LINE_LENGTH = 1024;
+    char valueBuf[MAX_PARAM_LINE_LENGTH];
+    bool bDollar = false;
+    int j = 0;
+    for(int i = 0; value[i] != '\0'; i++){
+      char cval = value[i];
+      if(!bDollar){
+	if(cval == '$'){
+	  bDollar = true;
+	  continue;
+	}
+	valueBuf[j++] = cval;
+	continue;
+      }
+      else{
+	if(cval == '('){
+	  char envBuf[MAX_PARAM_LINE_LENGTH];
+	  //const char *ptr = &value[i+1];
+	  int k=0;
+	  char c;
+	  i++;
+	  while((c = value[i++]) != ')' && c != '\0')
+	    envBuf[k++] = c;
+	  envBuf[k] = '\0';
+	  char* eVal = getenv(envBuf);
+	  if(eVal != NULL){
+	    while(*eVal != '\0')
+	      valueBuf[j++] = *eVal++;
+	  }
+	  bDollar = false;
+	  i--;   
+	} else {
+	  valueBuf[j++] = '$';
+	  valueBuf[j++] = cval;
+	  bDollar = false;
+	}
+      }      
+    }   
+    valueBuf[j] = '\0';
+    std::string sExpand(valueBuf);
+    
+    std::cout << sExpand << std::endl;
+
+    return sExpand;
+  }
+
   /*@}*/
   //---------------------------------------------------------------------------
 
