@@ -599,15 +599,25 @@ BCP_lp_branch(BCP_lp_prob& p)
    can->apply_child_bd(p.lp_solver, keep);
    if (can->vars_affected()) {
       BCP_var_set& vars = p.node->vars;
-      if (can->forced_var_pos)
+      if (can->forced_var_pos) {
 	 vars.set_lb_ub(*can->forced_var_pos, can->forced_var_bd_child(keep));
+	 const BCP_vec<int>& pos = *can->forced_var_pos;
+	 for (int p = pos.size() - 1; p >= 0; --p) {
+	    vars[pos[p]]->make_non_removable();
+	 }
+      }
       if (can->implied_var_pos)
 	 vars.set_lb_ub(*can->implied_var_pos,can->implied_var_bd_child(keep));
    }
    if (can->cuts_affected()) {
       BCP_cut_set& cuts = p.node->cuts;
-      if (can->forced_cut_pos)
+      if (can->forced_cut_pos) {
 	 cuts.set_lb_ub(*can->forced_cut_pos, can->forced_cut_bd_child(keep));
+	 const BCP_vec<int>& pos = *can->forced_cut_pos;
+	 for (int p = pos.size() - 1; p >= 0; --p) {
+	    cuts[pos[p]]->make_non_removable();
+	 }
+      }
       if (can->implied_cut_pos)
 	 cuts.set_lb_ub(*can->implied_cut_pos,can->implied_cut_bd_child(keep));
    }
