@@ -26,6 +26,7 @@ int BCP_lp_user::current_level() const     { return p->node->level; }
 int BCP_lp_user::current_index() const     { return p->node->index; }
 int BCP_lp_user::current_iteration() const { return p->node->iteration_count; }
 BCP_user_data* BCP_lp_user::get_user_data() { return p->node->user_data; }
+
 //#############################################################################
 // Informational methods for the user
 /* Methods to get/set BCP parameters on the fly */
@@ -729,6 +730,7 @@ BCP_lp_user::select_vars_to_delete(const BCP_lp_result& lpres,
    if (before_fathom && p->param(BCP_lp_par::NoCompressionAtFathom))
       return;
    const int varnum = vars.size();
+   deletable.reserve(varnum);
    for (int i = p->core->varnum(); i < varnum; ++i) {
       BCP_var *var = vars[i];
       if (var->is_to_be_removed() ||
@@ -753,6 +755,7 @@ BCP_lp_user::select_cuts_to_delete(const BCP_lp_result& lpres,
    const int ineff_to_delete = p->param(BCP_lp_par::IneffectiveBeforeDelete);
    const double lb = lpres.objval();
    const BCP_vec<double>& lb_at_cutgen = p->node->lb_at_cutgen;
+   deletable.reserve(cutnum);
    for (int i = p->core->cutnum(); i < cutnum; ++i) {
      BCP_cut *cut = cuts[i];
      if (cut->is_to_be_removed() ||
