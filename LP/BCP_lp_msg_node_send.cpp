@@ -249,9 +249,13 @@ int BCP_lp_send_node_description(BCP_lp_prob& p,
    buf.clear();
    buf.pack(node.index).pack(node.quality).pack(node.true_lower_bound);
 
+   const bool send_desc = brobj || p.param(BCP_lp_par::SendFathomedNodeDesc);
+
+   buf.pack(send_desc);
+
    // Send the node description only if this node is branched on (i.e., brobj
    // is non-null) or we got to send the description of fathomed nodes, too.
-   if (brobj || p.param(BCP_lp_par::SendFathomedNodeDesc)) {
+   if (send_desc) {
       // Pack the core (WrtCore, WrtParent or Explicit)
       BCP_lp_pack_core(p);  // BCP_problem_core_change
       // pack the indexed/algo var set change (or pack them explicitly)

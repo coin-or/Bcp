@@ -215,6 +215,16 @@ LP:   Terminating and fathoming due to proven high cost.\n",
       BCP_solution* sol =
 	p.user->generate_heuristic_solution(lpres, p.node->vars, p.node->cuts);
       p.stat.time_heuristics += BCP_time_since_epoch() - time0;
+      // If the sol is a generic sol then look through the vars in it, and
+      // if any of them has 0 bcpindex then assign an index to it.
+      BCP_solution_generic* gsol = dynamic_cast<BCP_solution_generic*>(sol);
+      if (gsol) {
+	 const int size = gsol->_vars.size();
+	 for (int i = 0; i < size; ++i) {
+	    if (gsol->_vars[i]->bcpind() == 0)
+	       gsol->_vars[i]->set_bcpind(BCP_lp_next_var_index(p));
+	 }
+      }
 
       if (sol != NULL) {
 	p.user->send_feasible_solution(sol);
