@@ -338,7 +338,8 @@ BCP_lp_user::test_binary(const BCP_lp_result& lpres,
       return(NULL);
   }
 
-  BCP_solution_generic* sol = new BCP_solution_generic;
+  // This solution does not own the pointers to the variables
+  BCP_solution_generic* sol = new BCP_solution_generic(false); 
   double obj = 0;
   for (i = 0 ; i < varnum; ++i) {
     if (x[i] > 1 - etol) {
@@ -378,7 +379,8 @@ BCP_lp_user::test_integral(const BCP_lp_result& lpres,
       return(NULL);
   }
   
-  BCP_solution_generic* sol = new BCP_solution_generic;
+  // This solution does not own the pointers to the variables
+  BCP_solution_generic* sol = new BCP_solution_generic(false);
   double obj = 0;
   for (i = 0 ; i < varnum; ++i) {
     val = floor(x[i] + 0.5);
@@ -430,7 +432,8 @@ BCP_lp_user::test_full(const BCP_lp_result& lpres,
     }
   }
 
-  BCP_solution_generic* sol = new BCP_solution_generic;
+  // This solution does not own the pointers to the variables
+  BCP_solution_generic* sol = new BCP_solution_generic(false);
   double obj = 0;
   for (i = 0 ; i < varnum; ++i) {
     val = x[i];
