@@ -6,7 +6,7 @@
 // This file is fully docified.
 // There's nothing to docify...
 
-#if defined(LINUX) || (defined(__GNUC__) && defined(__linux__))
+#if (defined(__GNUC__) && defined(__linux__))
 #  include "BCP_linux.hpp"
 #endif
 
@@ -20,6 +20,10 @@
 
 #if defined(__GNUC__) && defined(__sparc) && defined(__sun)
 #  include "BCP_sunos.hpp"
+#endif
+
+#if defined(__MACH__) && defined(__GNUC__)
+#  include "BCP_MACH.hpp"
 #endif
 
 #endif
