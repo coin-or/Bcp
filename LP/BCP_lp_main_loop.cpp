@@ -18,7 +18,7 @@ void BCP_lp_main_loop(BCP_lp_prob& p)
    // argument flag for a number of functions. of course, here we invoke those
    // functions from the main loop, but this flag must be tru if the functions
    // are invoked from repricing. hence the flag is set here to false.
-   const bool from_main_loop = false; 
+   const bool not_from_main_loop = false; 
 
    /*------------------------------------------------------------------------*
     * The main loop -- continue solving relaxations until no new cuts
@@ -33,6 +33,10 @@ void BCP_lp_main_loop(BCP_lp_prob& p)
 	     p.node->index, p.node->level);
    // let the user do whatever she wants before the new node starts
    BCP_lp_prepare_for_new_node(p);
+
+   const bool fix_vars_while_external_processes_working =
+      (p.node->colgen == BCP_DoNotGenerateColumns_Fathom) ||
+      (p.node->colgen == BCP_DoNotGenerateColumns_Send);
 
    while (true){
       ++p.node->iteration_count;
@@ -84,11 +88,28 @@ void BCP_lp_main_loop(BCP_lp_prob& p)
       BCP_lp_test_feasibility(p, lpres);
       p.stat.time_feas_testing += BCP_time_since_epoch() - time0;
 
+      // Update the lower bound
+      p.node->quality = lpres.objval();
+      p.node->true_lower_bound =
+	 p.user->compute_lower_bound(p.node->true_lower_bound,
+				     lpres, p.node->vars, p.node->cuts);
+
+      if (p.over_ub(p.node->true_lower_bound)) {
+	 if (p.param(BCP_lp_par::LpVerb_FathomInfo))
+	    printf("\
+LP:   Terminating and fathoming due to proven high cost.\n");
+	 BCP_lp_perform_fathom(p);
+	 return;
+      }
+
+      // If we get here then we either
+      // - do not generate columns AND the lp value is below the ub
+      // - generate columns
+
       if (tc & BCP_ProvenPrimalInf) {
 	 if (p.param(BCP_lp_par::LpVerb_FathomInfo))
 	    printf("LP:   Primal feasibility lost.\n");
-	 if (BCP_lp_fathom(p, from_main_loop)) {
-	    BCP_lp_clean_up_node(p);
+	 if (BCP_lp_fathom(p, not_from_main_loop)) {
 	    return;
 	 }
 	 varset_changed = true;
@@ -99,8 +120,7 @@ void BCP_lp_main_loop(BCP_lp_prob& p)
 	  (tc & BCP_DualObjLimReached)) {
 	 if (p.param(BCP_lp_par::LpVerb_FathomInfo))
 	    printf("LP:   Terminating due to high cost.\n");
-	 if (BCP_lp_fathom(p, from_main_loop)) {
-	    BCP_lp_clean_up_node(p);
+	 if (BCP_lp_fathom(p, not_from_main_loop)) {
 	    return;
 	 }
 	 varset_changed = true;
@@ -167,26 +187,30 @@ void BCP_lp_main_loop(BCP_lp_prob& p)
 	 }
       }
 
-      // While CG and CP are working try to fix vars and test the
-      // effectiveness of the rows.
-      if (BCP_lp_fix_vars(p,
-			  false /* not from fathom */,
-			  true /* update_bd_change_count */)) {
-	// during variable fixing primal feasibility is lost (must be due to
-	// logical fixing by the user). Go back and resolve, but keep the same
-	// iteration number
-	--p.node->iteration_count;
-	continue;
+      if (fix_vars_while_external_processes_working) {
+	 if (BCP_lp_fix_vars(p)) {
+	    // during variable fixing primal feasibility is lost (must be due
+	    // to logical fixing by the user). Go back and resolve, but keep
+	    // the same iteration number
+	    --p.node->iteration_count;
+	    continue;
+	 }
       }
       BCP_lp_adjust_row_effectiveness(p);
 
       // Generate and receive the cuts
       const int cuts_to_add_cnt =
-	 BCP_lp_generate_cuts(p, varset_changed, from_main_loop);
-
+	 BCP_lp_generate_cuts(p, varset_changed, not_from_main_loop);
       // Generate and receive the vars
       const int vars_to_add_cnt =
-	 BCP_lp_generate_vars(p, cutset_changed, from_main_loop);
+	 BCP_lp_generate_vars(p, cutset_changed, not_from_main_loop);
+
+      if (! fix_vars_while_external_processes_working) {
+	 if (BCP_lp_fix_vars(p)) {
+	    --p.node->iteration_count;
+	    continue;
+	 }
+      }
 
       time0 = BCP_time_since_epoch();
       BCP_solution* sol =
@@ -199,8 +223,7 @@ void BCP_lp_main_loop(BCP_lp_prob& p)
 	if (p.over_ub(lpres.objval())) {
 	  if (p.param(BCP_lp_par::LpVerb_FathomInfo))
 	    printf("LP:   Terminating due to high cost (good heur soln!).\n");
-	  if (BCP_lp_fathom(p, from_main_loop)) {
-	    BCP_lp_clean_up_node(p);
+	  if (BCP_lp_fathom(p, not_from_main_loop)) {
 	    return;
 	  }
 	  varset_changed = true;

@@ -44,9 +44,9 @@ BCP_tree::enumerate_leaves(BCP_tm_node* node, const double obj_limit)
       node->_processed_leaf_num = st == BCP_ActiveNode ? 1 : 0;
       node->_pruned_leaf_num = st == BCP_PrunedNode ? 1 : 0;
       node->_tobepriced_leaf_num =
-	 (st == BCP_NextPhaseNode ||
-	  (st == BCP_ProcessedNode || st == BCP_ActiveNode ||
-	   st == BCP_CandidateNode) && node->lower_bound() > obj_limit) ? 1:0;
+	 ( ((st & (BCP_ProcessedNode | BCP_ActiveNode | BCP_CandidateNode)) &&
+	    node->true_lower_bound() > obj_limit) ||
+	   st == BCP_NextPhaseNode ) ? 1 : 0;
    } else {
       node->_leaf_num = 0;
       node->_processed_leaf_num = 0;
@@ -67,18 +67,18 @@ BCP_tree::enumerate_leaves(BCP_tm_node* node, const double obj_limit)
 //#############################################################################
 // Find the best lower bound
 double
-BCP_tree::lower_bound(const BCP_tm_node* node) const
+BCP_tree::true_lower_bound(const BCP_tm_node* node) const
 {
   double worstlb = DBL_MAX;
   if (node->child_num() == 0) {
     const BCP_tm_node_status st = node->status;
     if (st == BCP_ActiveNode || st == BCP_CandidateNode)
-      worstlb = node->lower_bound();
+      worstlb = node->true_lower_bound();
   } else {
     BCP_vec<BCP_tm_node*>::const_iterator child;
     BCP_vec<BCP_tm_node*>::const_iterator lastchild = node->_children.end();
     for (child = node->_children.begin(); child != lastchild; ++child) {
-      const double childlb = lower_bound(*child);
+      const double childlb = true_lower_bound(*child);
       if (childlb < worstlb)
 	worstlb = childlb;
     }

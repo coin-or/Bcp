@@ -228,8 +228,8 @@ void BCP_tm_send_node(BCP_tm_prob& p, const BCP_tm_node* node,
 
    // start with book-keeping data
    buf.clear();
-   buf.pack(p.current_phase_colgen)
-      .pack(node->index()).pack(node->level()).pack(node->lower_bound())
+   buf.pack(p.current_phase_colgen).pack(node->index()).pack(node->level())
+      .pack(node->quality()).pack(node->true_lower_bound())
       .pack(dive);
 
    // pack the process information

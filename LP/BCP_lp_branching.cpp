@@ -425,7 +425,10 @@ BCP_lp_select_branching_object(BCP_lp_prob& p,
    lp->resolve();
    p.lp_result->get_results(*lp);
 
-   p.node->lower_bound = p.lp_result->objval();
+   p.node->quality = p.lp_result->objval();
+   p.node->true_lower_bound =
+      p.user->compute_lower_bound(p.node->true_lower_bound,
+				  *p.lp_result, p.node->vars, p.node->cuts);
 
    delete ws;
 

@@ -57,34 +57,26 @@ BCP_restore_feasibility(BCP_lp_prob& p,
 
 //#############################################################################
 
+void
+BCP_lp_perform_fathom(BCP_lp_prob& p)
+{
+   if (p.param(BCP_lp_par::LpVerb_FathomInfo))
+      printf("LP:   Pruning node\n");
+   // Here we don't have col/row_indices to compress and we do want to
+   // force deletion.
+   BCP_lp_delete_cols_and_rows(p, 0, true);
+   BCP_lp_send_node_description(p, 0, BCP_Msg_NodeDescription_Discarded);
+   BCP_lp_clean_up_node(p);
+}
+   
+
+//#############################################################################
+
 // the primal must be infeas or OverUB.
 
 bool BCP_lp_fathom(BCP_lp_prob& p, const bool from_repricing)
 {
-   if (p.node->colgen == BCP_DoNotGenerateColumns_Fathom) {
-      if (p.param(BCP_lp_par::LpVerb_FathomInfo))
-	 printf("LP:   Pruning node\n");
-      // Here we don't have col/row_indices to compress and we do want to
-      // force deletion.
-      if (p.param(BCP_lp_par::FixVarsBeforeFathom))
-	 BCP_lp_fix_vars(p,
-			 true /* from fathom */,
-			 false /* ??? *THINK*: this is safe, but maybe
-				  true would be OK, too ??? */
-			      );
-      BCP_lp_delete_cols_and_rows(p, 0, true);
-      BCP_lp_send_node_description(p, 0, BCP_Msg_NodeDescription_Discarded);
-      return true;
-   }
-
    BCP_lp_result& lpres = *p.lp_result;
-
-   if (p.param(BCP_lp_par::FixVarsBeforeFathom))
-      BCP_lp_fix_vars(p,
-		      true /* from fathom */,
-		      false /* ??? *THINK*: this is safe, but maybe true
-			     * would be OK, too ??? */
-		      );
 
    int i, j;
    int added_size = 0;
@@ -93,12 +85,7 @@ bool BCP_lp_fathom(BCP_lp_prob& p, const bool from_repricing)
 
    switch (p.node->colgen){
     case BCP_DoNotGenerateColumns_Fathom:
-      if (p.param(BCP_lp_par::LpVerb_FathomInfo))
-	 printf("LP:   Pruning node\n");
-      // Here we don't have col/row_indices to compress and we do want to
-      // force deletion.
-      BCP_lp_delete_cols_and_rows(p, 0, true);
-      BCP_lp_send_node_description(p, 0, BCP_Msg_NodeDescription_Discarded);
+      BCP_lp_perform_fathom(p);
       return true;
 
     case BCP_DoNotGenerateColumns_Send:

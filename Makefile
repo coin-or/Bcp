@@ -323,7 +323,7 @@ $(USERTARGETDIR)/ebcpp $(USERTARGETDIR)/ebcps : $(ALLOBJFILES)
 	@echo "Linking $(notdir $@) ..."
 	@echo ""
 	@mkdir -p $(USERTARGETDIR)
-	@$(CXX) $(CXXFLAGS) -o $@ $(ALLOBJFILES) 
+	@$(CXX) $(CXXFLAGS) -o $@ $(ALLOBJFILES) \
 		$(LDFLAGS) $(SYSLD) $(EFENCE) -lm
 
 clean :

@@ -65,7 +65,8 @@ BCP_lp_user::send_feasible_solution(const BCP_solution* sol)
 
   // update the UB if necessary
   const double objval = sol->objective_value();
-  if (! p->param(BCP_lp_par::SolveLpToOptimality) && p->ub(objval))
+  const bool over_ub = p->ub(objval);
+  if (! p->param(BCP_lp_par::SolveLpToOptimality) && over_ub)
     p->lp_solver->setDblParam(OsiDualObjectiveLimit, objval-p->granularity());
 }
 
@@ -287,6 +288,39 @@ BCP_lp_user::modify_lp_parameters(OsiSolverInterface* lp,
   if (p->param(BCP_lp_par::ReportWhenDefaultIsExecuted)) {
     printf(" LP: Default prepare_for_optimization() executed.\n");
   }
+}
+
+//#############################################################################
+// Generating a true lower bound
+double
+BCP_lp_user::compute_lower_bound(const double old_lower_bound,
+				 const BCP_lp_result& lpres,
+				 const BCP_vec<BCP_var*>& vars,
+				 const BCP_vec<BCP_cut*>& cuts)
+{
+   // If columns are to be generated then we can't say anything, just return
+   // the current lower bound
+   if (p->node->colgen != BCP_DoNotGenerateColumns_Fathom)
+      return old_lower_bound;
+
+   // Otherwise we got the examine the termination code and the objective
+   // value of the LP solution
+   const BCP_termcode tc = lpres.termcode();
+   if (tc & BCP_ProvenOptimal)
+      return lpres.objval();
+
+   // The limit (the upper bound) on the dual objective is proven to be
+   // reached, but the objval might not reflect this! (the LP solver may not
+   // make the last iteration that pushes objval over the limit). So we return
+   // a high value ourselves.
+   if (tc & BCP_DualObjLimReached)
+      return p->ub() + 1e-5;
+
+   // We can't say anything in any other case
+   // (BCP_ProvenPrimalInf | BCP_ProvenDualInf | BCP_PrimalObjLimReached |
+   //  BCP_TimeLimit | BCP_Abandoned), not to mention that some of these are
+   //  impossible. Just return the current bound.
+   return old_lower_bound;
 }
 
 //#############################################################################
@@ -731,10 +765,19 @@ BCP_lp_user::logical_fixing(const BCP_lp_result& lpres,
 
 //#############################################################################
 void
-BCP_lp_user::reduced_cost_fixing(const double* dj, const double gap,
+BCP_lp_user::reduced_cost_fixing(const double* dj, const double* x,
+				 const double gap,
 				 BCP_vec<BCP_var*>& vars, int& newly_changed)
 {
   newly_changed = 0;
+  const bool atZero = get_param(BCP_lp_par::DoReducedCostFixingAtZero);
+  const bool atAny = get_param(BCP_lp_par::DoReducedCostFixingAtAnything);
+
+  if (! atZero && ! atAny)
+     return;
+
+  double petol = 0.0;
+  p->lp_solver->getDblParam(OsiPrimalTolerance, petol);
 
   // If the gap is negative that means that we are above the limit, so
   // don't do anything.
@@ -753,13 +796,13 @@ BCP_lp_user::reduced_cost_fixing(const double* dj, const double gap,
 
   // *FIXME* : If we knew that there are integral vars only, then
   // we could leave out the test for BCP_ContinuousVar...
-  for (int i = 0; i < varnum; ++i){
+  for (int i = 0; i < varnum; ++i) {
     BCP_var* var = vars[i];
     if (! var->is_fixed() && var->var_type() != BCP_ContinuousVar){
       if (dj[i] > 0) {
 	const double lb = var->lb();
 	const double new_ub = lb + floor(gap / dj[i]);
-	if (new_ub < var->ub()) {
+	if (new_ub < var->ub() && (atAny || CoinAbs(x[i])<petol) ) {
 	  vars[i]->set_ub(new_ub);
 	  changed_indices.unchecked_push_back(i);
 	  changed_bounds.unchecked_push_back(lb);
@@ -768,7 +811,7 @@ BCP_lp_user::reduced_cost_fixing(const double* dj, const double gap,
       } else if (dj[i] < 0) {
 	const double ub = var->ub();
 	const double new_lb = ub - floor(gap / (-dj[i]));
-	if (new_lb > var->lb()) {
+	if (new_lb > var->lb() && (atAny || CoinAbs(x[i])<petol) ) {
 	  vars[i]->set_lb(new_lb);
 	  changed_indices.unchecked_push_back(i);
 	  changed_bounds.unchecked_push_back(new_lb);

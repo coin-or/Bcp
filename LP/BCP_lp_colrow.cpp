@@ -38,9 +38,7 @@ inline static int BCP_compare_waiting_col_ptr(const BCP_lp_waiting_col* wcol0,
 
 //#############################################################################
 
-bool BCP_lp_fix_vars(BCP_lp_prob& p,
-		     const bool from_fathom,
-		     const bool update_change_count)
+bool BCP_lp_fix_vars(BCP_lp_prob& p)
 {
    const BCP_lp_result& lpres = *p.lp_result;
 
@@ -54,18 +52,15 @@ bool BCP_lp_fix_vars(BCP_lp_prob& p,
 
    BCP_lp_check_ub(p);
 
-   if (! from_fathom && p.par.entry(BCP_lp_par::DoReducedCostFixing))
-      p.user->reduced_cost_fixing(lpres.dj(),
-				  p.ub() - lpres.objval() - p.granularity(),
-				  vars, newly_changed);
-
+   p.user->reduced_cost_fixing(lpres.dj(), lpres.x(),
+			       p.ub() - lpres.objval() - p.granularity(),
+			       vars, newly_changed);
    if (newly_changed > 0 && p.param(BCP_lp_par::LpVerb_VarTightening)) {
       printf("LP: Reduced cost fixing has changed the bounds on %i vars\n",
 	     newly_changed);
    }
       
-   if (update_change_count)
-      p.var_bound_changes_since_logical_fixing += newly_changed;
+   p.var_bound_changes_since_logical_fixing += newly_changed;
 
    BCP_vec<BCP_obj_status> var_status;
    var_status.reserve(varnum);
@@ -112,28 +107,12 @@ bool BCP_lp_fix_vars(BCP_lp_prob& p,
 	     vars[pos]->ub() < new_ub - petol) {
 	    throw BCP_fatal_error("logical fixing enlarged feas region!\n");
 	 }
-	 const bool viol =
-	    (x[pos] < new_lb - petol) || (x[pos] > new_ub + petol);
-	 if (viol)
+	 if ((x[pos] < new_lb - petol) || (x[pos] > new_ub + petol))
 	    lost_primal_feasibility = true;
+      }
 
-	 // If we are NOT from fathom then any fixing goes. Otherwise fixings
-	 // that violate primal feas must be disregarded 'cos if the node gets
-	 // sent to the TM for later processing and there's a var fixed to 0
-	 // but at nonzero level then the LP gets royally messed up when this
-	 // node is processed again.
-	 if (from_fathom && viol) {
-	    newbd -= 2;
-	    *newbd = vars[pos]->lb();
-	    ++newbd;
-	    *newbd = vars[pos]->ub();
-	    ++newbd;
-	    --bd_changes;
-	 }	    
-      }
-      if (update_change_count) {
-	 p.var_bound_changes_since_logical_fixing = 0;
-      }
+      p.var_bound_changes_since_logical_fixing = 0;
+
       if (bd_changes > 0) {
 	 p.lp_solver->setColSetBounds(changed_pos.begin(), changed_pos.end(),
 				      new_bd.begin());

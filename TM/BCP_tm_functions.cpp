@@ -157,12 +157,12 @@ BCP_tm_start_one_node(BCP_tm_prob& p)
 
       bool process_this = true;
 
-      if (next_node->lower_bound() > p.ub() - p.granularity())
+      if (next_node->true_lower_bound() > p.ub() - p.granularity())
 	 process_this = false;
-      if (next_node->lower_bound() >
+      if (next_node->true_lower_bound() >
 	  p.ub() - p.param(BCP_tm_par::TerminationGap_Absolute))
 	 process_this = false;
-      if (next_node->lower_bound() >
+      if (next_node->true_lower_bound() >
 	  p.ub() * (1 - p.param(BCP_tm_par::TerminationGap_Relative)))
 	 process_this = false;
 

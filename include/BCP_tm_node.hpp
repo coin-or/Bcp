@@ -59,7 +59,9 @@ public:
    /** */
    int _level;
    /** */
-   double _lower_bound;
+   double _quality;
+   /** */
+   double _true_lower_bound;
    /** */
    BCP_node_change* _desc;
    /** */
@@ -96,7 +98,8 @@ public:
       status(BCP_DefaultNode),
       _index(0),
       _level(level),
-      _lower_bound(-DBL_MAX),
+      _quality(-DBL_MAX),
+      _true_lower_bound(-DBL_MAX),
       _desc(desc),
       _parent(0),
       _birth_index(-1),
@@ -114,7 +117,8 @@ public:
       status(BCP_DefaultNode),
       _index(0),
       _level(level),
-      _lower_bound(-DBL_MAX),
+      _quality(-DBL_MAX),
+      _true_lower_bound(-DBL_MAX),
       _desc(desc),
       _parent(0),
       _birth_index(-1),
@@ -139,7 +143,9 @@ public:
    /** */
    inline int child_num() const { return _children.size(); }
    /** */
-   inline double lower_bound() const { return _lower_bound; }
+   inline double quality() const { return _quality; }
+   /** */
+   inline double true_lower_bound() const { return _true_lower_bound; }
    /** */
    inline int birth_index() const { return _birth_index; }
 
@@ -209,8 +215,8 @@ public:
 
    /**@name Modifying methods */
    /*@{*/
-   /** Return the worst lower bound in the search tree */
-   double lower_bound(const BCP_tm_node* node) const;
+   /** Return the worst true lower bound in the search tree */
+   double true_lower_bound(const BCP_tm_node* node) const;
    /** */
    void enumerate_leaves(BCP_tm_node* node, const double obj_limit);
    /** */

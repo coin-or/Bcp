@@ -41,6 +41,7 @@ void BCP_lp_main_loop(BCP_lp_prob& p);
 
 //-----------------------------------------------------------------------------
 // BCP_lp_fathom.cpp
+void BCP_lp_perform_fathom(BCP_lp_prob& p);
 bool BCP_lp_fathom(BCP_lp_prob& p, const bool from_repricing);
 
 //-----------------------------------------------------------------------------
@@ -82,8 +83,7 @@ BCP_lp_branch(BCP_lp_prob& p);
 
 //-----------------------------------------------------------------------------
 // BCP_lp_colrow.cpp
-bool BCP_lp_fix_vars(BCP_lp_prob& p, const bool from_fathom,
-		     const bool update_change_count);
+bool BCP_lp_fix_vars(BCP_lp_prob& p);
 void BCP_lp_adjust_row_effectiveness(BCP_lp_prob& p);
 void BCP_lp_delete_cols_and_rows(BCP_lp_prob& p,
 				 BCP_lp_branching_object* can,

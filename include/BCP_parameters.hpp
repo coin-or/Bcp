@@ -128,6 +128,9 @@ private:
     /** The keyword, parameter pairs. Used when the parameter file is read in.
      */
     BCP_vec< std::pair<BCP_string, BCP_parameter> > keys;
+    /** list of obsolete keywords. If any of these is encountered a warning is
+	printed. */
+    BCP_vec<BCP_string> obsolete_keys;
     /** The character parameters. */
     char*                cpar;
     /** The integer parameters. */
@@ -267,6 +270,7 @@ public:
       char ch;
 
       BCP_vec< std::pair<BCP_string, BCP_parameter> >::const_iterator ind;
+      BCP_vec<BCP_string>::const_iterator obs_ind;
       while (parstream) {
 	 parstream.get(line, MAX_PARAM_LINE_LENGTH);
 	 if (parstream) {
@@ -299,16 +303,25 @@ This is absurd.\n", MAX_PARAM_LINE_LENGTH);
 	            // even if ctmp == end_ofline
 
 	 //--------------- Find the parameter corresponding to  the keyword ---
-	 for (ind = keys.begin(); ind != keys.end(); ++ind)
-	    if (ind->first == keyword)
+	 for (ind = keys.begin(); ind != keys.end(); ++ind) {
+	    if (ind->first == keyword) {
+	       // The keyword does exists
+	       // set_param(ind->second, value);    should work
+	       printf("keyword `%s' is found (%s).\n", keyword, value);
+	       set_entry((*ind).second, value);
 	       break;
+	    }
+	 }
 
-	 if (ind != keys.end()){
-	    // The keyword does exists
-	    // set_param(ind->second, value);    should work
-	    printf("keyword `%s' is found (%s).\n", keyword, value);
-	    set_entry((*ind).second, value);
-	    continue;
+	 for (obs_ind = obsolete_keys.begin();
+	      obs_ind != obsolete_keys.end();
+	      ++obs_ind) {
+	    if (*obs_ind == keyword) {
+	       // The keyword does exists but is obsolete
+	       printf("***WARNING*** : Obsolete keyword `%s' is found.\n",
+		      keyword);
+	       break;
+	    }
 	 }
       }
       printf("\n");

@@ -29,16 +29,14 @@ struct BCP_lp_par{
 	  whether it already exists in the local variable pool or not. <br> 
 	  Values: true (1), false (0). Default: 1. */
       CompareNewVarsToOldOnes,
-      /** If true the BCP will attempt to do reduced cost fixing. <br>
+      /** If true the BCP will attempt to do reduced cost fixing only for
+	  variables currently at zero. <br>
 	  Values: true (1), false (0). Default: 1. */
-      DoReducedCostFixing,
-      /** Whether to fix variables (with reduced cost and logical fixing)
-	  before fathoming. More precisely, before column generation is
-	  attempted before fathoming. <br>
-	  Confession: I do remember that the necessity came up once, but I
-	  can't remember what was the reason... :-( <br>
+      DoReducedCostFixingAtZero,
+      /** If true the BCP will attempt to do reduced cost fixing for any
+	  variable, no matter what is their current value. <br>
 	  Values: true (1), false (0). Default: 1. */
-      FixVarsBeforeFathom,
+      DoReducedCostFixingAtAnything,
       /** Indicate whether BCP is supposed to track the indexed variables yet
 	  to be priced out. */
       MaintainIndexedVarPricingList,

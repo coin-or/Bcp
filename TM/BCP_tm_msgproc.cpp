@@ -402,7 +402,7 @@ Unexpected BCP_Msg_LpStatistics message in BCP_tm_process_message.\n");
    }
 
    if (time_is_over) {
-     const double lb = p.search_tree.lower_bound(p.search_tree.root());
+     const double lb = p.search_tree.true_lower_bound(p.search_tree.root());
      printf("TM: Time has ran out... %.3f secs\n", t);
      printf("TM: Best lower bound in this phase: %f\n", lb);
      fflush(0);

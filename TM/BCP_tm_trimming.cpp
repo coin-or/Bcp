@@ -131,7 +131,7 @@ int BCP_tm_trim_tree(BCP_tm_prob& p, BCP_tm_node* node,
       // if there are no more than 2 nodes further down that have to be taken
       // care of then don't trim
       trim = false;
-   } else if (node->lower_bound() < p.ub() - p.granularity()) {
+   } else if (node->true_lower_bound() < p.ub() - p.granularity()) {
       // don't trim if the gap at this node is not below the granularity
       trim = false;
    }

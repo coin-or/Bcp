@@ -257,7 +257,7 @@ BCP_tm_user::compare_tree_nodes(const BCP_tm_node* node0,
 {
   switch (p->param(BCP_tm_par::TreeSearchStrategy)) {
   case BCP_BestFirstSearch:
-    return node0->lower_bound() < node1->lower_bound();
+    return node0->quality() < node1->quality();
   case BCP_BreadthFirstSearch:
     return node0->index() < node1->index();
   case BCP_DepthFirstSearch:

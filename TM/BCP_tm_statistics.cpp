@@ -79,10 +79,15 @@ BCP_tm_wrapup(BCP_tm_prob* tm, BCP_lp_prob* lp,
 
   const bool bval = tm->param(BCP_tm_par::TmVerb_BestFeasibleSolutionValue);
   const bool bsol = tm->param(BCP_tm_par::TmVerb_BestFeasibleSolution);
-  if (bval || bsol)
-    printf("TM: The best solution found has value %f\n",
-	   tm->feas_sol->objective_value());
-  if (bsol)
+  if (bval || bsol) {
+     if (! tm->feas_sol) {
+	printf("TM: No feasible solution is found\n");
+     } else {
+	printf("TM: The best solution found has value %f\n",
+	       tm->feas_sol->objective_value());
+     }
+  }
+  if (bsol && tm->feas_sol)
     tm->user->display_feasible_solution(tm->feas_sol);
 
   if (lp) {
