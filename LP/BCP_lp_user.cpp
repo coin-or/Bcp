@@ -315,7 +315,7 @@ BCP_lp_user::test_feasibility(const BCP_lp_result& lpres,
 
 //-----------------------------------------------------------------------------
 
-BCP_solution*
+BCP_solution_generic*
 BCP_lp_user::test_binary(const BCP_lp_result& lpres,
 			 const BCP_vec<BCP_var*>& vars,
 			 const double etol) const
@@ -351,7 +351,7 @@ BCP_lp_user::test_binary(const BCP_lp_result& lpres,
   return sol;
 }
 //-----------------------------------------------------------------------------
-BCP_solution*
+BCP_solution_generic*
 BCP_lp_user::test_integral(const BCP_lp_result& lpres,
 			   const BCP_vec<BCP_var*>& vars,
 			   const double etol) const
@@ -393,7 +393,7 @@ BCP_lp_user::test_integral(const BCP_lp_result& lpres,
   return sol;
 }
 //-----------------------------------------------------------------------------
-BCP_solution*
+BCP_solution_generic*
 BCP_lp_user::test_full(const BCP_lp_result& lpres,
 		       const BCP_vec<BCP_var*>& vars,
 		       const double etol) const
@@ -1280,3 +1280,5 @@ BCP_lp_user::purge_slack_pool(const BCP_vec<BCP_cut*>& slack_pool,
     break;
   }
 }
+
+//#############################################################################

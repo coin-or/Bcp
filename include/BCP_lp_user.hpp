@@ -303,17 +303,17 @@ public:
     */
     /*@{*/
       /** Test whether all variables are 0/1. */
-      BCP_solution*
+      BCP_solution_generic*
       test_binary(const BCP_lp_result& lpres, const BCP_vec<BCP_var*>& vars,
 		  const double etol) const;
       /** Test whether all variables are integer and are within their lower and
           upper bounds. */
-      BCP_solution*
+      BCP_solution_generic*
       test_integral(const BCP_lp_result& lpres, const BCP_vec<BCP_var*>& vars,
 		    const double etol) const;
       /** Test whether all variables are within their lower and upper bounds
 	  and that the integer variables are really integer. */
-      BCP_solution*
+      BCP_solution_generic*
       test_full(const BCP_lp_result& lpres, const BCP_vec<BCP_var*>& vars,
 		const double etol) const;
     /*@}*/
