@@ -1283,6 +1283,15 @@ BCP_lp_user::set_actions_for_children(BCP_presolved_lp_brobj* best)
 //#############################################################################
 
 void
+BCP_lp_user::set_user_data_for_children(BCP_presolved_lp_brobj* best, 
+					const int selected)
+{
+  set_user_data_for_children(best);
+}
+
+//#############################################################################
+
+void
 BCP_lp_user::set_user_data_for_children(BCP_presolved_lp_brobj* best)
 {
   if (p->param(BCP_lp_par::ReportWhenDefaultIsExecuted)) {

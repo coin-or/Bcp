@@ -789,6 +789,9 @@ public:
 	appropriate entry in uds. When this function is called uds 
      */
     virtual void
+    set_user_data_for_children(BCP_presolved_lp_brobj* best, 
+			       const int selected);
+    virtual void
     set_user_data_for_children(BCP_presolved_lp_brobj* best);
   /*@}*/
       

@@ -488,7 +488,7 @@ LP: Strong branching is disabled but more than one candidate is selected.\n\
 
    // finally get the user data for the children
    best_presolved->initialize_user_data();
-   p.user->set_user_data_for_children(best_presolved);
+   p.user->set_user_data_for_children(best_presolved, selected);
    
    // Now just resolve the LP to get what'll be sent to the TM.
    p.user->modify_lp_parameters(p.lp_solver, false);
