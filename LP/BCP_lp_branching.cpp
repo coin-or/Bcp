@@ -37,13 +37,17 @@ static inline void
 BCP_lp_make_parent_from_node(BCP_lp_prob& p);
 
 static inline void
-BCP_print_brobj_stat(BCP_lp_prob& p, const int candidate_num,
+BCP_print_brobj_stat(BCP_lp_prob& p,
+		     const int orig_varnum,
+		     const int candidate_num,
 		     const BCP_presolved_lp_brobj* best_presolved);
 
 //#############################################################################
 
 static inline void
-BCP_print_brobj_stat(BCP_lp_prob& p, const int candidate_num,
+BCP_print_brobj_stat(BCP_lp_prob& p,
+		     const int orig_varnum,
+		     const int candidate_num,
 		     const BCP_presolved_lp_brobj* best_presolved)
 {
    const BCP_lp_branching_object* can = best_presolved->candidate();
@@ -51,7 +55,8 @@ BCP_print_brobj_stat(BCP_lp_prob& p, const int candidate_num,
    if (p.param(BCP_lp_par::LpVerb_StrongBranchResult)) {
       printf("LP:   Out of %i Strong Branching selected:", candidate_num);
       if (p.param(BCP_lp_par::LpVerb_StrongBranchPositions)) {
-	 can->print_branching_info(p.lp_result->x(),
+	 can->print_branching_info(orig_varnum,
+				   p.lp_result->x(),
 				   p.lp_solver->getObjCoefficients());
       }
       for (int i = 0; i < can->child_num; ++i) {
@@ -262,11 +267,14 @@ BCP_lp_select_branching_object(BCP_lp_prob& p,
    // ** OK, now we have to branch. **
    double time0 = BCP_time_since_epoch();
 
+   const int orig_colnum = vars.size();
+
    // Get a private copy of the results
    p.lp_result->get_results(*lp, true);
 
    const std::pair<int,int> added_object_num =
       BCP_add_branching_objects(p, candidates);
+
    const int added_colnum = added_object_num.first;
    const int added_rownum = added_object_num.second;
 
@@ -338,7 +346,8 @@ BCP_lp_select_branching_object(BCP_lp_prob& p,
       if (p.param(BCP_lp_par::LpVerb_PresolveResult)) {
 	 printf("LP:   Presolving:");
 	 if (p.param(BCP_lp_par::LpVerb_PresolvePositions)) {
-	    can->print_branching_info(p.lp_result->x(),
+	    can->print_branching_info(orig_colnum,
+				      p.lp_result->x(),
 				      p.lp_solver->getObjCoefficients());
 	 }
 	 for (i = 0; i < can->child_num; ++i) {
@@ -406,7 +415,7 @@ BCP_lp_select_branching_object(BCP_lp_prob& p,
    }
    
    
-   BCP_print_brobj_stat(p, candidate_num, best_presolved);
+   BCP_print_brobj_stat(p, orig_colnum, candidate_num, best_presolved);
 
    // Mark the cols/rows of the OTHER candidates as removable
    BCP_mark_result_of_strong_branching(p, can, added_colnum, added_rownum);
@@ -533,6 +542,12 @@ BCP_lp_branch(BCP_lp_prob& p)
    BCP_lp_send_cuts_to_cp(p, -1);
 
    if (keep < 0){ // if no diving then return quickly
+      if (p.param(BCP_lp_par::LpVerb_FathomInfo)) {
+	 if (best_presolved->is_pruned())
+	    printf("LP:   Forcibly Pruning node\n");
+	 else
+	    printf("LP:   Returned children to TM. Waiting for new node.\n");
+      }
       delete best_presolved->candidate();
       delete best_presolved;
       return BCP_BranchingFathomedThisNode;

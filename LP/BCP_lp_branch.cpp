@@ -121,7 +121,8 @@ BCP_lp_branching_object::apply_child_bd(OsiSolverInterface* lp,
 //#############################################################################
 
 void
-BCP_lp_branching_object::print_branching_info(const double * x,
+BCP_lp_branching_object::print_branching_info(const int orig_varnum,
+					      const double * x,
 					      const double * obj) const
 {
    printf(" (");
@@ -131,14 +132,19 @@ BCP_lp_branching_object::print_branching_info(const double * x,
       const int size = forced_var_pos->size();
       for (int i = 1; i < size; ++i) {
 	 const int ind = (*forced_var_pos)[i];
-	 printf("%i,%.4f,%.4f", ind, x[ind], obj[ind]);
+	 if (ind < orig_varnum) {
+	    printf(";%i,%.4f,%.4f", ind, x[ind], obj[ind]);
+	 } else {
+	    // must be a var added in branching
+	    printf(";%i,-,-", ind);
+	 }
       }
    }
    printf(" / ");
    if (forced_cut_pos) {
       printf("%i", (*forced_cut_pos)[0]);
       const int size = forced_cut_pos->size();
-      for (int i = 0; i < size; ++i)
+      for (int i = 1; i < size; ++i)
 	 printf(";%i", (*forced_cut_pos)[i]);
    }
    printf(" )");

@@ -252,7 +252,8 @@ public:
    void apply_child_bd(OsiSolverInterface* lp, const int child_ind) const;
    /** This method prints out some information about the branching object.
        (The positions, new bounds, the primal value of the variables.) */
-   void print_branching_info(const double* x, const double * obj) const;
+   void print_branching_info(const int orig_varnum,
+			     const double* x, const double * obj) const;
    /*@}*/
 };
 
@@ -350,6 +351,21 @@ public:
    inline void initialize_action() {
       _child_action = new BCP_vec<BCP_child_action>(_candidate->child_num,
 						    BCP_ReturnChild);
+   }
+   inline void keep_no_child() {
+      for (int i = _child_action->size() - 1; i >= 0; --i) {
+	 if ((*_child_action)[i] == BCP_KeepChild) {
+	    (*_child_action)[i] = BCP_ReturnChild;
+	    return;
+	 }
+      }
+   }
+   inline bool is_pruned() const {
+      for (int i = _child_action->size() - 1; i >= 0; --i) {
+	 if ((*_child_action)[i] != BCP_FathomChild)
+	    return false;
+      }
+      return true;
    }
    /** Fill up <code>obj</code> with the lower bound on each child. */
    inline void get_lower_bounds(BCP_vec<double>& obj) {

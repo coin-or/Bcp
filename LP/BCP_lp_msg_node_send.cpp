@@ -311,9 +311,15 @@ LP: there is ws info in BCP_lp_send_node_description()!\n");
       BCP_lp_unpack_diving_info(p, p.msg_buf);
    }
 
-   // BCP_lp_process_diving_info() sets p.node->index to the new index is
-   // diving is done, or to -1 if diving is not allowed.
-   return p.node->index == -1 ? -1 : keep;
+   // BCP_lp_unpack_diving_info() sets p.node->index to the new index if
+   // diving is to be done, or to -1 if diving is not allowed.
+   if (p.node->index == -1) {
+      keep = -1;
+      // At this point brobj cannot be empty.
+      // We must reset the child to be kept, too.
+      brobj->keep_no_child();
+   }
+   return keep;
 }
 
 //#############################################################################
