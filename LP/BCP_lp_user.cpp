@@ -17,6 +17,7 @@
 #include "BCP_lp_branch.hpp"
 #include "BCP_problem_core.hpp"
 #include "BCP_solution.hpp"
+#include "BCP_functions.hpp"
 
 //#############################################################################
 // Informational methods for the user
@@ -132,63 +133,25 @@ BCP_lp_user::unpack_module_data(BCP_buffer & buf)
 
 //#############################################################################
 
-#if defined(COIN_USE_VOL)
-
-#include "BCP_warmstart_dual.hpp"
 void
 BCP_lp_user::pack_warmstart(const BCP_warmstart* ws, BCP_buffer& buf)
 {
   if (p->param(BCP_lp_par::ReportWhenDefaultIsExecuted)) {
     printf(" LP: Default BCP_lp_user::pack_warmstart() executed.\n");
   }
-  const BCP_warmstart_dual* dws = dynamic_cast<const BCP_warmstart_dual*>(ws);
-  if (!dws) {
-    throw BCP_fatal_error("\
-COIN_USE_VOL defined but BCP_lp_user::pack_warmstart() is invoked\n\
-with a non-BCP_warmstart_dual object.\n");
-  }
-  dws->pack(buf);
+  BCP_pack_warmstart(ws, buf);
 }
+
 //-----------------------------------------------------------------------------
+
 BCP_warmstart*
 BCP_lp_user::unpack_warmstart(BCP_buffer& buf)
 {
   if (p->param(BCP_lp_par::ReportWhenDefaultIsExecuted)) {
     printf(" LP: Default BCP_lp_user::unpack_warmstart() executed.\n");
   }
-  return new BCP_warmstart_dual(buf);
+  return BCP_unpack_warmstart(buf);
 }
-
-#elif defined(COIN_USE_CPX) || defined(COIN_USE_OSL) //========================
-      
-#include "BCP_warmstart_basis.hpp"
-void
-BCP_lp_user::pack_warmstart(const BCP_warmstart* ws, BCP_buffer& buf)
-{
-  if (p->param(BCP_lp_par::ReportWhenDefaultIsExecuted)) {
-    printf(" LP: Default BCP_lp_user::pack_warmstart() executed.\n");
-  }
-  const BCP_warmstart_basis* bws = dynamic_cast<const BCP_warmstart_basis*>(ws);
-  if (!bws) {
-    throw BCP_fatal_error("\
-COIN_USE_VOL defined but BCP_lp_user::pack_warmstart() is invoked\n\
-with a non-BCP_warmstart_basis object.\n");
-  }
-  bws->pack(buf);
-}
-//-----------------------------------------------------------------------------
-BCP_warmstart*
-BCP_lp_user::unpack_warmstart(BCP_buffer& buf)
-{
-  if (p->param(BCP_lp_par::ReportWhenDefaultIsExecuted)) {
-    printf(" LP: Default BCP_lp_user::unpack_warmstart() executed.\n");
-  }
-  return new BCP_warmstart_basis(buf);
-}
-
-#elif defined(COIN_USE_XPR) //=================================================
-
-#endif
 
 //#############################################################################
 

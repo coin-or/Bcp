@@ -149,6 +149,7 @@ BCP_SRC +=	BCP_tm_node.cpp
 BCP_SRC +=	BCP_tm_user.cpp
 BCP_SRC +=	BCP_tm.cpp
 BCP_SRC +=	BCP_tm_param.cpp
+BCP_SRC +=	BCP_warmstart_pack.cpp
 BCP_SRC +=	
 # Files related to LP
 BCP_SRC +=	BCP_lp_main.cpp
