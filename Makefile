@@ -74,10 +74,8 @@ DEFINES += $(USER_DEFINES)
 ##############################################################################
 
 LDFLAGS := $(addprefix -L,$(LIBDIRS))
+LDFLAGS += $(call ifprefix,$(SHLINKPREFIX),$(LIBDIRS))
 LDFLAGS += $(patsubst lib%,-l%,$(basename $(LIBS)))
-ifneq ($(SHLINKPREFIX),)
-    LDFLAGS += $(addprefix $(SHLINKPREFIX),$(LIBDIRS))
-endif
 
 ##############################################################################
 ##############################################################################
