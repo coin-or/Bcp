@@ -97,6 +97,9 @@ public:
     int current_index() const;
     /// Return the iteration count within the search tree node being processed
     int current_iteration() const;
+    /** Return a pointer to the BCP_user_data structure the user (may have)
+	stored in this node */
+    BCP_user_data* get_user_data();
   /*@}*/
 
   /**@name Methods to get/set BCP parameters on the fly */
