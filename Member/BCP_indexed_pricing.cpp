@@ -19,25 +19,24 @@ BCP_indexed_pricing_list::swap(BCP_indexed_pricing_list& x) {
 void
 BCP_indexed_pricing_list::update(const BCP_indexed_pricing_list& change) {
    switch (change.get_storage()){
-    case BCP_Storage_Explicit:
-    case BCP_Storage_NoData:
+   case BCP_Storage_Explicit:
+   case BCP_Storage_NoData:
       operator=(change);
       break;
-    case BCP_Storage_WrtParent:
+   case BCP_Storage_WrtParent:
       // in this case 'this' must be the parent, and _storage must be
       // explicit
-      if (_storage != BCP_Storage_Explicit)
+      if (_storage != BCP_Storage_Explicit) {
 	 throw BCP_fatal_error("\
 BCP_indexed_pricing_list::update() : Bad storage.\n");
+      }
+      _indices.erase_by_index(change._del_pos);
+      _indices.append(change._indices);
       break;
     default:
       throw BCP_fatal_error("\
 BCP_indexed_pricing_list::update() : unrecognized change list storage.\n");
    }
-   // we come here only if
-   // change.storage == WrtParent && _storage == Explicit
-   _indices.erase_by_index(change._del_pos);
-   _indices.append(change._indices);
 }
 
 BCP_indexed_pricing_list*
