@@ -92,6 +92,7 @@ void BCP_lp_main(BCP_message_environment* msg_env, USER_initialize* user_init,
 
    // now create the user universe
    p.user = user_init->lp_init(p);
+   p.user->setLpProblemPointer(&p);
 
    // wait for the core description and process it
    p.msg_buf.clear();
