@@ -118,12 +118,12 @@ BCP_lp_prob::pack_var(BCP_process_t target_proc, const BCP_var& var)
     return;
 
   const BCP_object_t obj_t = var.obj_type();
-  const BCP_obj_status stat = var.status();
+  const BCP_obj_status varstat = var.status();
   const BCP_var_t var_t = var.var_type();
   const double obj = var.obj();
   const double lb = var.lb();
   const double ub = var.ub();
-  msg_buf.pack(obj_t).pack(stat).pack(var_t).pack(obj).pack(lb).pack(ub);
+  msg_buf.pack(obj_t).pack(varstat).pack(var_t).pack(obj).pack(lb).pack(ub);
   switch (obj_t) {
   case BCP_CoreObj:
     break;
@@ -151,9 +151,9 @@ BCP_lp_prob::unpack_var()
   BCP_var_t var_t;
   int index;
   double obj, lb, ub;
-  BCP_obj_status stat;
+  BCP_obj_status varstat;
   msg_buf.unpack(bcpind)
-         .unpack(obj_t).unpack(stat)
+         .unpack(obj_t).unpack(varstat)
          .unpack(var_t).unpack(obj).unpack(lb).unpack(ub);
 
   BCP_var* var = 0;
@@ -175,7 +175,7 @@ BCP_lp_prob::unpack_var()
     throw BCP_fatal_error("BCP_lp_prob::_unpack_var(): unexpected obj_t.\n");
   }
   var->set_bcpind(bcpind);
-  var->set_status(stat);
+  var->set_status(varstat);
 
   return var;
 }
@@ -191,10 +191,10 @@ BCP_lp_prob::pack_cut(BCP_process_t target_proc, const BCP_cut& cut)
     return;
 
   const BCP_object_t obj_t = cut.obj_type();
-  const BCP_obj_status stat = cut.status();
+  const BCP_obj_status cutstat = cut.status();
   const double lb = cut.lb();
   const double ub = cut.ub();
-  msg_buf.pack(obj_t).pack(stat).pack(lb).pack(ub);
+  msg_buf.pack(obj_t).pack(cutstat).pack(lb).pack(ub);
   switch (obj_t) {
   case BCP_CoreObj:
     break;
@@ -221,9 +221,9 @@ BCP_lp_prob::unpack_cut()
   BCP_IndexType bcpind;
   int index;
   double lb, ub;
-  BCP_obj_status stat;
+  BCP_obj_status cutstat;
   msg_buf.unpack(bcpind)
-         .unpack(obj_t).unpack(stat).unpack(lb).unpack(ub);
+         .unpack(obj_t).unpack(cutstat).unpack(lb).unpack(ub);
 
   BCP_cut* cut = 0;
   switch (obj_t) {
@@ -242,7 +242,7 @@ BCP_lp_prob::unpack_cut()
     throw BCP_fatal_error("BCP_lp_prob::_unpack_cut(): unexpected obj_t.\n");
   }
   cut->set_bcpind(bcpind);
-  cut->set_status(stat);
+  cut->set_status(cutstat);
 
   return cut;
 }
