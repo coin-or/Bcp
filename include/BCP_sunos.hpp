@@ -13,15 +13,31 @@ typedef int BCP_IndexType;
 #  include <sys/time.h>     // for gettimeofday()
 #  include <sys/resource.h> // for setpriority()
 #  include <unistd.h>       // to get gethostname() from unistd.h
-#  define NEED_IMPLICIT_TEMPLATE_FUNCTIONS 1
-#  ifdef __OPTIMIZE__
-#    define NEED_IMPLICIT_TEMPLATE_CLASSES 1
-#  endif
-#  define NEED_IMPLICIT_TEMPLATE_CLASSES 1
 #  define BCP_PtrDiff       int
-#  define BCP_CONSTRUCT     construct
-#  define BCP_DESTROY       destroy
-#  define BCP_DESTROY_RANGE destroy
+
+#  if (__GNUC__ >= 3)
+
+#    define NEED_TEMPLATE_CLASSES
+#    define NEED_TEMPLATE_FUNCTIONS
+// #    define NEED_STD_TEMPLATE_FUNCTIONS
+// #    define NEED_IMPLICIT_TEMPLATE_CLASSES
+// #    define NEED_IMPLICIT_TEMPLATE_FUNCTIONS
+#    define BCP_CONSTRUCT     std::_Construct
+#    define BCP_DESTROY       std::_Destroy
+#    define BCP_DESTROY_RANGE std::_Destroy
+
+#  else
+
+#    define NEED_TEMPLATE_CLASSES
+#    define NEED_TEMPLATE_FUNCTIONS
+// #    define NEED_STD_TEMPLATE_FUNCTIONS
+// #    define NEED_IMPLICIT_TEMPLATE_CLASSES
+// #    define NEED_IMPLICIT_TEMPLATE_FUNCTIONS
+#    define BCP_CONSTRUCT     std::construct
+#    define BCP_DESTROY       std::destroy
+#    define BCP_DESTROY_RANGE std::destroy
+
+#  endif
 
 #endif
 
