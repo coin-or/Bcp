@@ -1,6 +1,7 @@
 // Copyright (C) 2000, International Business Machines
 // Corporation and others.  All Rights Reserved.
-#include "BCP_timeout.hpp"
+#include "CoinTime.hpp"
+
 #include "BCP_node_change.hpp"
 #include "BCP_tm.hpp"
 #include "BCP_lp.hpp"
@@ -354,7 +355,7 @@ TM: non-existing VP was assigned to a just pruned node.\n");
 	  if (allval || allsol || ((betterval || bettersol) && better)) {
 	    if (param(BCP_tm_par::TmVerb_TimeOfImprovingSolution)) {
 	      printf("TM: Solution found at %.3f sec.\n",
-		     BCP_time_since_epoch() - start_time);
+		     CoinCpuTime() - start_time);
 	    }
 	    if (upper_bound > DBL_MAX/2) {
 	       printf("\
@@ -425,7 +426,7 @@ Unknown message in BCP_tm_prob::process_message.\n");
    }
    msg_buf.clear();
 
-   const double t = BCP_time_since_epoch() - start_time;
+   const double t = CoinCpuTime() - start_time;
    const bool time_is_over = t > param(BCP_tm_par::MaxRunTime);
 
    if (! param(BCP_tm_par::MessagePassingIsSerial) &&

@@ -1,8 +1,9 @@
 // Copyright (C) 2000, International Business Machines
 // Corporation and others.  All Rights Reserved.
+#include "CoinTime.hpp"
+
 #include "BCP_lp_functions.hpp"
 #include "BCP_enum.hpp"
-#include "BCP_timeout.hpp"
 #include "BCP_lp_result.hpp"
 #include "BCP_lp_pool.hpp"
 #include "BCP_lp_user.hpp"
@@ -12,7 +13,7 @@
 int BCP_lp_generate_cuts(BCP_lp_prob& p,
 			 bool varset_changed, const bool from_repricing)
 {
-   double time0 = BCP_time_since_epoch();
+   double time0 = CoinCpuTime();
 
    BCP_lp_result& lpres = *p.lp_result;
    BCP_lp_cut_pool& cp = *p.local_cut_pool;
@@ -127,7 +128,7 @@ LP: uneven new_cuts/new_rows sizes in generate_cuts_in_lp().\n");
 	 p.param(BCP_lp_par::FirstLP_AllCutsTimeout) :
 	 p.param(BCP_lp_par::LaterLP_AllCutsTimeout);
       double tout = cp.size() == 0 ? first_cut_time_out : all_cuts_time_out;
-      double tin = BCP_time_since_epoch();
+      double tin = CoinCpuTime();
 
       while(true){
 	 p.msg_buf.clear();
@@ -163,7 +164,7 @@ LP: uneven new_cuts/new_rows sizes in generate_cuts_in_lp().\n");
 	 if (tout >= 0){
 	    // with this tout we'll read out the rest of the message queue
 	    // even if cut generation times out.
-	    tout = std::max(0.0, tout - (BCP_time_since_epoch() - tin));
+	    tout = std::max<double>(0.0, tout - (CoinCpuTime() - tin));
 	 }
       }
    }
@@ -190,7 +191,7 @@ LP: *WARNING*: There are nonviolated cuts in the local CP\n\
       }
    }
 
-   p.stat.time_cut_generation += BCP_time_since_epoch() - time0;
+   p.stat.time_cut_generation += CoinCpuTime() - time0;
 
    return cp.size();
 }

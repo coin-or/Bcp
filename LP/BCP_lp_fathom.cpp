@@ -257,9 +257,9 @@ BCP_price_vars(BCP_lp_prob& p, const bool from_fathom,
       int max_new_vars = max_indexed_vars;
 
       const size_t indexed_store =
-	std::max(static_cast<const size_t>
-		 (p.param(BCP_lp_par::IndexedToPriceStorageSize)),
-		 p.node->indexed_pricing.get_indices().size());
+       std::max<const size_t>(static_cast<const size_t>
+			      (p.param(BCP_lp_par::IndexedToPriceStorageSize)),
+			      p.node->indexed_pricing.get_indices().size());
 
       new_index_list.reserve(indexed_store);
 

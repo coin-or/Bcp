@@ -122,7 +122,7 @@ void BCP_lp_create_lp(BCP_lp_prob& p)
   }
 
   // Now fix the bounds
-  const int num = std::max(varnum, cutnum);
+  const int num = std::max<int>(varnum, cutnum);
   BCP_vec<int> ind;
   ind.reserve(num);
   int i = -1;

@@ -6,8 +6,8 @@
 #include <utility> // for pair<>
 
 #include "CoinWarmStart.hpp"
+#include "CoinTime.hpp"
 
-#include "BCP_timeout.hpp"
 #include "BCP_enum.hpp"
 #include "BCP_matrix.hpp"
 #include "BCP_warmstart.hpp"
@@ -272,7 +272,7 @@ BCP_lp_perform_strong_branching(BCP_lp_prob& p,
    BCP_vec<double> rowbounds(2 * rownum, 0.0);
    BCP_vec<double> colbounds(2 * colnum, 0.0);
 
-   const int maxind = std::max(rownum, colnum);
+   const int maxind = std::max<int>(rownum, colnum);
    BCP_vec<int> all_indices(maxind, 0);
    for (i = 0; i < maxind; ++i)
       all_indices[i] = i;
@@ -426,7 +426,7 @@ BCP_lp_select_branching_object: branching forced but no candidates selected\n");
    }
    
    // ** OK, now we have to branch. **
-   double time0 = BCP_time_since_epoch();
+   double time0 = CoinCpuTime();
    const int orig_colnum = p.node->vars.size();
 
    // if branching candidates are not presolved then choose the first branching
@@ -496,7 +496,7 @@ LP: Strong branching is disabled but more than one candidate is selected.\n\
    p.lp_result->get_results(*p.lp_solver);
    p.node->quality = p.lp_result->objval();
 
-   p.stat.time_branching += BCP_time_since_epoch() - time0;
+   p.stat.time_branching += CoinCpuTime() - time0;
 
    return BCP_DoBranch;
 }

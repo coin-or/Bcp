@@ -399,8 +399,8 @@ int BCP_lp_add_from_local_cut_pool(BCP_lp_prob& p)
    // First find out how many do we want to add
    BCP_lp_cut_pool& cp = *p.local_cut_pool;
    size_t added_rows =
-      std::min(size_t(p.param(BCP_lp_par::MaxCutsAddedPerIteration)),
-	       cp.size());
+      std::min<size_t>(size_t(p.param(BCP_lp_par::MaxCutsAddedPerIteration)),
+		       cp.size());
 
    if (added_rows == 0)
      return 0;
@@ -508,8 +508,8 @@ int BCP_lp_add_from_local_var_pool(BCP_lp_prob& p)
    // First find out how many do we want to add
    BCP_lp_var_pool& vp = *p.local_var_pool;
    size_t added_cols =
-      std::min(size_t(p.param(BCP_lp_par::MaxVarsAddedPerIteration)),
-	       vp.size());
+      std::min<size_t>(size_t(p.param(BCP_lp_par::MaxVarsAddedPerIteration)),
+		       vp.size());
 
    if (added_cols == 0)
      return 0;

@@ -7,7 +7,6 @@
 #include "BCP_cg.hpp"
 #include "BCP_lp.hpp"
 #include "BCP_tm.hpp"
-#include "BCP_timeout.hpp"
 #include "BCP_solution.hpp"
 #include "BCP_tm_user.hpp"
 #include "BCP_node_change.hpp"

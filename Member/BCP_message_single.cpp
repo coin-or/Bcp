@@ -3,8 +3,9 @@
 
 #include <cstdio>
 
+#include "CoinTime.hpp"
+
 #include "BCP_USER.hpp"
-#include "BCP_timeout.hpp"
 
 #include "BCP_error.hpp"
 #include "BCP_buffer.hpp"
@@ -99,7 +100,7 @@ BCP_single_environment::register_process()
    BCP_tm_parse_command_line(*_tm_prob, _argnum, _arglist);
    
    _tm_prob->msg_env = this;
-   _tm_prob->start_time = BCP_time_since_epoch();
+   _tm_prob->start_time = CoinCpuTime();
    _my_id = _tm_id;
 
    // BCP_tm_user_init() returns a BCP_tm_user* and that will be part of p.
@@ -248,7 +249,7 @@ BCP_single_environment::register_process()
    _lp_prob->user->unpack_module_data(_tm_prob->msg_buf);
    _lp_prob->master_lp = _lp_prob->user->initialize_solver_interface();
 
-   _lp_prob->upper_bound = std::min(_tm_prob->ub(), DBL_MAX/2);
+   _lp_prob->upper_bound = std::min<double>(_tm_prob->ub(), DBL_MAX/2);
    //--------------------------------------------------------------------------
    if (_cg_prob) {
       // CG (it already has the core)

@@ -5,10 +5,11 @@
 #include <cmath>
 #include <queue>
 
+#include "CoinTime.hpp"
+
 #include "BCP_os.hpp"
 
 #include "BCP_USER.hpp"
-#include "BCP_timeout.hpp"
 #include "BCP_string.hpp"
 #include "BCP_vector.hpp"
 #include "BCP_buffer.hpp"
@@ -113,7 +114,7 @@ BCP_tm_main(BCP_message_environment* msg_env,
    
    BCP_buffer msg_buf;
    p.msg_env = msg_env;
-   p.start_time = BCP_time_since_epoch();
+   p.start_time = CoinCpuTime();
 
    FILE* logfile = 0;
 

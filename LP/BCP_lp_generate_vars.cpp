@@ -159,7 +159,7 @@ int BCP_lp_generate_vars(BCP_lp_prob& p,
 	 if (tout >= 0){
 	    // with this tout we'll read out the rest of the message queue
 	    // even if var generation times out.
-	    tout = std::max(0.0, tout - (CoinCpuTime() - tin));
+	    tout = std::max<double>(0.0, tout - (CoinCpuTime() - tin));
 	 }
       }
    }

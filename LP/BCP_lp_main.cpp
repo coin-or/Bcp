@@ -29,7 +29,7 @@ BCP_lp_process_core(BCP_lp_prob& p, BCP_buffer& buf)
    // create the core part of p.node
    const BCP_vec<BCP_var_core*>& bvars = p.core->vars;
    const int bvarnum = bvars.size();
-   p.node->vars.reserve(std::max(1000, 3 * bvarnum));
+   p.node->vars.reserve(std::max<int>(1000, 3 * bvarnum));
    if (bvarnum > 0) {
       BCP_vec<BCP_var*>& vars = p.node->vars;
       for (int i = 0; i < bvarnum; ++i) {
@@ -39,7 +39,7 @@ BCP_lp_process_core(BCP_lp_prob& p, BCP_buffer& buf)
 
    const BCP_vec<BCP_cut_core*>& bcuts = p.core->cuts;
    const int bcutnum = bcuts.size();
-   p.node->cuts.reserve(std::max(1000, 3 * bcutnum));
+   p.node->cuts.reserve(std::max<int>(1000, 3 * bcutnum));
    if (bcutnum > 0) {
       BCP_vec<BCP_cut*>& cuts = p.node->cuts;
       for (int i = 0; i < bcutnum; ++i) {

@@ -1,5 +1,7 @@
 // Copyright (C) 2000, International Business Machines
 // Corporation and others.  All Rights Reserved.
+#include "CoinTime.hpp"
+
 #include "BCP_vector.hpp"
 #include "BCP_tm_user.hpp"
 #include "BCP_tm.hpp"
@@ -7,7 +9,6 @@
 #include "BCP_solution.hpp"
 #include "BCP_var.hpp"
 #include "BCP_functions.hpp"
-#include "BCP_timeout.hpp"
 
 //#############################################################################
 // Informational methods for the user
@@ -215,8 +216,7 @@ void
 BCP_tm_user::display_final_information(const BCP_lp_statistics& lp_stat)
 {
    if (p->param(BCP_tm_par::TmVerb_FinalStatistics)) {
-      printf("TM: Running time: %.3f\n",
-	     BCP_time_since_epoch() - p->start_time);
+      printf("TM: Running time: %.3f\n", CoinCpuTime() - p->start_time);
       printf("TM: search tree size: %i   max depth: %i\n",
 	     int(p->search_tree.size()), p->search_tree.maxdepth());
       lp_stat.display();
