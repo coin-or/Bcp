@@ -314,6 +314,14 @@ BCP_pvm_environment::start_process(const BCP_string& exe, const bool debug) {
    char** exe_args;
    BCP_pvm_split_exe(exe, exe_name, exe_args);
    pvm_spawn(exe_name, exe_args, flag, 0, 1, &pid);
+   delete[] exe_name;
+   if (exe_args != 0) {
+      while (*exe_args != 0) {
+	 delete[] *exe_args;
+	 ++exe_args;
+      }
+      delete[] exe_args;
+   }
    check_error(pid, "start_process() - spawn");
    return new BCP_pvm_id(pid);
 }
@@ -329,6 +337,14 @@ BCP_pvm_environment::start_process(const BCP_string& exe,
    BCP_pvm_split_exe(exe, exe_name, exe_args);
    pvm_spawn(exe_name, exe_args, flag,
 	     const_cast<char*>(machine.c_str()), 1, &pid);
+   delete[] exe_name;
+   if (exe_args != 0) {
+      while (*exe_args != 0) {
+	 delete[] *exe_args;
+	 ++exe_args;
+      }
+      delete[] exe_args;
+   }
    check_error(pid, "start_process() - spawn");
    return new BCP_pvm_id(pid);
 }
@@ -346,6 +362,14 @@ BCP_pvm_environment::start_processes(const BCP_string& exe,
    char** exe_args;
    BCP_pvm_split_exe(exe, exe_name, exe_args);
    pvm_spawn(exe_name, exe_args, flag, 0, proc_num, pids);
+   delete[] exe_name;
+   if (exe_args != 0) {
+      while (*exe_args != 0) {
+	 delete[] *exe_args;
+	 ++exe_args;
+      }
+      delete[] exe_args;
+   }
    for (int i = 0; i != proc_num; ++i)
       check_error(pids[i], "start_processes() - spawn");
    for (int i = 0; i != proc_num; ++i)
