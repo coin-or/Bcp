@@ -20,6 +20,9 @@
     
 class BCP_fatal_error{
 public:
+   static bool abort_on_error;
+
+public:
    /** The constructor prints out the error message, flushes the stdout buffer
        and aborts execution. */
 #if 0
@@ -32,7 +35,8 @@ public:
    BCP_fatal_error(const std::string& str) {
       printf("%s", str.c_str());
       fflush(0);
-      abort();
+      if (abort_on_error)
+	 abort();
    }
    BCP_fatal_error(const char * format, ...) {
       BCP_DEFAULT_NAMESPACE;
@@ -41,7 +45,8 @@ public:
       vprintf(format, valist);
       va_end(valist);
       fflush(0);
-      abort();
+      if (abort_on_error)
+	 abort();
    }
    /** The destructor exists only because it must. */
    ~BCP_fatal_error() {}

@@ -145,8 +145,14 @@ BCP_add_branching_objects(BCP_lp_prob& p,
 
       BCP_vec<BCP_row*> rows;
       rows.reserve(newcut_num);
-      p.user->cuts_to_rows(vars, new_cuts, rows,
-			   *p.lp_result, BCP_Object_Branching, false);
+      BCP_fatal_error::abort_on_error = false;
+      try {
+	 p.user->cuts_to_rows(vars, new_cuts, rows,
+			      *p.lp_result, BCP_Object_Branching, false);
+      }
+      catch (...) {
+      }
+      BCP_fatal_error::abort_on_error = true;
       BCP_lp_add_rows_to_lp(rows, lp);
       purge_ptr_vector(rows);
 

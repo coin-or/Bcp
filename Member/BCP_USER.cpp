@@ -1,5 +1,8 @@
 // Copyright (C) 2000, International Business Machines
 // Corporation and others.  All Rights Reserved.
+#include "BCP_error.hpp"
+bool BCP_fatal_error::abort_on_error = true;
+
 #include "BCP_USER.hpp"
 
 //-----------------------------------------------------------------------------
