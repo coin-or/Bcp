@@ -2,6 +2,7 @@
 // Corporation and others.  All Rights Reserved.
 #include <memory>
 #include <algorithm>
+#include <numeric>
 #include <cmath>
 
 #include "CoinHelperFunctions.hpp"
@@ -419,6 +420,21 @@ int BCP_lp_add_from_local_cut_pool(BCP_lp_prob& p)
 	    }
 	 }
 	 break;
+       case BCP_CutViolationNorm_Directional: {
+	  const double* c = p.lp_solver->getObjCoefficients();
+	  const int n = p.lp_solver->getNumCols();
+	  const double cnorm = sqrt(std::inner_product(c, c+n, c, 0.0));
+	  for (int i = cp.size() - 1; i >= 0; --i) {
+	     BCP_lp_waiting_row& cut = *cp[i];
+	     if (cut.violation() > 0) {
+		cut.set_violation(cut.violation() * cnorm /
+				  fabs(cut.row()->dotProduct(c)));
+	     }
+	  }
+       }
+	 break;
+       default:
+	 throw BCP_fatal_error("LP: No violation norm specified!\n");
       }
       // Sort the waiting rows if we have more than we want to add. The most
       // violated ones will be at the end with this sort.

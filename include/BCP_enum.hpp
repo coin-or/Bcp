@@ -33,7 +33,10 @@ enum BCP_CutViolationNorm {
        max(0, max(lb-lhs, lhs-ub)) */
    BCP_CutViolationNorm_Plain,
    /** The violation is the distance of the fractional point from the cut */
-   BCP_CutViolationNorm_Distance
+   BCP_CutViolationNorm_Distance,
+   /** The violation is the directional (in the direction of the objective
+       distance of the fractional point from the cut */
+   BCP_CutViolationNorm_Directional
 };
 
 //-----------------------------------------------------------------------------
