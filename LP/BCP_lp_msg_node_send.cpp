@@ -11,6 +11,8 @@
 #include "BCP_lp_branch.hpp"
 #include "BCP_lp_node.hpp"
 #include "BCP_lp_functions.hpp"
+#include "BCP_lp_functions.hpp"
+#include "BCP_vector.hpp"
 
 #include "BCP_USER.hpp"
 

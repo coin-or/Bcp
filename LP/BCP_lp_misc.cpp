@@ -42,6 +42,10 @@ void BCP_lp_clean_up_node(BCP_lp_prob& p)
    BCP_vec<BCP_cut*>& cuts = p.node->cuts;
    purge_ptr_vector(cuts, cuts.entry(p.core->cutnum()), cuts.end());
    p.parent->clean();
+   // Also, the local pools might contain only locally valid
+   // cuts/vars, so get rid of them
+   purge_ptr_vector(*p.local_cut_pool);
+   purge_ptr_vector(*p.local_var_pool);
 }
 
 //#############################################################################
