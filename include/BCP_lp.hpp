@@ -83,7 +83,7 @@ public:
   /*@}*/
 
   /** Print out the statistics */
-  void display();
+  void display() const;
 
   /** Add the argument statistics to this one. This method is used when
       multiple LP processes are running and their stats need to be combined. */

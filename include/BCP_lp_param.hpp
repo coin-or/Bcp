@@ -60,61 +60,94 @@ struct BCP_lp_par{
 	  Values: true (1), false (0). Default: 0. */
       SolveLpToOptimality,
 
-      /**@name Verbosity Parameters */
+      /**@name Verbosity Parameters.
+
+	 These are all true/false parameters; if the parameter value is set
+	 then the corresponding information is printed. */
       /*@{*/
-        /** */
+        /** Print the number of cuts added from the local cut pool in the
+	    current iteration. (BCP_lp_main_loop)*/
         LpVerb_AddedCutCount,
-        /** */
+        /** Print the number of variables added from the local variable pool
+	    in the curent iteration. (BCP_lp_main_loop) */
         LpVerb_AddedVarCount,
-        /** */
+        /** After a branching object is selected print what happens to the
+	    presolved children (e.g., fathomed). (BCP_print_brobj_stat) */
         LpVerb_ChildrenInfo,
-        /** */
+        /** Print the number of variables generated before resolving the Lp ir
+	    fathoming a node. (BCP_lp_fathom) */
         LpVerb_ColumnGenerationInfo,
-        /** */
+        /** Print the number of cuts sent from the LP to the cut pool.
+	    (BCP_lp_send_cuts_to_cp) */
         LpVerb_CutsToCutPoolCount,
-        /** */
+        /** **** This parameter is not used anywhere!!! **** */
         LpVerb_VarsToVarPoolCount,
-        /** */
+        /** Print information related to fathoming. (BCP_lp_main_loop,
+	    BCP_lp_perform_fathom, BCP_lp_branch)
+	 (BCP_lp_fathom) */
         LpVerb_FathomInfo,
-        /** */
+        /** Print the "Starting iteration x" line. (BCP_lp_main_loop)
+	 */
         LpVerb_IterationCount,
-        /** */
+        /** Turn on the user hook "display_lp_solution". (BCP_lp_main_loop) */
         LpVerb_RelaxedSolution,
-        /** */
+        /** Turn on the user hook "display_lp_solution" for the last LP
+	    relaxation solved at a search tree node. (BCP_lp_main_loop) */
         LpVerb_FinalRelaxedSolution,
-        /** */
+        /** **** This parameter is not used anywhere!!! **** */
         LpVerb_LpMatrixSize,
-        /** */
+        /** Print the size of the problem matrix and the LP solution value
+	    after resolving the LP. (BCP_lp_main_loop) */
         LpVerb_LpSolutionValue,
-        /** */
+        /** Print the number of columns and rows that were deleted during
+	    matrix compression. (BCP_lp_delete_cols_and_rows) */
         LpVerb_MatrixCompression,
-        /** */
+        /** Print detailed information about all the branching candidates
+	    during strong branching. LpVerb_PresolveResult must be set for
+	    this parameter to have an effect.
+	    (BCP_lp_perform_strong_branching) */ 
         LpVerb_PresolvePositions,
-        /** */
+        /** Print information on the presolved branching candidates during
+	    strong branching. (BCP_lp_perform_strong_branching) */
         LpVerb_PresolveResult,
-        /** */
+        /** Print the "Processing NODE x on LEVEL y" line. (BCP_lp-main_loop)
+	 */
         LpVerb_ProcessedNodeIndex,
-        /** */
+        /** Print information if receiving cuts is timed out.
+	    (BCP_lp_generate_cuts) */
         LpVerb_ReportCutGenTimeout,
-        /** */
+        /** Print information if receiving variables is timed out.
+	    (BCP_lp_generate_vars) */
         LpVerb_ReportVarGenTimeout,
-        /** */
+        /** Print the current number of cuts in the cut pool. This number is
+	    printed several times: before and after generating columns at the
+	    current iteration, after removing non-essential cuts, etc.
+	    (BCP_lp_generate_cuts) */
         LpVerb_ReportLocalCutPoolSize,
-        /** */
+        /** Similar as above for variables. (BCP_lp_generate_vars) */
         LpVerb_ReportLocalVarPoolSize,
-        /** */
+        /** **** This parameter is not used anywhere!!! **** */
         LpVerb_RepricingResult,
-        /** */
+        /** Print the number of variables whose bounds have been changed by
+	    reduced cost fixing or logical fixing. (BCP_lp_fix_vars) */
         LpVerb_VarTightening,
-        /** */
+        /** Print the number of ineffective rows in the current problem. The
+	    definition of what rows are considered ineffective is determined
+	    by the paramter IneffectiveConstraints.
+	    (BCP_lp_adjust_row_effectiveness) */
         LpVerb_RowEffectivenessCount,
-        /** */
+        /** Print detailed information on the branching candidate selected by
+	    strong branching. LpVerb_StrongBranchResult must be set fo this
+	    parameter to have an effect. (BCP_print_brobj_stat) */ 
         LpVerb_StrongBranchPositions,
-        /** */
+        /** Print information on the branching candidate selected by strong
+	    branching. (BCP_print_brobj_stat) */
         LpVerb_StrongBranchResult,
-        /** */
+        /** Print the number of cuts generated during this iteration (since
+	    the LP was resolved last time). (BCP_lp_main_loop) */
         LpVerb_GeneratedCutCount,
-        /** */
+        /** Print the number of variables generated during this iteration.
+	    (BCP_lp_main_loop) */
         LpVerb_GeneratedVarCount,
       /*@}*/ 
       //

@@ -1,5 +1,12 @@
 // Copyright (C) 2000, International Business Machines
 // Corporation and others.  All Rights Reserved.
+
+#include "BCP_os.hpp"
+
+#ifdef NEED_TEMPLATE_FUNCTIONS
+
+//#############################################################################
+
 #include "BCP_var.hpp"
 #include "BCP_cut.hpp"
 #include "BCP_lp_branch.hpp"
@@ -54,3 +61,7 @@ template void purge_ptr_vector(BCP_vec<BCP_lp_waiting_col *> &,
 
 template void purge_ptr_vector(BCP_vec<BCP_col *> &);
 template void purge_ptr_vector(BCP_vec<BCP_row *> &);
+
+//#############################################################################
+
+#endif

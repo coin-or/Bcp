@@ -8,7 +8,7 @@
 
 //#############################################################################
 
-template <> inline void
+template<> void
 BCP_vec<char>::deallocate() {
    if (start) {
       ::operator delete(start);

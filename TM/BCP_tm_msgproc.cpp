@@ -339,15 +339,15 @@ TM: non-existing VP was assigned to a just pruned node.\n");
 	    if (param(BCP_tm_par::TmVerb_TimeOfImprovingSolution)) {
 	      printf("TM: Solution found at %.3f sec.\n",
 		     BCP_time_since_epoch() - start_time);
-	      if (upper_bound > DBL_MAX/2) {
-		printf("\
+	    }
+	    if (upper_bound > DBL_MAX/2) {
+	       printf("\
 TM: Solution value: %f (best solution value so far: infinity)\n",
-		       new_sol->objective_value());
-	      } else {
-		printf("\
+		      new_sol->objective_value());
+	    } else {
+	       printf("\
 TM: Solution value: %f (best solution value so far: %f)\n",
-		       new_sol->objective_value(), upper_bound);
-	      }
+		      new_sol->objective_value(), upper_bound);
 	    }
 	    if (allsol || (bettersol && better)) {
 	      user->display_feasible_solution(new_sol);

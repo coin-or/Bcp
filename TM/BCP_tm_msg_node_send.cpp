@@ -220,6 +220,7 @@ BCP_tm_pack_procid(BCP_message_environment* msg_env,
 void BCP_tm_send_node(BCP_tm_prob& p, const BCP_tm_node* node,
 		      const BCP_message_tag msgtag)
 {
+   p.user->display_node_information(p.search_tree, *node);
    BCP_buffer& buf = p.msg_buf;
    BCP_node_change* desc = node->_desc;
    BCP_diving_status dive =

@@ -49,9 +49,9 @@ BCP_lp_perform_fathom(BCP_lp_prob& p, const char* msg, BCP_message_tag msgtag)
 {
    if (p.param(BCP_lp_par::LpVerb_FathomInfo))
       printf("%s", msg);
-   // Here we don't have col/row_indices to compress and we do want to
-   // force deletion.
-   BCP_lp_delete_cols_and_rows(p, 0, true);
+   // Here we don't have col/row_indices to compress, we are from fathom and
+   // we do want to force deletion.
+   BCP_lp_delete_cols_and_rows(p, 0, true, true);
    BCP_lp_send_node_description(p, 0, msgtag);
    BCP_lp_clean_up_node(p);
 }
@@ -117,6 +117,7 @@ LP:   Fathoming node (discovered not restorable inf.)\n",
 	       vars_to_add[i]->set_bcpind(-BCP_lp_next_var_index(p));
 	    }
 	    BCP_lp_add_cols_to_lp(cols_to_add, p.lp_solver);
+	    purge_ptr_vector(cols_to_add);
 	    p.node->vars.append(vars_to_add);
 	    p.local_cut_pool->rows_are_valid(false);
 	    if (p.param(BCP_lp_par::LpVerb_ColumnGenerationInfo))
@@ -124,9 +125,11 @@ LP:   Fathoming node (discovered not restorable inf.)\n",
 		      static_cast<int>(vars_to_add.size()));
 	    // need not delete the entries in vars_to_add one-by-one; those
 	    // pointers are appended to p.node->variables
-	    // Here we don't have col/row_indices to compress and we don't
-	    // want to force deletion.
-	    BCP_lp_delete_cols_and_rows(p, 0, false);
+	    // Here we don't have col/row_indices to compress, we say we are
+	    // not from fathom ('cos we do add columns, i.e., we are not going
+	    // to fathom the node after the call returns) and we don't want to
+	    // force deletion.
+	    BCP_lp_delete_cols_and_rows(p, 0, false, false);
 	    return false;
 	 }
       } else { //############################################# over upper bound
@@ -164,7 +167,8 @@ LP:   Fathoming node (discovered tdf & high cost)\n",
 	    perm.erase(perm.entry(j), perm.end());
 	    // those in perm are to be kept
 	    keep_ptr_vector_by_index(vars_to_add, perm.begin(), perm.end());
-	    cols_to_add.keep_by_index(perm);
+	    keep_ptr_vector_by_index(cols_to_add, perm.begin(), perm.end());
+	    // cols_to_add.keep_by_index(perm); // this was wrong
 	 }
 
 	 // Just add the given colums and go back to resolve
@@ -173,6 +177,7 @@ LP:   Fathoming node (discovered tdf & high cost)\n",
 	    vars_to_add[i]->set_bcpind(-BCP_lp_next_var_index(p));
 	 }
 	 BCP_lp_add_cols_to_lp(cols_to_add, p.lp_solver);
+	 purge_ptr_vector(cols_to_add);
 	 p.node->vars.append(vars_to_add);
 	 p.local_cut_pool->rows_are_valid(false);
 	 if (p.param(BCP_lp_par::LpVerb_ColumnGenerationInfo))
@@ -180,9 +185,11 @@ LP:   Fathoming node (discovered tdf & high cost)\n",
 		   static_cast<int>(vars_to_add.size()));
 	 // need not delete the entries in vars_to_add one-by-one; those
 	 // pointers are appended to p.node->variables.
-	 // Here we don't have col/row_indices to compress and we don't want
+	 // Here we don't have col/row_indices to compress, we say we are
+	 // not from fathom ('cos we do add columns, i.e., we are not going
+	 // to fathom the node after the call returns) and we don't want
 	 // to force deletion.
-	 BCP_lp_delete_cols_and_rows(p, 0, false);
+	 BCP_lp_delete_cols_and_rows(p, 0, false, false);
 	 return false;
       }
       break;

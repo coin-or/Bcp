@@ -614,6 +614,19 @@ public:
   /*@}*/
 
   //===========================================================================
+    virtual void
+    select_vars_to_delete(const BCP_lp_result& lpres,
+			  const BCP_vec<BCP_var*>& vars,
+			  const BCP_vec<BCP_cut*>& cuts,
+			  const bool before_fathom,
+			  BCP_vec<int>& deletable);
+    virtual void
+    select_cuts_to_delete(const BCP_lp_result& lpres,
+			  const BCP_vec<BCP_var*>& vars,
+			  const BCP_vec<BCP_cut*>& cuts,
+			  const bool before_fathom,
+			  BCP_vec<int>& deletable);
+  //===========================================================================
   /**@name Logical fixing */
   /*@{*/
     /** This method provides an opportunity for the user to tighten the bounds

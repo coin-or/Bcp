@@ -101,18 +101,25 @@ public:
      pointer. */
   /*@{*/
     ///
+    int&          termcode()       { return _termcode; }
     int           termcode() const { return _termcode; }
     ///
+    int&          iternum()        { return _iternum; }
     int           iternum()  const { return _iternum; }
     ///		  
+    double&       objval()         { return _objval; }
     double        objval()   const { return _objval; }
     ///
+    double* x()                    { return _x; }
     const double* x()        const { return _x; }
     ///	  
+    double* pi()                   { return _pi; }
     const double* pi()       const { return _pi; }
     ///	  
+    double* dj()                   { return _dj; }
     const double* dj()       const { return _dj; }
     ///	  
+    double* lhs()                  { return _lhs; }
     const double* lhs()      const { return _lhs; }
   /*@}*/
 

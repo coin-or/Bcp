@@ -254,8 +254,7 @@ LP:   Terminating and fathoming due to proven high cost (good heur soln!).\n",
       switch (BCP_lp_branch(p)){
        case BCP_BranchingFathomedThisNode:
 	 // Note that BCP_lp_branch() has already sent the node description to
-	 // the TM, info is printed, so just clean up
-	 BCP_lp_clean_up_node(p);
+	 // the TM, info is printed, node is cleaned up, so just return
 	 return;
 
       case BCP_BranchingDivedIntoNewNode:
@@ -291,9 +290,9 @@ LP:   Terminating and fathoming due to proven high cost (good heur soln!).\n",
 	 varset_changed = (added_vars > 0);
 	 cutset_changed = (added_cuts > 0);
 	 // the args are: (p, col_indices, row_indices, force_delete).
-	 // Here we don't have col/row_indices to compress and we don't want
-	 // to force deletion.
-	 BCP_lp_delete_cols_and_rows(p, 0, false);
+	 // Here we don't have col/row_indices to compress, we are not from
+	 // fathom and we don't want to force deletion.
+	 BCP_lp_delete_cols_and_rows(p, 0, false, false);
 	 break;
       }
    }

@@ -1,5 +1,12 @@
 // Copyright (C) 2000, International Business Machines
 // Corporation and others.  All Rights Reserved.
+
+#include "BCP_os.hpp"
+
+#ifdef NEED_TEMPLATE_CLASSES
+
+//#############################################################################
+
 #include "BCP_vector.hpp"
 #include "templates/BCP_vector_general.cpp"
 
@@ -55,3 +62,7 @@ template class BCP_vec<BCP_lp_branching_object*>;
 template class BCP_vec<BCP_proc_id*>;
 
 template class BCP_vec<BCP_tm_node*>;
+
+//#############################################################################
+
+#endif

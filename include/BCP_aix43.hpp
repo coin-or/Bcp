@@ -14,7 +14,6 @@ typedef int BCP_IndexType;
 
 #if defined(__GNUC__)
 
-#  define NEED_EXPLICIT_INSTANTIATION 1
 #  define NEED_IMPLICIT_TEMPLATE_FUNCTIONS 1
 #  define NEED_IMPLICIT_TEMPLATE_CLASSES 1
 #  define BCP_PtrDiff       long

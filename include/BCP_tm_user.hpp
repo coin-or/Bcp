@@ -21,6 +21,8 @@
 #include "BCP_tm_node.hpp"
 #include "BCP_enum_tm.hpp"
 
+class BCP_lp_statistics;
+
 //#############################################################################
 
 /**
@@ -208,6 +210,18 @@ public:
   /** Display a feasible solution */
   virtual void
   display_feasible_solution(const BCP_solution* sol);
+    
+  //--------------------------------------------------------------------------
+  /** Display user information just before a new node is sent to the LP or
+      diving into a node is acknowledged. */
+  virtual void
+  display_node_information(BCP_tree& search_tree,
+			   const BCP_tm_node& node);
+    
+  //--------------------------------------------------------------------------
+   /** Display information after BCP finished processing the search tree. */
+  virtual void
+  display_final_information(const BCP_lp_statistics& lp_stat);
     
   //---------------------------------------------------------------------------
   /**@name Initialize new phase */

@@ -709,6 +709,49 @@ BCP_lp_user::compare_vars(const BCP_var* v0, const BCP_var* v1)
 //#############################################################################
 
 void
+BCP_lp_user::select_vars_to_delete(const BCP_lp_result& lpres,
+				   const BCP_vec<BCP_var*>& vars,
+				   const BCP_vec<BCP_cut*>& cuts,
+				   const bool before_fathom,
+				   BCP_vec<int>& deletable)
+{
+   const int varnum = vars.size();
+   for (int i = p->core->varnum(); i < varnum; ++i) {
+      BCP_var *var = vars[i];
+      if (var->is_to_be_removed() ||
+	  (! var->is_non_removable() && var->lb() == 0 && var->ub() == 0)) {
+	 deletable.unchecked_push_back(i);
+      }
+   }
+}
+
+//=============================================================================
+
+void
+BCP_lp_user::select_cuts_to_delete(const BCP_lp_result& lpres,
+				   const BCP_vec<BCP_var*>& vars,
+				   const BCP_vec<BCP_cut*>& cuts,
+				   const bool before_fathom,
+				   BCP_vec<int>& deletable)
+{
+   const int cutnum = cuts.size();
+   const int ineff_to_delete = p->param(BCP_lp_par::IneffectiveBeforeDelete);
+   const double lb = lpres.objval();
+   const BCP_vec<double>& lb_at_cutgen = p->node->lb_at_cutgen;
+   for (int i = p->core->cutnum(); i < cutnum; ++i) {
+     BCP_cut *cut = cuts[i];
+     if (cut->is_to_be_removed() ||
+	 (! cut->is_non_removable() &&
+	  cut->effective_count() <= -ineff_to_delete &&
+	  lb_at_cutgen[i] < lb - 0.0001)) {
+       deletable.unchecked_push_back(i);
+     }
+   }
+}
+
+//#############################################################################
+
+void
 BCP_lp_user::logical_fixing(const BCP_lp_result& lpres,
 			    const BCP_vec<BCP_var*>& vars,
 			    const BCP_vec<BCP_cut*>& cuts,

@@ -352,6 +352,11 @@ public:
       _child_action = new BCP_vec<BCP_child_action>(_candidate->child_num,
 						    BCP_ReturnChild);
    }
+   inline void initialize_lower_bound(const double val) {
+      for (int i = _candidate->child_num - 1; i >= 0; --i) {
+	 _lpres[i]->fake_objective_value(val);
+      }
+   }
    inline void keep_no_child() {
       for (int i = _child_action->size() - 1; i >= 0; --i) {
 	 if ((*_child_action)[i] == BCP_KeepChild) {

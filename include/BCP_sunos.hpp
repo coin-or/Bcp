@@ -13,8 +13,6 @@ typedef int BCP_IndexType;
 #  include <sys/time.h>     // for gettimeofday()
 #  include <sys/resource.h> // for setpriority()
 #  include <unistd.h>       // to get gethostname() from unistd.h
-
-#  define NEED_EXPLICIT_INSTANTIATION 1
 #  define NEED_IMPLICIT_TEMPLATE_FUNCTIONS 1
 #  ifdef __OPTIMIZE__
 #    define NEED_IMPLICIT_TEMPLATE_CLASSES 1

@@ -80,10 +80,11 @@ LDFLAGS += $(patsubst lib%,-l%,$(basename $(LIBS)))
 # Paths
 ##############################################################################
 ##############################################################################
+space = $(empty) $(empty)
 
-BCPTARGETDIR = $(BCPROOT)/$(UNAME)$(BCP_OPT)
+BCPTARGETDIR = $(BCPROOT)/$(UNAME)$(subst $(space),_,$(BCP_OPT))
 BCPDEPDIR    = $(BCPROOT)/dep
-USERTARGETDIR = $(USERROOT)/$(UNAME)$(USER_OPT)
+USERTARGETDIR = $(USERROOT)/$(UNAME)$(subst $(space),_,$(USER_OPT))
 USERDEPDIR    = $(USERROOT)/dep
 
 SRCDIR = \
@@ -228,7 +229,7 @@ $(BCPTARGETDIR)/%.o : %.cpp ${BCPDEPDIR}/%.d
 	@echo ""
 	@echo Compiling $*.cpp
 	@mkdir -p $(BCPTARGETDIR)
-	@$(CXX) $(CXXFLAGS) $(BCPOPTFLAG) -c $< -o $@
+	$(CXX) $(CXXFLAGS) $(BCPOPTFLAG) -c $< -o $@
 
 ${BCPDEPDIR}/%.d : %.cpp
 	@echo ""
@@ -243,7 +244,7 @@ $(USERTARGETDIR)/%.o : %.cpp ${USERDEPDIR}/%.d
 	@echo ""
 	@echo Compiling $*.cpp
 	@mkdir -p $(USERTARGETDIR)
-	@$(CXX) $(CXXFLAGS) $(USEROPTFLAG) -c $< -o $@
+	$(CXX) $(CXXFLAGS) $(USEROPTFLAG) -c $< -o $@
 
 ${USERDEPDIR}/%.d : %.cpp
 	@echo ""
