@@ -4,8 +4,7 @@
 #define _BCP_SOLUTION_H
 
 #include "BCP_vector.hpp"
-
-class BCP_var;
+#include "BCP_var.hpp"
 
 // This file is fully docified.
 
