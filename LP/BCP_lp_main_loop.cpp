@@ -28,9 +28,10 @@ void BCP_lp_main_loop(BCP_lp_prob& p)
    bool cutset_changed = true;
    double time0;
 
-   if (p.param(BCP_lp_par::LpVerb_ProcessedNodeIndex))
+   if (p.param(BCP_lp_par::LpVerb_ProcessedNodeIndex)) {
       printf("\nLP: **** Processing NODE %i on LEVEL %i (from TM) ****\n",
 	     p.node->index, p.node->level);
+   }
    // let the user do whatever she wants before the new node starts
    BCP_lp_prepare_for_new_node(p);
 
@@ -90,9 +91,11 @@ void BCP_lp_main_loop(BCP_lp_prob& p)
 
       // Update the lower bound
       p.node->quality = lpres.objval();
-      p.node->true_lower_bound =
+      const double tlb = 
 	 p.user->compute_lower_bound(p.node->true_lower_bound,
 				     lpres, p.node->vars, p.node->cuts);
+      if (tlb > p.node->true_lower_bound)
+	 p.node->true_lower_bound = tlb;
 
       if (p.over_ub(p.node->true_lower_bound)) {
 	 BCP_lp_perform_fathom(p, "\
@@ -255,10 +258,11 @@ LP:   Terminating and fathoming due to proven high cost (good heur soln!).\n",
 	 BCP_lp_clean_up_node(p);
 	 return;
 
-       case BCP_BranchingDivedIntoNewNode:
-	 if (p.param(BCP_lp_par::LpVerb_ProcessedNodeIndex))
+      case BCP_BranchingDivedIntoNewNode:
+	 if (p.param(BCP_lp_par::LpVerb_ProcessedNodeIndex)) {
 	    printf("\nLP: **** Processing NODE %i on LEVEL %i (dived) ****\n",
 		   p.node->index, p.node->level);
+	 }
 	 // let the user do whatever she wants before the new node starts
 	 BCP_lp_prepare_for_new_node(p);
 	 // here we don't have to delete cols and rows, it's done as part of
