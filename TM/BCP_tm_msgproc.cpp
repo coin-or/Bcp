@@ -3,6 +3,7 @@
 #include "BCP_timeout.hpp"
 #include "BCP_node_change.hpp"
 #include "BCP_tm.hpp"
+#include "BCP_lp.hpp"
 #include "BCP_tm_functions.hpp"
 #include "BCP_problem_core.hpp"
 #include "BCP_solution.hpp"
@@ -425,6 +426,8 @@ Unknown message in BCP_tm_prob::process_message.\n");
      const double lb = search_tree.true_lower_bound(search_tree.root());
      printf("TM: Time has ran out... %.3f secs\n", t);
      printf("TM: Best lower bound in this phase: %f\n", lb);
+     BCP_lp_statistics dummy_stat;
+     user->display_final_information(dummy_stat);
      fflush(0);
      BCP_tm_save_root_cuts(this);
      BCP_tm_stop_processes(*this);
