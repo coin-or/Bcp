@@ -438,6 +438,7 @@ public:
       std::swap(_candidate, rhs._candidate);
       std::swap(_lpres, rhs._lpres);
       std::swap(_child_action, rhs._child_action);
+      std::swap(_user_data, rhs._user_data);
    }
    /*@}*/
 };

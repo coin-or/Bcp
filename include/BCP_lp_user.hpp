@@ -71,6 +71,7 @@ class BCP_lp_prob;
 
 class BCP_lp_user {
 private:
+  bool using_deprecated_set_user_data_for_children;
   BCP_lp_prob * p;
 public:
   /**@name Methods to set and get the pointer to the BCP_lp_prob
@@ -786,11 +787,19 @@ public:
     set_actions_for_children(BCP_presolved_lp_brobj* best);
 
     /** For each child create a user data object and put it into the
-	appropriate entry in uds. When this function is called uds 
-     */
+	appropriate entry in <code>best->user_data()</code>. When this
+	function is called the <code>best->user_data()</code> vector is
+	already the right size and is filled will 0 pointers. The second
+	argument is usefule if strong branching was done. It is the index of
+	the branching candidate that was selected for branching (the one
+	that's the source of <code>best</code>.
+    */
     virtual void
     set_user_data_for_children(BCP_presolved_lp_brobj* best, 
 			       const int selected);
+    /** Deprecated version of the previos method (it does not pass the index
+        of the selected branching candidate).
+    */
     virtual void
     set_user_data_for_children(BCP_presolved_lp_brobj* best);
   /*@}*/

@@ -1286,7 +1286,21 @@ void
 BCP_lp_user::set_user_data_for_children(BCP_presolved_lp_brobj* best, 
 					const int selected)
 {
+  using_deprecated_set_user_data_for_children = true;
   set_user_data_for_children(best);
+  if (using_deprecated_set_user_data_for_children) {
+     printf("\
+*** WARNING *** WARNING *** WARNING *** WARNING *** WARNING *** WARNING ***\n\
+You have overridden\n\
+  BCP_lp_user::set_user_data_for_children(BCP_presolved_lp_brobj* best)\n\
+which is a deprecated virtual function. Please override\n\
+  BCP_lp_user::set_user_data_for_children(BCP_presolved_lp_brobj* best,\n\
+                                          const int selected)\n\
+instead. The old version will go away, your code will still compile, but it\n\
+will not do what you intend it to be doing.\n\
+*** WARNING *** WARNING *** WARNING *** WARNING *** WARNING *** WARNING ***\n"\
+	    );
+  }
 }
 
 //#############################################################################
@@ -1294,6 +1308,7 @@ BCP_lp_user::set_user_data_for_children(BCP_presolved_lp_brobj* best,
 void
 BCP_lp_user::set_user_data_for_children(BCP_presolved_lp_brobj* best)
 {
+  using_deprecated_set_user_data_for_children = false;
   if (p->param(BCP_lp_par::ReportWhenDefaultIsExecuted)) {
     printf(" LP: Default set_user_data_for_children() executed.\n");
   }
