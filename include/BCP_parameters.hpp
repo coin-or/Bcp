@@ -262,7 +262,8 @@ public:
       // Get the lines of the parameter file one-by-one and if a line contains
       // a (keyword, value) pair set the appropriate parameter
       const int MAX_PARAM_LINE_LENGTH = 1024;
-      char line[MAX_PARAM_LINE_LENGTH], *end_of_line, *keyword, *value, *ctmp;
+      char line[MAX_PARAM_LINE_LENGTH], *end_of_line, *keyword, *ctmp;
+      char value[MAX_PARAM_LINE_LENGTH];
       bool quiet = true;
 
       BCP_vec< std::pair<BCP_string, BCP_parameter> >::const_iterator ind;
@@ -294,25 +295,42 @@ This is absurd.\n", MAX_PARAM_LINE_LENGTH);
 	    if (isspace(*ctmp))
 	       break;
 	 }
+	 *ctmp = 0; // terminate the keyword with a 0 character
+	 // ctmp = std::find_if(ctmp, end_of_line, isgraph);
+	 for ( ; ctmp < end_of_line; ++ctmp) {
+	    if (isgraph(*ctmp))
+	       break;
+	 }
 	 if (ctmp == end_of_line) // line is just one word. must be a comment
 	    continue;
-	 *ctmp++ = 0; // terminate the keyword with a 0 character
 
-	 // value = std::find_if(ctmp, end_of_line, isgraph);
-	 for (value = ctmp; value < end_of_line; ++value) {
-	    if (isgraph(*value))
-	       break;
+	 int i;
+	 if (*ctmp == '"') {
+	    ++ctmp;
+	    for (i = 0; ctmp < end_of_line; ++ctmp) {
+	       if (*ctmp == '\\') {
+		  if (++ctmp == end_of_line)
+		     break;
+		  value[i++] = *ctmp;
+		  continue;
+	       }
+	       if (*ctmp != '"') {
+		  value[i++] = *ctmp;
+	       } else {
+		  ++ctmp;
+		  break;
+	       }
+	    }
+	 } else {
+	    for (i = 0; ctmp < end_of_line; ++ctmp) {
+	       if (!isspace(*ctmp)) {
+		  value[i++] = *ctmp;
+	       } else {
+		  break;
+	       }
+	    }
 	 }
-	 if (value == end_of_line) // line is just one word. must be a comment
-	    continue;
-
-	 // ctmp = std::find_if(value, end_of_line, isspace);
-	 for (ctmp = value; ctmp < end_of_line; ++ctmp) {
-	    if (isspace(*ctmp))
-	       break;
-	 }
-	 *ctmp = 0; // terminate the value with a 0 character. this is good
-	            // even if ctmp == end_ofline
+	 value[i] = 0;
 
 	 //--------------- Check if the keyword is a param file ---------------
 	 if (strcmp(keyword, "ParamFile") == 0) {
