@@ -155,20 +155,16 @@ BCP_lp_branching_object::print_branching_info(const int orig_varnum,
 void BCP_presolved_lp_brobj::fake_objective_values(const double itlim_objval)
 {
    for (int i = _candidate->child_num - 1; i >= 0; --i){
-      switch (_lpres[i]->termcode()){
-       case BCP_ProvenOptimal:
-	 break;
-       case BCP_ProvenPrimalInf:
-       case BCP_DualObjLimReached:
+      const BCP_termcode tc = _lpres[i]->termcode();
+      if (tc & (BCP_ProvenPrimalInf | BCP_DualObjLimReached)) {
 	 _lpres[i]->fake_objective_value(DBL_MAX / 2);
-	 break;
-       case BCP_ProvenDualInf: // *THINK* : what to do in this case?
-       case BCP_PrimalObjLimReached: // *THINK* : what to do in this case?
-       case BCP_IterationLimit:
-       case BCP_Abandoned:
-       case BCP_TimeLimit: // *THINK* : what to do in this case?
+	 continue;
+      }
+      // *THINK* : what to do in these cases?
+      if (tc & (BCP_ProvenDualInf | BCP_PrimalObjLimReached |
+		BCP_IterationLimit | BCP_Abandoned | BCP_TimeLimit) ) {
 	 _lpres[i]->fake_objective_value(itlim_objval);
-	 break;
+	 continue;
       }
    }
 }

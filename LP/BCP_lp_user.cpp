@@ -815,6 +815,20 @@ select_branching_candidates(const BCP_lp_result& lpres,
 			p->param(BCP_lp_par::StrongBranch_CloseToOneNum),
 			p->param(BCP_lp_par::IntegerTolerance),
 			cans);
+  // Get rid of duplicates in cans
+  BCP_vec<int> brvars;
+  brvars.reserve(cans.size());
+  for (size_t i = 0; i < cans.size(); ) {
+     const int brvar = (*cans[i]->forced_var_pos)[0];
+     if (std::find(brvars.begin(), brvars.end(), brvar) == brvars.end()) {
+	brvars.unchecked_push_back(brvar);
+	++i;
+     } else {
+	std::swap(cans[i], cans.back());
+	cans.pop_back();
+     }
+  }
+  
   if (cans.size() == 0) {
     throw BCP_fatal_error("\
  LP : No var/cut in pool but couldn't select branching object.\n");
