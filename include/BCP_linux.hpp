@@ -25,9 +25,9 @@ typedef int BCP_IndexType;
 #  endif
 #  define NEED_IMPLICIT_TEMPLATE_CLASSES 1
 #  define BCP_PtrDiff       int
-#  define BCP_CONSTRUCT     construct
-#  define BCP_DESTROY       destroy
-#  define BCP_DESTROY_RANGE destroy
+#  define BCP_CONSTRUCT     std::construct
+#  define BCP_DESTROY       std::destroy
+#  define BCP_DESTROY_RANGE std::destroy
 
 #endif
 
