@@ -184,6 +184,10 @@ void BCP_parameter_set<BCP_lp_par>::create_keyword_list() {
 			    BCP_parameter(BCP_IntPar, 
 					  MaxIndexedToPriceToAdd_Max)));
 
+   keys.push_back(make_pair(BCP_string("BCP_CutViolationNorm"),
+			    BCP_parameter(BCP_IntPar,
+					  CutViolationNorm)));
+
    keys.push_back(make_pair(BCP_string("BCP_MaxCutsAddedPerIteration"),
 			    BCP_parameter(BCP_IntPar, 
 					  MaxCutsAddedPerIteration)));
@@ -356,6 +360,8 @@ void BCP_parameter_set<BCP_lp_par>::set_default_entries() {
    set_entry(MaxNonDualFeasToAdd_Max, 200);
    set_entry(MaxIndexedToPriceToAdd_Min, 5);
    set_entry(MaxIndexedToPriceToAdd_Max, 200);
+
+   set_entry(CutViolationNorm, BCP_CutViolationNorm_Plain);
 
    set_entry(MaxCutsAddedPerIteration, 100000);
    set_entry(MaxVarsAddedPerIteration, 100000);

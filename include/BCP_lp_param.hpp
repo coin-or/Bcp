@@ -235,6 +235,14 @@ struct BCP_lp_par{
 	  Values: . Default: 200. */
       MaxIndexedToPriceToAdd_Max,
 
+      /** How cut violation should be computed.<br>
+	  Values: \link BCP_CutViolationNorm. <br>
+	  Default: <code>BCP_CutViolationNorm_Plain</code> (violation in the
+	  usual sense). <br>
+	  (The other option is <code>BCP_CutViolationNorm_Distance</code>: the
+	  distance of the fractional point from the cut. */
+      CutViolationNorm,
+
       /** The maximum number of violated valid inequalities that can be added
 	  per iteration. <br>
 	  Values: . Default: 100,000. */

@@ -24,6 +24,21 @@ enum BCP_slack_cut_discarding{
 //-----------------------------------------------------------------------------
 
 /**
+   This enumerative constant describes how to compute the "violation" of a
+   generated cut. Possible values are:
+*/
+
+enum BCP_CutViolationNorm {
+   /** The violation is interpreted in the normal sense, i.e.,
+       max(0, max(lb-lhs, lhs-ub)) */
+   BCP_CutViolationNorm_Plain,
+   /** The violation is the distance of the fractional point from the cut */
+   BCP_CutViolationNorm_Distance
+};
+
+//-----------------------------------------------------------------------------
+
+/**
    This enumerative constant describes the possible types of objects
    (variables and cuts). 
 */

@@ -38,6 +38,7 @@ public:
    inline void set_row(BCP_row*& row) { _row = row; row = 0; }
 
    inline double violation() const { return _violation; }
+   inline void set_violation(double v) { _violation = v; }
    void compute_violation(const BCP_lp_result& lpres);
 };
 

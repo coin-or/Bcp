@@ -292,6 +292,21 @@ int BCP_lp_add_from_local_cut_pool(BCP_lp_prob& p)
      return 0;
 
    if (added_rows < cp.size()) {
+      /* The violations in the cut pool are: max(0, max(lb-lhs, lhs-ub)).
+	 If the parameter says so then normalize it, so that we get the
+	 distance of the fractional point from the cutting planes */
+      switch (p.param(BCP_lp_par::CutViolationNorm)) {
+       case BCP_CutViolationNorm_Plain:
+	 break;
+       case BCP_CutViolationNorm_Distance:
+	 for (int i = cp.size() - 1; i >= 0; --i) {
+	    BCP_lp_waiting_row& cut = *cp[i];
+	    if (cut.violation() > 0) {
+	       cut.set_violation(cut.violation()/sqrt(cut.row()->normSquare()));
+	    }
+	 }
+	 break;
+      }
       // Sort the waiting rows if we have more than we want to add. The most
       // violated ones will be at the end with this sort.
       std::sort(cp.begin(), cp.end(), BCP_compare_waiting_row_ptr);
