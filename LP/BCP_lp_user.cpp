@@ -486,7 +486,7 @@ BCP_lp_user::pack_feasible_solution(BCP_buffer& buf, const BCP_solution* sol)
   const BCP_vec<BCP_var*> solvars = gensol->_vars;
   const BCP_vec<double> values = gensol->_values;
   const int size = solvars.size();
-  buf.pack(sol->objective_value()).pack(size);
+  buf.pack(size);
   BCP_lp_prob* p = getLpProblemPointer();
   for (int i = 0; i < size; ++i) {
     buf.pack(values[i]);

@@ -64,6 +64,7 @@ public:
   void add_entry(BCP_var* var, double value) {
     _vars.push_back(var);
     _values.push_back(value);
+    _objective += value * var->obj();
   }
 };
 

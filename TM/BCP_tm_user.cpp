@@ -54,7 +54,7 @@ BCP_tm_user::unpack_feasible_solution(BCP_buffer& buf)
   BCP_solution_generic* soln = new BCP_solution_generic;
 
   int varnum;
-  buf.unpack(soln->_objective).unpack(varnum);
+  buf.unpack(varnum);
 
   double val;
   int bcpind;
