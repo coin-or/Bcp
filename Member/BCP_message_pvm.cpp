@@ -270,11 +270,50 @@ BCP_pvm_environment::pack_proc_id(BCP_buffer& buf, const BCP_proc_id* pid) {
 	    
 //-----------------------------------------------------------------------------
 
+static inline char*
+BCP_get_next_word(const char*& ctmp, const char* last)
+{
+   for ( ; ctmp != last && !isgraph(*ctmp); ++ctmp);
+   const char* word = ctmp;
+   for ( ; ctmp != last && !isspace(*ctmp); ++ctmp);
+   if (word == ctmp)
+      return 0;
+   const int len = ctmp - word;
+   char* new_word = new char[len + 1];
+   memcpy(new_word, word, len);
+   new_word[len] = 0;
+   return new_word;
+}
+
+static void
+BCP_pvm_split_exe(const BCP_string& exe, char*& exe_name, char**& exe_args)
+{
+   const char* ctmp = exe.c_str();
+   const char* last = ctmp + exe.length();
+   std::vector<char*> arglist;
+   exe_name = BCP_get_next_word(ctmp, last);
+   while (ctmp != last) {
+      char* word = BCP_get_next_word(ctmp, last);
+      if (word)
+	 arglist.push_back(word);
+   }
+   if (arglist.size() == 0) {
+      exe_args = 0;
+   } else {
+      exe_args = new char*[arglist.size() + 1];
+      std::copy(arglist.begin(), arglist.end(), exe_args);
+      exe_args[arglist.size()] = 0;
+   }
+}
+
 BCP_proc_id*
 BCP_pvm_environment::start_process(const BCP_string& exe, const bool debug) {
    int flag = debug ? PvmTaskDebug : 0;
    int pid;
-   pvm_spawn(const_cast<char*>(exe.c_str()), 0, flag, 0, 1, &pid);
+   char* exe_name;
+   char** exe_args;
+   BCP_pvm_split_exe(exe, exe_name, exe_args);
+   pvm_spawn(exe_name, exe_args, flag, 0, 1, &pid);
    check_error(pid, "start_process() - spawn");
    return new BCP_pvm_id(pid);
 }
@@ -285,7 +324,10 @@ BCP_pvm_environment::start_process(const BCP_string& exe,
 				   const bool debug) {
    int flag = PvmTaskHost | (debug ? PvmTaskDebug : 0);
    int pid;
-   pvm_spawn(const_cast<char*>(exe.c_str()), 0, flag,
+   char* exe_name;
+   char** exe_args;
+   BCP_pvm_split_exe(exe, exe_name, exe_args);
+   pvm_spawn(exe_name, exe_args, flag,
 	     const_cast<char*>(machine.c_str()), 1, &pid);
    check_error(pid, "start_process() - spawn");
    return new BCP_pvm_id(pid);
@@ -300,7 +342,10 @@ BCP_pvm_environment::start_processes(const BCP_string& exe,
 
    int flag = debug ? PvmTaskDebug : 0;
    int* pids = new int[proc_num];
-   pvm_spawn(const_cast<char*>(exe.c_str()), 0, flag, 0, proc_num, pids);
+   char* exe_name;
+   char** exe_args;
+   BCP_pvm_split_exe(exe, exe_name, exe_args);
+   pvm_spawn(exe_name, exe_args, flag, 0, proc_num, pids);
    for (int i = 0; i != proc_num; ++i)
       check_error(pids[i], "start_processes() - spawn");
    for (int i = 0; i != proc_num; ++i)
