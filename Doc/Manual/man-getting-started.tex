@@ -96,27 +96,21 @@ Since the whole project lives in the {\tt COIN} directory in the rest of this
 section every path specified is relative to this directory.
 
 \begin{itemize}
-\item First, edit the file {\tt Makefile.coin}. This is
-  the global make file with settings used by all the software in the
-  repository. It contains primarily pathnames and compiler settings.
-  Uncomment the appropriate lines for whichever LP solvers you want to
-  link in, and set the following variables as needed:
+\item First, edit the file {\tt Makefiles/Makefile.location}. This file 
+   contains definitions for which libraries you want to build and
+   the location of libraries that might be needed (e.g., zlib to read
+   compressed MPS files). Set the following variables as needed.
   \begin{itemize}
-  \item Uncomment whichever LP solver you want to use
-  \item {\tt COINDIR}: the path to the {\tt COIN/} directory
-  \item {\tt OSLDIR}: the directory where OSL library is installed (if
-    using OSL). Later on the Makefile makes the assumption that standard
-    installation procedure was followed for OSL, i.e., the include files 
-    of OSL are in {\tt \$(OSLDIR)/includes} and the library is in 
-    {\tt \$(OSLDIR)/program}.
-  \item {\tt XPRDIR}: same for XPRESS-MP. 
-  \item {\tt CPXDIR}: same for CPLEX
+  \item {\tt CoinDir}: to the path to the {\tt COIN/} directory
+  \item Uncomment lines that add support for different libraries 
+    such as libz, and different LP solvers.
+  \item Set the paths for the added libraries. 
   \end{itemize}
 \item You should not need to make any modifications to 
   {\tt Bcp/Makefile}. 
 \item Now, edit the application specific make file. This
-  is {\tt Bcp/MaxCut/Makefile} for the MaxCut example. Here are the variables
-  that you can set:
+  is {\tt Examples/MaxCut/Makefile.maxcut} for the MaxCut example. 
+  Here are the variables that you can set:
   \begin{itemize}
   \item {\tt USER\_OPT}: options the compiler should use
     for compiling the user's code.
@@ -151,12 +145,12 @@ application Makefile.
   \end{itemize}
 \item Type ``{\tt make}'' in the application directory. To
   start out, we recommend that you try to compile the {\tt MaxCut}
-  application in the directory {\tt Bcp/MaxCut}
+  application in the directory {\tt Examples/MaxCut}
   application module. Dependency files will be created in 
-  {\tt Bcp/Bcp-common/dep} and in 
-  {\tt Bcp/MaxCut/dep}. Object files will be placed in 
-  {\tt Bcp/Bcp-common/\$(ARCH)} and in 
-  {\tt Bcp/MaxCut/\$(ARCH)}, where \$(ARCH) is the platform you
+  {\tt Bcp/dep} and in 
+  {\tt Examples/MaxCut/dep}. Object files will be placed in 
+  {\tt Bcp/\$(ARCH)} and in 
+  {\tt Examples/MaxCut/\$(ARCH)}, where \$(ARCH) is the platform you
   run on combined with the optimization level (e.g, Linux-g or AIX-4.3-O).
   This latter directory also contains the executable named {\tt bcps} (the
   ``s'' stands for being serial).
