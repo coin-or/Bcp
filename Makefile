@@ -63,8 +63,6 @@ endif
 CXXFLAGS += -DBCP_COMM_PROTOCOL_$(COMM_PROTOCOL)
 
 ##############################################################################
-#  Include the user specific makefile
-##############################################################################
 
 INCDIRS += $(USER_INC_DIRS)
 LIBDIRS += $(USER_LIB_DIRS)
@@ -74,7 +72,7 @@ DEFINES += $(USER_DEFINES)
 ##############################################################################
 
 LDFLAGS := $(addprefix -L,$(LIBDIRS))
-LDFLAGS += $(call ifprefix,$(SHLINKPREFIX),$(LIBDIRS))
+LDFLAGS += $(if ${SHLINKPREFIX},$(addprefix ${SHLINKPREFIX},${LIBDIRS}),)
 LDFLAGS += $(patsubst lib%,-l%,$(basename $(LIBS)))
 
 ##############################################################################
