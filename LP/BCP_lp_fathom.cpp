@@ -312,6 +312,7 @@ BCP_price_vars(BCP_lp_prob& p, const bool from_fathom,
 	    ++old_index_list_i;
 	    continue;
 	  }
+	  ++old_index_list_i;
 	}
 	if (new_index == -1) // nothing is left to check
 	  break;
@@ -468,6 +469,7 @@ BCP_restore_feasibility(BCP_lp_prob& p,
 		     ++old_index_list_i;
 		     continue;
 		  }
+		  ++old_index_list_i;
 	       }
 	       if (new_index == -1) // nothing is left to check
 		  break;
