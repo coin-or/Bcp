@@ -283,8 +283,8 @@ BCP_problem_core* BCP_tm_create_core(BCP_tm_prob& p)
 	 BCP_var_core* var = bvars[i];
 	 // make certain that the bounds of integer vars is integer...
 	 if (var->var_type() != BCP_ContinuousVar) {
-	    var->set_lb(floor(var->lb()+1e-8));
-	    var->set_ub(ceil(var->ub()-1e-8));
+	    var->set_lb(ceil(var->lb()-1e-8));
+	    var->set_ub(floor(var->ub()+1e-8));
 	 }
 	 var->set_bcpind(i);
 	 p.vars[i] = new BCP_var_core(*var);
