@@ -104,8 +104,14 @@ void BCP_lp_create_lp(BCP_lp_prob& p)
     if (cutnum > bcutnum) {
       BCP_vec<BCP_cut*> added_cuts(cuts.entry(bcutnum), cuts.end());
       rows.reserve(added_cuts.size());
-      p.user->cuts_to_rows(vars, added_cuts, rows,
-			   *p.lp_result, BCP_Object_FromTreeManager, false);
+      BCP_fatal_error::abort_on_error = false;
+      try {
+	 p.user->cuts_to_rows(vars, added_cuts, rows,
+			      *p.lp_result, BCP_Object_FromTreeManager, false);
+      }
+      catch (...) {
+      }
+      BCP_fatal_error::abort_on_error = true;
       BCP_lp_add_rows_to_lp(rows, p.lp_solver);
       purge_ptr_vector(rows);
     }
