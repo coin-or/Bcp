@@ -409,8 +409,11 @@ BCP_lp_select_branching_object(BCP_lp_prob& p,
     case BCP_DoNotBranch_Fathomed:
       return BCP_DoNotBranch_Fathomed;
     case BCP_DoNotBranch:
-      if (p.local_var_pool->size() == 0 && p.local_cut_pool->size() == 0)
-	 throw BCP_fatal_error("BCP_DoNotBranch, but nothing can be added!\n");
+      if (p.local_var_pool->size() == 0 && p.local_cut_pool->size() == 0) {
+	 printf("\
+LP: ***WARNING*** : BCP_DoNotBranch, but nothing can be added! ***WARNING***\n");
+	 //throw BCP_fatal_error("BCP_DoNotBranch, but nothing can be added!\n");
+      }
       return BCP_DoNotBranch;
     case BCP_DoBranch:
       break;
