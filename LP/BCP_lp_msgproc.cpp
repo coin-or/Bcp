@@ -274,7 +274,9 @@ void BCP_lp_process_ub_message(BCP_lp_prob& p, BCP_buffer& buf)
 {
    double new_ub;
    buf.unpack(new_ub);
-   if (! p.param(BCP_lp_par::SolveLpToOptimality) && p.ub(new_ub))
+   if (! p.param(BCP_lp_par::SolveLpToOptimality) &&
+       p.ub(new_ub) &&
+       p.lp_solver)
      p.lp_solver->setDblParam(OsiDualObjectiveLimit, new_ub - p.granularity());
 }
 
