@@ -417,7 +417,7 @@ BCP_parameters::read_from_stream   Finished scanning parameter stream.\n\n");
     valueBuf[j] = '\0';
     std::string sExpand(valueBuf);
     
-    std::cout << sExpand << std::endl;
+    // std::cout << sExpand << std::endl;
 
     return sExpand;
   }
