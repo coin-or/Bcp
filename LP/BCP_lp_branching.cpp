@@ -649,6 +649,8 @@ BCP_lp_branch(BCP_lp_prob& p)
       if (can->implied_cut_pos)
 	 cuts.set_lb_ub(*can->implied_cut_pos,can->implied_cut_bd_child(keep));
    }
+   // Delete the old user data before getting new
+   delete p.node->user_data;
    p.node->user_data = best_presolved->user_data()[keep];
    best_presolved->user_data()[keep] = 0;
 
