@@ -134,6 +134,7 @@ BCP_cg_user::unpack_var_algo(BCP_buffer& buf)
 {
   throw BCP_fatal_error("\
 BCP_cg_user::unpack_var_algo() invoked but not overridden!\n");
+  return 0; // to satisfy aCC on HP-UX
 }
 
 void

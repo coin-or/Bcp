@@ -306,7 +306,7 @@ public:
    }
 
    /** Pack a <code>std::vector</code> into the buffer. */
-   template <class T> BCP_buffer& pack(const typename std::vector<T>& vec) {
+   template <class T> BCP_buffer& pack(const std::vector<T>& vec) {
      int objnum = vec.size();
      int new_bytes = objnum * sizeof(T);
      make_fit( sizeof(int) + new_bytes );
@@ -342,7 +342,7 @@ public:
    }
 
    /** Unpack a <code>std::vector</code> from the buffer. */
-   template <class T> BCP_buffer& unpack(typename std::vector<T>& vec) {
+   template <class T> BCP_buffer& unpack(std::vector<T>& vec) {
      int objnum;
 #ifdef PARANOID
      if (_pos + sizeof(int) > _size)

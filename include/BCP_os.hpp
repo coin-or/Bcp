@@ -18,6 +18,10 @@
 #  include "BCP_aix43.hpp"
 #endif
 
+#if defined(__hpux)
+#  include "BCP_hpux.hpp"
+#endif
+
 #if defined(__sparc) && defined(__sun)
 #  include "BCP_sunos.hpp"
 #endif

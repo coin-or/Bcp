@@ -388,5 +388,3 @@ $(BCPROOT)/NetConfig/BCP_netconfig_pvm.cpp
 
 -include $(DEPFILES) 
 -include $(INSTDEPFILES)
-
-

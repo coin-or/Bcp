@@ -5,11 +5,14 @@
 
 // This file is fully docified.
 
+#include "BCP_os.hpp"
+
 #include <utility> // for 'pair'
 #include <iostream>
 #include <fstream>
 #include <string>
 #include <algorithm>
+
 #if defined(__GNUC__) && (__GNUC__ >= 3)
 #    include <sstream>
 #    include <locale>
@@ -23,8 +26,7 @@
 #include "BCP_error.hpp"
 #include "BCP_string.hpp"
 #include "BCP_vector.hpp"
-
-class BCP_buffer;
+#include "BCP_buffer.hpp"
 
 /** This enumerative constant describes the possible parameter types. */
 enum BCP_parameter_t{

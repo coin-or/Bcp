@@ -137,6 +137,7 @@ BCP_vg_user::unpack_cut_algo(BCP_buffer& buf)
 {
   throw BCP_fatal_error("\
 BCP_vg_user::pack_cut_algo() invoked but not overridden!\n");
+  return 0; // to satisfy aCC on HP-UX
 }
 
 void

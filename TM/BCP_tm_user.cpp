@@ -119,6 +119,7 @@ BCP_tm_user::unpack_var_algo(BCP_buffer& buf)
 {
   throw BCP_fatal_error("\
 BCP_tm_user::unpack_var_algo() invoked but not overridden!\n");
+  return 0; // to satisfy aCC on HP-UX
 }
       
 //-----------------------------------------------------------------------------
@@ -135,6 +136,7 @@ BCP_tm_user::unpack_cut_algo(BCP_buffer& buf)
 {
   throw BCP_fatal_error("\
 BCP_tm_user::unpack_cut_algo() invoked but not overridden!\n");
+  return 0; // to satisfy aCC on HP-UX
 }
 
 //-----------------------------------------------------------------------------
@@ -151,6 +153,7 @@ BCP_tm_user::unpack_user_data(BCP_buffer& buf)
 {
   throw BCP_fatal_error("\
 BCP_tm_user::unpack_user_data() invoked but not overridden!\n");
+  return 0; // to satisfy aCC on HP-UX
 }
 
 //#############################################################################

@@ -348,6 +348,7 @@ BCP_proc_id*
 BCP_single_environment::parent_process() {
    throw BCP_fatal_error("\
 BCP_single_environment::parent_process() invoked.\n");
+   return 0; // to satisfy aCC on HP-UX
 }
 
 bool
@@ -483,6 +484,7 @@ BCP_single_environment::start_process(const BCP_string& exe,
 				      const bool debug) {
    throw BCP_fatal_error("start_process() called!\n");
    //   return new BCP_single_id(pid);
+   return 0; // to satisfy aCC on HP-UX
 }
 
 BCP_proc_id*
@@ -491,6 +493,7 @@ BCP_single_environment::start_process(const BCP_string& exe,
 				      const bool debug){
    throw BCP_fatal_error("start_process() called!\n");
    //   return new BCP_single_id(pid);
+   return 0; // to satisfy aCC on HP-UX
 }
 
 BCP_proc_array*
@@ -499,6 +502,7 @@ BCP_single_environment::start_processes(const BCP_string& exe,
 					const bool debug) {
    throw BCP_fatal_error("start_processes() called!\n");
    //   return new BCP_proc_array(procs);
+   return 0; // to satisfy aCC on HP-UX
 }
 
 BCP_proc_array*
@@ -508,6 +512,7 @@ BCP_single_environment::start_processes(const BCP_string& exe,
 					const bool debug){
    throw BCP_fatal_error("start_processes() called!\n");
    //   return new BCP_proc_array(procs);
+   return 0; // to satisfy aCC on HP-UX
 }
 
 //-----------------------------------------------------------------------------

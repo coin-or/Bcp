@@ -168,6 +168,7 @@ BCP_lp_user::unpack_var_algo(BCP_buffer& buf)
 {
   throw BCP_fatal_error("\
 BCP_lp_user::unpack_var_algo() invoked but not overridden!\n");
+  return 0; // to satisfy aCC on HP-UX
 }
       
 //-----------------------------------------------------------------------------
@@ -184,6 +185,7 @@ BCP_lp_user::unpack_cut_algo(BCP_buffer& buf)
 {
   throw BCP_fatal_error("\
 BCP_lp_user::unpack_cut_algo() invoked but not overridden!\n");
+  return 0; // to satisfy aCC on HP-UX
 }
 
 //-----------------------------------------------------------------------------
@@ -200,6 +202,7 @@ BCP_lp_user::unpack_user_data(BCP_buffer& buf)
 {
   throw BCP_fatal_error("\
 BCP_lp_user::unpack_user_data() invoked but not overridden!\n");
+  return 0; // to satisfy aCC on HP-UX
 }
 
 //#############################################################################
@@ -622,7 +625,8 @@ BCP_lp_user::create_indexed_var(int index,
   if (p->param(BCP_lp_par::ReportWhenDefaultIsExecuted)) {
     printf(" LP: Default create_indexed_var() executed.\n");
   }
-   throw BCP_fatal_error("create_indexed_var() missing.\n");
+  throw BCP_fatal_error("create_indexed_var() missing.\n");
+  return 0; // to satisfy aCC on HP-UX
 }
 
 //#############################################################################

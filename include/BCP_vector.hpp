@@ -5,9 +5,9 @@
 
 // This file is fully docified.
 
-#include <memory>
-
 #include "BCP_os.hpp"
+
+#include <memory>
 
 /**
    The class BCP_vec serves the same purpose as the vector class in the

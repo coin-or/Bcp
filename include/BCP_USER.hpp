@@ -72,26 +72,32 @@ public:
 				 const int argnum,
 				 const char * const * arglist) {
       throw BCP_fatal_error("USER_initialize::tm_init() missing.\n");
+      return 0; // to satisfy aCC on HP-UX
    }
    ///
    virtual BCP_lp_user * lp_init(BCP_lp_prob& p) {
       throw BCP_fatal_error("USER_initialize::lp_init() missing.\n");
+      return 0; // to satisfy aCC on HP-UX
    }
    ///
    virtual BCP_vg_user * vg_init(BCP_vg_prob& p) {
       throw BCP_fatal_error("USER_initialize::vg_init() missing.\n");
+      return 0; // to satisfy aCC on HP-UX
    }
    ///
    virtual BCP_cg_user * cg_init(BCP_cg_prob& p) {
       throw BCP_fatal_error("USER_initialize::cg_init() missing.\n");
+      return 0; // to satisfy aCC on HP-UX
    }
    ///
    virtual BCP_vp_user * vp_init(BCP_vp_prob& p) {
       throw BCP_fatal_error("USER_initialize::vp_init() missing.\n");
+      return 0; // to satisfy aCC on HP-UX
    }
    ///
    virtual BCP_cp_user * cp_init(BCP_cp_prob& p) {
       throw BCP_fatal_error("USER_initialize::cp_init() missing.\n");
+      return 0; // to satisfy aCC on HP-UX
    }
    /*@}*/
 };
