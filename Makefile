@@ -113,7 +113,7 @@ VPATH  = ${SRCDIR}
 
 CXXFLAGS += $(USERFLAGS)
 
-CXXFLAGS += -I- $(addprefix -I,$(INCDIRS)) $(addprefix -D,$(DEFINES)) 
+CXXFLAGS += $(addprefix -I,$(INCDIRS)) $(addprefix -D,$(DEFINES)) 
 
 ##############################################################################
 ##############################################################################
