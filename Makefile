@@ -129,8 +129,6 @@ BCP_SRC  =
 BCP_INSTSRC  =
 
 # Files containing member functions
-#BCP_SRC +=	BCP_vector_change.cpp
-
 BCP_SRC +=	BCP_lp_param.cpp
 BCP_SRC +=	BCP_USER.cpp
 BCP_SRC +=	BCP_node_change.cpp
