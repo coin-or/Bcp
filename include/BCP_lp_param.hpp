@@ -29,16 +29,14 @@ struct BCP_lp_par{
 	  whether it already exists in the local variable pool or not. <br> 
 	  Values: true (1), false (0). Default: 1. */
       CompareNewVarsToOldOnes,
-      /** If true the BCP will attempt to do reduced cost fixing. <br>
+      /** If true the BCP will attempt to do reduced cost fixing only for
+	  variables currently at zero. <br>
 	  Values: true (1), false (0). Default: 1. */
-      DoReducedCostFixing,
-      /** Whether to fix variables (with reduced cost and logical fixing)
-	  before fathoming. More precisely, before column generation is
-	  attempted before fathoming. <br>
-	  Confession: I do remember that the necessity came up once, but I
-	  can't remember what was the reason... :-( <br>
+      DoReducedCostFixingAtZero,
+      /** If true the BCP will attempt to do reduced cost fixing for any
+	  variable, no matter what is their current value. <br>
 	  Values: true (1), false (0). Default: 1. */
-      FixVarsBeforeFathom,
+      DoReducedCostFixingAtAnything,
       /** Indicate whether BCP is supposed to track the indexed variables yet
 	  to be priced out. */
       MaintainIndexedVarPricingList,
@@ -209,68 +207,6 @@ struct BCP_lp_par{
 	  parameter.*/
       MaxLeftoverCutNum,
 
-      /** This and the following three parameters control how long the LP
-	  process waits for generated cuts. The parameters specify waiting
-	  times (in milliseconds) separately for the first and later LP
-	  relaxations at a search tree node, and also the time to receive the
-	  first cut vs all the cuts. <br>
-	  Note that it might make sense to set <code>AllCutsTimeout</code> for
-	  a <em>shorter</em> time than the first cut time out: "We are willing
-	  to wait 5 seconds to receive a cut, but if we do receive a cut the
-	  total time we wait is only 2 seconds." <br>
-	  This parameter specifies the time to wait for the first generated
-	  cut at the first LP relaxation at a search tree node. <br>
-	  Values: Any positive integer represents a waiting time in
-	  milliseconds. -1 indicates no time limit on waiting. Default: -1. */
-      FirstLP_FirstCutTimeout,
-      /** This parameter specifies the time to wait for the first generated
-	  cut at iterations that are not the first at a search tree node. See
-	  the remarks at <code>FirstLP_FirstCutTimeout</code> as well. <br>
-	  Values: Any positive integer represents a waiting time in
-	  milliseconds. -1 indicates no time limit on waiting. Default: -1. */
-      LaterLP_FirstCutTimeout,
-      /** This parameter specifies the time to wait for cuts at the first LP
-	  relaxation at a search tree node. See the remarks at <code>
-	  FirstLP_FirstCutTimeout</code> as well. <br> 
-	  Values: Any positive integer represents a waiting time in
-	  milliseconds. -1 indicates no time limit on waiting. Default: -1. */
-      FirstLP_AllCutsTimeout,
-      /** This parameter specifies the time to wait for cuts at iterations
-	  that are not the first at a search tree node. See the remarks at
-	  <code>FirstLP_FirstCutTimeout</code> as well. <br> 
-	  Values: Any positive integer represents a waiting time in
-	  milliseconds. -1 indicates no time limit on waiting. Default: -1. */
-      LaterLP_AllCutsTimeout,
-
-      /** This and the following three parameters control how long the LP
-	  process waits for generated variables. These parameters are
-	  analogous to the ones that control the waiting time for generated
-	  cuts. See the remarks at <code>FirstLP_FirstCutTimeout</code> as
-	  well. <br> 
-	  This parameter specifies the time to wait for the first generated
-	  variable at the first LP relaxation at a search tree node. <br> 
-	  Values: Any positive integer represents a waiting time in
-	  milliseconds. -1 indicates no time limit on waiting. Default: -1. */
-      FirstLP_FirstVarTimeout,
-      /** This parameter specifies the time to wait for the first generated
-	  variable at iterations that are not the first at a search tree node.
-	  See the remarks at <code>FirstLP_FirstVarTimeout</code> as well. <br>
-	  Values: Any positive integer represents a waiting time in
-	  milliseconds. -1 indicates no time limit on waiting. Default: -1. */
-      LaterLP_FirstVarTimeout,
-      /** This parameter specifies the time to wait for variables at the first
-	  LP relaxation at a search tree node. See the remarks at <code>
-	  FirstLP_FirstVarTimeout</code> as well. <br> 
-	  Values: Any positive integer represents a waiting time in
-	  milliseconds. -1 indicates no time limit on waiting. Default: -1. */
-      FirstLP_AllVarsTimeout,
-      /** This parameter specifies the time to wait for variables at iterations
-	  that are not the first at a search tree node. See the remarks at
-	  <code>FirstLP_FirstVarTimeout</code> as well. <br> 
-	  Values: Any positive integer represents a waiting time in
-	  milliseconds. -1 indicates no time limit on waiting. Default: -1. */
-      LaterLP_AllVarsTimeout,
-
       /** The number of columns that must be marked for deletion before
 	  matrix compression can occur. Matrix compressions also subject to a
 	  minimum number of marked columns as a fraction of the current number
@@ -286,7 +222,10 @@ struct BCP_lp_par{
 
       /** Upper limit on the number of iterations performed in each of the
 	  children of the search tree node when presolving branching
-	  candidates. This parameter is passed onto the LP solver. <br>
+	  candidates. This parameter is passed onto the LP solver. If the
+	  parameter is set to -1 then the branching candidates are not
+	  presolved and the first branching candidate is chosen (if there is
+	  any).<br>
 	  Note that for different LP solvers (e.g., simplex based algorithm or
 	  the Volume Algorithm) the meaning of an iteration is different, thus
 	  this parameter will be set differently. <br>
@@ -384,6 +323,77 @@ struct BCP_lp_par{
 	  parameter are considered to be integer. <br>
 	  Values: . Default: .*/
       IntegerTolerance,
+
+      /** This and the following three parameters control how long the LP
+	  process waits for generated cuts. The parameters specify waiting
+	  times (in seconds) separately for the first and later LP
+	  relaxations at a search tree node, and also the time to receive the
+	  first cut vs all the cuts. <br>
+	  Note that it might make sense to set <code>AllCutsTimeout</code> for
+	  a <em>shorter</em> time than the first cut time out: "We are willing
+	  to wait 5 seconds to receive a cut, but if we do receive a cut the
+	  total time we wait is only 2 seconds." <br>
+	  This parameter specifies the time to wait for the first generated
+	  cut at the first LP relaxation at a search tree node. <br>
+	  Values: Any non-negative number represents a waiting time in
+	  seconds. Negative numbers indicate no time limit on
+	  waiting. Default: -1. */
+      FirstLP_FirstCutTimeout,
+      /** This parameter specifies the time to wait for the first generated
+	  cut at iterations that are not the first at a search tree node. See
+	  the remarks at <code>FirstLP_FirstCutTimeout</code> as well. <br>
+	  Values: Any non-negative number represents a waiting time in
+	  seconds. Negative numbers indicate no time limit on
+	  waiting. Default: -1. */
+      LaterLP_FirstCutTimeout,
+      /** This parameter specifies the time to wait for cuts at the first LP
+	  relaxation at a search tree node. See the remarks at <code>
+	  FirstLP_FirstCutTimeout</code> as well. <br> 
+	  Values: Any non-negative number represents a waiting time in
+	  seconds. Negative numbers indicate no time limit on
+	  waiting. Default: -1. */
+      FirstLP_AllCutsTimeout,
+      /** This parameter specifies the time to wait for cuts at iterations
+	  that are not the first at a search tree node. See the remarks at
+	  <code>FirstLP_FirstCutTimeout</code> as well. <br> 
+	  Values: Any non-negative number represents a waiting time in
+	  seconds. Negative numbers indicate no time limit on
+	  waiting. Default: -1. */
+      LaterLP_AllCutsTimeout,
+
+      /** This and the following three parameters control how long the LP
+	  process waits for generated variables. These parameters are
+	  analogous to the ones that control the waiting time for generated
+	  cuts. See the remarks at <code>FirstLP_FirstCutTimeout</code> as
+	  well. <br> 
+	  This parameter specifies the time to wait for the first generated
+	  variable at the first LP relaxation at a search tree node. <br> 
+	  Values: Any non-negative number represents a waiting time in
+	  seconds. Negative numbers indicate no time limit on
+	  waiting. Default: -1. */
+      FirstLP_FirstVarTimeout,
+      /** This parameter specifies the time to wait for the first generated
+	  variable at iterations that are not the first at a search tree node.
+	  See the remarks at <code>FirstLP_FirstVarTimeout</code> as well. <br>
+	  Values: Any non-negative number represents a waiting time in
+	  seconds. Negative numbers indicate no time limit on
+	  waiting. Default: -1. */
+      LaterLP_FirstVarTimeout,
+      /** This parameter specifies the time to wait for variables at the first
+	  LP relaxation at a search tree node. See the remarks at <code>
+	  FirstLP_FirstVarTimeout</code> as well. <br> 
+	  Values: Any non-negative number represents a waiting time in
+	  seconds. Negative numbers indicate no time limit on
+	  waiting. Default: -1. */
+      FirstLP_AllVarsTimeout,
+      /** This parameter specifies the time to wait for variables at iterations
+	  that are not the first at a search tree node. See the remarks at
+	  <code>FirstLP_FirstVarTimeout</code> as well. <br> 
+	  Values: Any non-negative number represents a waiting time in
+	  seconds. Negative numbers indicate no time limit on
+	  waiting. Default: -1. */
+      LaterLP_AllVarsTimeout,
+
       //
       end_of_dbl_params
    };

@@ -257,7 +257,7 @@ public:
    /** Blocking receive with timeout. Wait until a message is received from
        the given process with the given message tag within the given
        timelimit. If <code>timeout</code> is positive then the receive routine
-       times out after this many milliseconds. If it is negative then the
+       times out after this many seconds. If it is negative then the
        method blocks until a message is received. The received message is
        saved into the buffer. With a 0 pointer as the first argument (or the
        predefined <code>BCP_AnyProcess</code> process id can be used) a
@@ -266,7 +266,7 @@ public:
        <code>BCP_Msg_AnyMessage</code>. */
    virtual void receive(const BCP_proc_id* const source,
 			const BCP_message_tag tag, BCP_buffer& buf,
-			const int timeout) = 0;
+			const double timeout) = 0;
    /** Probe if there are any messages from the given process with the
        given message tag. Return true if such a message is found, false
        otherwise. Note that the message is not "read", only its

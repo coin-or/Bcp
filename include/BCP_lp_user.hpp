@@ -206,64 +206,74 @@ public:
   /*@}*/
 
   //===========================================================================
-  /**@name LP solver environment */
-  /*@{*/
-    /** Create the LP solver class that will be used for solving the LP
-	relaxations. The default implementation picks up which
-	\c COIN_USE_XXX is defined and initializes an lp solver of that type.
-	This is probably OK for most users. The only reason to override this
-	method is to be able to choose at runtime which lp solver to
-	instantiate (maybe even different solvers on different processors).
-	In this case she should probably also override the
-	pack_warmstart() and unpack_warmstart() methods in this class and in
-	the BCP_tm_user class. */
-    virtual OsiSolverInterface *
-    initialize_solver_interface();
-  /*@}*/
+  /** Create LP solver environment.
+      Create the LP solver class that will be used for solving the LP
+      relaxations. The default implementation picks up which
+      \c COIN_USE_XXX is defined and initializes an lp solver of that type.
+      This is probably OK for most users. The only reason to override this
+      method is to be able to choose at runtime which lp solver to
+      instantiate (maybe even different solvers on different processors).
+      In this case she should probably also override the
+      pack_warmstart() and unpack_warmstart() methods in this class and in
+      the BCP_tm_user class. */
+  virtual OsiSolverInterface *
+  initialize_solver_interface();
 
   //===========================================================================
-  /**@name Initializing a new search tree node */
-  /*@{*/
-    /** This method serves as hook for the user to do some preprocessing on a
-	search tree node before the node is processed. Also, logical fixing
-	results can be returned in the last four parameters. This might be very
-	useful if the branching implies significant tightening.<br>
-	Default: empty method. 
-	@param vars       (IN) The variables in the current formulation 
-	@param cuts       (IN) The cuts in the current formulation
-	@param var_status (IN) The stati of the variables
-	@param cut_status (IN) The stati of the cuts
-	@param var_changed_pos (OUT) The positions of the variables whose
-	                             bounds should be tightened
-	@param var_new_bd      (OUT) The new lb/ub of those variables
-	@param cut_changed_pos (OUT) The positions of the cuts whose bounds
-	should be tightened
-	@param cut_new_bd (OUT) The new lb/ub of those cuts
-    */
-    virtual void
-    initialize_new_search_tree_node(const BCP_vec<BCP_var*>& vars,
-				    const BCP_vec<BCP_cut*>& cuts,
-				    const BCP_vec<BCP_obj_status>& var_status,
-				    const BCP_vec<BCP_obj_status>& cut_status,
-				    BCP_vec<int>& var_changed_pos,
-				    BCP_vec<double>& var_new_bd,
-				    BCP_vec<int>& cut_changed_pos,
-				    BCP_vec<double>& cut_new_bd);
-  /*@}*/
+  /** Initializing a new search tree node.
+      This method serves as hook for the user to do some preprocessing on a
+      search tree node before the node is processed. Also, logical fixing
+      results can be returned in the last four parameters. This might be very
+      useful if the branching implies significant tightening.<br>
+      Default: empty method. 
+      @param vars       (IN) The variables in the current formulation 
+      @param cuts       (IN) The cuts in the current formulation
+      @param var_status (IN) The stati of the variables
+      @param cut_status (IN) The stati of the cuts
+      @param var_changed_pos (OUT) The positions of the variables whose
+	                           bounds should be tightened
+      @param var_new_bd      (OUT) The new lb/ub of those variables
+      @param cut_changed_pos (OUT) The positions of the cuts whose bounds
+      should be tightened
+      @param cut_new_bd (OUT) The new lb/ub of those cuts
+  */
+  virtual void
+  initialize_new_search_tree_node(const BCP_vec<BCP_var*>& vars,
+				  const BCP_vec<BCP_cut*>& cuts,
+				  const BCP_vec<BCP_obj_status>& var_status,
+				  const BCP_vec<BCP_obj_status>& cut_status,
+				  BCP_vec<int>& var_changed_pos,
+				  BCP_vec<double>& var_new_bd,
+				  BCP_vec<int>& cut_changed_pos,
+				  BCP_vec<double>& cut_new_bd);
 
   //===========================================================================
-  /**@name Modifying parameters of the LP solver before optimization */
-  /*@{*/
-    /** This method provides an opportunity for the user to change parameters
-	of the LP solver before optimization in the LP solver starts. The
-	second argument indicates whether the optimization is a "regular"
-	optimization or it will take place in strong branching.
-	Default: empty method. 
-    */
-    virtual void
-    modify_lp_parameters(OsiSolverInterface* lp, bool in_strong_branching);
-  /*@}*/
+  /** Modify parameters of the LP solver before optimization.
+      This method provides an opportunity for the user to change parameters
+      of the LP solver before optimization in the LP solver starts. The
+      second argument indicates whether the optimization is a "regular"
+      optimization or it will take place in strong branching.
+      Default: empty method. 
+  */
+  virtual void
+  modify_lp_parameters(OsiSolverInterface* lp, bool in_strong_branching);
 
+  //===========================================================================
+  /** Compute a true lower bound for the subproblem.
+      In case column generation is done the lower bound for the subproblem
+      might not be the same as the objective value of the current LP
+      relaxation. Here the user has an option to return a true lower
+      bound.<br>
+      The default implementation returns the objective value of the current
+      LP relaxation if no column generation is done, otherwise returns the
+      current (somehow previously computed) true lower bound.
+  */
+  virtual double
+  compute_lower_bound(const double old_lower_bound,
+		      const BCP_lp_result& lpres,
+		      const BCP_vec<BCP_var*>& vars,
+		      const BCP_vec<BCP_cut*>& cuts);
+       
   //===========================================================================
   /**@name MIP feasibility testing of LP solutions and heuristics */
   /*@{*/
@@ -288,21 +298,22 @@ public:
 		     const BCP_vec<BCP_cut*>& cuts);
     /**@name Helper functions for <code>test_feasibility</code>. If the
        solution is feasible a pointer to a BCP_solution_generic object is
-       returned.
+       returned. Note that the solutions generated by these helper functions
+       <b>DO NOT OWN</b> the pointers in the \c _vars member of the solution.
     */
     /*@{*/
       /** Test whether all variables are 0/1. */
-      BCP_solution*
+      BCP_solution_generic*
       test_binary(const BCP_lp_result& lpres, const BCP_vec<BCP_var*>& vars,
 		  const double etol) const;
       /** Test whether all variables are integer and are within their lower and
           upper bounds. */
-      BCP_solution*
+      BCP_solution_generic*
       test_integral(const BCP_lp_result& lpres, const BCP_vec<BCP_var*>& vars,
 		    const double etol) const;
       /** Test whether all variables are within their lower and upper bounds
 	  and that the integer variables are really integer. */
-      BCP_solution*
+      BCP_solution_generic*
       test_full(const BCP_lp_result& lpres, const BCP_vec<BCP_var*>& vars,
 		const double etol) const;
     /*@}*/
@@ -633,7 +644,7 @@ public:
   /** Reduced cost fixing. This is not exactly a helper function, but the user
       might want to invoke it... */
   void
-  reduced_cost_fixing(const double* dj, const double gap,
+  reduced_cost_fixing(const double* dj, const double* x, const double gap,
 		      BCP_vec<BCP_var*>& vars, int& newly_changed);
 
   //===========================================================================

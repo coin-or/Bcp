@@ -101,7 +101,7 @@ BCP_vg_user::unpack_dual_solution(BCP_buffer& buf)
 VG: BCP_Msg_LpSolution_User message arrived but the unpack_dual_solution() \n\
     function is not overridden.\n");
    } else {
-      double cutnum;
+      int cutnum;
       buf.unpack(cutnum);
       if (cutnum > 0) {
 	 p->cuts.reserve(cutnum);

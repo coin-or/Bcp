@@ -6,6 +6,8 @@
 // This file is fully docified.
 // Actually, there's nothing to docify here...
 
+#include <vector>
+
 #include "BCP_os.hpp"
 #include "BCP_enum.hpp"
 #include "BCP_enum_branch.hpp"
@@ -24,7 +26,7 @@ class BCP_solution;
 class BCP_col;
 class BCP_row;
 class BCP_warmstart;
-
+class BCP_var;
 
 //-----------------------------------------------------------------------------
 // BCP_lp_main.cpp
@@ -41,6 +43,15 @@ void BCP_lp_main_loop(BCP_lp_prob& p);
 
 //-----------------------------------------------------------------------------
 // BCP_lp_fathom.cpp
+void BCP_price_vars(BCP_lp_prob& p, const bool from_fathom,
+		    BCP_vec<BCP_var*>& vars_to_add,
+		    BCP_vec<BCP_col*>& cols_to_add);
+void BCP_restore_feasibility(BCP_lp_prob& p,
+			     const std::vector<double*> dual_rays,
+			     BCP_vec<BCP_var*>& vars_to_add,
+			     BCP_vec<BCP_col*>& cols_to_add);
+void BCP_lp_perform_fathom(BCP_lp_prob& p, const char* msg,
+			   BCP_message_tag msgtag);
 bool BCP_lp_fathom(BCP_lp_prob& p, const bool from_repricing);
 
 //-----------------------------------------------------------------------------
@@ -68,7 +79,6 @@ void BCP_lp_add_rows_to_lp(const BCP_vec<BCP_row*>& rows,
 //-----------------------------------------------------------------------------
 // BCP_lp_msgproc.cpp
 void BCP_lp_check_ub(BCP_lp_prob& p);
-void BCP_lp_process_message(BCP_lp_prob& p, BCP_buffer& buf);
 BCP_IndexType BCP_lp_next_var_index(BCP_lp_prob& p);
 BCP_IndexType BCP_lp_next_cut_index(BCP_lp_prob& p);
 void BCP_lp_process_ub_message(BCP_lp_prob& p, BCP_buffer& buf);
@@ -82,8 +92,7 @@ BCP_lp_branch(BCP_lp_prob& p);
 
 //-----------------------------------------------------------------------------
 // BCP_lp_colrow.cpp
-bool BCP_lp_fix_vars(BCP_lp_prob& p, const bool from_fathom,
-		     const bool update_change_count);
+bool BCP_lp_fix_vars(BCP_lp_prob& p);
 void BCP_lp_adjust_row_effectiveness(BCP_lp_prob& p);
 void BCP_lp_delete_cols_and_rows(BCP_lp_prob& p,
 				 BCP_lp_branching_object* can,

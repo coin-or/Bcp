@@ -12,6 +12,7 @@
 #include "BCP_buffer.hpp"
 #include "BCP_cg_param.hpp"
 #include "BCP_parameters.hpp"
+#include "BCP_process.hpp"
 
 class BCP_cg_user;
 class BCP_message_environment;
@@ -27,7 +28,7 @@ class BCP_cut;
    (or member method) that's invoked within the CG process. 
 */
 
-class BCP_cg_prob {
+class BCP_cg_prob : public BCP_process {
 private:
    /**@name Disabled members */
    /*@{*/
@@ -101,7 +102,7 @@ public:
        state. */
    BCP_cg_prob();
    /** The destructor deletes everything. */
-   ~BCP_cg_prob();
+   virtual ~BCP_cg_prob();
    /*@}*/
 
    /**@name Query methods */
@@ -126,6 +127,10 @@ public:
    /** Unpack a variable. Invoked from the built-in
        BCP_cg_user::unpack_primal_solution(). */
    BCP_var* unpack_var();
+   //--------------------------------------------------------------------------
+   virtual BCP_buffer& get_message_buffer() { return msg_buf; }
+   virtual BCP_proc_id* get_parent() { return tree_manager; }
+   virtual void process_message();
 };
 
 // This function is used only internally. 

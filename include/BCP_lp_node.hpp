@@ -136,7 +136,9 @@ public:
    /** */
    BCP_column_generation colgen;
    /** */
-   double lower_bound;
+   double quality;
+   /** */
+   double true_lower_bound;
    /** */
    BCP_var_set vars;
    /** */
@@ -162,7 +164,7 @@ public:
       cg(0), cp(0), vg(0), vp(0),
       level(0), index(0), iteration_count(0),
       dive(BCP_DoNotDive), colgen(BCP_DoNotGenerateColumns_Fathom),
-      lower_bound(0.0), vars(), cuts(),
+      quality(-DBL_MAX), true_lower_bound(-DBL_MAX), vars(), cuts(),
       indexed_pricing(),
       warmstart(0) {}
    /** */

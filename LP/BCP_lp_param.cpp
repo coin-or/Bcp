@@ -10,6 +10,9 @@ using std::make_pair;
 
 template <>
 void BCP_parameter_set<BCP_lp_par>::create_keyword_list() {
+
+   obsolete_keys.push_back(BCP_string("BCP_FixVarsBeforeFathom"));
+
    // Create the list of keywords for parameter file reading
    //--------------------------------------------------------------------------
    // CharPar
@@ -22,12 +25,15 @@ void BCP_parameter_set<BCP_lp_par>::create_keyword_list() {
    keys.push_back(make_pair(BCP_string("BCP_CompareNewVarsToOldOnes"),
 			    BCP_parameter(BCP_CharPar, 
 					  CompareNewVarsToOldOnes)));
+   keys.push_back(make_pair(BCP_string("BCP_DoReducedCostFixingAtZero"),
+			    BCP_parameter(BCP_CharPar, 
+					  DoReducedCostFixingAtZero)));
+   keys.push_back(make_pair(BCP_string("BCP_DoReducedCostFixingAtAnything"),
+			    BCP_parameter(BCP_CharPar, 
+					  DoReducedCostFixingAtAnything)));
    keys.push_back(make_pair(BCP_string("BCP_DoReducedCostFixing"),
 			    BCP_parameter(BCP_CharPar, 
-					  DoReducedCostFixing)));
-   keys.push_back(make_pair(BCP_string("BCP_FixVarsBeforeFathom"),
-			    BCP_parameter(BCP_CharPar, 
-					  FixVarsBeforeFathom)));
+					  DoReducedCostFixingAtAnything)));
    keys.push_back(make_pair(BCP_string("BCP_MaintainIndexedVarPricingList"),
 			    BCP_parameter(BCP_CharPar, 
 					  MaintainIndexedVarPricingList)));
@@ -293,8 +299,8 @@ void BCP_parameter_set<BCP_lp_par>::set_default_entries() {
    set_entry(BranchOnCuts, false);
    set_entry(CompareNewCutsToOldOnes, true);
    set_entry(CompareNewVarsToOldOnes, true);
-   set_entry(DoReducedCostFixing, true);
-   set_entry(FixVarsBeforeFathom, true);
+   set_entry(DoReducedCostFixingAtZero, true);
+   set_entry(DoReducedCostFixingAtAnything, true);
    set_entry(MaintainIndexedVarPricingList, true);
    set_entry(MessagePassingIsSerial, true);
    set_entry(ReportWhenDefaultIsExecuted, true);

@@ -5,6 +5,7 @@
 #include "BCP_tm.hpp"
 #include "BCP_solution.hpp"
 #include "BCP_var.hpp"
+#include "BCP_functions.hpp"
 
 //#############################################################################
 // Informational methods for the user
@@ -54,7 +55,7 @@ BCP_tm_user::unpack_feasible_solution(BCP_buffer& buf)
   BCP_solution_generic* soln = new BCP_solution_generic;
 
   int varnum;
-  buf.unpack(soln->_objective).unpack(varnum);
+  buf.unpack(varnum);
 
   double val;
   int bcpind;
@@ -62,100 +63,43 @@ BCP_tm_user::unpack_feasible_solution(BCP_buffer& buf)
     buf.unpack(val);
     buf.unpack(bcpind);
     BCP_var* var = p->unpack_var_without_bcpind(buf);
+    var->set_bcpind(bcpind);
     soln->add_entry(var, val);
   }
 
   return soln;
 }
 
+//-----------------------------------------------------------------------------
+
+bool
+BCP_tm_user::replace_solution(const BCP_solution* old_sol,
+			      const BCP_solution* new_sol)
+{
+   return false;
+}
+
 //#############################################################################
 
-#if defined(COIN_USE_VOL)
-
-#include "BCP_warmstart_dual.hpp"
 void
 BCP_tm_user::pack_warmstart(const BCP_warmstart* ws, BCP_buffer& buf)
 {
   if (p->param(BCP_tm_par::ReportWhenDefaultIsExecuted)) {
     printf(" TM: Default BCP_tm_user::pack_warmstart() executed.\n");
   }
-  const BCP_warmstart_dual* dws = dynamic_cast<const BCP_warmstart_dual*>(ws);
-  if (!dws) {
-    throw BCP_fatal_error("\
-COIN_USE_VOL defined but BCP_tm_user::pack_warmstart() is invoked\n\
-with a non-BCP_warmstart_dual object.\n");
-  }
-  dws->pack(buf);
+  BCP_pack_warmstart(ws, buf);
 }
+
 //-----------------------------------------------------------------------------
+
 BCP_warmstart*
 BCP_tm_user::unpack_warmstart(BCP_buffer& buf)
 {
   if (p->param(BCP_tm_par::ReportWhenDefaultIsExecuted)) {
     printf(" TM: Default BCP_tm_user::unpack_warmstart() executed.\n");
   }
-  return new BCP_warmstart_dual(buf);
+  return BCP_unpack_warmstart(buf);
 }
-
-#elif defined(COIN_USE_CPX) //=================================================
-
-#include "BCP_warmstart_basis.hpp"
-
-void
-BCP_tm_user::pack_warmstart(const BCP_warmstart* ws, BCP_buffer& buf)
-{
-  if (p->param(BCP_tm_par::ReportWhenDefaultIsExecuted)) {
-    printf(" TM: Default BCP_tm_user::pack_warmstart() executed.\n");
-  }
-  const BCP_warmstart_basis* bws = dynamic_cast<const BCP_warmstart_basis*>(ws);
-  if (!bws) {
-    throw BCP_fatal_error("\
-COIN_USE_VOL defined but BCP_tm_user::pack_warmstart() is invoked\n\
-with a non-BCP_warmstart_basis object.\n");
-  }
-  bws->pack(buf);
-}
-//-----------------------------------------------------------------------------
-BCP_warmstart*
-BCP_tm_user::unpack_warmstart(BCP_buffer& buf)
-{
-  if (p->param(BCP_tm_par::ReportWhenDefaultIsExecuted)) {
-    printf(" TM: Default BCP_tm_user::unpack_warmstart() executed.\n");
-  }
-  return new BCP_warmstart_basis(buf);
-}
-
-#elif defined(COIN_USE_XPR) //=================================================
-      
-#elif defined(COIN_USE_OSL) //=================================================
-
-#include "BCP_warmstart_basis.hpp"
-
-void
-BCP_tm_user::pack_warmstart(const BCP_warmstart* ws, BCP_buffer& buf)
-{
-  if (p->param(BCP_tm_par::ReportWhenDefaultIsExecuted)) {
-    printf(" TM: Default BCP_tm_user::pack_warmstart() executed.\n");
-  }
-  const BCP_warmstart_basis* bws = dynamic_cast<const BCP_warmstart_basis*>(ws);
-  if (!bws) {
-    throw BCP_fatal_error("\
-COIN_USE_VOL defined but BCP_tm_user::pack_warmstart() is invoked\n\
-with a non-BCP_warmstart_basis object.\n");
-  }
-  bws->pack(buf);
-}
-//-----------------------------------------------------------------------------
-BCP_warmstart*
-BCP_tm_user::unpack_warmstart(BCP_buffer& buf)
-{
-  if (p->param(BCP_tm_par::ReportWhenDefaultIsExecuted)) {
-    printf(" TM: Default BCP_tm_user::unpack_warmstart() executed.\n");
-  }
-  return new BCP_warmstart_basis(buf);
-}
-
-#endif
 
 //#############################################################################
 
@@ -256,7 +200,7 @@ BCP_tm_user::compare_tree_nodes(const BCP_tm_node* node0,
 {
   switch (p->param(BCP_tm_par::TreeSearchStrategy)) {
   case BCP_BestFirstSearch:
-    return node0->lower_bound() < node1->lower_bound();
+    return node0->quality() < node1->quality();
   case BCP_BreadthFirstSearch:
     return node0->index() < node1->index();
   case BCP_DepthFirstSearch:

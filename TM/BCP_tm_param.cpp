@@ -37,6 +37,9 @@ void BCP_parameter_set<BCP_tm_par>::create_keyword_list() {
    keys.push_back(make_pair(BCP_string("BCP_IndexedVariablesAreGenerated"),
 			    BCP_parameter(BCP_CharPar,
 					  IndexedVariablesAreGenerated)));
+   keys.push_back(make_pair(BCP_string("BCP_LpValueIsTrueLowerBound"),
+			    BCP_parameter(BCP_CharPar,
+					  LpValueIsTrueLowerBound)));
    keys.push_back(make_pair(BCP_string("BCP_PriceInRootBeforePhase2"),
 			    BCP_parameter(BCP_CharPar,
 					  PriceInRootBeforePhase2)));
@@ -121,12 +124,12 @@ void BCP_parameter_set<BCP_tm_par>::create_keyword_list() {
    keys.push_back(make_pair(BCP_string("BCP_UnconditionalDiveProbability"),
 			    BCP_parameter(BCP_DoublePar,
 					  UnconditionalDiveProbability)));
-   keys.push_back(make_pair(BCP_string("BCP_LBRatioToAllowDiving_HasUB"),
+   keys.push_back(make_pair(BCP_string("BCP_QualityRatioToAllowDiving_HasUB"),
 			    BCP_parameter(BCP_DoublePar,
-					  LBRatioToAllowDiving_HasUB)));
-   keys.push_back(make_pair(BCP_string("BCP_LBRatioToAllowDiving_NoUB"),
+					  QualityRatioToAllowDiving_HasUB)));
+   keys.push_back(make_pair(BCP_string("BCP_QualityRatioToAllowDiving_NoUB"),
 			    BCP_parameter(BCP_DoublePar,
-					  LBRatioToAllowDiving_NoUB)));
+					  QualityRatioToAllowDiving_NoUB)));
    keys.push_back(make_pair(BCP_string("BCP_Granularity"),
 			    BCP_parameter(BCP_DoublePar,
 					  Granularity)));
@@ -200,10 +203,11 @@ void BCP_parameter_set<BCP_tm_par>::set_default_entries(){
    set_entry(DoBranchAndCut, false);
    set_entry(AlgorithmicVariablesAreGenerated, false);
    set_entry(IndexedVariablesAreGenerated, false);
+   set_entry(LpValueIsTrueLowerBound, true);
+   set_entry(MessagePassingIsSerial, true);
    set_entry(PriceInRootBeforePhase2, false);
    set_entry(ReportWhenDefaultIsExecuted, true);
    set_entry(TrimTreeBeforeNewPhase, false);
-   set_entry(MessagePassingIsSerial, true);
    //--------------------------------------------------------------------------
    set_entry(TmVerb_AllFeasibleSolutionValue, true);
    set_entry(TmVerb_AllFeasibleSolution, false);
@@ -228,8 +232,8 @@ void BCP_parameter_set<BCP_tm_par>::set_default_entries(){
    //--------------------------------------------------------------------------
    // DoublePar
    set_entry(UnconditionalDiveProbability, 0.02);
-   set_entry(LBRatioToAllowDiving_HasUB, 1.2);
-   set_entry(LBRatioToAllowDiving_NoUB, 2.0);
+   set_entry(QualityRatioToAllowDiving_HasUB, 1.2);
+   set_entry(QualityRatioToAllowDiving_NoUB, 2.0);
    set_entry(Granularity, 1e-8);
    set_entry(MaxRunTime, 3600.0); // one hour
    set_entry(TerminationGap_Absolute, 0.0);

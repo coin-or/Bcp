@@ -133,6 +133,13 @@ public:
     virtual BCP_solution*
     unpack_feasible_solution(BCP_buffer& buf);
 
+    /** Decide whether to replace old_sol with new_sol. When this method is
+	invoked it has already been tested that they have the same objective
+	function value. The purpose of the method is that the user can have a
+	secondary objective function. */
+    virtual bool
+    replace_solution(const BCP_solution* old_sol, const BCP_solution* new_sol);
+
     /**@name Methods that pack/unpack warmstart, var_algo and cut_algo objects.
 
        The packing methods take an object and a buffer as

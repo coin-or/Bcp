@@ -37,13 +37,17 @@ static inline void
 BCP_lp_make_parent_from_node(BCP_lp_prob& p);
 
 static inline void
-BCP_print_brobj_stat(BCP_lp_prob& p, const int candidate_num,
+BCP_print_brobj_stat(BCP_lp_prob& p,
+		     const int orig_varnum,
+		     const int candidate_num,
 		     const BCP_presolved_lp_brobj* best_presolved);
 
 //#############################################################################
 
 static inline void
-BCP_print_brobj_stat(BCP_lp_prob& p, const int candidate_num,
+BCP_print_brobj_stat(BCP_lp_prob& p,
+		     const int orig_varnum,
+		     const int candidate_num,
 		     const BCP_presolved_lp_brobj* best_presolved)
 {
    const BCP_lp_branching_object* can = best_presolved->candidate();
@@ -51,7 +55,8 @@ BCP_print_brobj_stat(BCP_lp_prob& p, const int candidate_num,
    if (p.param(BCP_lp_par::LpVerb_StrongBranchResult)) {
       printf("LP:   Out of %i Strong Branching selected:", candidate_num);
       if (p.param(BCP_lp_par::LpVerb_StrongBranchPositions)) {
-	 can->print_branching_info(p.lp_result->x(),
+	 can->print_branching_info(orig_varnum,
+				   p.lp_result->x(),
 				   p.lp_solver->getObjCoefficients());
       }
       for (int i = 0; i < can->child_num; ++i) {
@@ -235,38 +240,20 @@ BCP_mark_result_of_strong_branching(BCP_lp_prob& p,
 
 //#############################################################################
 
-static inline BCP_branching_decision
-BCP_lp_select_branching_object(BCP_lp_prob& p,
-			       BCP_presolved_lp_brobj*& best_presolved)
+static inline void
+BCP_lp_perform_strong_branching(BCP_lp_prob& p,
+				BCP_vec<BCP_lp_branching_object*>& candidates,
+				BCP_presolved_lp_brobj*& best_presolved)
 {
    OsiSolverInterface* lp = p.lp_solver;
    BCP_var_set& vars = p.node->vars;
    BCP_cut_set& cuts = p.node->cuts;
-   BCP_vec<BCP_lp_branching_object*> candidates;
 
-   BCP_branching_decision do_branch = 
-      p.user->select_branching_candidates(*p.lp_result, vars, cuts,
-					  *p.local_var_pool, *p.local_cut_pool,
-					  candidates);
-   switch (do_branch){
-    case BCP_DoNotBranch_Fathomed:
-      return BCP_DoNotBranch_Fathomed;
-    case BCP_DoNotBranch:
-      if (p.local_var_pool->size() == 0 && p.local_cut_pool->size() == 0)
-	 throw BCP_fatal_error("BCP_DoNotBranch, but nothing can be added!\n");
-      return BCP_DoNotBranch;
-    case BCP_DoBranch:
-      break;
-   }
-
-   // ** OK, now we have to branch. **
-   double time0 = BCP_time_since_epoch();
-
-   // Get a private copy of the results
-   p.lp_result->get_results(*lp, true);
+   const int orig_colnum = vars.size();
 
    const std::pair<int,int> added_object_num =
       BCP_add_branching_objects(p, candidates);
+   
    const int added_colnum = added_object_num.first;
    const int added_rownum = added_object_num.second;
 
@@ -312,8 +299,6 @@ BCP_lp_select_branching_object(BCP_lp_prob& p,
    // Look at the candidates one-by-one and presolve them.
    BCP_vec<BCP_lp_branching_object*>::iterator cani;
 
-   const int candidate_num = candidates.size();
-
    printf("\nLP: Starting strong branching:\n\n");
 
    for (cani = candidates.begin(); cani != candidates.end(); ++cani){
@@ -338,7 +323,8 @@ BCP_lp_select_branching_object(BCP_lp_prob& p,
       if (p.param(BCP_lp_par::LpVerb_PresolveResult)) {
 	 printf("LP:   Presolving:");
 	 if (p.param(BCP_lp_par::LpVerb_PresolvePositions)) {
-	    can->print_branching_info(p.lp_result->x(),
+	    can->print_branching_info(orig_colnum,
+				      p.lp_result->x(),
 				      p.lp_solver->getObjCoefficients());
 	 }
 	 for (i = 0; i < can->child_num; ++i) {
@@ -380,49 +366,109 @@ BCP_lp_select_branching_object(BCP_lp_prob& p,
 	 delete *cani;
    }
 
-   // decide what to do with each children
-   best_presolved->initialize_action();
-   p.user->set_actions_for_children(best_presolved);
-   BCP_vec<BCP_child_action>& action = best_presolved->action();
-   // override the set values if we won't dive
-   if (p.node->dive == BCP_DoNotDive){
-      bool needed_overriding = false;
-      for (i = can->child_num - 1; i >= 0; --i) {
-	 if (action[i] != BCP_ReturnChild) {
-	    action[i] = BCP_ReturnChild;
-	    needed_overriding = true;
-	 }
-      }
-      if (needed_overriding && p.param(BCP_lp_par::LpVerb_StrongBranchResult)){
-	 printf("LP:   Every children is returned because of not diving.\n");
-      }
-   }
-   // finally throw out the fathomable ones
-   if (p.node->indexed_pricing.get_status() == BCP_PriceNothing && p.has_ub()){
-      for (i = can->child_num - 1; i >= 0; --i){
-	 if (p.over_ub(best_presolved->lpres(i).objval()))
-	    action[i] = BCP_FathomChild;
-      }
-   }
-   
-   
-   BCP_print_brobj_stat(p, candidate_num, best_presolved);
-
    // Mark the cols/rows of the OTHER candidates as removable
    BCP_mark_result_of_strong_branching(p, can, added_colnum, added_rownum);
    // Delete whatever cols/rows we want to delete. This function also updates
    // var/cut_positions !!!
    BCP_lp_delete_cols_and_rows(p, can, true /* to force deletion */);
    
+   delete ws;
+}
+
+//#############################################################################
+
+static inline BCP_branching_decision
+BCP_lp_select_branching_object(BCP_lp_prob& p,
+			       BCP_presolved_lp_brobj*& best_presolved)
+{
+   OsiSolverInterface* lp = p.lp_solver;
+   BCP_var_set& vars = p.node->vars;
+   BCP_cut_set& cuts = p.node->cuts;
+   BCP_vec<BCP_lp_branching_object*> candidates;
+
+   BCP_branching_decision do_branch = 
+      p.user->select_branching_candidates(*p.lp_result, vars, cuts,
+					  *p.local_var_pool, *p.local_cut_pool,
+					  candidates);
+   switch (do_branch){
+    case BCP_DoNotBranch_Fathomed:
+      return BCP_DoNotBranch_Fathomed;
+    case BCP_DoNotBranch:
+      if (p.local_var_pool->size() == 0 && p.local_cut_pool->size() == 0)
+	 throw BCP_fatal_error("BCP_DoNotBranch, but nothing can be added!\n");
+      return BCP_DoNotBranch;
+    case BCP_DoBranch:
+      break;
+   }
+
+   // give error message if there are no branching candidates
+   if (candidates.size() < 1) {
+      throw BCP_fatal_error("\
+BCP_lp_select_branching_object: branching forced but no candidates selected\n");
+   }
+   
+   // ** OK, now we have to branch. **
+   double time0 = BCP_time_since_epoch();
+   const int orig_colnum = p.node->vars.size();
+
+   // if branching candidates are not presolved then choose the first branching
+   // candidate as the best candidate. 
+   if (p.param(BCP_lp_par::MaxPresolveIter) < 0) {
+      if (candidates.size() > 1) {
+	 printf("\
+LP: Strong branching is disabled but more than one candidate is selected.\n\
+    Deleting all candidates but the first.\n");
+	 // delete all other candidates
+	 BCP_vec<BCP_lp_branching_object*>::iterator can = candidates.begin();
+	 for (++can; can != candidates.end(); ++can) {
+	    delete *can;
+	 }
+	 candidates.erase(candidates.begin()+1, candidates.end());
+      }
+      BCP_add_branching_objects(p, candidates);
+      best_presolved = new BCP_presolved_lp_brobj(candidates[0]);
+   } else {
+      BCP_lp_perform_strong_branching(p, candidates, best_presolved);
+   }
+
+   BCP_lp_branching_object* can = best_presolved->candidate();
+
+   // decide what to do with each child
+   best_presolved->initialize_action();
+   p.user->set_actions_for_children(best_presolved);
+   BCP_vec<BCP_child_action>& action = best_presolved->action();
+   // override the set values if we won't dive
+   if (p.node->dive == BCP_DoNotDive){
+      bool needed_overriding = false;
+      for (int i = can->child_num - 1; i >= 0; --i) {
+	 if (action[i] == BCP_KeepChild) {
+	    action[i] = BCP_ReturnChild;
+	    needed_overriding = true;
+	 }
+      }
+      if (needed_overriding && p.param(BCP_lp_par::LpVerb_StrongBranchResult)){
+	 printf("LP:   Every child is returned because of not diving.\n");
+      }
+   }
+   // finally throw out the fathomable ones. This can be done only if nothing
+   // needs to be priced, there already is an upper bound and strong branching
+   // was enabled (otherwise we don't have the LPs solved)
+   if (p.param(BCP_lp_par::MaxPresolveIter) >= 0) {
+      if (p.node->indexed_pricing.get_status() == BCP_PriceNothing &&
+	  p.has_ub()) {
+	 for (int i = can->child_num - 1; i >= 0; --i) {
+	    if (p.over_ub(best_presolved->lpres(i).objval()))
+	       action[i] = BCP_FathomChild;
+	 }
+      }
+      BCP_print_brobj_stat(p, orig_colnum, candidates.size(), best_presolved);
+   }
+   
    // Now just resolve the LP to get what'll be sent to the TM.
    p.user->modify_lp_parameters(p.lp_solver, false);
    lp->resolve();
-   p.lp_result->get_results(*lp, false /* a pointer to the lp solver's
-					  copy is fine */ );
-
-   p.node->lower_bound = p.lp_result->objval();
-
-   delete ws;
+   p.lp_result->get_results(*lp);
+   p.node->quality = p.lp_result->objval();
 
    p.stat.time_branching += BCP_time_since_epoch() - time0;
 
@@ -533,6 +579,12 @@ BCP_lp_branch(BCP_lp_prob& p)
    BCP_lp_send_cuts_to_cp(p, -1);
 
    if (keep < 0){ // if no diving then return quickly
+      if (p.param(BCP_lp_par::LpVerb_FathomInfo)) {
+	 if (best_presolved->is_pruned())
+	    printf("LP:   Forcibly Pruning node\n");
+	 else
+	    printf("LP:   Returned children to TM. Waiting for new node.\n");
+      }
       delete best_presolved->candidate();
       delete best_presolved;
       return BCP_BranchingFathomedThisNode;
@@ -547,15 +599,25 @@ BCP_lp_branch(BCP_lp_prob& p)
    can->apply_child_bd(p.lp_solver, keep);
    if (can->vars_affected()) {
       BCP_var_set& vars = p.node->vars;
-      if (can->forced_var_pos)
+      if (can->forced_var_pos) {
 	 vars.set_lb_ub(*can->forced_var_pos, can->forced_var_bd_child(keep));
+	 const BCP_vec<int>& pos = *can->forced_var_pos;
+	 for (int p = pos.size() - 1; p >= 0; --p) {
+	    vars[pos[p]]->make_non_removable();
+	 }
+      }
       if (can->implied_var_pos)
 	 vars.set_lb_ub(*can->implied_var_pos,can->implied_var_bd_child(keep));
    }
    if (can->cuts_affected()) {
       BCP_cut_set& cuts = p.node->cuts;
-      if (can->forced_cut_pos)
+      if (can->forced_cut_pos) {
 	 cuts.set_lb_ub(*can->forced_cut_pos, can->forced_cut_bd_child(keep));
+	 const BCP_vec<int>& pos = *can->forced_cut_pos;
+	 for (int p = pos.size() - 1; p >= 0; --p) {
+	    cuts[pos[p]]->make_non_removable();
+	 }
+      }
       if (can->implied_cut_pos)
 	 cuts.set_lb_ub(*can->implied_cut_pos,can->implied_cut_bd_child(keep));
    }

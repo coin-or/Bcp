@@ -36,6 +36,10 @@ struct BCP_tm_par{
 	  (false). Default: 0. */
     // *FIXME* name of parameter is not the best. 
     DoBranchAndCut,
+    /** Indicator whether the LP computed objective value is a true lower
+	bound on the node. This should be set to false if column generation is
+	done. Values: 1 (true), 0 (false). Default: 1. */
+    LpValueIsTrueLowerBound,
     /** Indicates whether message passing is serial (all processes are on
 	the same processor) or not. Values: 1 (true), 0 (false). Default: 0.
     */
@@ -109,15 +113,15 @@ struct BCP_tm_par{
     /** The probability with which the LP process is directed to dive.
 	Values: Default: */
     UnconditionalDiveProbability,
-    /** The LP process is allowed to dive if the ratio between the lower
-	bound (the presolved objective value) of the child to be kept and
-	the best lower bound among the candidate nodes is not larger the
+    /** The LP process is allowed to dive if the ratio between the quality
+	(for now the presolved objective value) of the child to be kept and
+	the best quality among the candidate nodes is not larger the
 	this parameter. This ratio is applied if an upper bound already
 	exists. Values: Default: */
-    LBRatioToAllowDiving_HasUB,
+    QualityRatioToAllowDiving_HasUB,
     /** Same as above, but this value is used if an upper bound does not
 	exist yet. Values: Default: */
-    LBRatioToAllowDiving_NoUB,
+    QualityRatioToAllowDiving_NoUB,
     /** ??? Values: Default: */
     Granularity,
     /** Maximum allowed running time */

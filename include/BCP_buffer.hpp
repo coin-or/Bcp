@@ -4,6 +4,7 @@
 #define _BCP_BUFFER_H
 
 #include <memory>
+#include <vector>
 
 // This file is fully docified.
 
@@ -12,8 +13,6 @@
 #include "BCP_message_tag.hpp"
 #include "BCP_message.hpp"
 #include "BCP_vector.hpp"
-
-class BCP_proc_id;
 
 /**        
    This class describes the message buffer used for all processes of BCP.
@@ -293,6 +292,20 @@ public:
      return *this;
    }
 
+   /** Pack a <code>std::vector</code> into the buffer. */
+   template <class T> BCP_buffer& pack(const std::vector<T>& vec) {
+     int objnum = vec.size();
+     int new_bytes = objnum * sizeof(T);
+     make_fit( sizeof(int) + new_bytes );
+     memcpy(_data + _size, &objnum, sizeof(int));
+     _size += sizeof(int);
+     if (objnum > 0){
+       memcpy(_data + _size, &vec[0], new_bytes);
+       _size += new_bytes;
+     }
+     return *this;
+   }
+
    /** Unpack a <code>BCP_vec</code> from the buffer. */
    template <class T> BCP_buffer& unpack(BCP_vec<T>& vec) {
      int objnum;
@@ -310,6 +323,28 @@ public:
 #endif
        vec.reserve(objnum);
        vec.insert(vec.end(), _data + _pos, objnum);
+       _pos += objnum * sizeof(T);
+     }
+     return *this;
+   }
+
+   /** Unpack a <code>std::vector</code> from the buffer. */
+   template <class T> BCP_buffer& unpack(std::vector<T>& vec) {
+     int objnum;
+#ifdef PARANOID
+     if (_pos + sizeof(int) > _size)
+       throw BCP_fatal_error("Reading over the end of buffer.\n");
+#endif
+     memcpy(&objnum, _data + _pos, sizeof(int));
+     _pos += sizeof(int);
+     vec.clear();
+     if (objnum > 0){
+#ifdef PARANOID
+       if (_pos + sizeof(T)*objnum > _size)
+	 throw BCP_fatal_error("Reading over the end of buffer.\n");
+#endif
+       vec.insert(vec.end(), objnum, T());
+       memcpy(&vec[0], _data + _pos, objnum * sizeof(T));
        _pos += objnum * sizeof(T);
      }
      return *this;

@@ -203,17 +203,21 @@ BCP_lp_pack_branching_info(BCP_lp_prob& p, BCP_presolved_lp_brobj* lp_brobj)
    const int child_num = lp_brobj->candidate()->child_num;
 
    // collect the lower bounds on the children
-   BCP_temp_vec<double> tmp_lower_bounds(child_num);
-   BCP_vec<double>& lower_bounds = tmp_lower_bounds.vec();
+   BCP_temp_vec<double> tmp_lpobj(child_num);
+   BCP_vec<double>& lpobj = tmp_lpobj.vec();
    for (int i = 0; i < child_num; ++i) {
-      lower_bounds.unchecked_push_back(lp_brobj->lpres(i).objval());
+      lpobj.unchecked_push_back(lp_brobj->lpres(i).objval());
    }
+
+   // The qualities are the same (for now) as the lpobjs
+   BCP_temp_vec<double> tmp_qualities(lpobj);
+   BCP_vec<double>& qualities = tmp_qualities.vec();
 
    const BCP_vec<BCP_child_action>& action = lp_brobj->action();
 
    // now pack all those stuff
    BCP_buffer& buf = p.msg_buf;
-   buf.pack(p.node->dive).pack(action).pack(lower_bounds);
+   buf.pack(p.node->dive).pack(action).pack(qualities).pack(lpobj);
    BCP_internal_brobj int_brobj(*lp_brobj->candidate());
    int_brobj.pack(buf);
 
@@ -243,11 +247,15 @@ int BCP_lp_send_node_description(BCP_lp_prob& p,
 
    // let's start with saying who this node is and what is the lb we got
    buf.clear();
-   buf.pack(node.index).pack(node.lower_bound);
+   buf.pack(node.index).pack(node.quality).pack(node.true_lower_bound);
+
+   const bool send_desc = brobj || p.param(BCP_lp_par::SendFathomedNodeDesc);
+
+   buf.pack(send_desc);
 
    // Send the node description only if this node is branched on (i.e., brobj
    // is non-null) or we got to send the description of fathomed nodes, too.
-   if (brobj || p.param(BCP_lp_par::SendFathomedNodeDesc)) {
+   if (send_desc) {
       // Pack the core (WrtCore, WrtParent or Explicit)
       BCP_lp_pack_core(p);  // BCP_problem_core_change
       // pack the indexed/algo var set change (or pack them explicitly)
@@ -311,9 +319,15 @@ LP: there is ws info in BCP_lp_send_node_description()!\n");
       BCP_lp_unpack_diving_info(p, p.msg_buf);
    }
 
-   // BCP_lp_process_diving_info() sets p.node->index to the new index is
-   // diving is done, or to -1 if diving is not allowed.
-   return p.node->index == -1 ? -1 : keep;
+   // BCP_lp_unpack_diving_info() sets p.node->index to the new index if
+   // diving is to be done, or to -1 if diving is not allowed.
+   if (p.node->index == -1) {
+      keep = -1;
+      // At this point brobj cannot be empty.
+      // We must reset the child to be kept, too.
+      brobj->keep_no_child();
+   }
+   return keep;
 }
 
 //#############################################################################

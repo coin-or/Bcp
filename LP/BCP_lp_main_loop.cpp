@@ -18,7 +18,7 @@ void BCP_lp_main_loop(BCP_lp_prob& p)
    // argument flag for a number of functions. of course, here we invoke those
    // functions from the main loop, but this flag must be tru if the functions
    // are invoked from repricing. hence the flag is set here to false.
-   const bool from_main_loop = false; 
+   const bool from_repricing = false; 
 
    /*------------------------------------------------------------------------*
     * The main loop -- continue solving relaxations until no new cuts
@@ -28,11 +28,16 @@ void BCP_lp_main_loop(BCP_lp_prob& p)
    bool cutset_changed = true;
    double time0;
 
-   if (p.param(BCP_lp_par::LpVerb_ProcessedNodeIndex))
+   if (p.param(BCP_lp_par::LpVerb_ProcessedNodeIndex)) {
       printf("\nLP: **** Processing NODE %i on LEVEL %i (from TM) ****\n",
 	     p.node->index, p.node->level);
+   }
    // let the user do whatever she wants before the new node starts
    BCP_lp_prepare_for_new_node(p);
+
+   const bool fix_vars_while_external_processes_working =
+      (p.node->colgen == BCP_DoNotGenerateColumns_Fathom) ||
+      (p.node->colgen == BCP_DoNotGenerateColumns_Send);
 
    while (true){
       ++p.node->iteration_count;
@@ -54,9 +59,8 @@ void BCP_lp_main_loop(BCP_lp_prob& p)
 	      p.node->level, p.node->index, p.node->iteration_count);
       p.lp_solver->writeMps(fname, "mps");
 #endif
-      lpres.get_results(*p.lp_solver, false /* a pointer to the lp solver's
-					       copy is fine */ );
-      const BCP_termcode tc = lpres.termcode();
+      lpres.get_results(*p.lp_solver);
+      const int tc = lpres.termcode();
       p.stat.time_lp_solving += BCP_time_since_epoch() - time0;
 
       if (varset_changed) {
@@ -85,23 +89,29 @@ void BCP_lp_main_loop(BCP_lp_prob& p)
       BCP_lp_test_feasibility(p, lpres);
       p.stat.time_feas_testing += BCP_time_since_epoch() - time0;
 
+      // Update the lower bound
+      p.node->quality = lpres.objval();
+      const double tlb = 
+	 p.user->compute_lower_bound(p.node->true_lower_bound,
+				     lpres, p.node->vars, p.node->cuts);
+      if (tlb > p.node->true_lower_bound)
+	 p.node->true_lower_bound = tlb;
+
+      if (p.over_ub(p.node->true_lower_bound)) {
+	 BCP_lp_perform_fathom(p, "\
+LP:   Terminating and fathoming due to proven high cost.\n",
+			       BCP_Msg_NodeDescription_OverUB_Pruned);
+	 return;
+      }
+
+      // If we get here then we either
+      // - do not generate columns AND the lp value is below the ub
+      // - generate columns
+
       if (tc & BCP_ProvenPrimalInf) {
 	 if (p.param(BCP_lp_par::LpVerb_FathomInfo))
 	    printf("LP:   Primal feasibility lost.\n");
-	 if (BCP_lp_fathom(p, from_main_loop)) {
-	    BCP_lp_clean_up_node(p);
-	    return;
-	 }
-	 varset_changed = true;
-	 continue;
-      }
-
-      if (((tc & BCP_ProvenOptimal) && p.over_ub(lpres.objval())) ||
-	  (tc & BCP_DualObjLimReached)) {
-	 if (p.param(BCP_lp_par::LpVerb_FathomInfo))
-	    printf("LP:   Terminating due to high cost.\n");
-	 if (BCP_lp_fathom(p, from_main_loop)) {
-	    BCP_lp_clean_up_node(p);
+	 if (BCP_lp_fathom(p, from_repricing)) {
 	    return;
 	 }
 	 varset_changed = true;
@@ -168,44 +178,54 @@ void BCP_lp_main_loop(BCP_lp_prob& p)
 	 }
       }
 
-      // While CG and CP are working try to fix vars and test the
-      // effectiveness of the rows.
-      if (BCP_lp_fix_vars(p,
-			  false /* not from fathom */,
-			  true /* update_bd_change_count */)) {
-	// during variable fixing primal feasibility is lost (must be due to
-	// logical fixing by the user). Go back and resolve, but keep the same
-	// iteration number
-	--p.node->iteration_count;
-	continue;
+      if (fix_vars_while_external_processes_working) {
+	 if (BCP_lp_fix_vars(p)) {
+	    // during variable fixing primal feasibility is lost (must be due
+	    // to logical fixing by the user). Go back and resolve, but keep
+	    // the same iteration number
+	    --p.node->iteration_count;
+	    continue;
+	 }
       }
       BCP_lp_adjust_row_effectiveness(p);
 
       // Generate and receive the cuts
       const int cuts_to_add_cnt =
-	 BCP_lp_generate_cuts(p, varset_changed, from_main_loop);
-
+	 BCP_lp_generate_cuts(p, varset_changed, from_repricing);
       // Generate and receive the vars
       const int vars_to_add_cnt =
-	 BCP_lp_generate_vars(p, cutset_changed, from_main_loop);
+	 BCP_lp_generate_vars(p, cutset_changed, from_repricing);
+
+      if (! fix_vars_while_external_processes_working) {
+	 if (BCP_lp_fix_vars(p)) {
+	    --p.node->iteration_count;
+	    continue;
+	 }
+      }
 
       time0 = BCP_time_since_epoch();
       BCP_solution* sol =
 	p.user->generate_heuristic_solution(lpres, p.node->vars, p.node->cuts);
       p.stat.time_heuristics += BCP_time_since_epoch() - time0;
+      // If the sol is a generic sol then look through the vars in it, and
+      // if any of them has 0 bcpindex then assign an index to it.
+      BCP_solution_generic* gsol = dynamic_cast<BCP_solution_generic*>(sol);
+      if (gsol) {
+	 const int size = gsol->_vars.size();
+	 for (int i = 0; i < size; ++i) {
+	    if (gsol->_vars[i]->bcpind() == 0)
+	       gsol->_vars[i]->set_bcpind(-BCP_lp_next_var_index(p));
+	 }
+      }
 
       if (sol != NULL) {
 	p.user->send_feasible_solution(sol);
 	delete sol;
-	if (p.over_ub(lpres.objval())) {
-	  if (p.param(BCP_lp_par::LpVerb_FathomInfo))
-	    printf("LP:   Terminating due to high cost (good heur soln!).\n");
-	  if (BCP_lp_fathom(p, from_main_loop)) {
-	    BCP_lp_clean_up_node(p);
-	    return;
-	  }
-	  varset_changed = true;
-	  continue;
+	if (p.over_ub(p.node->true_lower_bound)) {
+	   BCP_lp_perform_fathom(p, "\
+LP:   Terminating and fathoming due to proven high cost (good heur soln!).\n",
+				 BCP_Msg_NodeDescription_OverUB_Pruned);
+	   return;
 	}
       }
 
@@ -234,17 +254,15 @@ void BCP_lp_main_loop(BCP_lp_prob& p)
       switch (BCP_lp_branch(p)){
        case BCP_BranchingFathomedThisNode:
 	 // Note that BCP_lp_branch() has already sent the node description to
-	 // the TM.
-	 if (p.param(BCP_lp_par::LpVerb_FathomInfo))
-	    printf("LP:   Forcibly Pruning node\n");
-	 // clean up
+	 // the TM, info is printed, so just clean up
 	 BCP_lp_clean_up_node(p);
 	 return;
 
-       case BCP_BranchingDivedIntoNewNode:
-	 if (p.param(BCP_lp_par::LpVerb_ProcessedNodeIndex))
+      case BCP_BranchingDivedIntoNewNode:
+	 if (p.param(BCP_lp_par::LpVerb_ProcessedNodeIndex)) {
 	    printf("\nLP: **** Processing NODE %i on LEVEL %i (dived) ****\n",
 		   p.node->index, p.node->level);
+	 }
 	 // let the user do whatever she wants before the new node starts
 	 BCP_lp_prepare_for_new_node(p);
 	 // here we don't have to delete cols and rows, it's done as part of

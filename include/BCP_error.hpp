@@ -7,6 +7,7 @@
 
 #include <cstdio>
 #include <cstdlib>
+#include <stdarg.h>
 
 /** 
     Currently there isn't any error handling in BCP. When an object of this
@@ -19,8 +20,18 @@ class BCP_fatal_error{
 public:
    /** The constructor prints out the error message, flushes the stdout buffer
        and aborts execution. */
+#if 0
    BCP_fatal_error(const char * error) {
       printf("%s", error);
+      fflush(0);
+      abort();
+   }
+#endif
+   BCP_fatal_error(const char * format, ...) {
+	   va_list valist;
+	   va_start(valist,format);
+      vprintf(format, valist);
+	  va_end(valist);
       fflush(0);
       abort();
    }

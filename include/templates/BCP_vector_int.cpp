@@ -190,7 +190,8 @@ BCP_vec<int>::insert(int* position, const void* first, const size_t n)
 {
    if (n == 0) return;
    if ((size_t) (end_of_storage - finish) >= n) {
-      memmove(position + n, position, (finish - position) * sizeof(int));
+      if (finish != position)
+	 memmove(position + n, position, (finish - position) * sizeof(int));
       memcpy(position, first, n * sizeof(int));
       finish += n;
    } else {

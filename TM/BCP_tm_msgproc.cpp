@@ -233,7 +233,8 @@ void BCP_tm_distribute_user_info(BCP_tm_prob& p)
 // This function returns T/F depending on whether an LP process was freed up
 // or not.
 
-void BCP_tm_process_message(BCP_tm_prob& p, BCP_buffer& buf)
+void
+BCP_tm_prob::process_message()
 {
    BCP_tm_node* node;
    BCP_proc_id * sender;
@@ -249,7 +250,7 @@ void BCP_tm_process_message(BCP_tm_prob& p, BCP_buffer& buf)
 
    ++msg_count;
 
-   switch (buf.msgtag()){
+   switch (msg_buf.msgtag()){
     case BCP_Msg_NoMessage:
       msg_count = 0;
       break;
@@ -259,155 +260,174 @@ void BCP_tm_process_message(BCP_tm_prob& p, BCP_buffer& buf)
       break;
 
     case BCP_Msg_PricedRoot:
-      BCP_tm_unpack_priced_root(p, buf);
+      BCP_tm_unpack_priced_root(*this, msg_buf);
       break;
 
     case BCP_Msg_NodeDescription_OverUB:
+      node = BCP_tm_unpack_node_no_branching_info(*this, msg_buf);
+      next_phase_nodes.push_back(node);
+      node->status = BCP_NextPhaseNode_OverUB;
+      break;
+
     case BCP_Msg_NodeDescription_Infeas:
-      node = BCP_tm_unpack_node_no_branching_info(p, buf);
-      p.next_phase_nodes.push_back(node);
-      node->status = BCP_NextPhaseNode;
+      node = BCP_tm_unpack_node_no_branching_info(*this, msg_buf);
+      next_phase_nodes.push_back(node);
+      node->status = BCP_NextPhaseNode_Infeas;
       break;
 
     case BCP_Msg_NodeDescription_Discarded:
     case BCP_Msg_NodeDescription_OverUB_Pruned:
     case BCP_Msg_NodeDescription_Infeas_Pruned:
-      node = BCP_tm_unpack_node_no_branching_info(p, buf);
-      node->status = BCP_PrunedNode;
+      node = BCP_tm_unpack_node_no_branching_info(*this, msg_buf);
+      if (msg_buf.msgtag() == BCP_Msg_NodeDescription_OverUB_Pruned) {
+	 node->status = BCP_PrunedNode_OverUB;
+      } else if (msg_buf.msgtag() == BCP_Msg_NodeDescription_Infeas_Pruned) {
+	 node->status = BCP_PrunedNode_Infeas;
+      } else {
+	 node->status = BCP_PrunedNode_Discarded;
+      }
       if (node->cp) {
 	 BCP_vec< std::pair<BCP_proc_id*, int> >::iterator proc =
-	    BCP_tm_identify_process(p.leaves_per_cp, node->cp);
+	    BCP_tm_identify_process(leaves_per_cp, node->cp);
 #ifdef BCP_DEBUG
-	 if (proc == p.leaves_per_cp.end())
+	 if (proc == leaves_per_cp.end())
 	    throw BCP_fatal_error("\
 TM: non-existing CP was assigned to a just pruned node.\n");
 #endif
 	 if (--proc->second == 0)
-	    p.slaves.cp->set_proc_free(proc->first->clone());
+	    slaves.cp->set_proc_free(proc->first->clone());
       }
       if (node->vp) {
 	 BCP_vec< std::pair<BCP_proc_id*, int> >::iterator proc =
-	    BCP_tm_identify_process(p.leaves_per_vp, node->vp);
+	    BCP_tm_identify_process(leaves_per_vp, node->vp);
 #ifdef BCP_DEBUG
-	 if (proc == p.leaves_per_vp.end())
+	 if (proc == leaves_per_vp.end())
 	    throw BCP_fatal_error("\
 TM: non-existing VP was assigned to a just pruned node.\n");
 #endif
 	 if (--proc->second == 0)
-	    p.slaves.vp->set_proc_free(proc->first->clone());
+	    slaves.vp->set_proc_free(proc->first->clone());
       }
       break;
 
     case BCP_Msg_NodeDescriptionWithBranchingInfo:
-      BCP_tm_unpack_node_with_branching_info(p, buf);
+      BCP_tm_unpack_node_with_branching_info(*this, msg_buf);
       break;
 
     case BCP_Msg_FeasibleSolution:
       {
-	BCP_solution *new_sol = p.user->unpack_feasible_solution(buf);
+	BCP_solution *new_sol = user->unpack_feasible_solution(msg_buf);
 	if (new_sol) {
-	  const double ub = p.ub();
 	  const bool allval =
-	    p.param(BCP_tm_par::TmVerb_AllFeasibleSolutionValue);
+	    param(BCP_tm_par::TmVerb_AllFeasibleSolutionValue);
 	  const bool allsol =
-	    p.param(BCP_tm_par::TmVerb_AllFeasibleSolution);
+	    param(BCP_tm_par::TmVerb_AllFeasibleSolution);
 	  const bool betterval =
-	    p.param(BCP_tm_par::TmVerb_BetterFeasibleSolutionValue);
+	    param(BCP_tm_par::TmVerb_BetterFeasibleSolutionValue);
 	  const bool bettersol =
-	    p.param(BCP_tm_par::TmVerb_BetterFeasibleSolution);
-	  const bool better = p.ub(new_sol->objective_value());
-	  
+	    param(BCP_tm_par::TmVerb_BetterFeasibleSolution);
+	  bool better;
+	  if (upper_bound > new_sol->objective_value() + 1e-6) {
+	     better = true;
+	  } else if (upper_bound > new_sol->objective_value() - 1e-6) {
+	     better = user->replace_solution(feas_sol, new_sol);
+	  } else {
+	     better = false;
+	  }
+
 	  if (allval || allsol || ((betterval || bettersol) && better)) {
-	    if (p.param(BCP_tm_par::TmVerb_TimeOfImprovingSolution)) {
-	      printf("Solution found at %.3f sec.\n",
-		     BCP_time_since_epoch() - p.start_time);
-	      if (ub > DBL_MAX/2) {
+	    if (param(BCP_tm_par::TmVerb_TimeOfImprovingSolution)) {
+	      printf("TM: Solution found at %.3f sec.\n",
+		     BCP_time_since_epoch() - start_time);
+	      if (upper_bound > DBL_MAX/2) {
 		printf("\
-Solution value: %f (best solution value so far: infinity)\n",
+TM: Solution value: %f (best solution value so far: infinity)\n",
 		       new_sol->objective_value());
 	      } else {
 		printf("\
-Solution value: %f (best solution value so far: %f)\n",
-		       new_sol->objective_value(), ub);
+TM: Solution value: %f (best solution value so far: %f)\n",
+		       new_sol->objective_value(), upper_bound);
 	      }
 	    }
 	    if (allsol || (bettersol && better)) {
-	      p.user->display_feasible_solution(new_sol);
+	      user->display_feasible_solution(new_sol);
 	    }
-	    if (better) {
-	      delete p.feas_sol;
-	      p.feas_sol = new_sol;
-	      buf.clear();
-	      buf.pack(new_sol->objective_value());
-	      p.msg_env->multicast(p.slaves.all, BCP_Msg_UpperBound, buf);
-	    } else {
-	      delete new_sol;
-	    }
+	  }
+	  if (better) {
+	    ub(new_sol->objective_value());
+	    delete feas_sol;
+	    feas_sol = new_sol;
+	    msg_buf.clear();
+	    msg_buf.pack(new_sol->objective_value());
+	    msg_env->multicast(slaves.all, BCP_Msg_UpperBound, msg_buf);
+	  } else {
+	    delete new_sol;
 	  }
 	}
       }
       break;
 
     case BCP_Msg_RequestCutIndexSet:
-      sender = buf.sender()->clone();
-      buf.clear();
-      buf.pack(p.next_cut_index_set_start);
-      p.next_cut_index_set_start += 10000;
-      buf.pack(p.next_cut_index_set_start);
-      p.msg_env->send(sender, BCP_Msg_CutIndexSet, buf);
+      sender = msg_buf.sender()->clone();
+      msg_buf.clear();
+      msg_buf.pack(next_cut_index_set_start);
+      next_cut_index_set_start += 10000;
+      msg_buf.pack(next_cut_index_set_start);
+      msg_env->send(sender, BCP_Msg_CutIndexSet, msg_buf);
       delete sender;
       break;
       
     case BCP_Msg_RequestVarIndexSet:
-      sender = buf.sender()->clone();
-      buf.clear();
-      buf.pack(p.next_var_index_set_start);
-      p.next_var_index_set_start += 10000;
-      buf.pack(p.next_var_index_set_start);
-      p.msg_env->send(sender, BCP_Msg_VarIndexSet, buf);
+      sender = msg_buf.sender()->clone();
+      msg_buf.clear();
+      msg_buf.pack(next_var_index_set_start);
+      next_var_index_set_start += 10000;
+      msg_buf.pack(next_var_index_set_start);
+      msg_env->send(sender, BCP_Msg_VarIndexSet, msg_buf);
       delete sender;
       break;
 
     case BCP_Msg_LpStatistics:
       throw BCP_fatal_error("\
-Unexpected BCP_Msg_LpStatistics message in BCP_tm_process_message.\n");
+Unexpected BCP_Msg_LpStatistics message in BCP_tm_prob::process_message.\n");
 
     case BCP_Msg_SomethingDied:
       // *FIXME-NOW* : what to do when something has died?
       break;
 
     case BCP_ARE_YOU_TREEMANAGER:
-      p.msg_env->send(buf.sender(), BCP_I_AM_TREEMANAGER);
+      msg_env->send(msg_buf.sender(), BCP_I_AM_TREEMANAGER);
       break;
 
     case BCP_CONFIG_CHANGE:
-      BCP_tm_change_config(p, buf);
+      BCP_tm_change_config(*this, msg_buf);
       break;
 
     default:
-      throw BCP_fatal_error("Unknown message in BCP_tm_process_message.\n");
+      throw BCP_fatal_error("\
+Unknown message in BCP_tm_prob::process_message.\n");
    }
-   buf.clear();
+   msg_buf.clear();
 
-   const double t = BCP_time_since_epoch() - p.start_time;
-   const bool time_is_over = t > p.param(BCP_tm_par::MaxRunTime);
+   const double t = BCP_time_since_epoch() - start_time;
+   const bool time_is_over = t > param(BCP_tm_par::MaxRunTime);
 
-   if (! p.param(BCP_tm_par::MessagePassingIsSerial) &&
+   if (! param(BCP_tm_par::MessagePassingIsSerial) &&
        msg_count % test_frequency == 0) {
       // run the machine testing while it returns false (i.e., it did not
       // check out, it had to delete something)
-      while (! BCP_tm_test_machine(p));
-      if (p.slaves.lp->size() == 0)
+      while (! BCP_tm_test_machine(*this));
+      if (slaves.lp->size() == 0)
 	 throw BCP_fatal_error("TM: No LP process left to compute with...\n");
    }
 
    if (time_is_over) {
-     const double lb = p.search_tree.lower_bound(p.search_tree.root());
+     const double lb = search_tree.true_lower_bound(search_tree.root());
      printf("TM: Time has ran out... %.3f secs\n", t);
      printf("TM: Best lower bound in this phase: %f\n", lb);
      fflush(0);
-     BCP_tm_save_root_cuts(&p);
-     BCP_tm_stop_processes(p);
+     BCP_tm_save_root_cuts(this);
+     BCP_tm_stop_processes(*this);
      exit(0);
    }
 }
