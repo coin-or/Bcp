@@ -23,7 +23,7 @@ BCP_pack_warmstart(const BCP_warmstart* ws, BCP_buffer& buf)
    if (wsd) {
       const int type = 2;
       buf.pack(type);
-      wsb->pack(buf);
+      wsd->pack(buf);
       return;
    }
 
