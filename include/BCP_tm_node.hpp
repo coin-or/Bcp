@@ -161,10 +161,14 @@ public:
    inline int birth_index() const { return _birth_index; }
 
    /** */
+   inline BCP_user_data* user_data() { return _user_data; }
+   /** */
    inline BCP_tm_node* child(int ind) { return _children[ind]; }
    /** */
    inline BCP_tm_node* parent() { return _parent; }
 
+   /** */
+   inline const BCP_user_data* user_data() const { return _user_data; }
    /** */
    inline const BCP_tm_node* child(int ind) const { return _children[ind]; }
    /** */
