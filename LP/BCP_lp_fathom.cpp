@@ -481,10 +481,13 @@ BCP_restore_feasibility(BCP_lp_prob& p,
 	       for (int j = 0; j < numrays && rays_uncut > 0; ++j) {
 		  if (new_col.dotProduct(dual_rays[j]) < 0) {
 		     if (!rays_cut[j]) {
-			vars_to_add.push_back(new_indexed_var);
-			cols_to_add.push_back(new BCP_col(new_col));
 			rays_cut[j] = true;
 			--rays_uncut;
+			if (new_indexed_var) {
+			   vars_to_add.push_back(new_indexed_var);
+			   cols_to_add.push_back(new BCP_col(new_col));
+			   new_indexed_var = 0;
+			}
 		     }
 		  }
 	       }
