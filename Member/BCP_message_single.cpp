@@ -312,10 +312,7 @@ BCP_single_environment::register_process()
 
    // everything is done
    BCP_tm_wrapup(_tm_prob, _lp_prob, _cg_prob, _vg_prob, true);
-   int i = 0;
-   while (true) {
-      i = 1-i;
-   }
+//    sleep(7200);
 
    delete _lp_prob;
 
