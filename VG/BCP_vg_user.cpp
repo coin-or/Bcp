@@ -104,6 +104,10 @@ VG: BCP_Msg_LpSolution_User message arrived but the unpack_dual_solution() \n\
       int cutnum;
       buf.unpack(cutnum);
       if (cutnum > 0) {
+	 // Just to be on the safe side... If it's already empty, it won't
+	 // take long.
+	 purge_ptr_vector(p->cuts);
+	 p->pi.clear();
 	 p->cuts.reserve(cutnum);
 	 p->pi.reserve(cutnum);
 	 double val;
