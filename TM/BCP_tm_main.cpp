@@ -156,7 +156,6 @@ BCP_tm_main(BCP_message_environment* msg_env,
       // *FIXME-NOW*
       // Print out timing and solution
 
-      delete p.user;   p.user = 0;
       // delete parent; -- not needed: TM has no parent, it's a 0 pointer
       delete my_id;   my_id = 0;
       delete msg_env;   msg_env = 0;
@@ -235,11 +234,6 @@ BCP_tm_main(BCP_message_environment* msg_env,
 
    if (logfile)
       fclose(logfile);
-
-   delete p.user;   p.user = 0;
-   // delete parent; -- not needed: TM has no parent, it's a 0 pointer
-   delete my_id;   my_id = 0;
-   delete msg_env;  msg_env = 0;
 }
 
 //#############################################################################

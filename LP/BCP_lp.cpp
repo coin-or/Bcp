@@ -85,7 +85,6 @@ BCP_lp_prob::~BCP_lp_prob() {
    delete user;
    delete master_lp;
    delete lp_solver;
-   delete msg_env;
 
    delete core;
    delete core_as_change;

@@ -15,7 +15,6 @@ BCP_vg_prob::BCP_vg_prob() :
 
 BCP_vg_prob::~BCP_vg_prob()
 {
-   //   delete msg_env;   msg_env = 0;
    delete user;   user = 0;
    delete core;   core = 0;
    purge_ptr_vector(cuts);
