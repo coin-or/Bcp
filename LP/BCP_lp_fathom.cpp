@@ -347,12 +347,6 @@ BCP_price_vars(BCP_lp_prob& p, const bool from_fathom,
 	  } else {
 	    assumed_pr_status = BCP_PriceAfterLastIndexedToPrice;
 	  }
-	  if (max_new_vars > 0){
-	    --max_new_vars;
-	    vars_to_add.push_back(new_indexed_var);
-	    cols_to_add.push_back(new BCP_col(new_col));
-	    new_indexed_var = 0;
-	  }
 	}
       }
       delete new_indexed_var;
