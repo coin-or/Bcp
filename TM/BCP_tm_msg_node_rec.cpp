@@ -413,6 +413,7 @@ BCP_tm_unpack_branching_info(BCP_tm_prob& p, BCP_buffer& buf,
       child->_true_lower_bound =
 	 p.param(BCP_tm_par::LpValueIsTrueLowerBound) ?
 	 lpobj[i] : node->true_lower_bound();
+      child->_user_data = user_data[i];
       child->_parent = node;
       child->_birth_index = node->child_num();
       node->new_child(child);
