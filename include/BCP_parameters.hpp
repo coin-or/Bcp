@@ -374,7 +374,7 @@ BCP_parameters::read_from_stream   Finished scanning parameter stream.\n\n");
   /*@{*/
   std::string expand(const char* value){
 
-    std::cout << "expand( " << value << " ) : ";
+    // std::cout << "expand( " << value << " ) : ";
     
     const int MAX_PARAM_LINE_LENGTH = 1024;
     char valueBuf[MAX_PARAM_LINE_LENGTH];
