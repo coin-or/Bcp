@@ -133,6 +133,11 @@ public:
       OsiPackedVector::assignVector(size, ElementIndices, ElementValues,
 				    false /* no test for duplicate index */);
    }
+   BCP_col(const OsiPackedVectorBase& vec,
+	   const double Obj, const double LB, const double UB) :
+      OsiPackedVector(vec.getNumElements(),
+		      vec.getIndices(), vec.getElements()),
+      _Objective(Obj), _LowerBound(LB), _UpperBound(UB) {}
    /** The destructor deletes all data members. */
    ~BCP_col() {}
    /*@}*/
@@ -243,6 +248,10 @@ public:
       OsiPackedVector::assignVector(size, ElementIndices, ElementValues,
 				    false /* no test for duplicate index */);
    }
+   BCP_row(const OsiPackedVectorBase& vec, const double LB, const double UB) :
+      OsiPackedVector(vec.getNumElements(),
+		      vec.getIndices(), vec.getElements()),
+      _LowerBound(LB), _UpperBound(UB) {}
    /** The destructor deletes all data members. */
    ~BCP_row() {}
    /*@}*/
@@ -304,6 +313,14 @@ public:
 		const int MaxNonzeros);
    /** Clear the LP relaxation. */
    void clear();
+   /** Set up the LP relaxation by making a copy of the arguments */
+   void copyOf(const OsiPackedMatrix& m,
+	       const double* OBJ, const double* CLB, const double* CUB,
+	       const double* RLB, const double* RUB);
+   /** Set up the LP relaxation by taking over the pointers in the arguments */
+   void assign(OsiPackedMatrix& m,
+	       double*& OBJ, double*& CLB, double*& CUB,
+	       double*& RLB, double*& RUB);
    /*@}*/
    //--------------------------------------------------------------------------
 

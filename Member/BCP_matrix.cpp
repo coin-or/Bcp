@@ -64,6 +64,55 @@ BCP_lp_relax::clear() {
 }
 
 //-----------------------------------------------------------------------------
+
+void
+BCP_lp_relax::copyOf(const OsiPackedMatrix& m,
+		     const double* OBJ, const double* CLB, const double* CUB,
+		     const double* RLB, const double* RUB)
+{
+   clear();
+   const int colnum = m.getNumCols();
+   const int rownum = m.getNumRows();
+   _ColLowerBound.insert(_ColLowerBound.end(), CLB, CLB+colnum);
+   _ColUpperBound.insert(_ColUpperBound.end(), CUB, CUB+colnum);
+   _Objective.insert(_Objective.end(), OBJ, OBJ+colnum);
+   _RowLowerBound.insert(_RowLowerBound.end(), RLB, RLB+rownum);
+   _RowUpperBound.insert(_RowUpperBound.end(), RUB, RUB+rownum);
+
+   OsiPackedMatrix::copyOf(m);
+}
+
+//-----------------------------------------------------------------------------
+
+void
+BCP_lp_relax::assign(OsiPackedMatrix& m,
+		     double*& OBJ, double*& CLB, double*& CUB,
+		     double*& RLB, double*& RUB)
+{
+   clear();
+   const int colnum = m.getNumCols();
+   const int rownum = m.getNumRows();
+   _ColLowerBound.insert(_ColLowerBound.end(), CLB, CLB+colnum);
+   delete[] CLB;
+   CLB = 0;
+   _ColUpperBound.insert(_ColUpperBound.end(), CUB, CUB+colnum);
+   delete[] CUB;
+   CUB = 0;
+   _Objective.insert(_Objective.end(), OBJ, OBJ+colnum);
+   delete[] OBJ;
+   OBJ = 0;
+   _RowLowerBound.insert(_RowLowerBound.end(), RLB, RLB+rownum);
+   delete[] RLB;
+   RLB = 0;
+   _RowUpperBound.insert(_RowUpperBound.end(), RUB, RUB+rownum);
+   delete[] RUB;
+   RUB = 0;
+   
+   OsiPackedMatrix::gutsOfDestructor();
+   OsiPackedMatrix::swap(m);
+}
+
+//-----------------------------------------------------------------------------
 #if 0
 void 
 BCP_lp_relax::add_col_set(const BCP_col_set& Cols)
