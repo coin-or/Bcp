@@ -3,9 +3,11 @@
 #include "BCP_vector.hpp"
 #include "BCP_tm_user.hpp"
 #include "BCP_tm.hpp"
+#include "BCP_lp.hpp"
 #include "BCP_solution.hpp"
 #include "BCP_var.hpp"
 #include "BCP_functions.hpp"
+#include "BCP_timeout.hpp"
 
 //#############################################################################
 // Informational methods for the user
@@ -181,6 +183,49 @@ BCP_tm_user::display_feasible_solution() invoked with non-generic sol.\n");
   gsol->display();
 }
 
+//-----------------------------------------------------------------------------
+/** Display user information just before a new node is sent to the LP or
+    diving into a node is acknowledged. */
+void
+BCP_tm_user::display_node_information(BCP_tree& search_tree,
+				      const BCP_tm_node& node)
+{
+}
+    
+//-----------------------------------------------------------------------------
+/** Display information after BCP finished processing the search tree. */
+void
+BCP_tm_user::display_final_information(const BCP_lp_statistics& lp_stat)
+{
+   if (p->param(BCP_tm_par::TmVerb_RunningTime)) {
+      printf("TM: Running time: %.3f\n",
+	     BCP_time_since_epoch() - p->start_time);
+   }
+
+   if (p->param(BCP_tm_par::TmVerb_TreeStatistics)) {
+      printf("TM: search tree size: %i   max depth: %i\n",
+	     int(p->search_tree.size()), p->search_tree.maxdepth());
+   }
+
+   const bool bval = p->param(BCP_tm_par::TmVerb_BestFeasibleSolutionValue);
+   const bool bsol = p->param(BCP_tm_par::TmVerb_BestFeasibleSolution);
+   if (bval || bsol) {
+      if (! p->feas_sol) {
+	 printf("TM: No feasible solution is found\n");
+      } else {
+	 printf("TM: The best solution found has value %f\n",
+		p->feas_sol->objective_value());
+      }
+   }
+   if (bsol && p->feas_sol) {
+      p->user->display_feasible_solution(p->feas_sol);
+   }
+
+   if (p->param(BCP_tm_par::TmVerb_LpStatistics)) {
+      lp_stat.display();
+   }
+}
+    
 //--------------------------------------------------------------------------
 // Initialize new phase 
 void

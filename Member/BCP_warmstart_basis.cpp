@@ -1,12 +1,12 @@
 // Copyright (C) 2000, International Business Machines
 // Corporation and others.  All Rights Reserved.
-#include "OsiWarmStartBasis.hpp"
+#include "CoinWarmStartBasis.hpp"
 #include "BCP_warmstart_basis.hpp"
 
 //#############################################################################
 
-OsiWarmStart*
-BCP_warmstart_basis::convert_to_OsiWarmStart() const
+CoinWarmStart*
+BCP_warmstart_basis::convert_to_CoinWarmStart() const
 {
   if (storage() != BCP_Storage_Explicit)
     return NULL;
@@ -14,7 +14,7 @@ BCP_warmstart_basis::convert_to_OsiWarmStart() const
   const BCP_vec<char>& vst = _var_stat.explicit_vector();
   const BCP_vec<char>& cst = _cut_stat.explicit_vector();
   return
-    new OsiWarmStartBasis(vst.size(), cst.size(), vst.begin(), cst.begin());
+    new CoinWarmStartBasis(vst.size(), cst.size(), vst.begin(), cst.begin());
 }
 
 //#############################################################################

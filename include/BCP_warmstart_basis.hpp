@@ -59,9 +59,10 @@ public:
 
   // Inherited methods --------------------------------------------------------
 
-  /** Return an OsiWarmStart object that can be fed to the LP engine. The
-      implementation for this class will return an OsiWarmStartBasis object. */
-  virtual OsiWarmStart* convert_to_OsiWarmStart() const;
+  /** Return an CoinwarmStart object that can be fed to the LP engine. The
+      implementation for this class will return an CoinwarmStartBasis
+      object. */
+  virtual CoinWarmStart* convert_to_CoinWarmStart() const;
 
   virtual BCP_storage_t storage() const;
 

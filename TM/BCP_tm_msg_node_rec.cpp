@@ -395,6 +395,7 @@ BCP_tm_unpack_branching_info(BCP_tm_prob& p, BCP_buffer& buf,
 	    dive = BCP_tm_shall_we_dive(p, child->quality());
 	 buf.pack(dive);
 	 if (dive != BCP_DoNotDive){
+	    p.user->display_node_information(p.search_tree, *child);
 	    child->status = BCP_ActiveNode;
 	    // if diving then send the new index and var/cut_names
 	    buf.pack(child->index());

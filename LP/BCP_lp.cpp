@@ -36,7 +36,7 @@ BCP_lp_statistics::unpack(BCP_buffer& buf)
       .unpack(time_branching);
 }
 void
-BCP_lp_statistics::display()
+BCP_lp_statistics::display() const
 {
   printf("LP statistics:\n");
   printf("   time in cut generation  : %12.3f sec\n", time_cut_generation);

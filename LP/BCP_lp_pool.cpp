@@ -43,7 +43,9 @@ BCP_lp_var_pool::remove_positives(const double etol)
    int cnt = 0;
 
    while (waiting_col != end()) {
-      if ((*waiting_col)->red_cost() >= -etol) {
+      const double rc = (*waiting_col)->red_cost();
+      if (rc >= -etol) {
+	 // printf("LP:    removing col with rc: %e (etol: %e)\n", rc, etol);
 	 delete *waiting_col;
 	 *waiting_col = back();
 	 pop_back();

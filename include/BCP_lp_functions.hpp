@@ -15,7 +15,7 @@
 #include "BCP_vector.hpp"
 
 class OsiSolverInterface;
-class OsiWarmStart;
+class CoinWarmStart;
 
 class BCP_buffer;
 class BCP_lp_prob;
@@ -96,6 +96,7 @@ bool BCP_lp_fix_vars(BCP_lp_prob& p);
 void BCP_lp_adjust_row_effectiveness(BCP_lp_prob& p);
 void BCP_lp_delete_cols_and_rows(BCP_lp_prob& p,
 				 BCP_lp_branching_object* can,
+				 const bool from_fathom,
 				 const bool force_delete);
 int BCP_lp_add_from_local_cut_pool(BCP_lp_prob& p);
 int BCP_lp_add_from_local_var_pool(BCP_lp_prob& p);
@@ -120,6 +121,6 @@ void BCP_lp_create_lp(BCP_lp_prob& p);
 // BCP_lp_create_warmstart.cpp
 // The calling functions will consider ws to be lost! This function should
 // either build it into the created BCP_warmstart or delete it.
-BCP_warmstart* BCP_lp_convert_OsiWarmStart(BCP_lp_prob& p, OsiWarmStart*& ws);
+BCP_warmstart* BCP_lp_convert_CoinWarmStart(BCP_lp_prob& p, CoinWarmStart*& ws);
 
 #endif

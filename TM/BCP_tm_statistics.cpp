@@ -72,55 +72,36 @@ void
 BCP_tm_wrapup(BCP_tm_prob* tm, BCP_lp_prob* lp,
 	      BCP_cg_prob* cg, BCP_vg_prob* vg, bool final_stat)
 {
-  printf("TM: Total running time: %.3f\n",
-	 BCP_time_since_epoch() - tm->start_time);
+   BCP_tm_save_root_cuts(tm);
 
-  BCP_tm_save_root_cuts(tm);
-
-  const bool bval = tm->param(BCP_tm_par::TmVerb_BestFeasibleSolutionValue);
-  const bool bsol = tm->param(BCP_tm_par::TmVerb_BestFeasibleSolution);
-  if (bval || bsol) {
-     if (! tm->feas_sol) {
-	printf("TM: No feasible solution is found\n");
-     } else {
-	printf("TM: The best solution found has value %f\n",
-	       tm->feas_sol->objective_value());
-     }
-  }
-  if (bsol && tm->feas_sol)
-    tm->user->display_feasible_solution(tm->feas_sol);
-
-  if (lp) {
-    lp->stat.display();
-  } else {
    // Collect the statistics and print it out
-    int i;
-    if (!tm->lp_stat)
+   if (!tm->lp_stat)
       tm->lp_stat = new BCP_lp_statistics;
 
-    // Now ask every process
-    const int num_lp = tm->slaves.lp->size();
-    BCP_lp_statistics this_lp_stat;
-
-    for (i = 0; i < num_lp; ++i) {
-      while (true) {
-	tm->msg_env->receive(tm->slaves.lp->process(i), BCP_Msg_LpStatistics,
-			     tm->msg_buf, 10);
-	BCP_message_tag msgtag = tm->msg_buf.msgtag();
-	if (msgtag == BCP_Msg_NoMessage) {
-	  // test if the LP is still alive
-	  if (! tm->msg_env->alive(tm->slaves.lp->process(i)))
-	    break;
-	} else {
-	  break;
-	}
+   if (! lp) {
+      // Now ask every process
+      const int num_lp = tm->slaves.lp->size();
+      BCP_lp_statistics this_lp_stat;
+   
+      int i;
+      for (i = 0; i < num_lp; ++i) {
+	 while (true) {
+	    tm->msg_env->receive(tm->slaves.lp->process(i),
+				 BCP_Msg_LpStatistics,
+				 tm->msg_buf, 10);
+	    BCP_message_tag msgtag = tm->msg_buf.msgtag();
+	    if (msgtag == BCP_Msg_NoMessage) {
+	       // test if the LP is still alive
+	       if (! tm->msg_env->alive(tm->slaves.lp->process(i)))
+		  break;
+	    } else {
+	       break;
+	    }
+	 }
+	 this_lp_stat.unpack(tm->msg_buf);
+	 tm->lp_stat->add(this_lp_stat);
       }
-      this_lp_stat.unpack(tm->msg_buf);
-      tm->lp_stat->add(this_lp_stat);
-    }
+   }
 
-    tm->lp_stat->display();
-  }
-
-  printf("\n\nBCP finished!!!\n\n");
+   tm->user->display_final_information(lp ? lp->stat : *tm->lp_stat);
 }

@@ -12,11 +12,12 @@
 #if defined(__GNUC__)
 #  if (__GNUC__ >= 3)
 #    include <sstream>
+#    include <locale>
 #  else
 #    include <strstream>
+#    include <cctype>
 #  endif
 #endif
-#include <cctype>
 #include <algorithm>
 
 #include "BCP_error.hpp"
@@ -271,6 +272,7 @@ public:
       // a (keyword, value) pair set the appropriate parameter
       const int MAX_PARAM_LINE_LENGTH = 1024;
       char line[MAX_PARAM_LINE_LENGTH], *end_of_line, *keyword, *value, *ctmp;
+      bool quiet = true;
 
       BCP_vec< std::pair<BCP_string, BCP_parameter> >::const_iterator ind;
       BCP_vec<BCP_string>::const_iterator obs_ind;
@@ -289,19 +291,35 @@ This is absurd.\n", MAX_PARAM_LINE_LENGTH);
 	 end_of_line = line + len;
 
 	 //------------------------ First separate the keyword and value ------
-	 keyword = std::find_if(line, end_of_line, isgraph);
+	 // keyword = std::find_if(line, end_of_line, isgraph);
+	 for (keyword = line; keyword < end_of_line; ++keyword) {
+	    if (isgraph(*keyword))
+	       break;
+	 }
 	 if (keyword == end_of_line) // empty line
 	    continue;
-	 ctmp = std::find_if(keyword, end_of_line, isspace);
+	 // ctmp = std::find_if(keyword, end_of_line, isspace);
+	 for (ctmp = line; ctmp < end_of_line; ++ctmp) {
+	    if (isspace(*ctmp))
+	       break;
+	 }
 	 if (ctmp == end_of_line) // line is just one word. must be a comment
 	    continue;
 	 *ctmp++ = 0; // terminate the keyword with a 0 character
 
-	 value = std::find_if(ctmp, end_of_line, isgraph);
+	 // value = std::find_if(ctmp, end_of_line, isgraph);
+	 for (value = line; value < end_of_line; ++value) {
+	    if (isgraph(*value))
+	       break;
+	 }
 	 if (value == end_of_line) // line is just one word. must be a comment
 	    continue;
 
-	 ctmp = std::find_if(value, end_of_line, isspace);
+	 // ctmp = std::find_if(value, end_of_line, isspace);
+	 for (ctmp = line; ctmp < end_of_line; ++ctmp) {
+	    if (isspace(*ctmp))
+	       break;
+	 }
 	 *ctmp = 0; // terminate the value with a 0 character. this is good
 	            // even if ctmp == end_ofline
 
@@ -310,12 +328,20 @@ This is absurd.\n", MAX_PARAM_LINE_LENGTH);
 	    read_from_file(value);
 	 }
 
+	 //--------------- Check if we need to be quiet -----------------------
+	 if (strcmp(keyword, "Quiet") == 0) {
+	    int val = atoi(value);
+	    quiet = (val != 0);
+	 }
+
 	 //--------------- Find the parameter corresponding to  the keyword ---
 	 for (ind = keys.begin(); ind != keys.end(); ++ind) {
 	    if (ind->first == keyword) {
 	       // The keyword does exists
 	       // set_param(ind->second, value);    should work
-	       printf("%s %s\n", keyword, value);
+	       if (!quiet) {
+		  printf("%s %s\n", keyword, value);
+	       }
 	       set_entry((*ind).second, value);
 	       break;
 	    }
@@ -332,8 +358,10 @@ This is absurd.\n", MAX_PARAM_LINE_LENGTH);
 	    }
 	 }
       }
-      printf("\
+      if (!quiet) {
+	 printf("\
 BCP_parameters::read_from_stream   Finished scanning parameter stream.\n\n");
+      }
     }
   /*@}*/
   //---------------------------------------------------------------------------
@@ -373,6 +401,54 @@ BCP_parameters::read_from_stream   Finished scanning parameter stream.\n\n");
        read_from_stream(parstream);
     }
   /*@}*/
+  //---------------------------------------------------------------------------
+  /**@name Write parameters to a stream. */
+  /*@{*/
+  /** Write keyword-value pairs to the stream specified in the argument.
+
+      Each keyword-value pair is separated by a newline character. 
+  */
+   void write_to_stream(std::ostream& outstream) const {
+      
+      const int size = keys.size();
+      for (int i = 0; i < size; ++i) {
+	 const BCP_string& key = keys[i].first;
+	 const BCP_parameter& par = keys[i].second;
+	 switch (par.type()) {
+	  case BCP_CharPar:
+	    outstream << key.c_str() << "   "
+		      << static_cast<int>(cpar[par.index()]) << "\n";
+	    break;
+	  case BCP_IntPar:
+	    outstream << key.c_str() << "   "
+		      << ipar[par.index()] << "\n";
+	    break;
+	  case BCP_DoublePar:
+	    outstream << key.c_str() << "   "
+		      << dpar[par.index()] << "\n";
+	    break;
+	  case BCP_StringPar:
+	    outstream << key.c_str() << "   "
+		      << spar[par.index()].c_str() << "\n";
+	    break;
+	  case BCP_StringArrayPar:
+	    for (size_t j = 0; j < sapar[par.index()].size(); ++j) {
+	       outstream << key.c_str() << "   "
+			 << sapar[par.index()][j].c_str() << "\n";
+	    }
+	    break;
+	  case BCP_NoPar:
+	  default:
+	    // error
+	    throw BCP_fatal_error("\
+BCP_parameters::write_to_stream   ERROR: Unrecognized parameter type!\n");
+	    break;
+	 }
+	 
+      }
+       
+   }
+
   //---------------------------------------------------------------------------
 
   /**@name Packing/unpacking methods */

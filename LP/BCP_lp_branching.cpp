@@ -5,7 +5,7 @@
 #include <numeric>
 #include <utility> // for pair<>
 
-#include "OsiWarmStart.hpp"
+#include "CoinWarmStart.hpp"
 
 #include "BCP_timeout.hpp"
 #include "BCP_enum.hpp"
@@ -262,7 +262,7 @@ BCP_lp_perform_strong_branching(BCP_lp_prob& p,
 
    int i, j; // loop variable
 
-   const OsiWarmStart * ws = p.lp_solver->getWarmStart();
+   const CoinWarmStart * ws = p.lp_solver->getWarmStart();
 
    // prepare for strong branching
    lp->markHotStart();
@@ -370,7 +370,8 @@ BCP_lp_perform_strong_branching(BCP_lp_prob& p,
    BCP_mark_result_of_strong_branching(p, can, added_colnum, added_rownum);
    // Delete whatever cols/rows we want to delete. This function also updates
    // var/cut_positions !!!
-   BCP_lp_delete_cols_and_rows(p, can, true /* to force deletion */);
+   BCP_lp_delete_cols_and_rows(p, can, false /* not from fathom */,
+			       true /* to force deletion */);
    
    delete ws;
 }
@@ -427,11 +428,12 @@ LP: Strong branching is disabled but more than one candidate is selected.\n\
       }
       BCP_add_branching_objects(p, candidates);
       best_presolved = new BCP_presolved_lp_brobj(candidates[0]);
+      best_presolved->initialize_lower_bound(p.node->true_lower_bound);
    } else {
       BCP_lp_perform_strong_branching(p, candidates, best_presolved);
    }
 
-   BCP_lp_branching_object* can = best_presolved->candidate();
+   const BCP_lp_branching_object* can = best_presolved->candidate();
 
    // decide what to do with each child
    best_presolved->initialize_action();
@@ -551,10 +553,8 @@ BCP_lp_branch(BCP_lp_prob& p)
    switch (do_branch){
     case BCP_DoNotBranch_Fathomed:
       BCP_lp_send_cuts_to_cp(p, -1);
-      // Here we don't have col/row_indices to compress and we do want to
-      // force deletion.
-      BCP_lp_delete_cols_and_rows(p, 0, true);
-      BCP_lp_send_node_description(p, 0, BCP_Msg_NodeDescription_Discarded);
+      BCP_lp_perform_fathom(p,"LP:   Forcibly fathoming node in branch().\n",
+			    BCP_Msg_NodeDescription_Discarded);
       return BCP_BranchingFathomedThisNode;
     case BCP_DoNotBranch:
       BCP_lp_send_cuts_to_cp(p,
@@ -587,6 +587,8 @@ BCP_lp_branch(BCP_lp_prob& p)
       }
       delete best_presolved->candidate();
       delete best_presolved;
+      BCP_lp_delete_cols_and_rows(p, 0, true, true);
+      BCP_lp_clean_up_node(p);
       return BCP_BranchingFathomedThisNode;
    }
 

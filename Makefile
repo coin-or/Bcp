@@ -36,10 +36,10 @@ endif
 
 ###############################################################################
 
-INCDIRS := $(DETECTINCDIRS)
-LIBDIRS := $(DETECTLIBDIRS)
-LIBS    := $(DETECTLIBNAMES)
-DEFINES := $(DETECTDEFINES)
+INCDIRS := $(IncDir)
+LIBDIRS := $(LibDir)
+LIBS    := $(LibName)
+DEFINES := $(Define)
 
 ##############################################################################
 
@@ -80,10 +80,11 @@ LDFLAGS += $(patsubst lib%,-l%,$(basename $(LIBS)))
 # Paths
 ##############################################################################
 ##############################################################################
+space = $(empty) $(empty)
 
-BCPTARGETDIR = $(BCPROOT)/$(UNAME)$(BCP_OPT)
+BCPTARGETDIR = $(BCPROOT)/$(UNAME)$(subst $(space),_,$(BCP_OPT))
 BCPDEPDIR    = $(BCPROOT)/dep
-USERTARGETDIR = $(USERROOT)/$(UNAME)$(USER_OPT)
+USERTARGETDIR = $(USERROOT)/$(UNAME)$(subst $(space),_,$(USER_OPT))
 USERDEPDIR    = $(USERROOT)/dep
 
 SRCDIR = \

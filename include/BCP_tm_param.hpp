@@ -56,26 +56,48 @@ struct BCP_tm_par{
     TrimTreeBeforeNewPhase,
     /** Verbosity flags for the tree manager */
     /*@{*/
-      /** */
+      /** Print the value of *any* integer feasible solution found.
+	  (BCP_tm_prob::process_message) */
       TmVerb_AllFeasibleSolutionValue,
-      /** */
+      /** Invoke the user-written "display_feasible_solution" function if
+       *any* feasible solution is found. (BCP_tm_prob::process_message) */
       TmVerb_AllFeasibleSolution,
-      /** */
+      /** Print the value of the integer solution when a solution better than
+	  the current best solution is found. (BCP_tm_prob::process_message) */
       TmVerb_BetterFeasibleSolutionValue,
-      /** */
+      /** Invoke the user-written "display_feasible_solution" function if a
+	  better integral feasible solution is found.
+	  (BCP_tm_prob::process_message) */
       TmVerb_BetterFeasibleSolution,
-      /** */
+      /** Print the value of the best feasible solution found after the entire
+	  serach tree is processed. (BCP_tm_wrapup) */
       TmVerb_BestFeasibleSolutionValue,
-      /** */
+      /** Invoke "display_feasible_solution" user routine for the best
+	  feasible solution after the entire tree is processed.
+	  (BCP_tm_wrapup) */
       TmVerb_BestFeasibleSolution,
-      /** */
+      /** Print the "Starting phase x" line. (BCP_tm_tasks_before_new_phase) */
       TmVerb_NewPhaseStart,
-      /** */
+      /** Print information about nodes that are pruned by bound in the tree
+	  manager. These nodes would be returned by the LP if they were sent
+	  there, so prune them in the TM instead. (BCP_tm_start_one_node) */
       TmVerb_PrunedNodeInfo,
-      /** */
+      /** Print the time (and the solution value and solution if the above
+	  paramters are set appropriately) when any/better solution is
+	  found. (BCP_tm_prob::process_message) */  
       TmVerb_TimeOfImprovingSolution,
-      /** */
+      /** Print the number of nodes trimmed between phases.
+	  (BCP_tm_trim_tree_wrapper) */
       TmVerb_TrimmedNum,
+      /** Total running time. */
+      TmVerb_RunningTime,
+      /** Print size and max depth of search tree. */
+      TmVerb_LpStatistics,
+      /** Print timing information about the lp process(es). */
+      TmVerb_TreeStatistics,
+      /** Print out a message when the default version of an overridable
+	  method is executed. Default: 1. */
+      TmVerb_ReportDefault,
     /*@}*/
     //
     end_of_chr_params

@@ -1,5 +1,10 @@
 // Copyright (C) 2000, International Business Machines
 // Corporation and others.  All Rights Reserved.
+
+#include "BCP_os.hpp"
+
+#ifdef NEED_TEMPLATE_CLASSES
+
 #include "BCP_temporary.hpp"
 
 template class BCP_temp_vec<char>;
@@ -13,3 +18,5 @@ template<> BCP_vec<BCP_vec<int>*> BCP_temp_vec<int>::_temp_vecs;
 
 template class BCP_temp_vec<double>;
 template<> BCP_vec<BCP_vec<double>*> BCP_temp_vec<double>::_temp_vecs;
+
+#endif

@@ -8,8 +8,8 @@
 #include <cmath>
 #include <values.h>
 
-#include "OsiPackedVector.hpp"
-#include "OsiPackedMatrix.hpp"
+#include "CoinPackedVector.hpp"
+#include "CoinPackedMatrix.hpp"
 
 #include "BCP_vector.hpp"
 
@@ -22,7 +22,7 @@ class BCP_buffer;
 /** This class holds a column in a compressed form. That is, it is a packed
     vector with an objective coefficient, lower and upper bound. */
 
-class BCP_col : public OsiPackedVector {
+class BCP_col : public CoinPackedVector {
    
 protected:
    /**@name Data members */
@@ -59,7 +59,7 @@ public:
 
    /** Assignment operator: copy over the contents of <code>x</code>. */
    BCP_col& operator=(const BCP_col& x) {
-      OsiPackedVector::operator=(x);
+      CoinPackedVector::operator=(x);
       _Objective = x.Objective();
       _LowerBound = x.LowerBound();
       _UpperBound = x.UpperBound();
@@ -71,7 +71,7 @@ public:
    inline void
    assign(const int size, int*& ElementIndices, double*& ElementValues,
 	  const double Obj, const double LB, const double UB) {
-      OsiPackedVector::assignVector(size, ElementIndices, ElementValues,
+      CoinPackedVector::assignVector(size, ElementIndices, ElementValues,
 				    false /* no test for duplicate index */);
       _Objective = Obj;
       _LowerBound = LB;
@@ -81,7 +81,7 @@ public:
    inline void
    copy(const int size, const int* ElementIndices, const double* ElementValues,
 	const double Obj, const double LB, const double UB) {
-      OsiPackedVector::setVector(size, ElementIndices, ElementValues,
+      CoinPackedVector::setVector(size, ElementIndices, ElementValues,
 				 false /* no test for duplicate index */);
       _Objective = Obj;
       _LowerBound = LB;
@@ -96,7 +96,7 @@ public:
 	BCP_vec<double>::const_iterator firstval,
 	BCP_vec<double>::const_iterator lastval,
 	const double Obj, const double LB, const double UB) {
-      OsiPackedVector::setVector(lastind - firstind, firstind, firstval,
+      CoinPackedVector::setVector(lastind - firstind, firstind, firstval,
 				 false /* no test for duplicate index */);
       _Objective = Obj;
       _LowerBound = LB;
@@ -109,11 +109,11 @@ public:
    /*@{*/
    /** The default constructor creates an empty column with 0 as objective
        coefficient, 0.0 as lower and +infinity as upper bound. */
-   BCP_col() : OsiPackedVector(false /* no test for duplicate index */),
+   BCP_col() : CoinPackedVector(false /* no test for duplicate index */),
 	       _Objective(0), _LowerBound(0.0), _UpperBound(1e31) {}
    /** The copy constructor makes a copy of <code>x</code>. */
    BCP_col(const BCP_col& x) :
-      OsiPackedVector(x), _Objective(x.Objective()),
+      CoinPackedVector(x), _Objective(x.Objective()),
       _LowerBound(x.LowerBound()), _UpperBound(x.UpperBound()) {}
    /** This constructor acts exactly like the <code>copy</code> method with
        the same argument list. */
@@ -122,20 +122,20 @@ public:
 	   BCP_vec<double>::const_iterator firstval,
 	   BCP_vec<double>::const_iterator lastval,
 	   const double Obj, const double LB, const double UB) :
-      OsiPackedVector(lastind - firstind, firstind, firstval,
+      CoinPackedVector(lastind - firstind, firstind, firstval,
 		      false /* no test for duplicate index */),
       _Objective(Obj), _LowerBound(LB), _UpperBound(UB) {}
    /** This constructor acts exactly like the <code>assign</code> method with
        the same argument list. */ 
    BCP_col(const int size, int*& ElementIndices, double*& ElementValues,
 	   const double Obj, const double LB, const double UB) :
-      OsiPackedVector(), _Objective(Obj), _LowerBound(LB), _UpperBound(UB) {
-      OsiPackedVector::assignVector(size, ElementIndices, ElementValues,
+      CoinPackedVector(), _Objective(Obj), _LowerBound(LB), _UpperBound(UB) {
+      CoinPackedVector::assignVector(size, ElementIndices, ElementValues,
 				    false /* no test for duplicate index */);
    }
-   BCP_col(const OsiPackedVectorBase& vec,
+   BCP_col(const CoinPackedVectorBase& vec,
 	   const double Obj, const double LB, const double UB) :
-      OsiPackedVector(vec.getNumElements(),
+      CoinPackedVector(vec.getNumElements(),
 		      vec.getIndices(), vec.getElements()),
       _Objective(Obj), _LowerBound(LB), _UpperBound(UB) {}
    /** The destructor deletes all data members. */
@@ -148,7 +148,7 @@ public:
 /** This class holds a row in a compressed form. That is, it is a packed
     vector with a lower and upper bound. */
 
-class BCP_row : public OsiPackedVector {
+class BCP_row : public CoinPackedVector {
 protected:
    /**@name Data members */
    /*@{*/
@@ -178,7 +178,7 @@ public:
 
    /** Assignment operator: copy over the contents of <code>x</code>. */
    BCP_row& operator=(const BCP_row& x) {
-      OsiPackedVector::operator=(x);
+      CoinPackedVector::operator=(x);
       _LowerBound = x.LowerBound();
       _UpperBound = x.UpperBound();
       return *this;
@@ -189,7 +189,7 @@ public:
    void
    assign(const int size, int*& ElementIndices, double*& ElementValues,
 	  const double LB, const double UB) {
-      OsiPackedVector::assignVector(size, ElementIndices, ElementValues,
+      CoinPackedVector::assignVector(size, ElementIndices, ElementValues,
 				    false /* no test for duplicate index */);
       _LowerBound = LB;
       _UpperBound = UB;
@@ -198,7 +198,7 @@ public:
    void
    copy(const int size, const int* ElementIndices, const double* ElementValues,
 	const double LB, const double UB) {
-      OsiPackedVector::setVector(size, ElementIndices, ElementValues,
+      CoinPackedVector::setVector(size, ElementIndices, ElementValues,
 				 false /* no test for duplicate index */);
       _LowerBound = LB;
       _UpperBound = UB;
@@ -212,7 +212,7 @@ public:
 	BCP_vec<double>::const_iterator firstval,
 	BCP_vec<double>::const_iterator lastval,
 	const double LB, const double UB) {
-      OsiPackedVector::setVector(lastind - firstind, firstind, firstval,
+      CoinPackedVector::setVector(lastind - firstind, firstind, firstval,
 				 false /* no test for duplicate index */);
       _LowerBound = LB;
       _UpperBound = UB;
@@ -224,11 +224,11 @@ public:
    /*@{*/
    /** The default constructor creates an empty row with -infinity as lower
        and +infinity as upper bound. */
-   BCP_row() : OsiPackedVector(false /* no test for duplicate index */),
+   BCP_row() : CoinPackedVector(false /* no test for duplicate index */),
 	       _LowerBound(-DBL_MAX), _UpperBound(DBL_MAX) {}
    /** The copy constructor makes a copy of <code>x</code>. */
    BCP_row(const BCP_row& x) :
-      OsiPackedVector(x),
+      CoinPackedVector(x),
       _LowerBound(x.LowerBound()), _UpperBound(x.UpperBound()) {}
    /** This constructor acts exactly like the <code>copy</code> method with
        the same argument list. */
@@ -237,19 +237,19 @@ public:
 	   BCP_vec<double>::const_iterator firstval,
 	   BCP_vec<double>::const_iterator lastval,
 	   const double LB, const double UB) :
-      OsiPackedVector(lastind - firstind, firstind, firstval,
+      CoinPackedVector(lastind - firstind, firstind, firstval,
 		      false /* no test for duplicate index */),
       _LowerBound(LB), _UpperBound(UB) {}
    /** This constructor acts exactly like the <code>assign</code> method with
        the same argument list. */ 
    BCP_row(const int size, int*& ElementIndices, double*& ElementValues,
 	   const double LB, const double UB) :
-      OsiPackedVector(), _LowerBound(LB), _UpperBound(UB) {
-      OsiPackedVector::assignVector(size, ElementIndices, ElementValues,
+      CoinPackedVector(), _LowerBound(LB), _UpperBound(UB) {
+      CoinPackedVector::assignVector(size, ElementIndices, ElementValues,
 				    false /* no test for duplicate index */);
    }
-   BCP_row(const OsiPackedVectorBase& vec, const double LB, const double UB) :
-      OsiPackedVector(vec.getNumElements(),
+   BCP_row(const CoinPackedVectorBase& vec, const double LB, const double UB) :
+      CoinPackedVector(vec.getNumElements(),
 		      vec.getIndices(), vec.getElements()),
       _LowerBound(LB), _UpperBound(UB) {}
    /** The destructor deletes all data members. */
@@ -263,7 +263,7 @@ public:
 /** An object of type <code>CBP_lp_relax</code> holds the description of an lp
     relaxation. The matrix, lower/upper bounds on the variables and cuts and
     objective coefficients for the variables. */
-class BCP_lp_relax : public OsiPackedMatrix {
+class BCP_lp_relax : public CoinPackedMatrix {
 private:
    /**@name Data members */
    /*@{*/
@@ -314,11 +314,11 @@ public:
    /** Clear the LP relaxation. */
    void clear();
    /** Set up the LP relaxation by making a copy of the arguments */
-   void copyOf(const OsiPackedMatrix& m,
+   void copyOf(const CoinPackedMatrix& m,
 	       const double* OBJ, const double* CLB, const double* CUB,
 	       const double* RLB, const double* RUB);
    /** Set up the LP relaxation by taking over the pointers in the arguments */
-   void assign(OsiPackedMatrix& m,
+   void assign(CoinPackedMatrix& m,
 	       double*& OBJ, double*& CLB, double*& CUB,
 	       double*& RLB, double*& RUB);
    /*@}*/
@@ -374,7 +374,7 @@ public:
    /*@{*/
    /** Create an empty LP relaxation with given ordering. */
    BCP_lp_relax(const bool colordered = true) :
-      OsiPackedMatrix(colordered, 0, 0, 0, NULL, NULL, NULL, NULL),
+      CoinPackedMatrix(colordered, 0, 0, 0, NULL, NULL, NULL, NULL),
       _Objective(), _ColLowerBound(), _ColUpperBound(),
       _RowLowerBound(), _RowUpperBound() {}
 
@@ -391,7 +391,7 @@ public:
 
    /** Same as the previous method except that this method allows extra_gap
        and extra_major to be specified. For the description of those see the
-       documentation of OsiPackedMatrix. (extra_gap will be used for adding
+       documentation of CoinPackedMatrix. (extra_gap will be used for adding
        columns, while extra major for adding rows) */
    BCP_lp_relax(BCP_vec<BCP_row*>& rows,
 		BCP_vec<double>& CLB, BCP_vec<double>& CUB,
@@ -407,7 +407,7 @@ public:
 
    /** Same as the previous method except that this method allows extra_gap
        and extra_major to be specified. For the description of those see the
-       documentation of OsiPackedMatrix. (extra_gap will be used for adding
+       documentation of CoinPackedMatrix. (extra_gap will be used for adding
        rows, while extra major for adding columns) */
    BCP_lp_relax(BCP_vec<BCP_col*>& cols,
 		BCP_vec<double>& RLB, BCP_vec<double>& RUB,

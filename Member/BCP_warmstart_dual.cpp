@@ -1,18 +1,18 @@
 // Copyright (C) 2000, International Business Machines
 // Corporation and others.  All Rights Reserved.
-#include "OsiWarmStartDual.hpp"
+#include "CoinWarmStartDual.hpp"
 #include "BCP_warmstart_dual.hpp"
 
 //#############################################################################
 
-OsiWarmStart*
-BCP_warmstart_dual::convert_to_OsiWarmStart() const
+CoinWarmStart*
+BCP_warmstart_dual::convert_to_CoinWarmStart() const
 {
   if (storage() != BCP_Storage_Explicit)
     return NULL;
 
   const BCP_vec<double>& dual = _dual.explicit_vector();
-  return new OsiWarmStartDual(dual.size(), dual.begin());
+  return new CoinWarmStartDual(dual.size(), dual.begin());
 }
 
 //#############################################################################

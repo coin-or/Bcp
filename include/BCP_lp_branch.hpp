@@ -352,6 +352,11 @@ public:
       _child_action = new BCP_vec<BCP_child_action>(_candidate->child_num,
 						    BCP_ReturnChild);
    }
+   inline void initialize_lower_bound(const double val) {
+      for (int i = _candidate->child_num - 1; i >= 0; --i) {
+	 _lpres[i]->fake_objective_value(val);
+      }
+   }
    inline void keep_no_child() {
       for (int i = _child_action->size() - 1; i >= 0; --i) {
 	 if ((*_child_action)[i] == BCP_KeepChild) {
@@ -371,9 +376,16 @@ public:
    inline void get_lower_bounds(BCP_vec<double>& obj) {
       obj.clear();
       obj.reserve(_candidate->child_num);
-      BCP_vec<BCP_lp_result*>::const_iterator res = _lpres.end();
-      while (res != _lpres.begin())
-	 obj.unchecked_push_back((*(--res))->objval());
+      const int num_children = _lpres.size();
+      for (int i = 0; i < num_children; ++i)
+	 obj.unchecked_push_back(_lpres[i]->objval());
+   }
+   /** Fill up the lower bounds on the children with the content of
+       <code>obj</code>.*/
+   inline void set_lower_bounds(const BCP_vec<double>& obj) {
+      const int num_children = _lpres.size();
+      for (int i = 0; i < num_children; ++i)
+	 _lpres[i]->fake_objective_value(obj[i]);
    }
    /** Extract the lp results from the LP solver for the
        <code>child_ind</code>-th child. This is done immediately after
@@ -392,6 +404,13 @@ public:
        </ul>
    */
    void fake_objective_values(const double itlim_objval);
+
+   /** swap the two presolved branching object */
+   void swap(BCP_presolved_lp_brobj& rhs) {
+      std::swap(_candidate, rhs._candidate);
+      std::swap(_lpres, rhs._lpres);
+      std::swap(_child_action, rhs._child_action);
+   }
    /*@}*/
 };
 

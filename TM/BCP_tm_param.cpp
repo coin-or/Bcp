@@ -84,6 +84,18 @@ void BCP_parameter_set<BCP_tm_par>::create_keyword_list() {
    keys.push_back(make_pair(BCP_string("BCP_TmVerb_TrimmedNum"),
 			    BCP_parameter(BCP_CharPar,
 					  TmVerb_TrimmedNum)));
+   keys.push_back(make_pair(BCP_string("BCP_TmVerb_RunningTime"),
+			    BCP_parameter(BCP_CharPar,
+					  TmVerb_RunningTime)));
+   keys.push_back(make_pair(BCP_string("BCP_TmVerb_LpStatistics"),
+			    BCP_parameter(BCP_CharPar,
+					  TmVerb_LpStatistics)));
+   keys.push_back(make_pair(BCP_string("BCP_TmVerb_TreeStatistics"),
+			    BCP_parameter(BCP_CharPar,
+					  TmVerb_TreeStatistics)));
+   keys.push_back(make_pair(BCP_string("BCP_TmVerb_ReportDefault"),
+			    BCP_parameter(BCP_CharPar,
+					  TmVerb_ReportDefault)));
 
 //    keys.push_back(make_pair(BCP_string("BCP_"),
 // 			    BCP_parameter(BCP_CharPar,
@@ -219,6 +231,10 @@ void BCP_parameter_set<BCP_tm_par>::set_default_entries(){
    set_entry(TmVerb_TrimmedNum, true);
    set_entry(TmVerb_TimeOfImprovingSolution, true);
    set_entry(TmVerb_PrunedNodeInfo, true);
+   set_entry(TmVerb_RunningTime, true);
+   set_entry(TmVerb_LpStatistics, true);
+   set_entry(TmVerb_TreeStatistics, true);
+   set_entry(TmVerb_ReportDefault, true);
    //--------------------------------------------------------------------------
    // IntPar
    set_entry(TreeSearchStrategy, BCP_BestFirstSearch);

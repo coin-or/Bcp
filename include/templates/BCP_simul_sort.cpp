@@ -14,7 +14,7 @@ BCP_simul_sort(RAI_S sfirst, RAI_S slast, RAI_T tfirst)
    typedef typename std::iterator_traits<RAI_S>::value_type S;
    typedef typename std::iterator_traits<RAI_T>::value_type T;
 
-   BCP_vec< pair<S, T> > x;
+   BCP_vec< std::pair<S, T> > x;
    x.reserve(slast - sfirst);
 
    RAI_S scurrent = sfirst;
@@ -43,7 +43,7 @@ BCP_simul_stable_sort(RAI_S sfirst, RAI_S slast, RAI_T tfirst)
    typedef typename std::iterator_traits<RAI_S>::value_type S;
    typedef typename std::iterator_traits<RAI_T>::value_type T;
 
-   BCP_vec< pair<S, T> > x;
+   BCP_vec< std::pair<S, T> > x;
    x.reserve(slast - sfirst);
 
    RAI_S scurrent = sfirst;

@@ -156,6 +156,7 @@ BCP_lp_reset_positions(const BCP_vec<int>& deletable, BCP_vec<int>& pos)
 
 void BCP_lp_delete_cols_and_rows(BCP_lp_prob& p,
 				 BCP_lp_branching_object* can,
+				 const bool from_fathom,
 				 const bool force_delete)
 {
    // If can is set then this function is invoked after branching is decided
@@ -164,6 +165,7 @@ void BCP_lp_delete_cols_and_rows(BCP_lp_prob& p,
 
    int del_num;
 
+   BCP_lp_result& lpres = *p.lp_result;
    BCP_var_set& vars = p.node->vars;
    const int varnum = vars.size();
    BCP_cut_set& cuts = p.node->cuts;
@@ -174,7 +176,7 @@ void BCP_lp_delete_cols_and_rows(BCP_lp_prob& p,
    deletable.reserve(CoinMax(varnum, cutnum));
 
    // find out which columns could be deleted
-   vars.deletable(p.core->varnum(), deletable);
+   p.user->select_vars_to_delete(lpres, vars, cuts, from_fathom, deletable);
 
    del_num = deletable.size();
    if (del_num > 0 &&
@@ -196,19 +198,8 @@ void BCP_lp_delete_cols_and_rows(BCP_lp_prob& p,
    }
 
    // Now do the same for rows
-   const int ineff_to_delete = p.param(BCP_lp_par::IneffectiveBeforeDelete);
-   const double lb = p.lp_result->objval();
-   const BCP_vec<double>& lb_at_cutgen = p.node->lb_at_cutgen;
    deletable.clear();
-   for (int i = p.core->cutnum(); i < cutnum; ++i) {
-     BCP_cut *cut = cuts[i];
-     if (cut->is_to_be_removed() ||
-	 (! cut->is_non_removable() &&
-	  cut->effective_count() <= -ineff_to_delete &&
-	  lb_at_cutgen[i] < lb - 0.0001)) {
-       deletable.unchecked_push_back(i);
-     }
-   }
+   p.user->select_cuts_to_delete(lpres, vars, cuts, from_fathom, deletable);
 
    const int min_by_frac =
      static_cast<int>(cutnum * p.param(BCP_lp_par::DeletedRowToCompress_Frac));
@@ -322,8 +313,8 @@ int BCP_lp_add_from_local_cut_pool(BCP_lp_prob& p)
    BCP_lp_cut_pool::const_iterator cpi = first - 1;
 
    // create the row set
-   const OsiPackedVectorBase** rows =
-     new const OsiPackedVectorBase*[added_rows];
+   const CoinPackedVectorBase** rows =
+     new const CoinPackedVectorBase*[added_rows];
 
    BCP_temp_vec<double> tmp_rlb;
    BCP_vec<double>& rlb = tmp_rlb.vec();
@@ -403,8 +394,8 @@ int BCP_lp_add_from_local_var_pool(BCP_lp_prob& p)
    BCP_lp_var_pool::const_iterator vpi = first - 1;
 
    // create the col set
-   const OsiPackedVectorBase** cols =
-     new const OsiPackedVectorBase*[added_cols];
+   const CoinPackedVectorBase** cols =
+     new const CoinPackedVectorBase*[added_cols];
 
    BCP_temp_vec<double> tmp_clb;
    BCP_vec<double>& clb = tmp_clb.vec();

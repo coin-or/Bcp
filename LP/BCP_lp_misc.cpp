@@ -165,7 +165,8 @@ BCP_lp_add_cols_to_lp(const BCP_vec<BCP_col*>& cols, OsiSolverInterface* lp)
   double * clb = new double[colnum];
   double * cub = new double[colnum];
   double * obj = new double[colnum];
-  const OsiPackedVectorBase** vectors = new const OsiPackedVectorBase*[colnum];
+  const CoinPackedVectorBase** vectors =
+     new const CoinPackedVectorBase*[colnum];
   for (int i = 0; i < colnum; ++i) {
     const BCP_col * col = cols[i];
     vectors[i] = col;
@@ -188,7 +189,8 @@ BCP_lp_add_rows_to_lp(const BCP_vec<BCP_row*>& rows, OsiSolverInterface* lp)
   const int rownum = rows.size();
   double * rlb = new double[rownum];
   double * rub = new double[rownum];
-  const OsiPackedVectorBase** vectors = new const OsiPackedVectorBase*[rownum];
+  const CoinPackedVectorBase** vectors =
+     new const CoinPackedVectorBase*[rownum];
   for (int i = 0; i < rownum; ++i) {
     const BCP_row * row = rows[i];
     vectors[i] = row;

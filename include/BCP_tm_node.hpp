@@ -189,19 +189,22 @@ public:
 
 class BCP_tree {
 private:
-   /**@name Private data member */
-   /*@{*/
    /** */
    BCP_vec<BCP_tm_node*> _tree;
-   /*@}*/
+   /** */
+   int maxdepth_;
 
 public:
    /**@name Constructor and destructor */
    /*@{*/
    /** */
-   BCP_tree() : _tree() {}
+   BCP_tree() : _tree(), maxdepth_(0) {}
    /** */
-   ~BCP_tree() {}
+   ~BCP_tree() {
+      for (int i = _tree.size() - 1; i >= 0; --i) {
+	 delete _tree[i];
+      }
+   }
    /*@}*/
 
    /**@name Query methods */
@@ -217,6 +220,8 @@ public:
    inline BCP_tm_node* operator[](int index) { return _tree[index]; }
    /** */
    inline size_t size() const { return _tree.size(); }
+   /** */
+   inline int maxdepth() const { return maxdepth_; }
    /*@}*/
 
    /**@name Modifying methods */
@@ -229,6 +234,8 @@ public:
    void insert(BCP_tm_node* node) {
       node->_index = _tree.size();
       _tree.push_back(node);
+      if (node->_level > maxdepth_)
+	 maxdepth_ = node->_level;
    }
    /*@}*/
 };

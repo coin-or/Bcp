@@ -22,24 +22,10 @@ BCP_tm_parse_command_line(BCP_tm_prob& p,
   } else if (argnum == 1) {
      // work with default parameters
   } else {
-    int i = 1;
-    while (i < argnum) {
-      if (strncmp(arglist[i], "-par", 4) == 0) {
-	p.par.read_from_file(arglist[i+1]);
-	p.slave_pars.lp.read_from_file(arglist[i+1]);
-	p.slave_pars.cg.read_from_file(arglist[i+1]);
-	p.slave_pars.vg.read_from_file(arglist[i+1]);
-      } else {
-	if (i+1 == argnum) {
-	  printf("***WARNING*** BCP: Parameter key \"%s without value.\n",
-		 arglist[i]);
-	} else {
-	  printf("***WARNING*** BCP:Parameter \"%s %s\" is unrecognized.\n",
-		 arglist[i], arglist[i+i]);
-	}
-      }
-      i += 2;
-    }
+     p.par.read_from_arglist(argnum, arglist);
+     p.slave_pars.lp.read_from_arglist(argnum, arglist);
+     p.slave_pars.cg.read_from_arglist(argnum, arglist);
+     p.slave_pars.vg.read_from_arglist(argnum, arglist);
   }
   // check the consistency of the parameters
   BCP_check_parameters(p);
