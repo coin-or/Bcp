@@ -95,10 +95,9 @@ void BCP_lp_main_loop(BCP_lp_prob& p)
 				     lpres, p.node->vars, p.node->cuts);
 
       if (p.over_ub(p.node->true_lower_bound)) {
-	 if (p.param(BCP_lp_par::LpVerb_FathomInfo))
-	    printf("\
-LP:   Terminating and fathoming due to proven high cost.\n");
-	 BCP_lp_perform_fathom(p);
+	 BCP_lp_perform_fathom(p, "\
+LP:   Terminating and fathoming due to proven high cost.\n",
+			       BCP_Msg_NodeDescription_Discarded);
 	 return;
       }
 

@@ -41,7 +41,8 @@ void BCP_lp_main_loop(BCP_lp_prob& p);
 
 //-----------------------------------------------------------------------------
 // BCP_lp_fathom.cpp
-void BCP_lp_perform_fathom(BCP_lp_prob& p);
+void BCP_lp_perform_fathom(BCP_lp_prob& p, const char* msg,
+			   BCP_message_tag msgtag);
 bool BCP_lp_fathom(BCP_lp_prob& p, const bool from_repricing);
 
 //-----------------------------------------------------------------------------

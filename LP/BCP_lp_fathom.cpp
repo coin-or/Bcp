@@ -58,14 +58,14 @@ BCP_restore_feasibility(BCP_lp_prob& p,
 //#############################################################################
 
 void
-BCP_lp_perform_fathom(BCP_lp_prob& p)
+BCP_lp_perform_fathom(BCP_lp_prob& p, const char* msg, BCP_message_tag msgtag)
 {
    if (p.param(BCP_lp_par::LpVerb_FathomInfo))
-      printf("LP:   Pruning node\n");
+      printf("%s", msg);
    // Here we don't have col/row_indices to compress and we do want to
    // force deletion.
    BCP_lp_delete_cols_and_rows(p, 0, true);
-   BCP_lp_send_node_description(p, 0, BCP_Msg_NodeDescription_Discarded);
+   BCP_lp_send_node_description(p, 0, msgtag);
    BCP_lp_clean_up_node(p);
 }
    
@@ -85,19 +85,15 @@ bool BCP_lp_fathom(BCP_lp_prob& p, const bool from_repricing)
 
    switch (p.node->colgen){
     case BCP_DoNotGenerateColumns_Fathom:
-      BCP_lp_perform_fathom(p);
+      BCP_lp_perform_fathom(p, "LP:   Pruning node\n",
+			    BCP_Msg_NodeDescription_Discarded);
       return true;
 
     case BCP_DoNotGenerateColumns_Send:
-      if (p.param(BCP_lp_par::LpVerb_FathomInfo))
-	 printf("LP:   Sending node for next phase\n");
-      // Here we don't have col/row_indices to compress and we do want to
-      // force deletion.
-      BCP_lp_delete_cols_and_rows(p, 0, true);
-      BCP_lp_send_node_description(p, 0,
-				   lpres.termcode() & BCP_ProvenPrimalInf ?
-				   BCP_Msg_NodeDescription_Infeas :
-				   BCP_Msg_NodeDescription_OverUB);
+      BCP_lp_perform_fathom(p, "LP:   Sending node for next phase\n",
+			    lpres.termcode() & BCP_ProvenPrimalInf ?
+			    BCP_Msg_NodeDescription_Infeas :
+			    BCP_Msg_NodeDescription_OverUB);
       return true;
 
     case BCP_GenerateColumns:
@@ -166,13 +162,9 @@ bool BCP_lp_fathom(BCP_lp_prob& p, const bool from_repricing)
 	 if (p.over_ub(p.lp_result->objval())) {
 	    // doesn't matter how we came (infeas or over the bound) to this
 	    // function, if we have TDF we can fathom the node
-	    if (p.param(BCP_lp_par::LpVerb_FathomInfo))
-	       printf("LP:   Fathoming node (discovered tdf & high cost)\n");
-	    // Here we don't have col/row_indices to compress and we do want
-	    // to force deletion.
-	    BCP_lp_delete_cols_and_rows(p, 0, true);
-	    BCP_lp_send_node_description
-	       (p, 0, BCP_Msg_NodeDescription_OverUB_Pruned);
+	    BCP_lp_perform_fathom(p, "\
+LP:   Fathoming node (discovered tdf & high cost)\n",
+				  BCP_Msg_NodeDescription_OverUB_Pruned);
 	    // before returnning, we must clean vars_to_add
 	    purge_ptr_vector(vars_to_add);
 	    return true;
@@ -232,13 +224,9 @@ LP:   tdf_has_all_indexed achieved by adding %i variables. resolving.\n",
 	 vars_to_add_size = vars_to_add.size();
 	 if (vars_to_add_size == 0){
 	    // Nothing helps...
-	    if (p.param(BCP_lp_par::LpVerb_FathomInfo))
-	       printf("LP:   Fathoming node (tdf & not restorable inf.)\n");
-	    // Here we don't have col/row_indices to compress and we do
-	    // want to force deletion.
-	    BCP_lp_delete_cols_and_rows(p, 0, true);
-	    BCP_lp_send_node_description
-	       (p, 0, BCP_Msg_NodeDescription_Infeas_Pruned);
+	    BCP_lp_perform_fathom(p, "\
+LP:   Fathoming node (discovered tdf & not restorable inf.)\n",
+				  BCP_Msg_NodeDescription_Infeas_Pruned);
 	    // need not delete the entries in vars_to_add one-by-one; it's
 	    // empty
 	    return true;
