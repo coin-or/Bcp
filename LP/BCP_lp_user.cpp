@@ -858,11 +858,11 @@ BCP_lp_user::branch_close_to_half(const BCP_lp_result& lpres,
     // check if the next var violates MIP feasibility
     if ((*vi)->var_type() == BCP_ContinuousVar)
       continue;
-    val = abs(*xi - .5 - floor(*xi));
+    val = CoinAbs(*xi - .5 - floor(*xi));
     if (val > etol5)
       continue;
     // if not, insert it into the list
-    const double cost = abs(objcoeff[pos]);
+    const double cost = CoinAbs(objcoeff[pos]);
     for (i = k - 1; i >= 0; --i) {
       if (select_val[i] < val ||
 	  (select_val[i] == val && select_cost[i] >= cost))
@@ -881,7 +881,7 @@ BCP_lp_user::branch_close_to_half(const BCP_lp_result& lpres,
     // check if the next var violates MIP feasibility
     if ((*vi)->var_type() == BCP_ContinuousVar)
       continue;
-    val = abs(*xi - .5 - floor(*xi));
+    val = CoinAbs(*xi - .5 - floor(*xi));
     if (val > etol5)
       continue;
     // if not, insert it into the list
