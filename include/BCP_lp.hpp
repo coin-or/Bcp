@@ -287,7 +287,7 @@ public:
       }
       /** */
       inline bool over_ub(double lb) const {
-         return has_ub() && lb > upper_bound - granularity();
+         return has_ub() && lb >= upper_bound - granularity();
       }
     /*@}*/
   /*@}*/  // end of query methods 
