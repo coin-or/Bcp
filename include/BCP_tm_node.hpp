@@ -18,11 +18,17 @@ enum BCP_tm_node_status{
    /** */
    BCP_ActiveNode,
    /** */
-   BCP_PrunedNode,
+   BCP_PrunedNode_OverUB,
+   /** */
+   BCP_PrunedNode_Infeas,
+   /** */
+   BCP_PrunedNode_Discarded,
    /** */
    BCP_CandidateNode,
    /** */
-   BCP_NextPhaseNode
+   BCP_NextPhaseNode_OverUB,
+   /** */
+   BCP_NextPhaseNode_Infeas
 };
 
 //#############################################################################

@@ -222,7 +222,10 @@ struct BCP_lp_par{
 
       /** Upper limit on the number of iterations performed in each of the
 	  children of the search tree node when presolving branching
-	  candidates. This parameter is passed onto the LP solver. <br>
+	  candidates. This parameter is passed onto the LP solver. If the
+	  parameter is set to -1 then the branching candidates are not
+	  presolved and the first branching candidate is chosen (if there is
+	  any).<br>
 	  Note that for different LP solvers (e.g., simplex based algorithm or
 	  the Volume Algorithm) the meaning of an iteration is different, thus
 	  this parameter will be set differently. <br>

@@ -42,11 +42,15 @@ BCP_tree::enumerate_leaves(BCP_tm_node* node, const double obj_limit)
       const BCP_tm_node_status st = node->status;
       node->_leaf_num = 1;
       node->_processed_leaf_num = st == BCP_ActiveNode ? 1 : 0;
-      node->_pruned_leaf_num = st == BCP_PrunedNode ? 1 : 0;
+      const bool is_pruned = ( st == BCP_PrunedNode_OverUB ||
+			       st == BCP_PrunedNode_Infeas ||
+			       st == BCP_PrunedNode_Discarded );
+      node->_pruned_leaf_num = is_pruned ? 1 : 0;
+      const bool is_next_phase = ( st == BCP_NextPhaseNode_OverUB ||
+				   st == BCP_NextPhaseNode_Infeas );
       node->_tobepriced_leaf_num =
 	 ( ((st & (BCP_ProcessedNode | BCP_ActiveNode | BCP_CandidateNode)) &&
-	    node->true_lower_bound() > obj_limit) ||
-	   st == BCP_NextPhaseNode ) ? 1 : 0;
+	    node->true_lower_bound() > obj_limit) || is_next_phase ) ? 1 : 0;
    } else {
       node->_leaf_num = 0;
       node->_processed_leaf_num = 0;

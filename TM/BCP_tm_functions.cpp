@@ -177,7 +177,7 @@ BCP_tm_start_one_node(BCP_tm_prob& p)
 	 // here.
 	 // *FIXME-NOW* : adjust the number of nodes assigned to the cp and vp
 	 // of this node 
-	 next_node->status = BCP_PrunedNode;
+	 next_node->status = BCP_PrunedNode_OverUB;
 	 if (p.param(BCP_tm_par::TmVerb_PrunedNodeInfo))
 	    printf("TM: Pruning NODE %i LEVEL %i instead of sending it.\n",
 		   next_node->index(), next_node->level());
@@ -187,7 +187,7 @@ BCP_tm_start_one_node(BCP_tm_prob& p)
 	 // the node would be sent back from the LP right away. save the
 	 // trouble and don't even send it out
 	 p.next_phase_nodes.push_back(next_node);
-	 next_node->status = BCP_NextPhaseNode;
+	 next_node->status = BCP_NextPhaseNode_OverUB;
 	 if (p.param(BCP_tm_par::TmVerb_PrunedNodeInfo))
 	    printf("\
 TM: Moving NODE %i LEVEL %i into the next phase list \n\

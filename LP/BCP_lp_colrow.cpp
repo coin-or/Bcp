@@ -450,3 +450,5 @@ int BCP_lp_add_from_local_var_pool(BCP_lp_prob& p)
 
    return added_cols;
 }
+
+//#############################################################################

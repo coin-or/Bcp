@@ -376,7 +376,7 @@ BCP_tm_unpack_branching_info(BCP_tm_prob& p, BCP_buffer& buf,
 	 keep = i;
 	 break;
        case BCP_FathomChild:
-	 child->status = BCP_PrunedNode;
+	 child->status = BCP_PrunedNode_Discarded;
 	 break;
       }
       // inherit var/cut pools

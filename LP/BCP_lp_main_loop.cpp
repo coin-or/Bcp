@@ -97,7 +97,7 @@ void BCP_lp_main_loop(BCP_lp_prob& p)
       if (p.over_ub(p.node->true_lower_bound)) {
 	 BCP_lp_perform_fathom(p, "\
 LP:   Terminating and fathoming due to proven high cost.\n",
-			       BCP_Msg_NodeDescription_Discarded);
+			       BCP_Msg_NodeDescription_OverUB_Pruned);
 	 return;
       }
 
@@ -221,7 +221,7 @@ LP:   Terminating and fathoming due to proven high cost.\n",
 	if (p.over_ub(p.node->true_lower_bound)) {
 	   BCP_lp_perform_fathom(p, "\
 LP:   Terminating and fathoming due to proven high cost (good heur soln!).\n",
-				 BCP_Msg_NodeDescription_Discarded);
+				 BCP_Msg_NodeDescription_OverUB_Pruned);
 	   return;
 	}
       }

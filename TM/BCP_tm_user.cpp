@@ -70,6 +70,15 @@ BCP_tm_user::unpack_feasible_solution(BCP_buffer& buf)
   return soln;
 }
 
+//-----------------------------------------------------------------------------
+
+bool
+BCP_tm_user::replace_solution(const BCP_solution* old_sol,
+			      const BCP_solution* new_sol)
+{
+   return false;
+}
+
 //#############################################################################
 
 void
