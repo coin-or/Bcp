@@ -29,7 +29,7 @@ BCP_vec<T>::insert_aux(iterator position, const_reference x){
       *position = x;
       ++finish;
    } else {
-      const size_t len = (2*size() + 0x1000) * sizeof(T);
+      const size_t len = (2*size() + 0x100);
       iterator tmp = allocate(len);
       iterator tmp_finish = std::uninitialized_copy(start, position, tmp);
       BCP_CONSTRUCT(tmp_finish++, x);
@@ -215,7 +215,7 @@ BCP_vec<T>::insert(iterator position, const void* first, const size_t n){
 	 }
       }
    } else {
-      const size_t new_size = (2*size() + n) * sizeof(T);
+      const size_t new_size = (2*size() + n);
       iterator tmp = allocate(new_size);
       iterator tmp_finish = std::uninitialized_copy(start, position, tmp);
       for (int i = n; i > 0; --i) {
@@ -251,7 +251,7 @@ BCP_vec<T>::insert(iterator position,
       }
       finish += n;
    } else {
-      const size_t new_size = (2*size() + n) * sizeof(T);
+      const size_t new_size = (2*size() + n);
       iterator tmp = allocate(new_size);
       iterator tmp_finish = std::uninitialized_copy(start, position, tmp);
       tmp_finish = std::uninitialized_copy(first, last, tmp_finish);
@@ -281,7 +281,7 @@ BCP_vec<T>::insert(iterator position, const size_t n, const_reference x) {
       }
       finish += n;
    } else {
-      const size_t new_size = (2*size() + n) * sizeof(T);
+      const size_t new_size = (2*size() + n);
       iterator tmp = allocate(new_size);
       iterator tmp_finish = std::uninitialized_copy(start, position, tmp);
       std::uninitialized_fill_n(tmp_finish, n, x);

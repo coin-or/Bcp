@@ -25,7 +25,7 @@ BCP_vec<bool>::insert_aux(iterator position, const_reference x){
       *position = x;
       ++finish;
    } else {
-      const size_t len = (2*size() + 0x1000) * sizeof(bool);
+      const size_t len = (2*size() + 0x100);
       iterator tmp = allocate(len);
       const size_t until_pos = position - start;
       memmove(tmp, start, until_pos * sizeof(bool));
@@ -195,7 +195,7 @@ BCP_vec<bool>::insert(bool* position, const void* first, const size_t n)
       memcpy(position, first, n * sizeof(bool));
       finish += n;
    } else {
-      const size_t new_size = (2*size() + n) * sizeof(bool);
+      const size_t new_size = (2*size() + n);
       iterator tmp = allocate(new_size);
       const size_t after_pos = finish - position;
       const size_t until_pos = position - start;
@@ -221,7 +221,7 @@ BCP_vec<bool>::insert(iterator position,
       memcpy(position, first, n * sizeof(bool));
       finish += n;
    } else {
-      const size_t new_size = (2*size() + n) * sizeof(bool);
+      const size_t new_size = (2*size() + n);
       iterator tmp = allocate(new_size);
       const size_t after_pos = finish - position;
       const size_t until_pos = position - start;
@@ -246,7 +246,7 @@ BCP_vec<bool>::insert(iterator position, const size_t n, const_reference x) {
       for (int i = n; i > 0; --i)
 	 *position++ = x;
    } else {
-      const size_t new_size = (2*size() + n) * sizeof(bool);
+      const size_t new_size = (2*size() + n);
       iterator tmp = allocate(new_size);
       const size_t after_pos = finish - position;
       const size_t until_pos = position - start;
