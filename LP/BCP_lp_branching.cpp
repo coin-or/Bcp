@@ -35,12 +35,6 @@ BCP_lp_select_branching_object(BCP_lp_prob& p,
 static inline void
 BCP_lp_make_parent_from_node(BCP_lp_prob& p);
 
-static inline void
-BCP_print_brobj_stat(BCP_lp_prob& p,
-		     const int orig_varnum,
-		     const int candidate_num,
-		     const BCP_presolved_lp_brobj* best_presolved);
-
 //#############################################################################
 
 static inline void
