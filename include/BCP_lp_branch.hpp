@@ -379,7 +379,7 @@ public:
        <code>child_ind</code>-th child. This is done immediately after
        presolving the child. */
    void get_results(OsiSolverInterface& lp, const int child_ind) {
-      _lpres[child_ind]->get_results(lp, true /* want a private copy */);
+      _lpres[child_ind]->get_results(lp);
    }
    /** Examine the termination codes for the children and for those that do
        not have a valid lower bound fake the objective value depending on the

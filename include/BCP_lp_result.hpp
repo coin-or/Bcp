@@ -52,14 +52,6 @@ private:
     double _primal_tolerance;
     /** The zero-tolerance used by the LP solver for the dual solution. */
     double _dual_tolerance;
-    /** True if the primal and dual solution vectors, reduced costs and lhss
-	are <em>owned</em> by this structure. Otherwise these vectors are
-	members of some other structure, e.g., the LP solver. In the second
-	case the data members that are pointers just point into the other
-	structure. This is much faster, and most of the time sufficient. The
-	flag is needed so that when deleting such an object we shouldn't delete
-	these pointers. */
-    bool   _private_arrays;
   /*@}*/
 
   /**@name Data members holding information about the LP solution. */
@@ -89,19 +81,16 @@ public:
     /** The default constructor initializes an empty solution, i.e., one 
         which holds neither an exact nor an approximate solution. */
     BCP_lp_result() :
-      _lower_bound(-DBL_MAX),
-      _primal_tolerance(0), _dual_tolerance(0), _private_arrays(false),
+      _lower_bound(-DBL_MAX), _primal_tolerance(0), _dual_tolerance(0),
       _termcode(BCP_ProvenOptimal), _iternum(0), _objval(0),
       _x(0), _pi(0), _dj(0), _lhs(0)
     {}
     /** The destructor deletes the data members if they are private copies. */
     ~BCP_lp_result() {
-      if (_private_arrays) {
-	delete[] _x;
-	delete[] _pi;
-	delete[] _dj;
-	delete[] _lhs;
-      }
+      delete[] _x;
+      delete[] _pi;
+      delete[] _dj;
+      delete[] _lhs;
     }
   /*@}*/
 
@@ -138,11 +127,9 @@ public:
   /**@name Modifying methods */
   /*@{*/
     /** Get the result from the LP solver. Non-vector members will get their
-	values from the LP solver. Vector members are copied over if
-	<code>copy_out</code> is true, otherwise they will point to the
-	corresponding vectors in the LP solver. <code>_private_arrays</code> is
-	set to the same value as <code>copy_out</code>. */
-    void get_results(OsiSolverInterface& lp_solver, bool copy_out = true);
+	values from the LP solver. Vector members are copied out from the LP
+	solver. */
+    void get_results(OsiSolverInterface& lp_solver);
     /** Set the lower bound and the exact and approximate objective values to
 	the value given in the argument. */ 
     void fake_objective_value(const double val) {

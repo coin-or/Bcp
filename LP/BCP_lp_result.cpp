@@ -20,16 +20,14 @@ static inline BCP_termcode BCP_getTermcode(OsiSolverInterface& lp)
 }
 
 void
-BCP_lp_result::get_results(OsiSolverInterface& lp_solver, bool copy_out)
+BCP_lp_result::get_results(OsiSolverInterface& lp_solver)
 {
   lp_solver.getDblParam(OsiPrimalTolerance, _primal_tolerance);
   lp_solver.getDblParam(OsiDualTolerance, _dual_tolerance);
-  if (_private_arrays) {
-    delete[] _x;
-    delete[] _pi;
-    delete[] _dj;
-    delete[] _lhs;
-  }
+  delete[] _x;
+  delete[] _pi;
+  delete[] _dj;
+  delete[] _lhs;
   _x = 0;
   _pi = 0;
   _dj = 0;
@@ -40,29 +38,16 @@ BCP_lp_result::get_results(OsiSolverInterface& lp_solver, bool copy_out)
     _iternum = lp_solver.getIterationCount();
     _objval = lp_solver.getObjValue();
     
-    if (copy_out) {
-      _private_arrays = true;
+    const int colnum = lp_solver.getNumCols();
+    _x   = new double[colnum];
+    CoinDisjointCopyN(lp_solver.getColSolution(), colnum, _x);
+    _dj  = new double[colnum];
+    CoinDisjointCopyN(lp_solver.getReducedCost(), colnum, _dj);
 
-      const int colnum = lp_solver.getNumCols();
-      _x   = new double[colnum];
-      CoinDisjointCopyN(lp_solver.getColSolution(), colnum, _x);
-      _dj  = new double[colnum];
-      CoinDisjointCopyN(lp_solver.getReducedCost(), colnum, _dj);
-
-      const int rownum = lp_solver.getNumRows();
-      _pi  = new double[rownum];
-      CoinDisjointCopyN(lp_solver.getRowPrice(), rownum, _pi);
-      _lhs = new double[rownum];
-      CoinDisjointCopyN(lp_solver.getRowActivity(), rownum, _lhs);
-
-    } else {
-      _private_arrays = false;
-      _x   = const_cast<double*>(lp_solver.getColSolution());
-      _dj  = const_cast<double*>(lp_solver.getReducedCost());
-      _pi  = const_cast<double*>(lp_solver.getRowPrice());
-      _lhs = const_cast<double*>(lp_solver.getRowActivity());
-    }
-  } else {
-    _private_arrays = false;
+    const int rownum = lp_solver.getNumRows();
+    _pi  = new double[rownum];
+    CoinDisjointCopyN(lp_solver.getRowPrice(), rownum, _pi);
+    _lhs = new double[rownum];
+    CoinDisjointCopyN(lp_solver.getRowActivity(), rownum, _lhs);
   }
 }

@@ -269,9 +269,6 @@ BCP_lp_select_branching_object(BCP_lp_prob& p,
 
    const int orig_colnum = vars.size();
 
-   // Get a private copy of the results
-   p.lp_result->get_results(*lp, true);
-
    const std::pair<int,int> added_object_num =
       BCP_add_branching_objects(p, candidates);
 
@@ -426,8 +423,7 @@ BCP_lp_select_branching_object(BCP_lp_prob& p,
    // Now just resolve the LP to get what'll be sent to the TM.
    p.user->modify_lp_parameters(p.lp_solver, false);
    lp->resolve();
-   p.lp_result->get_results(*lp, false /* a pointer to the lp solver's
-					  copy is fine */ );
+   p.lp_result->get_results(*lp);
 
    p.node->lower_bound = p.lp_result->objval();
 

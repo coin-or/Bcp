@@ -54,8 +54,7 @@ void BCP_lp_main_loop(BCP_lp_prob& p)
 	      p.node->level, p.node->index, p.node->iteration_count);
       p.lp_solver->writeMps(fname, "mps");
 #endif
-      lpres.get_results(*p.lp_solver, false /* a pointer to the lp solver's
-					       copy is fine */ );
+      lpres.get_results(*p.lp_solver);
       const BCP_termcode tc = lpres.termcode();
       p.stat.time_lp_solving += BCP_time_since_epoch() - time0;
 
@@ -234,10 +233,7 @@ void BCP_lp_main_loop(BCP_lp_prob& p)
       switch (BCP_lp_branch(p)){
        case BCP_BranchingFathomedThisNode:
 	 // Note that BCP_lp_branch() has already sent the node description to
-	 // the TM.
-	 if (p.param(BCP_lp_par::LpVerb_FathomInfo))
-	    printf("LP:   Forcibly Pruning node\n");
-	 // clean up
+	 // the TM, info is printed, so just clean up
 	 BCP_lp_clean_up_node(p);
 	 return;
 
