@@ -25,7 +25,7 @@ ifeq ($(BCP_OPT),-O)
     ifeq ($(notdir $(CXX)),g++)
 	BCPOPTFLAG = -O6
     else
-	BCPOPTFLAG = -O3
+	BCPOPTFLAG = -O2 # -qtune=auto -qarch=auto # these are for xlC on AIX
     endif
 else
     BCPOPTFLAG = -g
@@ -35,7 +35,7 @@ ifeq ($(USER_OPT),-O)
     ifeq ($(notdir $(CXX)),g++)
 	USEROPTFLAG = -O6
     else
-	USEROPTFLAG = -O3
+	USEROPTFLAG = -O2 # -qtune=auto -qarch=auto # these are for xlC on AIX
     endif
 else
     USEROPTFLAG = -g
