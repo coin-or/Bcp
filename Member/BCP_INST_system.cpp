@@ -3,7 +3,7 @@
 
 #include "BCP_os.hpp"
 
-#ifdef NEED_TEMPLATE_FUNCTIONS
+#ifdef NEED_STD_TEMPLATE_FUNCTIONS
 #include <algorithm>
 #include <numeric>
 #include <functional>

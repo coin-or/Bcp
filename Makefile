@@ -229,7 +229,7 @@ $(BCPTARGETDIR)/%.o : %.cpp ${BCPDEPDIR}/%.d
 	@echo ""
 	@echo Compiling $*.cpp
 	@mkdir -p $(BCPTARGETDIR)
-	$(CXX) $(CXXFLAGS) $(BCPOPTFLAG) -c $< -o $@
+	@$(CXX) $(CXXFLAGS) $(BCPOPTFLAG) -c $< -o $@
 
 ${BCPDEPDIR}/%.d : %.cpp
 	@echo ""
@@ -244,7 +244,7 @@ $(USERTARGETDIR)/%.o : %.cpp ${USERDEPDIR}/%.d
 	@echo ""
 	@echo Compiling $*.cpp
 	@mkdir -p $(USERTARGETDIR)
-	$(CXX) $(CXXFLAGS) $(USEROPTFLAG) -c $< -o $@
+	@$(CXX) $(CXXFLAGS) $(USEROPTFLAG) -c $< -o $@
 
 ${USERDEPDIR}/%.d : %.cpp
 	@echo ""
