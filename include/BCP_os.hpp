@@ -10,6 +10,10 @@
 #  include "BCP_linux.hpp"
 #endif
 
+#if defined(__CYGWIN__) && defined(__GNUC__) 
+#  include "BCP_cygwin.hpp"
+#endif
+
 #if defined(_AIX43)
 #  include "BCP_aix43.hpp"
 #endif

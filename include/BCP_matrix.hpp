@@ -6,7 +6,7 @@
 // This file is fully docified.
 
 #include <cmath>
-#include <values.h>
+#include <cfloat>
 
 #include "CoinPackedVector.hpp"
 #include "CoinPackedMatrix.hpp"

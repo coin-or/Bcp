@@ -3,10 +3,12 @@
 #include "BCP_os.hpp"
 #include "BCP_timeout.hpp"
 
-#define BCP_USE_RUSAGE
+#ifndef BCP_USE_RUSAGE 
+#  define BCP_USE_RUSAGE 1
+#endif
 
 double BCP_time_since_epoch() {
-#ifdef BCP_USE_RUSAGE
+#if BCP_USE_RUSAGE == 1
    struct rusage ru;
    getrusage(RUSAGE_SELF, &ru);
    const struct timeval& tv = ru.ru_utime;
