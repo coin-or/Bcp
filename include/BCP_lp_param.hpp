@@ -65,6 +65,8 @@ struct BCP_lp_par{
 	 These are all true/false parameters; if the parameter value is set
 	 then the corresponding information is printed. */
       /*@{*/
+        /** Just a marker for the first LpVerb */
+        LpVerb_First,
         /** Print the number of cuts added from the local cut pool in the
 	    current iteration. (BCP_lp_main_loop)*/
         LpVerb_AddedCutCount,
@@ -149,6 +151,8 @@ struct BCP_lp_par{
         /** Print the number of variables generated during this iteration.
 	    (BCP_lp_main_loop) */
         LpVerb_GeneratedVarCount,
+        /** Just a marker for the last LpVerb */
+        LpVerb_Last,
       /*@}*/ 
       //
       end_of_chr_params

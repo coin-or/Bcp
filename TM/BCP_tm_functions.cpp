@@ -306,6 +306,27 @@ TM: PriceInRootBeforePhase2\n\
 TM: The final solution may not be optimal.\n\n");
       }
    }
+
+   if (p.par.entry(BCP_tm_par::VerbosityShutUp)) {
+      int i;
+      for (i = BCP_tm_par::TmVerb_First+1; i < BCP_tm_par::TmVerb_Last; ++i) {
+	 p.par.set_entry(static_cast<BCP_tm_par::chr_params>(i), false);
+      }
+      for (i = BCP_lp_par::LpVerb_First+1; i < BCP_lp_par::LpVerb_Last; ++i) {
+	 p.slave_pars.lp.set_entry(static_cast<BCP_lp_par::chr_params>(i),
+				   false);
+      }
+      for (i = BCP_cg_par::CgVerb_First+1; i < BCP_cg_par::CgVerb_Last; ++i) {
+	 p.slave_pars.cg.set_entry(static_cast<BCP_cg_par::chr_params>(i),
+				   false);
+      }
+      /*
+      for (i = BCP_vg_par::VgVerb_First+1; i < BCP_vg_par::VgVerb_Last; ++i) {
+	 p.slave_pars.vg.set_entry(static_cast<BCP_vg_par::chr_params>(i),
+	                           false);
+      }
+      */
+   }
 }
 
 //#############################################################################

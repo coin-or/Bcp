@@ -54,8 +54,16 @@ struct BCP_tm_par{
     /** Indicates whether to trim the search tree before a new phase.
 	Values: 1 (true), 0 (false). Default: 0. */
     TrimTreeBeforeNewPhase,
+    /** A flag that instructs BCP to be (almost) absolutely silent. It zeros
+	out all the XxVerb flags <em>even if the verbosity flag is set to 1
+	later in the parameter file</em>. The only exception is
+	<code>TmVerb_SingleLineInfoFrequency</code> whose status is not
+	changed. Default: 0. */
+    VerbosityShutUp,
     /** Verbosity flags for the tree manager */
     /*@{*/
+      /** Just a marker for the first TmVerb */
+      TmVerb_First,
       /** Print the value of *any* integer feasible solution found.
 	  (BCP_tm_prob::process_message) */
       TmVerb_AllFeasibleSolutionValue,
@@ -98,6 +106,8 @@ struct BCP_tm_par{
       /** Print out a message when the default version of an overridable
 	  method is executed. Default: 1. */
       TmVerb_ReportDefault,
+      /** Just a marker for the last TmVerb */
+      TmVerb_Last,
     /*@}*/
     //
     end_of_chr_params
@@ -105,6 +115,9 @@ struct BCP_tm_par{
    
   /** Integer parameters. */
   enum int_params{
+    /** At every this many search tree node provide a single line info on the
+	progress of the search tree. If <= 0 then never. Default: 0. */
+    TmVerb_SingleLineInfoFrequency,
     /** Which search tree enumeration strategy should be used.
 	Values: 0 (BCP_BestFirstSearch), 1 (BCP_BreadthFirstSearch),
 	2 (BCP_DepthFirstSearch). Default: 0 */

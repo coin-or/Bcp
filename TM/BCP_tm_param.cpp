@@ -54,6 +54,9 @@ void BCP_parameter_set<BCP_tm_par>::create_keyword_list() {
 					  MessagePassingIsSerial)));
 
    //--------------------------------------------------------------------------
+   keys.push_back(make_pair(BCP_string("BCP_VerbosityShutUp"),
+			    BCP_parameter(BCP_CharPar,
+					  VerbosityShutUp)));
    keys.push_back(make_pair(BCP_string("BCP_TmVerb_AllFeasibleSolutionValue"),
 			    BCP_parameter(BCP_CharPar,
 					  TmVerb_AllFeasibleSolutionValue)));
@@ -103,6 +106,9 @@ void BCP_parameter_set<BCP_tm_par>::create_keyword_list() {
 
    //--------------------------------------------------------------------------
    // IntPar
+   keys.push_back(make_pair(BCP_string("BCP_TmVerb_SingleLineInfoFrequency"),
+			    BCP_parameter(BCP_IntPar,
+					  TmVerb_SingleLineInfoFrequency)));
    keys.push_back(make_pair(BCP_string("BCP_TreeSearchStrategy"),
 			    BCP_parameter(BCP_IntPar,
 					  TreeSearchStrategy)));
@@ -221,6 +227,7 @@ void BCP_parameter_set<BCP_tm_par>::set_default_entries(){
    set_entry(ReportWhenDefaultIsExecuted, true);
    set_entry(TrimTreeBeforeNewPhase, false);
    //--------------------------------------------------------------------------
+   set_entry(VerbosityShutUp, false);
    set_entry(TmVerb_AllFeasibleSolutionValue, true);
    set_entry(TmVerb_AllFeasibleSolution, false);
    set_entry(TmVerb_BetterFeasibleSolutionValue, true);
@@ -237,6 +244,7 @@ void BCP_parameter_set<BCP_tm_par>::set_default_entries(){
    set_entry(TmVerb_ReportDefault, true);
    //--------------------------------------------------------------------------
    // IntPar
+   set_entry(TmVerb_SingleLineInfoFrequency, 0);
    set_entry(TreeSearchStrategy, BCP_BestFirstSearch);
    set_entry(NiceLevel, 0);
    set_entry(LpProcessNum, 1);

@@ -20,6 +20,10 @@ struct BCP_cg_par{
       /** Print out a message when the default version of an overridable
 	  method is executed. Default: 1. */
       ReportWhenDefaultIsExecuted,
+      /** Just a marker for the first CgVerb */
+      CgVerb_First,
+      /** Just a marker for the last CgVerb */
+      CgVerb_Last,
       //
       end_of_chr_params
    };
