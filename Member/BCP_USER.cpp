@@ -11,7 +11,7 @@ bool BCP_fatal_error::abort_on_error = true;
 
 #include "BCP_message_pvm.hpp"
 BCP_message_environment *
-USER_initialize::msgenv_init() {
+USER_initialize::msgenv_init(int argc, char* argv[]) {
   return new BCP_pvm_environment;
 }
 
@@ -19,8 +19,17 @@ USER_initialize::msgenv_init() {
 
 #include "BCP_message_single.hpp"
 BCP_message_environment * 
-USER_initialize::msgenv_init() {
+USER_initialize::msgenv_init(int argc, char* argv[]) {
   return new BCP_single_environment;
 }
+
+#elif defined(BCP_COMM_PROTOCOL_MPI)
+
+#include "BCP_message_mpi.hpp"
+BCP_message_environment *
+USER_initialize::msgenv_init(int argc, char* argv[]) {
+  return new BCP_mpi_environment(argc, argv);
+}
+
 
 #endif

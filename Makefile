@@ -66,6 +66,17 @@ ifeq ($(COMM_PROTOCOL),PVM)
 	LIBDIRS += ${PVM_ROOT}/lib/${PVM_ARCH} 
 	LIBS    += libpvm3.so
 endif
+ifeq ($(COMM_PROTOCOL),MPI)
+	MPI_COMP_ := $(shell mpiCC -compile_info)
+	MPI_COMP := $(wordlist 2,$(words $(MPI_COMP_)),$(MPI_COMP_))
+	MPI_LINK_ := $(shell mpiCC -link_info)
+	MPI_LINK := $(wordlist 2,$(words $(MPI_LINK_)),$(MPI_LINK_))
+	CXXFLAGS += $(filter -D%,$(MPI_COMP))
+	CXXFLAGS += $(filter-out -c -D% -I%,$(MPI_COMP))
+	INCDIRS  += $(subst -I,,$(filter -I%,$(MPI_COMP)))
+	LIBDIRS  += $(subst -L,,$(filter -L%,$(MPI_LINK)))
+	LIBS     += $(patsubst -l%,lib%.so,$(filter -l%,$(MPI_LINK)))
+endif
 
 CXXFLAGS += -DBCP_COMM_PROTOCOL_$(COMM_PROTOCOL)
 
@@ -197,6 +208,9 @@ BCP_SRC +=
 
 ifeq ($(COMM_PROTOCOL),PVM)
 	BCP_SRC +=	BCP_message_pvm.cpp
+endif
+ifeq ($(COMM_PROTOCOL),MPI)
+	BCP_SRC +=	BCP_message_mpi.cpp
 endif
 # BCP_message_single must be compiled into the code, no matter what
 BCP_SRC +=	BCP_message_single.cpp

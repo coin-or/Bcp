@@ -310,6 +310,15 @@ public:
    /** Pack the process id into the buffer. */
    virtual void pack_proc_id(BCP_buffer& buf, const BCP_proc_id* pid) = 0;
    /*@}*/
+
+   /**@name Additional function for MPI interface */
+   /*@{*/
+   /**Return the number of processes. For non-MPI this just returns 0.*/
+   virtual int num_procs() { return 0; }
+   /*@}*/
+
+
+
 };
 
 #endif

@@ -32,7 +32,7 @@ int main(int argc, char* argv[])
 {
    USER_initialize* user_init = BCP_user_init();
 
-   BCP_message_environment* msg_env = user_init->msgenv_init();
+   BCP_message_environment* msg_env = user_init->msgenv_init(argc, argv);
    {
      BCP_single_environment* single_env =
        dynamic_cast<BCP_single_environment*>(msg_env);
@@ -52,14 +52,22 @@ int main(int argc, char* argv[])
    }
    BCP_proc_id* parent = msg_env->parent_process();
 
-   // The master process takes one command-line argument which is the name of
-   // the parameter file. The slaves do not take any arguments.
    if (! parent) {
-     BCP_tm_main(msg_env, user_init, my_id, argc, argv);
+      //We compute the real numeber of arguments because Mpi can change
+     //list of arguments
+     int cnt;
+     for (cnt = 0; cnt < argc; ++cnt) {
+     	if (argv[cnt] == NULL)
+	   break;
+     }
+     BCP_tm_main(msg_env, user_init, my_id, cnt, argv);
    } else {
+   // In MPI all processes get the argument list, so we must not check this
+#ifndef BCP_COMM_PROTOCOL_MPI
      if (argc != 1) {
        throw BCP_fatal_error("The slaves do not take any argument!\n");
      }
+#endif
      BCP_buffer msg_buf;
      msg_env->receive(parent, BCP_Msg_AnyMessage, msg_buf, -1);
      if (msg_buf.msgtag() != BCP_Msg_ProcessType) {
@@ -114,6 +122,22 @@ BCP_tm_main(BCP_message_environment* msg_env,
    
    BCP_buffer msg_buf;
    p.msg_env = msg_env;
+
+   //We check if the number of BCP processes is the same as in MPI
+#ifdef BCP_COMM_PROTOCOL_MPI
+   const int n_proc =
+      p.param(BCP_tm_par::LpProcessNum) +
+      p.param(BCP_tm_par::CgProcessNum) +
+      p.param(BCP_tm_par::VgProcessNum) +
+      p.param(BCP_tm_par::CpProcessNum) +
+      p.param(BCP_tm_par::VpProcessNum) + 1;
+   if (p.msg_env->num_procs() != n_proc) {
+     throw BCP_fatal_error("\
+Number of process in parameter file %d != n_proc in mpirun -np %d!\n",
+			   n_proc, p.msg_env->num_procs());
+   }
+#endif
+
    p.start_time = CoinCpuTime();
 
    FILE* logfile = 0;
