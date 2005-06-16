@@ -33,15 +33,15 @@ BCP_vg_user::get_param(const BCP_vg_par::str_params key) const
 { return p->par.entry(key); }
 
 void BCP_vg_user::set_param(const BCP_vg_par::chr_params key, const bool val)
-{ return p->par.set_entry(key, val); }
+{ p->par.set_entry(key, val); }
 void BCP_vg_user::set_param(const BCP_vg_par::chr_params key, const char val)
-{ return p->par.set_entry(key, val); }
+{ p->par.set_entry(key, val); }
 void BCP_vg_user::set_param(const BCP_vg_par::int_params key, const int val)
-{ return p->par.set_entry(key, val); }
+{ p->par.set_entry(key, val); }
 void BCP_vg_user::set_param(const BCP_vg_par::dbl_params key, const double val)
-{ return p->par.set_entry(key, val); }
+{ p->par.set_entry(key, val); }
 void BCP_vg_user::set_param(const BCP_vg_par::str_params key, const char * val)
-{ return p->par.set_entry(key, val); }
+{ p->par.set_entry(key, val); }
 
 //#############################################################################
 

@@ -31,15 +31,15 @@ BCP_tm_user::get_param(const BCP_tm_par::str_params key) const
 { return p->par.entry(key); }
 
 void BCP_tm_user::set_param(const BCP_tm_par::chr_params key, const bool val)
-{ return p->par.set_entry(key, val); }
+{ p->par.set_entry(key, val); }
 void BCP_tm_user::set_param(const BCP_tm_par::chr_params key, const char val)
-{ return p->par.set_entry(key, val); }
+{ p->par.set_entry(key, val); }
 void BCP_tm_user::set_param(const BCP_tm_par::int_params key, const int val)
-{ return p->par.set_entry(key, val); }
+{ p->par.set_entry(key, val); }
 void BCP_tm_user::set_param(const BCP_tm_par::dbl_params key, const double val)
-{ return p->par.set_entry(key, val); }
+{ p->par.set_entry(key, val); }
 void BCP_tm_user::set_param(const BCP_tm_par::str_params key, const char * val)
-{ return p->par.set_entry(key, val); }
+{ p->par.set_entry(key, val); }
 
 //#############################################################################
 
