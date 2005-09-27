@@ -64,9 +64,11 @@ BCP_tm_user::unpack_feasible_solution(BCP_buffer& buf)
   int bcpind;
   while (--varnum >= 0) {
     buf.unpack(val);
+	// these vars are stored only in the solution, so noone cares if we flip
+	// negative bcpind's
     buf.unpack(bcpind);
     BCP_var* var = p->unpack_var_without_bcpind(buf);
-    var->set_bcpind(bcpind);
+    var->set_bcpind(bcpind < 0 ? -bcpind : bcpind);
     soln->add_entry(var, val);
   }
 
