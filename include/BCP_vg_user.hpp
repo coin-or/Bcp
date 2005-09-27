@@ -111,6 +111,14 @@ public:
    void send_var(const BCP_var& var);
 
   //===========================================================================
+  /**@name Constructor, Destructor */
+  /*@{*/
+    BCP_vg_user() : p(0) {}
+    /** Being virtual, the destructor invokes the destructor for the real type
+	of the object being deleted. */
+    virtual ~BCP_vg_user() {}
+  /*@}*/
+  //===========================================================================
   // Here are the user defined functions. For each of them a default is given
   // which can be overridden when the concrete user class is defined.
   //===========================================================================
