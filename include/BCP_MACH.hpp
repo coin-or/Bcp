@@ -6,6 +6,9 @@
 // This file is fully docified.
 // There's nothing to docify...
 
+#include <sys/types.h>
+#include <sys/time.h>
+
 typedef int BCP_IndexType;
 
 #if defined(__GNUC__)
