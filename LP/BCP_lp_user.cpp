@@ -803,6 +803,8 @@ BCP_lp_user::reduced_cost_fixing(const double* dj, const double* x,
 
   double petol = 0.0;
   p->lp_solver->getDblParam(OsiPrimalTolerance, petol);
+  double detol = 0.0;
+  p->lp_solver->getDblParam(OsiDualTolerance, detol);
 
   // If the gap is negative that means that we are above the limit, so
   // don't do anything.
@@ -824,7 +826,7 @@ BCP_lp_user::reduced_cost_fixing(const double* dj, const double* x,
   for (int i = 0; i < varnum; ++i) {
     BCP_var* var = vars[i];
     if (! var->is_fixed() && var->var_type() != BCP_ContinuousVar){
-      if (dj[i] > 0) {
+      if (dj[i] > detol) {
 	const double lb = var->lb();
 	const double new_ub = lb + floor(gap / dj[i]);
 	if (new_ub < var->ub() && (atAny || CoinAbs(x[i])<petol) ) {
@@ -833,7 +835,7 @@ BCP_lp_user::reduced_cost_fixing(const double* dj, const double* x,
 	  changed_bounds.unchecked_push_back(lb);
 	  changed_bounds.unchecked_push_back(new_ub);
 	}
-      } else if (dj[i] < 0) {
+      } else if (dj[i] < -detol) {
 	const double ub = var->ub();
 	const double new_lb = ub - floor(gap / (-dj[i]));
 	if (new_lb > var->lb() && (atAny || CoinAbs(x[i])<petol) ) {
