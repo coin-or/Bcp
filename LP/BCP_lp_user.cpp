@@ -1000,14 +1000,16 @@ BCP_lp_user::branch_close_to_half(const BCP_lp_result& lpres,
     for (pos = 0; pos < to_be_selected; ++pos) {
       const double val = select_cost[pos];
       // insert the next into the list
-      di = std::upper_bound(new_cost.begin(), new_cost.end(), val);
+      di = std::upper_bound(new_cost.begin(), new_cost.end(), val,
+							std::greater<double>());
       new_pos.insert(new_pos.entry(new_cost.index(di)), select_pos[pos]);
       new_cost.insert(di, val);
     }
     for ( ; pos < k; ++pos) {
       const double val = select_cost[pos];
       // insert the next into the list
-      di = std::upper_bound(new_cost.begin(), new_cost.end(), val);
+      di = std::upper_bound(new_cost.begin(), new_cost.end(), val,
+							std::greater<double>());
       if (di != new_cost.end()) {
 	new_cost.pop_back();
 	new_pos.pop_back();
