@@ -8,6 +8,7 @@
 #include <vector>
 
 #include "OsiSolverInterface.hpp"
+#include "OsiAuxInfo.hpp"
 
 #include "BCP_os.hpp"
 #include "BCP_USER.hpp"
@@ -71,8 +72,14 @@ class BCP_lp_prob;
 
 class BCP_lp_user {
 private:
-  bool using_deprecated_set_user_data_for_children;
-  BCP_lp_prob * p;
+	BCP_lp_user(const BCP_lp_user&);
+	BCP_lp_user& operator=(const BCP_lp_user&);
+
+private:
+	bool using_deprecated_set_user_data_for_children;
+	BCP_lp_prob * p;
+	OsiBabSolver* babSolver_;
+
 public:
   /**@name Methods to set and get the pointer to the BCP_lp_prob
      object. It is unlikely that the users would want to muck around with
@@ -85,6 +92,9 @@ public:
     /// Get the pointer
     BCP_lp_prob * getLpProblemPointer() { return p; }
   /*@}*/
+
+    void setOsiBabSolver(OsiBabSolver* ptr) { babSolver_ = ptr; }
+    OsiBabSolver* getOsiBabSolver() { return babSolver_; }
 
   /**@name Informational methods for the user. */
   /*@{*/
@@ -132,7 +142,7 @@ public:
   //===========================================================================
   /**@name Constructor, Destructor */
   /*@{*/
-    BCP_lp_user() : p(0) {}
+    BCP_lp_user() : p(0), babSolver_(0) {}
     /** Being virtual, the destructor invokes the destructor for the real type
 	of the object being deleted. */
     virtual ~BCP_lp_user() {}

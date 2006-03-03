@@ -13,7 +13,7 @@ class BCP_buffer;
 
 class BCP_user_data {
 public:
-   virtual ~BCP_user_data() {}
+	virtual ~BCP_user_data() {}
 };
 
 //#############################################################################

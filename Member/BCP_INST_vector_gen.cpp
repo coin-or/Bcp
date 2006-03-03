@@ -28,6 +28,12 @@ template class BCP_vec<BCP_child_action>;
 #include "BCP_obj_change.hpp"
 template class BCP_vec<BCP_obj_change>;
 
+#include "BCP_cut.hpp"
+template class BCP_vec< BCP_vec<BCP_cut*> >;
+
+#include "BCP_matrix.hpp"
+template class BCP_vec< BCP_vec<BCP_row*> >;
+
 //#############################################################################
 
 #endif
