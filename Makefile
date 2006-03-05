@@ -67,15 +67,25 @@ ifeq ($(COMM_PROTOCOL),PVM)
 	LIBS    += libpvm3.so
 endif
 ifeq ($(COMM_PROTOCOL),MPI)
-	MPI_COMP_ := $(shell mpiCC -compile_info)
-	MPI_COMP := $(wordlist 2,$(words $(MPI_COMP_)),$(MPI_COMP_))
-	MPI_LINK_ := $(shell mpiCC -link_info)
-	MPI_LINK := $(wordlist 2,$(words $(MPI_LINK_)),$(MPI_LINK_))
-	CXXFLAGS += $(filter -D%,$(MPI_COMP))
-	CXXFLAGS += $(filter-out -c -D% -I%,$(MPI_COMP))
-	INCDIRS  += $(subst -I,,$(filter -I%,$(MPI_COMP)))
-	LIBDIRS  += $(subst -L,,$(filter -L%,$(MPI_LINK)))
-	LIBS     += $(patsubst -l%,lib%.so,$(filter -l%,$(MPI_LINK)))
+	ifeq ($(BLUE_GENE),true)
+		BGL := /bgl/BlueLight/ppcfloor/bglsys
+		INCDIRS += $(BGL)/include
+		LIBDIRS += $(BGL)/lib
+		LIBS += libmpich.rts.a
+		LIBS += libmsglayer.rts.a
+		LIBS += libdevices.rts.a
+		LIBS += librts.rts.a
+	else
+		MPI_COMP_ := $(shell mpiCC -compile_info)
+		MPI_COMP  := $(wordlist 2,$(words $(MPI_COMP_)),$(MPI_COMP_))
+		MPI_LINK_ := $(shell mpiCC -link_info)
+		MPI_LINK  := $(wordlist 2,$(words $(MPI_LINK_)),$(MPI_LINK_))
+		CXXFLAGS += $(filter -D%,$(MPI_COMP))
+		CXXFLAGS += $(filter-out -c -D% -I%,$(MPI_COMP))
+		INCDIRS  += $(subst -I,,$(filter -I%,$(MPI_COMP)))
+		LIBDIRS  += $(subst -L,,$(filter -L%,$(MPI_LINK)))
+		LIBS     += $(patsubst -l%,lib%.so,$(filter -l%,$(MPI_LINK)))
+	endif
 endif
 
 CXXFLAGS += -DBCP_COMM_PROTOCOL_$(COMM_PROTOCOL)
@@ -326,7 +336,7 @@ $(USERTARGETDIR)/bcpp $(USERTARGETDIR)/bcps : $(ALLOBJFILES)
 	@echo "Linking $(notdir $@) ..."
 	@echo ""
 	@mkdir -p $(USERTARGETDIR)
-	@$(CXX) $(CXXFLAGS) -o $@ $(ALLOBJFILES) $(LDFLAGS) $(SYSLD) -lm
+	$(CXX) $(CXXFLAGS) -o $@ $(ALLOBJFILES) $(LDFLAGS) $(SYSLD) -lm
 
 $(USERTARGETDIR)/sbcpp $(USERTARGETDIR)/sbcps : $(ALLOBJFILES)
 	@rm -rf Junk

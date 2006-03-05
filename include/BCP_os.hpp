@@ -10,6 +10,10 @@
 #  include "BCP_linux.hpp"
 #endif
 
+#if defined(BLUE_GENE_XLC)
+#  include "BCP_bluegene_xlc.hpp"
+#endif
+
 #if defined(__CYGWIN__) && defined(__GNUC__) 
 #  include "BCP_cygwin.hpp"
 #endif

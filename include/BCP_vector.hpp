@@ -73,7 +73,7 @@ public:
    BCP_vec() : start(0), finish(0), end_of_storage(0) {}
    /** The copy constructor copies over the content of <code>x</code>. */
    BCP_vec(const BCP_vec<T>& x) : start(0), finish(0), end_of_storage(0) {
-      operator=(x);
+      *this = x;
    }
    /** Construct a <code>BCP_vec</code> with <code>n</code> elements, all
        initialized with the second argument (or initialized with the default
