@@ -206,6 +206,9 @@ public: // Data members
   BCP_node_queue candidates;
   /** a vector of nodes to be processed in the next phase */
   BCP_vec<BCP_tm_node*> next_phase_nodes;
+  /** */
+  BCP_vec<BCP_tm_node*> nodes_to_free;
+
   //-------------------------------------------------------------------------
   /**@name Vectors indicating the number of leaf nodes assigned to each CP/VP
    */ 

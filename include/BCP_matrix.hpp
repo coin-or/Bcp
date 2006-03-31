@@ -260,7 +260,7 @@ public:
 //#############################################################################
 //#############################################################################
 
-/** An object of type <code>CBP_lp_relax</code> holds the description of an lp
+/** An object of type <code>BCP_lp_relax</code> holds the description of an lp
     relaxation. The matrix, lower/upper bounds on the variables and cuts and
     objective coefficients for the variables. */
 class BCP_lp_relax : public CoinPackedMatrix {

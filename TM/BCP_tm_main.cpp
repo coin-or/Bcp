@@ -50,6 +50,7 @@ int main(int argc, char* argv[])
       delete msg_env;
       throw BCP_fatal_error("Exiting.\n");
    }
+
    BCP_proc_id* parent = msg_env->parent_process();
 
    if (! parent) {
@@ -116,6 +117,16 @@ BCP_tm_main(BCP_message_environment* msg_env,
 {
    // Start to create the universe... (we don't have a user universe yet).
    BCP_tm_prob p;
+
+   // If we ever get here then the environment is parallel
+   p.par.set_entry(BCP_tm_par::MessagePassingIsSerial,false);
+   p.slave_pars.lp.set_entry(BCP_lp_par::MessagePassingIsSerial,false);
+   p.slave_pars.cg.set_entry(BCP_cg_par::MessagePassingIsSerial,false);
+   p.slave_pars.vg.set_entry(BCP_vg_par::MessagePassingIsSerial,false);
+   /*
+   p.slave_pars.cp.set_entry(BCP_cp_par::MessagePassingIsSerial,false);
+   p.slave_pars.vp.set_entry(BCP_vp_par::MessagePassingIsSerial,false);
+   */
 
    // this also reads in the parameters from a file
    BCP_tm_parse_command_line(p, argnum, arglist);

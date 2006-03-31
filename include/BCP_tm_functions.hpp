@@ -40,7 +40,11 @@ bool BCP_tm_do_one_phase(BCP_tm_prob& p);
 BCP_problem_core* BCP_tm_create_core(BCP_tm_prob& p);
 BCP_tm_node* BCP_tm_create_root(BCP_tm_prob& p);
 void BCP_tm_tasks_before_new_phase(BCP_tm_prob& p);
+
+//-----------------------------------------------------------------------------
+// BCP_tm_trimming.cpp
 void BCP_tm_trim_tree_wrapper(BCP_tm_prob& p, const bool between_phases);
+void BCP_tm_remove_explored(BCP_tm_prob& p, BCP_tm_node* node);
 
 //-----------------------------------------------------------------------------
 // BCP_tm_msgproc.cpp
@@ -48,6 +52,7 @@ void BCP_tm_idle_processes(BCP_tm_prob& p);
 void BCP_tm_stop_processes(BCP_tm_prob& p);
 void BCP_tm_start_processes(BCP_tm_prob& p);
 bool BCP_tm_test_machine(BCP_tm_prob& p);
+void BCP_tm_modify_pool_counters(BCP_tm_prob& p, BCP_tm_node* node);
 void BCP_tm_remove_lp(BCP_tm_prob& p, const int index);
 void BCP_tm_remove_cg(BCP_tm_prob& p, const int index);
 void BCP_tm_remove_vg(BCP_tm_prob& p, const int index);

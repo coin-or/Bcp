@@ -10,9 +10,6 @@ void BCP_parameter_set<BCP_vg_par>::create_keyword_list() {
    // Create the list of keywords for parameter file reading
    //--------------------------------------------------------------------------
    // CharPar
-   keys.push_back(make_pair(BCP_string("BCP_MessagePassingIsSerial"),
-			    BCP_parameter(BCP_CharPar,
-					  MessagePassingIsSerial)));
    keys.push_back(make_pair(BCP_string("BCP_ReportWhenDefaultIsExecuted"),
 			    BCP_parameter(BCP_CharPar,
 					  ReportWhenDefaultIsExecuted)));
@@ -54,22 +51,12 @@ void BCP_parameter_set<BCP_vg_par>::create_keyword_list() {
 
 //#############################################################################
 
-#ifdef TRUE
-#undef TRUE
-#endif
-#define TRUE static_cast<const char>(true)
-
-#ifdef FALSE
-#undef FALSE
-#endif
-#define FALSE static_cast<const char>(false)
-
 template <>
 void BCP_parameter_set<BCP_vg_par>::set_default_entries(){
    //--------------------------------------------------------------------------
    // CharPar
-   set_entry(ReportWhenDefaultIsExecuted, TRUE);
-   set_entry(MessagePassingIsSerial, TRUE);
+   set_entry(ReportWhenDefaultIsExecuted, true);
+   set_entry(MessagePassingIsSerial, false);
    //--------------------------------------------------------------------------
    // IntPar
    set_entry(NiceLevel, 0);

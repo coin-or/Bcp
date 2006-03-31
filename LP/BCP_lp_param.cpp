@@ -37,9 +37,6 @@ void BCP_parameter_set<BCP_lp_par>::create_keyword_list() {
    keys.push_back(make_pair(BCP_string("BCP_MaintainIndexedVarPricingList"),
 			    BCP_parameter(BCP_CharPar, 
 					  MaintainIndexedVarPricingList)));
-   keys.push_back(make_pair(BCP_string("BCP_MessagePassingIsSerial"),
-			    BCP_parameter(BCP_CharPar, 
-					  MessagePassingIsSerial)));
    keys.push_back(make_pair(BCP_string("BCP_ReportWhenDefaultIsExecuted"),
 			    BCP_parameter(BCP_CharPar,
 					  ReportWhenDefaultIsExecuted)));
@@ -309,7 +306,7 @@ void BCP_parameter_set<BCP_lp_par>::set_default_entries() {
    set_entry(DoReducedCostFixingAtZero, true);
    set_entry(DoReducedCostFixingAtAnything, true);
    set_entry(MaintainIndexedVarPricingList, true);
-   set_entry(MessagePassingIsSerial, true);
+   set_entry(MessagePassingIsSerial, false);
    set_entry(ReportWhenDefaultIsExecuted, true);
    set_entry(NoCompressionAtFathom, false);
    set_entry(SendFathomedNodeDesc, true);

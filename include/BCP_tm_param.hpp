@@ -54,6 +54,12 @@ struct BCP_tm_par{
     /** Indicates whether to trim the search tree before a new phase.
 	Values: 1 (true), 0 (false). Default: 0. */
     TrimTreeBeforeNewPhase,
+	/** Indicates whether that part of the tree that's completely explored
+		should be freed as soon as possible. This conserves memory, but may
+		make it harder to track what's happening in the tree.
+		Values: 1 (true), 0 (false). Default: 1.
+	*/
+	RemoveExploredBranches,
     /** A flag that instructs BCP to be (almost) absolutely silent. It zeros
 	out all the XxVerb flags <em>even if the verbosity flag is set to 1
 	later in the parameter file</em>. Exceptions (flags whose status is
