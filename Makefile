@@ -101,7 +101,7 @@ DEFINES += $(USER_DEFINES)
 
 LDFLAGS := $(addprefix -L,$(LIBDIRS))
 LDFLAGS += $(if ${SHLINKPREFIX},$(addprefix ${SHLINKPREFIX},${LIBDIRS}),)
-LDFLAGS += $(patsubst lib%,-l%,$(basename $(LIBS)))
+LDFLAGS += $(patsubst lib%.so,-l%,$(patsubst lib%.a,-l%,$(LIBS)))
 
 ##############################################################################
 ##############################################################################
