@@ -28,7 +28,7 @@ ifeq ($(BCP_OPT),-O)
 	BCPOPTFLAG = -O2 # -qtune=auto -qarch=auto # these are for xlC on AIX
     endif
 else
-    BCPOPTFLAG = -g
+    BCPOPTFLAG = $(BCP_OPT)
 endif
 
 ifeq ($(USER_OPT),-O)
@@ -38,7 +38,7 @@ ifeq ($(USER_OPT),-O)
 	USEROPTFLAG = -O2 # -qtune=auto -qarch=auto # these are for xlC on AIX
     endif
 else
-    USEROPTFLAG = -g
+    USEROPTFLAG = $(USER_OPT)
 endif
 
 ###############################################################################
