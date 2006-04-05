@@ -109,6 +109,8 @@ struct BCP_lp_par{
         /** Print the number of columns and rows that were deleted during
 	    matrix compression. (BCP_lp_delete_cols_and_rows) */
         LpVerb_MatrixCompression,
+	    /** For each tree node print out how much time was spent on it */
+	    LpVerb_NodeTime,
         /** Print detailed information about all the branching candidates
 	    during strong branching. LpVerb_PresolveResult must be set for
 	    this parameter to have an effect.

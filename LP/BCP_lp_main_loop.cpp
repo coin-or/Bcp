@@ -28,6 +28,8 @@ void BCP_lp_main_loop(BCP_lp_prob& p)
 	bool cutset_changed = true;
 	double time0;
 
+	double nodeStart = CoinCpuTime();
+
 	if (p.param(BCP_lp_par::LpVerb_ProcessedNodeIndex)) {
 		printf("\nLP: **** Processing NODE %i on LEVEL %i (from TM) ****\n",
 			   p.node->index, p.node->level);
@@ -260,11 +262,19 @@ LP:   Terminating and fathoming due to proven high cost (good heur soln!).\n",
 		// Try to branch
 		switch (BCP_lp_branch(p)){
 		case BCP_BranchingFathomedThisNode:
+			if (p.param(BCP_lp_par::LpVerb_NodeTime)) {
+				printf("BCP_lp: Time spent in this node: %15.4f seconds\n",
+					   CoinCpuTime() - nodeStart);
+			}
 			// Note that BCP_lp_branch() has already sent the node description
 			// to the TM, info is printed, node is cleaned up, so just return
 			return;
 
 		case BCP_BranchingDivedIntoNewNode:
+			if (p.param(BCP_lp_par::LpVerb_NodeTime)) {
+				printf("BCP_lp: Time spent in this node: %15.4 seconds\n",
+					   CoinCpuTime() - nodeStart);
+			}
 			if (p.param(BCP_lp_par::LpVerb_ProcessedNodeIndex)) {
 				printf("\n\
 LP: **** Processing NODE %i on LEVEL %i (dived) ****\n",

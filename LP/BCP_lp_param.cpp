@@ -90,6 +90,9 @@ void BCP_parameter_set<BCP_lp_par>::create_keyword_list() {
    keys.push_back(make_pair(BCP_string("BCP_LpVerb_MatrixCompression"),
 			    BCP_parameter(BCP_CharPar,
 					  LpVerb_MatrixCompression)));
+   keys.push_back(make_pair(BCP_string("BCP_LpVerb_NodeTime"),
+			    BCP_parameter(BCP_CharPar,
+					  LpVerb_NodeTime)));
    keys.push_back(make_pair(BCP_string("BCP_LpVerb_PresolvePositions"),
 			    BCP_parameter(BCP_CharPar,
 					  LpVerb_PresolvePositions)));
@@ -325,6 +328,7 @@ void BCP_parameter_set<BCP_lp_par>::set_default_entries() {
    set_entry(LpVerb_LpMatrixSize, true);
    set_entry(LpVerb_LpSolutionValue, true);
    set_entry(LpVerb_MatrixCompression, true);
+   set_entry(LpVerb_NodeTime, false);
    set_entry(LpVerb_PresolvePositions, true);
    set_entry(LpVerb_PresolveResult, true);
    set_entry(LpVerb_ProcessedNodeIndex, true);
