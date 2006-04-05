@@ -275,6 +275,7 @@ LP:   Terminating and fathoming due to proven high cost (good heur soln!).\n",
 				printf("BCP_lp: Time spent in this node: %15.4f seconds\n",
 					   CoinCpuTime() - nodeStart);
 			}
+			nodeStart = CoinCpuTime();
 			if (p.param(BCP_lp_par::LpVerb_ProcessedNodeIndex)) {
 				printf("\n\
 LP: **** Processing NODE %i on LEVEL %i (dived) ****\n",
