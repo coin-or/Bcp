@@ -272,7 +272,7 @@ LP:   Terminating and fathoming due to proven high cost (good heur soln!).\n",
 
 		case BCP_BranchingDivedIntoNewNode:
 			if (p.param(BCP_lp_par::LpVerb_NodeTime)) {
-				printf("BCP_lp: Time spent in this node: %15.4 seconds\n",
+				printf("BCP_lp: Time spent in this node: %15.4f seconds\n",
 					   CoinCpuTime() - nodeStart);
 			}
 			if (p.param(BCP_lp_par::LpVerb_ProcessedNodeIndex)) {
