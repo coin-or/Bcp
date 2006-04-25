@@ -23,7 +23,11 @@ enum BCP_child_preference{
    BCP_PreferChild_MoreFractional,
    /** Keep the child that has the least to-be-integer variables at fractional
        level after presolving. */
-   BCP_PreferChild_LessFractional
+   BCP_PreferChild_LessFractional,
+   /** Mainly for binary choices: take the down branch unconditionally */
+   BCP_PreferDiveDown,
+   /** Mainly for binary choices: take the up branch unconditionally */
+   BCP_PreferDiveUp
 };
 
 //-----------------------------------------------------------------------------

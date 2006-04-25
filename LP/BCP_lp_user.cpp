@@ -1275,6 +1275,14 @@ BCP_lp_user::set_actions_for_children(BCP_presolved_lp_brobj* best)
 	int i, ind;
 
 	switch (p->param(BCP_lp_par::ChildPreference)){
+	case BCP_PreferDiveDown:
+		ind = 0;
+		break;
+
+	case BCP_PreferDiveUp:
+		ind = best->candidate()->child_num - 1;
+		break;
+		
 	case BCP_PreferChild_LowBound:
 		// NOTE: if the lowest objval child is fathomed then everything is
 		for (ind = 0, i = best->candidate()->child_num - 1; i > 0; --i){
