@@ -1,2 +1,3 @@
 * text=auto !eol
 Bcp/Manual/man.pdf svneol=native#unset
+/Externals -text
