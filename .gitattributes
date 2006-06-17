@@ -1,3 +1,5 @@
 * text=auto !eol
 Bcp/Manual/man.pdf svneol=native#unset
+Bcp/configure.ac -text
 /Externals -text
+/configure.ac -text
