@@ -112,19 +112,16 @@ AC_COIN_HAS_USER_LIBRARY([Mpi], [MPI], [mpi.h], [MPI_Irecv])
 ##AC_COIN_VPATH_LINK(examples/Abc/abc.par)
 ##AC_COIN_VPATH_LINK(examples/input.130)
 #
-###############################################################################
-##                   Finishing up by writing all the output                   #
-###############################################################################
-#
-## Here list all the files that configure should create (except for the
-## configuration header file)
-#AC_CONFIG_FILES([Makefile
-#		 examples/Abc/Makefile
-#		 examples/Abc/abc.par
-#                 src/Makefile
-#                 test/Makefile
-#		 alps_addlibs.txt])
-#
+##############################################################################
+#                   Finishing up by writing all the output                   #
+##############################################################################
+
+# Here list all the files that configure should create (except for the
+# configuration header file)
+AC_CONFIG_FILES([Makefile
+                 src/Makefile
+				 bcp_addlibs.txt])
+
 # Here put the location and name of the configuration header file
 AC_CONFIG_HEADER([inc/config_bcp.h])
 

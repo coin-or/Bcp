@@ -18,9 +18,9 @@ SUBDIRS = src
 # specified.  But we need to list it as subdirectory to make sure that it is
 # included in the tarball
 
-if ALWAYS_FALSE
-  SUBDIRS += test
-endif
+#if ALWAYS_FALSE
+#  SUBDIRS += test
+#endif
 
 ########################################################################
 #             Additional files to be included in tarball               #
@@ -28,30 +28,60 @@ endif
 
 # Here we need include all files that are not mentioned in other Makefiles
 
-EXTRA_DIST = 
+EXTRA_DIST =
+EXTRA_DIST += doc/flow-lpfathom.fig
+EXTRA_DIST += doc/man.pdf
+EXTRA_DIST += doc/man.tex
+EXTRA_DIST += doc/man-getting-started.tex
+EXTRA_DIST += doc/sample.tex
+EXTRA_DIST += doc/flow2.eps
+EXTRA_DIST += doc/flow2.fig
+EXTRA_DIST += doc/flow3.eps
+EXTRA_DIST += doc/flow3.fig
+EXTRA_DIST += doc/flow4.eps
+EXTRA_DIST += doc/flow4.fig
+EXTRA_DIST += doc/biblio.bib
+EXTRA_DIST += doc/biblio.tex
+EXTRA_DIST += doc/flow-init.eps
+EXTRA_DIST += doc/flow-init.fig
+EXTRA_DIST += doc/flow-steady.fig
+EXTRA_DIST += doc/man-cg.tex
+EXTRA_DIST += doc/man.ps
+EXTRA_DIST += doc/man-mcp.tex
+EXTRA_DIST += doc/man-lp.tex
+EXTRA_DIST += doc/man-param.tex
+EXTRA_DIST += doc/man-mkc.tex
+EXTRA_DIST += doc/bcp.eps
+EXTRA_DIST += doc/man-tm.tex
+EXTRA_DIST += doc/flow-lploop.eps
+EXTRA_DIST += doc/flow-lploop.fig
+EXTRA_DIST += doc/flow.eps
+EXTRA_DIST += doc/flow.fig
+EXTRA_DIST += doc/man-intro.tex
+EXTRA_DIST += doc/man-develop.tex
 
 ########################################################################
 #                           Extra Targets                              #
 ########################################################################
 
-test: all
-	cd test; make test
-
-unitTest: test
-
-clean-local:
-	if test -r test/Makefile; then cd test; make clean; fi
-
-distclean-local:
-	if test -r test/Makefile; then cd test; make distclean; fi
-
-.PHONY: test unitTest
+#test: all
+#	cd test; make test
+#
+#unitTest: test
+#
+#clean-local:
+#	if test -r test/Makefile; then cd test; make clean; fi
+#
+#distclean-local:
+#	if test -r test/Makefile; then cd test; make distclean; fi
+#
+#.PHONY: test unitTest
 
 ########################################################################
 #                  Installation of the addlibs file                    #
 ########################################################################
 
-addlibsfile = alps_addlibs.txt
+addlibsfile = bcp_addlibs.txt
 
 install-exec-local:
 	$(install_sh_DATA) $(addlibsfile) $(DESTDIR)$(libdir)/$(addlibsfile)

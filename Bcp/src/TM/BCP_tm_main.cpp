@@ -28,7 +28,7 @@
 
 //#############################################################################
 
-int main(int argc, char* argv[])
+int bcp_main(int argc, char* argv[])
 {
    USER_initialize* user_init = BCP_user_init();
 
@@ -195,7 +195,7 @@ Number of process in parameter file %d != n_proc in mpirun -np %d!\n",
       // delete parent; -- not needed: TM has no parent, it's a 0 pointer
       delete my_id;   my_id = 0;
       delete msg_env;   msg_env = 0;
-      exit(0);
+      return 0;
    }
 
    // Fire up the LP/CG/CP/VG/VP processes

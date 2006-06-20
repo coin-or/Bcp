@@ -1,7 +1,7 @@
 * text=auto !eol
 Bcp/Makefile.am -text
-Bcp/Manual/man.pdf svneol=native#unset
 Bcp/configure.ac -text
+Bcp/doc/man.pdf svneol=native#unset
 /Externals -text
 /Makefile.am -text
 /configure.ac -text

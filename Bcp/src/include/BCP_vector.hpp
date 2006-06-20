@@ -338,4 +338,13 @@ void keep_ptr_vector_by_index(BCP_vec<T*>& pvec,
    pvec.keep_by_index(origfirst, last);
 }
 
+/* Now include the implementation of the methods so the compiler could
+   instantiate any requested vector class */
+
+#include "BCP_vector_bool.cpp"
+#include "BCP_vector_char.cpp"
+#include "BCP_vector_short.cpp"
+#include "BCP_vector_int.cpp"
+#include "BCP_vector_double.cpp"
+
 #endif
