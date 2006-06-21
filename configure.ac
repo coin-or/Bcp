@@ -45,10 +45,10 @@ AC_COIN_INIT_AUTOMAKE
 
 AC_COIN_MAIN_SUBDIRS(CoinUtils)
 AC_COIN_MAIN_SUBDIRS(Bcp)
+AC_COIN_MAIN_SUBDIRS(Osi)
 # The following are required for Bcp examples
 AC_COIN_MAIN_SUBDIRS(Vol)
 AC_COIN_MAIN_SUBDIRS(Clp)
-AC_COIN_MAIN_SUBDIRS(Osi)
 AC_COIN_MAIN_SUBDIRS(Cgl)
 
 ##############################################################################

@@ -3,7 +3,6 @@
 #include <cfloat>
 #include <cerrno>
 
-#include "BCP_os.hpp"
 
 #include "BCP_USER.hpp"
 #include "BCP_buffer.hpp"

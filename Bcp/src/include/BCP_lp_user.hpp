@@ -10,7 +10,6 @@
 #include "OsiSolverInterface.hpp"
 #include "OsiAuxInfo.hpp"
 
-#include "BCP_os.hpp"
 #include "BCP_USER.hpp"
 
 #include "BCP_buffer.hpp"

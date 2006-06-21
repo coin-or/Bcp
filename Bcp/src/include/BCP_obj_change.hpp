@@ -5,7 +5,6 @@
 
 //#############################################################################
 
-#include "BCP_os.hpp"
 #include "BCP_enum.hpp"
 #include "BCP_vector.hpp"
 

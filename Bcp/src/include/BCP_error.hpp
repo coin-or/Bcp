@@ -9,7 +9,6 @@
 #include <cstdio>
 #include <cstdlib>
 #include <cstdarg>
-#include "BCP_os.hpp"
 
 /** 
     Currently there isn't any error handling in BCP. When an object of this

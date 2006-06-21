@@ -5,7 +5,6 @@
 
 // This file is fully docified.
 
-#include "BCP_os.hpp"
 
 #include <utility> // for 'pair'
 #include <iostream>

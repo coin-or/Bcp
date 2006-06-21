@@ -77,6 +77,7 @@ AC_COIN_HAS_PROJECT(Osi)
 
 AC_COIN_HAS_USER_LIBRARY([Mpi], [MPI], [mpi.h], [MPI_Irecv])
 # ToDo: Automatically choose MPI compiler
+# AC_COIN_HAS_USER_LIBRARY([Pvm], [PVM], [pvm3.h], [???])
 
 ##############################################################################
 #                   VPATH links for example input files                      #

@@ -4,7 +4,6 @@
 #include <cstdio>
 #include <cerrno>
 
-#include "BCP_os.hpp"
 
 #include "BCP_USER.hpp"
 

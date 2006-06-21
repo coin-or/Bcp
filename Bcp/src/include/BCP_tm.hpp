@@ -6,7 +6,6 @@
 #include <queue>
 #include <map>
 
-#include "BCP_os.hpp"
 #include "BCP_buffer.hpp"
 #include "BCP_enum.hpp"
 #include "BCP_enum_process_t.hpp"

@@ -8,7 +8,6 @@
 
 #include <vector>
 
-#include "BCP_os.hpp"
 #include "BCP_enum.hpp"
 #include "BCP_enum_branch.hpp"
 #include "BCP_message_tag.hpp"

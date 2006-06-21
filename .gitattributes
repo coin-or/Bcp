@@ -2,6 +2,7 @@
 Bcp/Makefile.am -text
 Bcp/configure.ac -text
 Bcp/doc/man.pdf svneol=native#unset
+Bcp/src/include/BcpConfig.h -text
 /Externals -text
 /Makefile.am -text
 /configure.ac -text

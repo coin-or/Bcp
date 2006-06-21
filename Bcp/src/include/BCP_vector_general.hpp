@@ -2,7 +2,6 @@
 // Corporation and others.  All Rights Reserved.
 #include <algorithm>
 
-#include "BCP_os.hpp"
 #include "BCP_error.hpp"
 #include "BCP_vector.hpp"
 #include "BCP_vector_sanity.hpp"

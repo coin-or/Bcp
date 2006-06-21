@@ -7,7 +7,6 @@
 
 #include "CoinTime.hpp"
 
-#include "BCP_os.hpp"
 
 #include "BCP_USER.hpp"
 #include "BCP_string.hpp"
