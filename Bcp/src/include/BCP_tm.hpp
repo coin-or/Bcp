@@ -188,13 +188,13 @@ public: // Data members
   BCP_column_generation current_phase_colgen;
 
   /** */
-  std::map<BCP_IndexType, BCP_var*> vars; // *FIXME*: maybe hash_map better ?
+  std::map<int, BCP_var*> vars; // *FIXME*: maybe hash_map better ?
   /** */
-  std::map<BCP_IndexType, BCP_cut*> cuts; // *FIXME*: maybe hash_map better ?
+  std::map<int, BCP_cut*> cuts; // *FIXME*: maybe hash_map better ?
   /** */
-  BCP_IndexType next_cut_index_set_start;
+  int next_cut_index_set_start;
   /** */
-  BCP_IndexType next_var_index_set_start;
+  int next_var_index_set_start;
 
   //-------------------------------------------------------------------------
   /** */

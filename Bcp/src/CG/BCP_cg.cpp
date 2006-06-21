@@ -52,7 +52,7 @@ BCP_var*
 BCP_cg_prob::unpack_var()
 {
   BCP_object_t obj_t;
-  BCP_IndexType bcpind;
+  int bcpind;
   BCP_var_t var_t;
   int index;
   double obj, lb, ub;

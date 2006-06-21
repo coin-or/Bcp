@@ -531,7 +531,7 @@ BCP_lp_make_parent_from_node(BCP_lp_prob& p)
 
 	const BCP_var_set& vars = node.vars;
 	const int varnum = vars.size();
-	BCP_vec<BCP_IndexType>& added_vindex = parent.added_vars_index;
+	BCP_vec<int>& added_vindex = parent.added_vars_index;
 	BCP_vec<BCP_obj_change>& added_vdesc = parent.added_vars_desc;
 	added_vindex.clear();
 	added_vdesc.clear();
@@ -547,7 +547,7 @@ BCP_lp_make_parent_from_node(BCP_lp_prob& p)
 
 	const BCP_cut_set& cuts = node.cuts;
 	const int cutnum = cuts.size();
-	BCP_vec<BCP_IndexType>& added_cindex = parent.added_cuts_index;
+	BCP_vec<int>& added_cindex = parent.added_cuts_index;
 	BCP_vec<BCP_obj_change>& added_cdesc = parent.added_cuts_desc;
 	added_cindex.clear();
 	added_cdesc.clear();

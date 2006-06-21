@@ -42,7 +42,7 @@ private:
      These are used only by BCP, the user need not worry about them. */
   /*@{*/
     /** The internal, unique index of the variable. */
-    BCP_IndexType  _bcpind;
+    int  _bcpind;
     /** The status of the variable. */ 
     BCP_obj_status _status;
   /*@}*/
@@ -89,7 +89,7 @@ public:
     /** Return the upper bound. */
     inline double ub() const            { return _ub; }
     /** Return the internal index of the variable. */
-    inline BCP_IndexType bcpind() const { return _bcpind; }
+    inline int bcpind() const { return _bcpind; }
 
     /**@name Query methods about the status of the variable */
     /*@{*/
@@ -166,7 +166,7 @@ public:
        test_inactive();
     }
     /** Set the internal index of the variable. */
-    inline void set_bcpind(const BCP_IndexType bcpind)  { _bcpind = bcpind; }
+    inline void set_bcpind(const int bcpind)  { _bcpind = bcpind; }
 
     /**@name Status modifying methods */
     /*@{*/

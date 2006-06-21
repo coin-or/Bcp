@@ -312,7 +312,7 @@ BCP_problem_core* BCP_tm_create_core(BCP_tm_prob& p)
 
    const int bvarnum = bvars.size();
    if (bvarnum > 0) {
-      BCP_IndexType i = p.next_var_index_set_start;
+      int i = p.next_var_index_set_start;
       for (i = 0; i < bvarnum; ++i) {
 	 BCP_var_core* var = bvars[i];
 	 // make certain that the bounds of integer vars is integer...
@@ -328,7 +328,7 @@ BCP_problem_core* BCP_tm_create_core(BCP_tm_prob& p)
 
    const int bcutnum = bcuts.size();
    if (bcutnum > 0) {
-      BCP_IndexType i = p.next_cut_index_set_start;
+      int i = p.next_cut_index_set_start;
       for (i = 0; i < bcutnum; ++i) {
 	 BCP_cut_core* cut = bcuts[i];
 	 cut->set_bcpind(i);
@@ -419,7 +419,7 @@ BCP_tm_node* BCP_tm_create_root(BCP_tm_prob& p)
       BCP_vec<BCP_var*>::iterator vi = added_vars.begin();
       const BCP_vec<BCP_var*>::iterator lastvi = added_vars.end();
       root_changes->var_change._change.reserve(added_vars.size());
-      BCP_IndexType i = p.next_var_index_set_start;
+      int i = p.next_var_index_set_start;
       while (vi != lastvi) {
 	 BCP_var* var = *vi;
 	 p.vars[i] = var;
@@ -442,7 +442,7 @@ BCP_tm_node* BCP_tm_create_root(BCP_tm_prob& p)
       BCP_vec<BCP_cut*>::iterator ci = added_cuts.begin();
       const BCP_vec<BCP_cut*>::iterator lastci = added_cuts.end();
       root_changes->cut_change._change.reserve(added_cuts.size());
-      BCP_IndexType i = p.next_cut_index_set_start;
+      int i = p.next_cut_index_set_start;
       while (ci != lastci) {
 	 BCP_cut* cut = *ci;
 	 p.cuts[i] = cut;

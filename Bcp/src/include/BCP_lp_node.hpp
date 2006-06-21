@@ -56,11 +56,11 @@ public:
    /** */
    BCP_problem_core_change  core_as_change;
    /** */
-   BCP_vec<BCP_IndexType>   added_vars_index;
+   BCP_vec<int>   added_vars_index;
    /** */
    BCP_vec<BCP_obj_change>  added_vars_desc;
    /** */
-   BCP_vec<BCP_IndexType>   added_cuts_index;
+   BCP_vec<int>   added_cuts_index;
    /** */
    BCP_vec<BCP_obj_change>  added_cuts_desc;
    /** */

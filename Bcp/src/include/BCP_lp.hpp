@@ -177,13 +177,13 @@ public:
 
    // The next/last index we can assign to a newly generated var/cut
    /** */
-   BCP_IndexType next_var_index;
+   int next_var_index;
    /** */
-   BCP_IndexType last_var_index;
+   int last_var_index;
    /** */
-   BCP_IndexType next_cut_index;
+   int next_cut_index;
    /** */
-   BCP_IndexType last_cut_index;
+   int last_cut_index;
    /*@}*/
    
    //--------------------------------------------------------------------------

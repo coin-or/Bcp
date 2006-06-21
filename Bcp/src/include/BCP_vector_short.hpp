@@ -1,10 +1,5 @@
 // Copyright (C) 2000, International Business Machines
 // Corporation and others.  All Rights Reserved.
-#include <algorithm>
-
-#include "BCP_error.hpp"
-#include "BCP_vector.hpp"
-#include "BCP_vector_sanity.hpp"
 
 //#############################################################################
 

@@ -124,7 +124,7 @@ BCP_var_set_change::BCP_var_set_change(BCP_vec<BCP_var*>::const_iterator first,
 BCP_var_set_change::
 BCP_var_set_change(BCP_vec<BCP_var*>::const_iterator first,
 		   BCP_vec<BCP_var*>::const_iterator last,
-		   const BCP_vec<BCP_IndexType>& added_bcpind,
+		   const BCP_vec<int>& added_bcpind,
 		   const BCP_vec<BCP_obj_change>& added_desc) :
    _storage(BCP_Storage_WrtParent), _deleted_num(0),
    _del_change_pos(), _change(), _new_vars()
@@ -227,7 +227,7 @@ BCP_cut_set_change::BCP_cut_set_change(BCP_vec<BCP_cut*>::const_iterator first,
 BCP_cut_set_change::
 BCP_cut_set_change(BCP_vec<BCP_cut*>::const_iterator first,
 		   BCP_vec<BCP_cut*>::const_iterator last,
-		   const BCP_vec<BCP_IndexType>& added_bcpind,
+		   const BCP_vec<int>& added_bcpind,
 		   const BCP_vec<BCP_obj_change>& added_desc) :
    _storage(BCP_Storage_WrtParent), _deleted_num(0),
    _del_change_pos(), _change(), _new_cuts()

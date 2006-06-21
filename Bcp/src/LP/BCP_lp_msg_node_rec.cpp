@@ -59,7 +59,7 @@ void BCP_lp_unpack_parent(BCP_lp_prob& p, BCP_buffer& buf, BCP_lp_node& node,
 #endif
       const int pvarnum = parent_added_vars._change.size();
       p.parent->added_vars_desc = parent_added_vars._change;
-      BCP_vec<BCP_IndexType>& index = p.parent->added_vars_index;
+      BCP_vec<int>& index = p.parent->added_vars_index;
       index.reserve(pvarnum);
       for (i = 0; i < pvarnum; ++i)
 	 index.unchecked_push_back(parent_added_vars._new_vars[i]->bcpind());
@@ -73,7 +73,7 @@ void BCP_lp_unpack_parent(BCP_lp_prob& p, BCP_buffer& buf, BCP_lp_node& node,
 #endif
       const int pcutnum = parent_added_cuts._change.size();
       p.parent->added_cuts_desc = parent_added_cuts._change;
-      BCP_vec<BCP_IndexType>& index = p.parent->added_cuts_index;
+      BCP_vec<int>& index = p.parent->added_cuts_index;
       index.reserve(pcutnum);
       for (i = 0; i < pcutnum; ++i)
 	 index.unchecked_push_back(parent_added_cuts._new_cuts[i]->bcpind());

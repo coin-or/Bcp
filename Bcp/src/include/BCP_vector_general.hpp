@@ -1,19 +1,29 @@
 // Copyright (C) 2000, International Business Machines
 // Corporation and others.  All Rights Reserved.
-#include <algorithm>
 
-#include "BCP_error.hpp"
-#include "BCP_vector.hpp"
-#include "BCP_vector_sanity.hpp"
+//#############################################################################
+
+template <class T> void
+BCP_vec<T>::destroy_range(iterator first, iterator last)
+{
+	while (first != last) {
+		(--last)->~T();
+	}
+}
+
+//#############################################################################
+
+template <class T> void
+BCP_vec<T*>::destroy_range(iterator first, iterator last)
+{
+}
 
 //#############################################################################
 
 template <class T> void
 BCP_vec<T>::deallocate() {
    if (start) {
-      while (finish != start) {
-	 BCP_DESTROY(--finish);
-      }
+	  destroy_range(start, finish);
       ::operator delete(start);
    }
 }
@@ -23,7 +33,7 @@ BCP_vec<T>::deallocate() {
 template <class T> void
 BCP_vec<T>::insert_aux(iterator position, const_reference x){
    if (finish != end_of_storage) {
-      BCP_CONSTRUCT(finish, *(finish - 1));
+	  construct(finish);
       std::copy_backward(position, finish - 1, finish);
       *position = x;
       ++finish;
@@ -31,7 +41,7 @@ BCP_vec<T>::insert_aux(iterator position, const_reference x){
       const size_t len = (2*size() + 0x100);
       iterator tmp = allocate(len);
       iterator tmp_finish = std::uninitialized_copy(start, position, tmp);
-      BCP_CONSTRUCT(tmp_finish++, x);
+      construct(tmp_finish++, x);
       tmp_finish = std::uninitialized_copy(position, finish, tmp_finish);
       deallocate();
       start = tmp;
@@ -71,8 +81,9 @@ BCP_vec<T>::BCP_vec(const T* x, const size_t num) :
    if (num > 0) {
       finish = start = allocate(num);
       const T* const lastx = x + num;
-      while (x != lastx)
-	 BCP_CONSTRUCT(finish++, *x++);
+      while (x != lastx) {
+		  construct(finish++, *x++);
+	  }
       end_of_storage = finish;
    }
 }
@@ -83,14 +94,14 @@ template <class T> void
 BCP_vec<T>::keep(iterator pos) {
    iterator oldfinish = finish;
    finish = std::copy(pos, pos + 1, start);
-   BCP_DESTROY_RANGE(finish, oldfinish);
+   destroy_range(finish, oldfinish);
 }
 
 template <class T> void
 BCP_vec<T>::keep(iterator first, iterator last) {
    iterator oldfinish = finish;
    finish = std::copy(first, last, start);
-   BCP_DESTROY_RANGE(finish, oldfinish);
+   destroy_range(finish, oldfinish);
 }
 
 //#############################################################################
@@ -99,14 +110,14 @@ template <class T> void
 BCP_vec<T>::erase(iterator position) {
    if (position + 1 != finish)
       std::copy(position + 1, finish, position);
-   BCP_DESTROY(--finish);
+   destroy(--finish);
 }
 
 template <class T> void
 BCP_vec<T>::erase(iterator first, iterator last) {
    iterator oldfinish = finish;
    finish = std::copy(last, finish, first);
-   BCP_DESTROY_RANGE(finish, oldfinish);
+   destroy_range(finish, oldfinish);
 }
 
 //#############################################################################
@@ -148,7 +159,7 @@ BCP_vec<T>::operator=(const BCP_vec<T>& x){
 	 if (x_size < size()) {
 	    iterator oldfinish = finish;
 	    finish = std::copy(x.begin(), x.end(), start);
-	    BCP_DESTROY_RANGE(finish, oldfinish);
+	    destroy_range(finish, oldfinish);
 	 } else {
 	    std::copy(x.begin(), x.entry(size()), start);
 	    finish = std::uninitialized_copy(x.entry(size()), x.end(), finish);
@@ -168,14 +179,14 @@ BCP_vec<T>::assign(const void* x, const size_t num){
       start = allocate(num);
       end_of_storage = start + num;
    } else {
-      BCP_DESTROY_RANGE(start, finish);
+      destroy_range(start, finish);
    }
    T entry;
    finish = start;
    const char* charx = static_cast<const char*>(x);
    for (int i = num; i > 0; --i) {
       memcpy(&entry, charx, sizeof(T));
-      BCP_CONSTRUCT(finish++, entry);
+	  construct(finish++, entry);
       charx += sizeof(T);
    }
 }
@@ -195,7 +206,7 @@ BCP_vec<T>::insert(iterator position, const void* first, const size_t n){
 	 size_t i = n;
 	 for ( ; i > to_move; --i) {
 	    memcpy(&entry, charx, sizeof(T));
-	    BCP_CONSTRUCT(position++, entry);
+		construct(position++, entry);
 	    charx += sizeof(T);
 	 }
 	 for ( ; i > 0; --i) {
@@ -219,7 +230,7 @@ BCP_vec<T>::insert(iterator position, const void* first, const size_t n){
       iterator tmp_finish = std::uninitialized_copy(start, position, tmp);
       for (int i = n; i > 0; --i) {
 	 memcpy(&entry, charx, sizeof(T));
-	 BCP_CONSTRUCT(tmp_finish++, entry);
+	 construct(tmp_finish++, entry);
 	 charx += sizeof(T);
       }
       tmp_finish = std::uninitialized_copy(position, finish, tmp_finish);
@@ -299,7 +310,7 @@ template <class T> typename BCP_vec<T>::iterator
 BCP_vec<T>::insert(iterator position, const_reference x){
    const size_t n = position - start;
    if (finish != end_of_storage && position == finish) {
-      BCP_CONSTRUCT(finish++, x);
+	   construct(finish++, x);
    } else {
       insert_aux(position, x);
    }
@@ -356,7 +367,7 @@ BCP_vec<T>::unchecked_keep_by_index(BCP_vec<int>::const_iterator firstpos,
       iterator target = start;
       while ( firstpos != lastpos )
 	 *target++ = operator[](*firstpos++);
-      BCP_DESTROY_RANGE(target, finish);
+      destroy_range(target, finish);
       finish = target;
    }
 }
@@ -388,7 +399,7 @@ BCP_vec<T>::unchecked_erase_by_index(BCP_vec<int>::const_iterator firstpos,
    }
    iterator oldfinish = finish;
    finish = std::copy( entry(*firstpos + 1), end(), target );
-   BCP_DESTROY_RANGE(finish, oldfinish);
+   destroy_range(finish, oldfinish);
 }
 
 //#############################################################################

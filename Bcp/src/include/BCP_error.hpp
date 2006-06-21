@@ -38,7 +38,6 @@ public:
 	 abort();
    }
    BCP_fatal_error(const char * format, ...) {
-      BCP_DEFAULT_NAMESPACE;
       va_list valist;
       va_start(valist,format);
       vprintf(format, valist);

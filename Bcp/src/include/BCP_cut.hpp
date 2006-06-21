@@ -41,7 +41,7 @@ private:
       them. */ 
   /*@{*/
     /** The internal, unique index of the cut. */
-    BCP_IndexType  _bcpind;
+    int  _bcpind;
     /** The status of the cut. */
     BCP_obj_status _status;
     /** Effectiveness counter (used only in the LP process). */
@@ -81,7 +81,7 @@ public:
     /** Return the upper bound on the cut. */
     inline double ub() const             { return _ub; }
     /** Return the internal index of the cut. */
-    inline BCP_IndexType bcpind() const  { return _bcpind; }
+    inline int bcpind() const  { return _bcpind; }
 
     /* *@name Query methods about the status of the variable */
     /* @{*/
@@ -144,7 +144,7 @@ public:
   	 _status = static_cast<BCP_obj_status>(_status | BCP_ObjInactive);
     }
     /** Set the internal index of the cut. */
-    inline void set_bcpind(const BCP_IndexType bcpind)  { _bcpind = bcpind; }
+    inline void set_bcpind(const int bcpind)  { _bcpind = bcpind; }
 
     /* *@name Status modifying methods */
     /* @{*/

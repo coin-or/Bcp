@@ -78,8 +78,8 @@ void BCP_lp_add_rows_to_lp(const BCP_vec<BCP_row*>& rows,
 //-----------------------------------------------------------------------------
 // BCP_lp_msgproc.cpp
 void BCP_lp_check_ub(BCP_lp_prob& p);
-BCP_IndexType BCP_lp_next_var_index(BCP_lp_prob& p);
-BCP_IndexType BCP_lp_next_cut_index(BCP_lp_prob& p);
+int BCP_lp_next_var_index(BCP_lp_prob& p);
+int BCP_lp_next_cut_index(BCP_lp_prob& p);
 void BCP_lp_process_ub_message(BCP_lp_prob& p, BCP_buffer& buf);
 void BCP_lp_send_cuts_to_cp(BCP_lp_prob& p, const int eff_cnt_limit);
 void BCP_lp_unpack_diving_info(BCP_lp_prob& p, BCP_buffer& buf);

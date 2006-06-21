@@ -6,7 +6,7 @@
 // This file is fully docified.
 // There's nothing to docify...
 
-typedef int BCP_IndexType;
+typedef int int;
 
 #if defined(__SUNPRO_CC)
 #  include <sys/resource.h> // for setpriority() and getrusage()

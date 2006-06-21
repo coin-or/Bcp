@@ -111,7 +111,7 @@ BCP_lp_prob::~BCP_lp_prob() {
 void
 BCP_lp_prob::pack_var(BCP_process_t target_proc, const BCP_var& var)
 {
-  const BCP_IndexType bcpind = var.bcpind();
+  const int bcpind = var.bcpind();
   msg_buf.pack(bcpind);
   if (target_proc == BCP_ProcessType_TM && bcpind > 0)
     return;
@@ -146,7 +146,7 @@ BCP_var*
 BCP_lp_prob::unpack_var()
 {
   BCP_object_t obj_t;
-  BCP_IndexType bcpind;
+  int bcpind;
   BCP_var_t var_t;
   int index;
   double obj, lb, ub;
@@ -184,7 +184,7 @@ BCP_lp_prob::unpack_var()
 void
 BCP_lp_prob::pack_cut(BCP_process_t target_proc, const BCP_cut& cut)
 {
-  const BCP_IndexType bcpind = cut.bcpind();
+  const int bcpind = cut.bcpind();
   msg_buf.pack(bcpind);
   if (target_proc == BCP_ProcessType_TM && bcpind > 0)
     return;
@@ -217,7 +217,7 @@ BCP_cut*
 BCP_lp_prob::unpack_cut()
 {
   BCP_object_t obj_t;
-  BCP_IndexType bcpind;
+  int bcpind;
   int index;
   double lb, ub;
   BCP_obj_status cutstat;

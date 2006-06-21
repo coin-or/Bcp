@@ -6,7 +6,7 @@
 // This file is fully docified.
 // There's nothing to docify...
 
-typedef int BCP_IndexType;
+typedef int int;
 
 #include <sys/resource.h> // for setpriority()
 #include <unistd.h>     // for gethostname()

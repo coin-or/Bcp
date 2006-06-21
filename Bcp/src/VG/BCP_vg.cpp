@@ -48,7 +48,7 @@ BCP_cut*
 BCP_vg_prob::unpack_cut()
 {
   BCP_object_t obj_t;
-  BCP_IndexType bcpind;
+  int bcpind;
   int index;
   double lb, ub;
   BCP_obj_status stat;

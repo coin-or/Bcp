@@ -226,7 +226,7 @@ LP: BCP_Msg_InitialUserInfo arrived in BCP_lp_prob::process_message().\n");
 
 //#############################################################################
 
-BCP_IndexType
+int
 BCP_lp_next_var_index(BCP_lp_prob& p)
 {
    if (p.next_var_index == p.last_var_index) {
@@ -242,13 +242,13 @@ BCP_lp_next_var_index(BCP_lp_prob& p)
 	 p.process_message();
       }
    }
-   const BCP_IndexType tmp = p.next_var_index++;
+   const int tmp = p.next_var_index++;
    return tmp;
 }
 
 //#############################################################################
 
-BCP_IndexType
+int
 BCP_lp_next_cut_index(BCP_lp_prob& p)
 {
    if (p.next_cut_index == p.last_cut_index) {
@@ -264,7 +264,7 @@ BCP_lp_next_cut_index(BCP_lp_prob& p)
 	 p.process_message();
       }
    }
-   const BCP_IndexType tmp = p.next_cut_index++;
+   const int tmp = p.next_cut_index++;
    return tmp;
 }
 

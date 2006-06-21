@@ -7,7 +7,7 @@
 // This file is fully docified.
 // There's nothing to docify...
 
-typedef int BCP_IndexType;
+typedef int int;
 
 #define setpriority(x,y,z)
 #define BCP_USE_RUSAGE 0

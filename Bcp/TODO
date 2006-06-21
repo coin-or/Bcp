@@ -1,3 +1,14 @@
+In BCP_error.hpp:
+
+On sun with CC in the ellipse constructor we had to have 'using
+namespace std' otherwise the va_list stuff would not compile. Any
+autoconf stuff to check?
+
+Same thing in BCP_string.hpp (memcpy, etc. would not work).
+
+Create a BCP_vector template specialization for pointers (to speed up
+destruction of arrays)
+
 Short term:
 ===========
 

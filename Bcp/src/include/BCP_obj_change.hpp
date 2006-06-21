@@ -75,7 +75,7 @@ public:
 		      BCP_vec<BCP_var*>::const_iterator lastvar);
    BCP_var_set_change(BCP_vec<BCP_var*>::const_iterator firstvar,
 		      BCP_vec<BCP_var*>::const_iterator lastvar,
-		      const BCP_vec<BCP_IndexType>& added_index,
+		      const BCP_vec<int>& added_index,
 		      const BCP_vec<BCP_obj_change>& added_desc);
    ~BCP_var_set_change() {}
 
@@ -120,7 +120,7 @@ public:
 		      BCP_vec<BCP_cut*>::const_iterator lastcut);
    BCP_cut_set_change(BCP_vec<BCP_cut*>::const_iterator firstcut,
 		      BCP_vec<BCP_cut*>::const_iterator lastcut,
-		      const BCP_vec<BCP_IndexType>& added_index,
+		      const BCP_vec<int>& added_index,
 		      const BCP_vec<BCP_obj_change>& added_desc);
    ~BCP_cut_set_change() {}
 

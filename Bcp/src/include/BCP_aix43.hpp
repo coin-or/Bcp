@@ -6,7 +6,7 @@
 // This file is fully docified.
 // There's nothing to docify...
 
-typedef int BCP_IndexType;
+typedef int int;
 
 #if defined(__IBMCPP__) && (__IBMCPP__ >= 5)
 #  include <sys/resource.h>

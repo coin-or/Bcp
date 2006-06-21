@@ -34,11 +34,11 @@ BCP_tm_prob::~BCP_tm_prob()
    
    delete feas_sol;
 
-   std::map<BCP_IndexType, BCP_var*>::iterator vari = vars.begin();
+   std::map<int, BCP_var*>::iterator vari = vars.begin();
    while (vari != vars.end()) {
       delete (vari++)->second;
    }
-   std::map<BCP_IndexType, BCP_cut*>::iterator cuti = cuts.begin();
+   std::map<int, BCP_cut*>::iterator cuti = cuts.begin();
    while (cuti != cuts.end()) {
       delete (cuti++)->second;
    }
@@ -52,7 +52,7 @@ BCP_tm_prob::~BCP_tm_prob()
 void
 BCP_tm_prob::pack_var(BCP_process_t target_proc, const BCP_var& var)
 {
-  const BCP_IndexType bcpind = var.bcpind();
+  const int bcpind = var.bcpind();
   const BCP_object_t obj_t = var.obj_type();
   const BCP_obj_status stat = var.status();
   const BCP_var_t var_t = var.var_type();
@@ -117,7 +117,7 @@ BCP_tm_prob::unpack_var_without_bcpind(BCP_buffer& buf)
 BCP_var* 
 BCP_tm_prob::unpack_var()
 {
-  BCP_IndexType bcpind;
+  int bcpind;
   BCP_var* var = 0;
   msg_buf.unpack(bcpind);
   if (bcpind == 0) {
@@ -145,7 +145,7 @@ BCP_tm_prob::unpack_var()
 void
 BCP_tm_prob::pack_cut(BCP_process_t target_proc, const BCP_cut& cut)
 {
-  const BCP_IndexType bcpind = cut.bcpind();
+  const int bcpind = cut.bcpind();
   const BCP_object_t obj_t = cut.obj_type();
   const BCP_obj_status stat = cut.status();
   const double lb = cut.lb();
@@ -174,7 +174,7 @@ BCP_tm_prob::pack_cut(BCP_process_t target_proc, const BCP_cut& cut)
 BCP_cut* 
 BCP_tm_prob::unpack_cut()
 {
-  BCP_IndexType bcpind;
+  int bcpind;
   BCP_cut* cut = 0;
   msg_buf.unpack(bcpind);
   if (bcpind == 0) {
