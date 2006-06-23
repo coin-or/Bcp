@@ -5,11 +5,14 @@ Bcp/bcp_addlibs.txt.in -text
 Bcp/configure -text
 Bcp/configure.ac -text
 Bcp/doc/man.pdf svneol=native#unset
+Bcp/examples/BAC/AUTHORS -text
+Bcp/examples/BAC/LICENSE -text
 Bcp/examples/BAC/LP/BB_lp.cpp -text
 Bcp/examples/BAC/Member/BB.cpp -text
 Bcp/examples/BAC/Member/BB_cut.cpp -text
 Bcp/examples/BAC/Member/BB_init.cpp -text
 Bcp/examples/BAC/Member/BB_user_data.cpp -text
+Bcp/examples/BAC/README -text
 Bcp/examples/BAC/TM/BB_tm.cpp -text
 Bcp/examples/BAC/bac.lp -text
 Bcp/examples/BAC/bac.mps -text
