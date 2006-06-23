@@ -87,34 +87,32 @@ AC_CHECK_HEADER(sys/resource.h)
 
 # In this case, the source code is taken from the Bcp examples directory
 
-#AC_CONFIG_LINKS(test/AbcBranchActual.cpp:examples/Abc/AbcBranchActual.cpp
-#                test/AbcBranchActual.h:examples/Abc/AbcBranchActual.h
-#                test/AbcBranchBase.cpp:examples/Abc/AbcBranchBase.cpp
-#                test/AbcBranchBase.h:examples/Abc/AbcBranchBase.h
-#                test/AbcCutGenerator.cpp:examples/Abc/AbcCutGenerator.cpp
-#                test/AbcCutGenerator.h:examples/Abc/AbcCutGenerator.h
-#                test/AbcHeuristic.cpp:examples/Abc/AbcHeuristic.cpp
-#                test/AbcHeuristic.h:examples/Abc/AbcHeuristic.h
-#                test/AbcMain.cpp:examples/Abc/AbcMain.cpp
-#                test/AbcMessage.cpp:examples/Abc/AbcMessage.cpp
-#                test/AbcMessage.h:examples/Abc/AbcMessage.h
-#                test/AbcModel.cpp:examples/Abc/AbcModel.cpp
-#                test/AbcModel.h:examples/Abc/AbcModel.h
-#                test/AbcNodeDesc.h:examples/Abc/AbcNodeDesc.h
-#                test/AbcParams.cpp:examples/Abc/AbcParams.cpp
-#                test/AbcParams.h:examples/Abc/AbcParams.h
-#                test/AbcSolution.cpp:examples/Abc/AbcSolution.cpp
-#                test/AbcSolution.h:examples/Abc/AbcSolution.h
-#                test/AbcTreeNode.cpp:examples/Abc/AbcTreeNode.cpp
-#                test/AbcTreeNode.h:examples/Abc/AbcTreeNode.h)
-#
-## In case this is a VPATH configuration we need to make sure that the
-## input files for the examples are available in the VPATH directory.
-#
-## ToDo
-##AC_COIN_VPATH_LINK(examples/Abc/abc.par)
-##AC_COIN_VPATH_LINK(examples/input.130)
-#
+AC_CONFIG_LINKS(
+test/BAC/LP/BB_lp.cpp:examples/BAC/LP/BB_lp.cpp
+test/BAC/TM/BB_tm.cpp:examples/BAC/TM/BB_tm.cpp
+test/BAC/Member/BB_user_data.cpp:examples/BAC/Member/BB_user_data.cpp
+test/BAC/Member/BB_init.cpp:examples/BAC/Member/BB_init.cpp
+test/BAC/Member/BB.cpp:examples/BAC/Member/BB.cpp
+test/BAC/Member/BB_cut.cpp:examples/BAC/Member/BB_cut.cpp
+test/BAC/bb.par:examples/BAC/bb.par
+test/BAC/bac.lp:examples/BAC/bac.lp
+test/BAC/bac.mps:examples/BAC/bac.mps
+test/BAC/bac.pdf:examples/BAC/bac.pdf
+test/BAC/include/BB_user_data.hpp:examples/BAC/include/BB_user_data.hpp
+test/BAC/include/BB_lp.hpp:examples/BAC/include/BB_lp.hpp
+test/BAC/include/BB_init.hpp:examples/BAC/include/BB_init.hpp
+test/BAC/include/BB_tm.hpp:examples/BAC/include/BB_tm.hpp
+test/BAC/include/BB.hpp:examples/BAC/include/BB.hpp
+test/BAC/include/BB_cut.hpp:examples/BAC/include/BB_cut.hpp
+)
+
+# In case this is a VPATH configuration we need to make sure that the
+# input files for the examples are available in the VPATH directory.
+
+# ToDo
+#AC_COIN_VPATH_LINK(examples/Abc/abc.par)
+#AC_COIN_VPATH_LINK(examples/input.130)
+
 ##############################################################################
 #                   Finishing up by writing all the output                   #
 ##############################################################################
@@ -123,6 +121,7 @@ AC_CHECK_HEADER(sys/resource.h)
 # configuration header file)
 AC_CONFIG_FILES([Makefile
                  src/Makefile
+                 test/BAC/Makefile
 				 bcp_addlibs.txt])
 
 # Here put the location and name of the configuration header file

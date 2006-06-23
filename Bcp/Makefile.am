@@ -18,9 +18,9 @@ SUBDIRS = src
 # specified.  But we need to list it as subdirectory to make sure that it is
 # included in the tarball
 
-#if ALWAYS_FALSE
-#  SUBDIRS += test
-#endif
+if ALWAYS_FALSE
+  SUBDIRS += test
+endif
 
 ########################################################################
 #             Additional files to be included in tarball               #
@@ -64,18 +64,26 @@ EXTRA_DIST += doc/man-develop.tex
 #                           Extra Targets                              #
 ########################################################################
 
-#test: all
-#	cd test; make test
-#
-#unitTest: test
-#
-#clean-local:
-#	if test -r test/Makefile; then cd test; make clean; fi
-#
-#distclean-local:
-#	if test -r test/Makefile; then cd test; make distclean; fi
-#
-#.PHONY: test unitTest
+TESTS = BAC
+
+test: all
+	for t in $(TESTS); do \
+		(cd test/$$t; make test); \
+	done
+
+unitTest: test
+
+clean-local:
+	for t in $(TESTS); do \
+		(if test -r test/$$t/Makefile; then cd test/$$t; make clean; fi); \
+	done
+
+distclean-local:
+	for t in $(TESTS); do \
+		(if test -r test/$$t/Makefile; then cd test/$$t; make distclean; fi); \
+	done
+
+.PHONY: test unitTest
 
 ########################################################################
 #                  Installation of the addlibs file                    #

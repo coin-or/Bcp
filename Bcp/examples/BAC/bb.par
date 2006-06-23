@@ -1,0 +1,122 @@
+// Last edit: 12/27/05
+//
+// Name:     bb.par
+// Author:   Francois Margot
+//           Tepper School of Business
+//           Carnegie Mellon University, Pittsburgh, PA 15213
+//           email: fmargot@andrew.cmu.edu
+// Date:     12/28/03
+//-----------------------------------------------------------------------------
+// Copyright (C) 2003, Francois Margot, International Business Machines
+// Corporation and others.  All Rights Reserved.
+
+/***************************************************************************/
+// VERBOSITY:
+
+BCP_VerbosityShutUp			1  // 0: regular output
+
+BCP_ReportWhenDefaultIsExecuted 	0  // 1: print a message when default
+                                           // functions are called
+
+BCP_TmVerb_SingleLineInfoFrequency 	1  // k: print the info line every
+                                           // k nodes 
+                                           // Default : 0 (disabled)
+
+BCP_LpVerb_RelaxedSolution              0  // 1: display LP sol at each iter
+
+BCP_LpVerb_FinalRelaxedSolution         0  // 1: display LP sol of final iter
+
+BCP_TmVerb_BestFeasibleSolution         0  // 1: display best sol at the end
+
+/***************************************************************************/
+//  MAX CPU TIME:
+
+BCP_MaxRunTime                          3600 // Max cpu time (in sec)
+					     // Default : 3600
+
+/***************************************************************************/
+//  NUMERICAL ACCURACY:
+
+BCP_Granularity 			.99 // Lower bound on the minimum 
+					    // difference between two feasible 
+					    // solutions
+					    // Default: 1e-8
+
+BCP_IntegerTolerance			1e-5 // Tolerance for a number to be 
+                                             // considered integer
+					     // Default: 1e-5
+
+/***************************************************************************/
+//  TREE SEARCH STRATEGY:
+
+BCP_TreeSearchStrategy 			2  // 0: Best Bound 
+					   // 1: BFS 
+					   // 2: DFS
+				   	   // Default: 1
+
+BCP_ChildPreference 			0  // 0 : lowest lp bound
+					   // 1: highest lp bnd 
+					   // 2: most fractional
+					   // 3: least fractional
+					   // Default : 0
+
+BCP_UnconditionalDiveProbability 	-1 // Diving probability
+                                           // -1: no diving
+                                           // Default: 0.02
+
+BCP_QualityRatioToAllowDiving_HasUB     -1 // Ratio to allow diving when UB
+                                           // -1: No diving
+                                           // Default: 1.2 
+
+BCP_QualityRatioToAllowDiving_NoUB      -1 // Ratio to allow diving when no UB
+                                           // -1: No diving
+                                           // Default: 2.0 
+
+/***************************************************************************/
+//  BRANCHING:
+
+
+BCP_MaxPresolveIter 			-1 // Perform strong branching if non
+					   // negative
+					   // Default: 100000
+
+BCP_StrongBranch_CloseToHalfNum 	1  // Number of candidates variables
+					   // with value close to 0.5
+					   // selected for strong branching
+				           // Default: 3
+
+BCP_StrongBranch_CloseToOneNum 		0  // Number of candidates variables
+					   // with value close to 1
+					   // selected for strong branching
+					   // Default: 3
+
+/***************************************************************************/
+//  CONSTRAINT MANAGEMENT:
+
+BCP_IneffectiveConstraints		1  // 0: keep all constraints
+					   // 1: based on non zero slack  
+				   	   // 2: based on zero dual val
+					   // Default: 2
+
+BCP_IneffectiveBeforeDelete 		1  // Number of iterations a cut  
+                                           // is considered ineffective before 
+					   // it is deleted
+					   // Default: 1
+
+BCP_MaxCutsAddedPerIteration		100000	// Default: 100000
+
+
+/***************************************************************************/
+//  VARIABLE FIXING:
+
+BCP_DoReducedCostFixingAtZero 		1  // 1: reduced cost fixing for 
+					   // variables with value 0
+
+BCP_DoReducedCostFixingAtAnything 	1  // 1: red cost fixing for all
+					   // variables
+
+/***************************************************************************/
+//  MESSAGE PASSING:
+
+BCP_MessagePassingIsSerial 		1  // 1: serial message passing
+

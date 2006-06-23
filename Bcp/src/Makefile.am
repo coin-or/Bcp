@@ -152,18 +152,17 @@ libBcp_la_SOURCES += include/BCP_vector_int.hpp
 libBcp_la_SOURCES += include/BCP_vector_short.hpp
 libBcp_la_SOURCES += include/BcpConfig.h
 
+libBcp_la_SOURCES += Member/BCP_message_single.cpp
+libBcp_la_SOURCES += include/BCP_message_single.hpp
+
 if COIN_HAS_MPI
-	libBcp_la_SOURCES += Member/BCP_message_mpi.cpp
-	libBcp_la_SOURCES += include/BCP_message_mpi.hpp
-else
-#	if COIN_HAS_PVM
-#		libBcp_la_SOURCES += Member/BCP_message_pvm.cpp
-#		libBcp_la_SOURCES += include/BCP_message_pvm.hpp
-#	else
-		libBcp_la_SOURCES += Member/BCP_message_single.cpp
-		libBcp_la_SOURCES += include/BCP_message_single.hpp
-#	endif
+libBcp_la_SOURCES += Member/BCP_message_mpi.cpp
+libBcp_la_SOURCES += include/BCP_message_mpi.hpp
 endif
+#if COIN_HAS_PVM
+#libBcp_la_SOURCES += Member/BCP_message_pvm.cpp
+#libBcp_la_SOURCES += include/BCP_message_pvm.hpp
+#endif
 
 # This is for libtool (on Windows)
 libBcp_la_LDFLAGS = $(LT_LDFLAGS)

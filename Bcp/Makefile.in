@@ -51,15 +51,36 @@ PRE_UNINSTALL = :
 POST_UNINSTALL = :
 build_triplet = @build@
 host_triplet = @host@
+
+# We don't want to compile the test subdirectory, unless the test target is
+# specified.  But we need to list it as subdirectory to make sure that it is
+# included in the tarball
+@ALWAYS_FALSE@am__append_1 = test
 DIST_COMMON = README $(am__configure_deps) \
 	$(srcdir)/../BuildTools/Makemain.inc $(srcdir)/../config.guess \
 	$(srcdir)/../config.sub $(srcdir)/../install-sh \
 	$(srcdir)/../ltmain.sh $(srcdir)/../missing \
 	$(srcdir)/Makefile.am $(srcdir)/Makefile.in \
 	$(srcdir)/bcp_addlibs.txt.in $(top_srcdir)/configure \
+	$(top_srcdir)/examples/BAC/LP/BB_lp.cpp \
+	$(top_srcdir)/examples/BAC/Member/BB.cpp \
+	$(top_srcdir)/examples/BAC/Member/BB_cut.cpp \
+	$(top_srcdir)/examples/BAC/Member/BB_init.cpp \
+	$(top_srcdir)/examples/BAC/Member/BB_user_data.cpp \
+	$(top_srcdir)/examples/BAC/TM/BB_tm.cpp \
+	$(top_srcdir)/examples/BAC/bac.lp \
+	$(top_srcdir)/examples/BAC/bac.mps \
+	$(top_srcdir)/examples/BAC/bac.pdf \
+	$(top_srcdir)/examples/BAC/bb.par \
+	$(top_srcdir)/examples/BAC/include/BB.hpp \
+	$(top_srcdir)/examples/BAC/include/BB_cut.hpp \
+	$(top_srcdir)/examples/BAC/include/BB_init.hpp \
+	$(top_srcdir)/examples/BAC/include/BB_lp.hpp \
+	$(top_srcdir)/examples/BAC/include/BB_tm.hpp \
+	$(top_srcdir)/examples/BAC/include/BB_user_data.hpp \
 	$(top_srcdir)/inc/config_bcp.h.in AUTHORS INSTALL TODO
-@HAVE_EXTERNALS_TRUE@am__append_1 = Externals
-@HAVE_EXTERNALS_TRUE@am__append_2 = .Externals-stamp
+@HAVE_EXTERNALS_TRUE@am__append_2 = Externals
+@HAVE_EXTERNALS_TRUE@am__append_3 = .Externals-stamp
 subdir = .
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/acinclude.m4 \
@@ -70,7 +91,13 @@ am__CONFIG_DISTCLEAN_FILES = config.status config.cache config.log \
  configure.lineno configure.status.lineno
 mkinstalldirs = $(install_sh) -d
 CONFIG_HEADER = $(top_builddir)/inc/config_bcp.h
-CONFIG_CLEAN_FILES = bcp_addlibs.txt
+CONFIG_CLEAN_FILES = bcp_addlibs.txt test/BAC/LP/BB_lp.cpp \
+	test/BAC/TM/BB_tm.cpp test/BAC/Member/BB_user_data.cpp \
+	test/BAC/Member/BB_init.cpp test/BAC/Member/BB.cpp \
+	test/BAC/Member/BB_cut.cpp test/BAC/include/BB_user_data.hpp \
+	test/BAC/include/BB_lp.hpp test/BAC/include/BB_init.hpp \
+	test/BAC/include/BB_tm.hpp test/BAC/include/BB.hpp \
+	test/BAC/include/BB_cut.hpp
 SOURCES =
 DIST_SOURCES =
 RECURSIVE_TARGETS = all-recursive check-recursive dvi-recursive \
@@ -81,7 +108,7 @@ RECURSIVE_TARGETS = all-recursive check-recursive dvi-recursive \
 	uninstall-recursive
 ETAGS = etags
 CTAGS = ctags
-DIST_SUBDIRS = $(SUBDIRS)
+DIST_SUBDIRS = src test
 DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
 distdir = $(PACKAGE)-$(VERSION)
 top_distdir = $(distdir)
@@ -251,15 +278,7 @@ AUTOMAKE_OPTIONS = foreign
 ########################################################################
 #                          Subdirectories                              #
 ########################################################################
-SUBDIRS = src
-
-# We don't want to compile the test subdirectory, unless the test target is
-# specified.  But we need to list it as subdirectory to make sure that it is
-# included in the tarball
-
-#if ALWAYS_FALSE
-#  SUBDIRS += test
-#endif
+SUBDIRS = src $(am__append_1)
 
 ########################################################################
 #             Additional files to be included in tarball               #
@@ -274,24 +293,12 @@ EXTRA_DIST = doc/flow-lpfathom.fig doc/man.pdf doc/man.tex \
 	doc/man.ps doc/man-mcp.tex doc/man-lp.tex doc/man-param.tex \
 	doc/man-mkc.tex doc/bcp.eps doc/man-tm.tex doc/flow-lploop.eps \
 	doc/flow-lploop.fig doc/flow.eps doc/flow.fig \
-	doc/man-intro.tex doc/man-develop.tex $(am__append_1)
+	doc/man-intro.tex doc/man-develop.tex $(am__append_2)
 
 ########################################################################
 #                           Extra Targets                              #
 ########################################################################
-
-#test: all
-#	cd test; make test
-#
-#unitTest: test
-#
-#clean-local:
-#	if test -r test/Makefile; then cd test; make clean; fi
-#
-#distclean-local:
-#	if test -r test/Makefile; then cd test; make distclean; fi
-#
-#.PHONY: test unitTest
+TESTS = BAC
 
 ########################################################################
 #                  Installation of the addlibs file                    #
@@ -303,7 +310,7 @@ addlibsfile = bcp_addlibs.txt
 ########################################################################
 
 # Files that are generated and should be cleaned with make distclean
-DISTCLEANFILES = $(am__append_2) $(VPATH_DISTCLEANFILES)
+DISTCLEANFILES = $(am__append_3) $(VPATH_DISTCLEANFILES)
 all: all-recursive
 
 .SUFFIXES:
@@ -502,10 +509,83 @@ GTAGS:
 distclean-tags:
 	-rm -f TAGS ID GTAGS GRTAGS GSYMS GPATH tags
 
+check-TESTS: $(TESTS)
+	@failed=0; all=0; xfail=0; xpass=0; skip=0; \
+	srcdir=$(srcdir); export srcdir; \
+	list='$(TESTS)'; \
+	if test -n "$$list"; then \
+	  for tst in $$list; do \
+	    if test -f ./$$tst; then dir=./; \
+	    elif test -f $$tst; then dir=; \
+	    else dir="$(srcdir)/"; fi; \
+	    if $(TESTS_ENVIRONMENT) $${dir}$$tst; then \
+	      all=`expr $$all + 1`; \
+	      case " $(XFAIL_TESTS) " in \
+	      *" $$tst "*) \
+		xpass=`expr $$xpass + 1`; \
+		failed=`expr $$failed + 1`; \
+		echo "XPASS: $$tst"; \
+	      ;; \
+	      *) \
+		echo "PASS: $$tst"; \
+	      ;; \
+	      esac; \
+	    elif test $$? -ne 77; then \
+	      all=`expr $$all + 1`; \
+	      case " $(XFAIL_TESTS) " in \
+	      *" $$tst "*) \
+		xfail=`expr $$xfail + 1`; \
+		echo "XFAIL: $$tst"; \
+	      ;; \
+	      *) \
+		failed=`expr $$failed + 1`; \
+		echo "FAIL: $$tst"; \
+	      ;; \
+	      esac; \
+	    else \
+	      skip=`expr $$skip + 1`; \
+	      echo "SKIP: $$tst"; \
+	    fi; \
+	  done; \
+	  if test "$$failed" -eq 0; then \
+	    if test "$$xfail" -eq 0; then \
+	      banner="All $$all tests passed"; \
+	    else \
+	      banner="All $$all tests behaved as expected ($$xfail expected failures)"; \
+	    fi; \
+	  else \
+	    if test "$$xpass" -eq 0; then \
+	      banner="$$failed of $$all tests failed"; \
+	    else \
+	      banner="$$failed of $$all tests did not behave as expected ($$xpass unexpected passes)"; \
+	    fi; \
+	  fi; \
+	  dashes="$$banner"; \
+	  skipped=""; \
+	  if test "$$skip" -ne 0; then \
+	    skipped="($$skip tests were not run)"; \
+	    test `echo "$$skipped" | wc -c` -le `echo "$$banner" | wc -c` || \
+	      dashes="$$skipped"; \
+	  fi; \
+	  report=""; \
+	  if test "$$failed" -ne 0 && test -n "$(PACKAGE_BUGREPORT)"; then \
+	    report="Please report to $(PACKAGE_BUGREPORT)"; \
+	    test `echo "$$report" | wc -c` -le `echo "$$banner" | wc -c` || \
+	      dashes="$$report"; \
+	  fi; \
+	  dashes=`echo "$$dashes" | sed s/./=/g`; \
+	  echo "$$dashes"; \
+	  echo "$$banner"; \
+	  test -z "$$skipped" || echo "$$skipped"; \
+	  test -z "$$report" || echo "$$report"; \
+	  echo "$$dashes"; \
+	  test "$$failed" -eq 0; \
+	else :; fi
+
 distdir: $(DISTFILES)
 	$(am__remove_distdir)
 	mkdir $(distdir)
-	$(mkdir_p) $(distdir)/. $(distdir)/.. $(distdir)/../BuildTools $(distdir)/doc $(distdir)/inc
+	$(mkdir_p) $(distdir)/. $(distdir)/.. $(distdir)/../BuildTools $(distdir)/doc $(distdir)/examples/BAC $(distdir)/examples/BAC/LP $(distdir)/examples/BAC/Member $(distdir)/examples/BAC/TM $(distdir)/examples/BAC/include $(distdir)/inc
 	@srcdirstrip=`echo "$(srcdir)" | sed 's|.|.|g'`; \
 	topsrcdirstrip=`echo "$(top_srcdir)" | sed 's|.|.|g'`; \
 	list='$(DISTFILES)'; for file in $$list; do \
@@ -645,6 +725,7 @@ distcleancheck: distclean
 	       $(distcleancheck_listfiles) ; \
 	       exit 1; } >&2
 check-am: all-am
+	$(MAKE) $(AM_MAKEFLAGS) check-TESTS
 check: check-recursive
 all-am: Makefile
 installdirs: installdirs-recursive
@@ -676,13 +757,13 @@ maintainer-clean-generic:
 	@echo "it deletes files that may require special tools to rebuild."
 clean: clean-recursive
 
-clean-am: clean-generic clean-libtool mostlyclean-am
+clean-am: clean-generic clean-libtool clean-local mostlyclean-am
 
 distclean: distclean-recursive
 	-rm -f $(am__CONFIG_DISTCLEAN_FILES)
 	-rm -f Makefile
 distclean-am: clean-am distclean-generic distclean-hdr \
-	distclean-libtool distclean-tags
+	distclean-libtool distclean-local distclean-tags
 
 dvi: dvi-recursive
 
@@ -727,21 +808,41 @@ uninstall-am: uninstall-info-am uninstall-local
 uninstall-info: uninstall-info-recursive
 
 .PHONY: $(RECURSIVE_TARGETS) CTAGS GTAGS all all-am am--refresh check \
-	check-am clean clean-generic clean-libtool clean-recursive \
-	ctags ctags-recursive dist dist-all dist-bzip2 dist-gzip \
-	dist-shar dist-tarZ dist-zip distcheck distclean \
-	distclean-generic distclean-hdr distclean-libtool \
-	distclean-recursive distclean-tags distcleancheck distdir \
-	distuninstallcheck dvi dvi-am html html-am info info-am \
-	install install-am install-data install-data-am install-exec \
-	install-exec-am install-exec-local install-info \
-	install-info-am install-man install-strip installcheck \
-	installcheck-am installdirs installdirs-am maintainer-clean \
-	maintainer-clean-generic maintainer-clean-recursive \
-	mostlyclean mostlyclean-generic mostlyclean-libtool \
-	mostlyclean-recursive pdf pdf-am ps ps-am tags tags-recursive \
-	uninstall uninstall-am uninstall-info-am uninstall-local
+	check-TESTS check-am clean clean-generic clean-libtool \
+	clean-local clean-recursive ctags ctags-recursive dist \
+	dist-all dist-bzip2 dist-gzip dist-shar dist-tarZ dist-zip \
+	distcheck distclean distclean-generic distclean-hdr \
+	distclean-libtool distclean-local distclean-recursive \
+	distclean-tags distcleancheck distdir distuninstallcheck dvi \
+	dvi-am html html-am info info-am install install-am \
+	install-data install-data-am install-exec install-exec-am \
+	install-exec-local install-info install-info-am install-man \
+	install-strip installcheck installcheck-am installdirs \
+	installdirs-am maintainer-clean maintainer-clean-generic \
+	maintainer-clean-recursive mostlyclean mostlyclean-generic \
+	mostlyclean-libtool mostlyclean-recursive pdf pdf-am ps ps-am \
+	tags tags-recursive uninstall uninstall-am uninstall-info-am \
+	uninstall-local
 
+
+test: all
+	for t in $(TESTS); do \
+		(cd test/$$t; make test); \
+	done
+
+unitTest: test
+
+clean-local:
+	for t in $(TESTS); do \
+		(if test -r test/$$t/Makefile; then cd test/$$t; make clean; fi); \
+	done
+
+distclean-local:
+	for t in $(TESTS); do \
+		(if test -r test/$$t/Makefile; then cd test/$$t; make distclean; fi); \
+	done
+
+.PHONY: test unitTest
 
 install-exec-local:
 	$(install_sh_DATA) $(addlibsfile) $(DESTDIR)$(libdir)/$(addlibsfile)

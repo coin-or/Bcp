@@ -6,6 +6,7 @@
 // This file is prepared for doxygen.
 
 #include "BCP_error.hpp"
+#include "BCP_message_single.hpp"
 
 class BCP_buffer;
 
@@ -56,7 +57,9 @@ public:
        environments are single and PVM, the default is single. To use PVM, the
        user has to override this method and return a pointer to a new
        <code>BCP_pvm_environment</code> object. */
-   virtual BCP_message_environment * msgenv_init(int argc, char* argv[]);
+   virtual BCP_message_environment * msgenv_init(int argc, char* argv[]) {
+	  return new BCP_single_environment;
+   }
    /*@}*/
 
    //--------------------------------------------------------------------------
@@ -104,10 +107,12 @@ public:
 
 //#############################################################################
 
-/** This function must return a pointer to an initializer object. That object
-    should be derived from the USER_initialize class. Its
-    member methods will be invoked to initialize the user controlled parts of
-    the branch-and-cut-and-price procedure. */
-USER_initialize * BCP_user_init();
+/** This is the function the user must invoke when (s)he is ready to turn
+    contrl over to BCP. The arguments of the function are the command line
+    arguments and a pointer to an initializer object. That object should be
+    derived from the USER_initialize class. Its member methods will be invoked
+    to initialize the user controlled parts of the branch-and-cut-and-price
+    procedure. */
+int bcp_main(int argc, char* argv[], USER_initialize* user_init);
 
 #endif

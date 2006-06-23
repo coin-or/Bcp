@@ -95,7 +95,7 @@ BCP_mpi_environment::check_error(const int code, const char* str) const {
 //-----------------------------------------------------------------------------
 
 BCP_proc_id*
-BCP_mpi_environment::register_process() {
+BCP_mpi_environment::register_process(USER_initialize* user_init) {
 
    int pid, num_procs;
    MPI_Comm_rank(MPI_COMM_WORLD, &pid);

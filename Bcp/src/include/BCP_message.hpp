@@ -15,6 +15,7 @@
 //#############################################################################
 
 class BCP_buffer;
+class USER_initialize;
 
 //#############################################################################
 
@@ -188,7 +189,7 @@ public:
    /*@{*/
    /** A process can register (receive its process id) with the message
        passing environment. */
-   virtual BCP_proc_id* register_process() = 0;
+   virtual BCP_proc_id* register_process(USER_initialize* user_init) = 0;
    /*@}*/
    /**@name Identify parent process */
    /*@{*/

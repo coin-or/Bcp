@@ -81,10 +81,8 @@ BCP_single_environment::~BCP_single_environment()
 //-----------------------------------------------------------------------------
 
 BCP_proc_id*
-BCP_single_environment::register_process()
+BCP_single_environment::register_process(USER_initialize* user_init)
 {
-	USER_initialize* user_init = BCP_user_init();
-
 	// OK, the TM invoked registration. Now this function takes over and
 	// becomes the driver for ALL `virtual' processes.
 	//--------------------------------------------------------------------------

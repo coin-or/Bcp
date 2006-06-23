@@ -28,7 +28,7 @@ public:
    BCP_pvm_environment() {}
    ~BCP_pvm_environment();
    
-   BCP_proc_id* register_process();
+   BCP_proc_id* register_process(USER_initialize* user_init);
    BCP_proc_id* parent_process();
 
    bool alive(const BCP_proc_id* pid); 

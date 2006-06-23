@@ -54,7 +54,7 @@ public:
    BCP_single_environment() : _argnum(0), _arglist(NULL), _my_id() {}
    virtual ~BCP_single_environment();
    
-   virtual BCP_proc_id* register_process();
+   virtual BCP_proc_id* register_process(USER_initialize* user_init);
    virtual BCP_proc_id* parent_process();
 
    virtual bool alive(const BCP_proc_id* pid); 

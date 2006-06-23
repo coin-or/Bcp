@@ -20543,41 +20543,23 @@ fi
 
 # In this case, the source code is taken from the Bcp examples directory
 
-#AC_CONFIG_LINKS(test/AbcBranchActual.cpp:examples/Abc/AbcBranchActual.cpp
-#                test/AbcBranchActual.h:examples/Abc/AbcBranchActual.h
-#                test/AbcBranchBase.cpp:examples/Abc/AbcBranchBase.cpp
-#                test/AbcBranchBase.h:examples/Abc/AbcBranchBase.h
-#                test/AbcCutGenerator.cpp:examples/Abc/AbcCutGenerator.cpp
-#                test/AbcCutGenerator.h:examples/Abc/AbcCutGenerator.h
-#                test/AbcHeuristic.cpp:examples/Abc/AbcHeuristic.cpp
-#                test/AbcHeuristic.h:examples/Abc/AbcHeuristic.h
-#                test/AbcMain.cpp:examples/Abc/AbcMain.cpp
-#                test/AbcMessage.cpp:examples/Abc/AbcMessage.cpp
-#                test/AbcMessage.h:examples/Abc/AbcMessage.h
-#                test/AbcModel.cpp:examples/Abc/AbcModel.cpp
-#                test/AbcModel.h:examples/Abc/AbcModel.h
-#                test/AbcNodeDesc.h:examples/Abc/AbcNodeDesc.h
-#                test/AbcParams.cpp:examples/Abc/AbcParams.cpp
-#                test/AbcParams.h:examples/Abc/AbcParams.h
-#                test/AbcSolution.cpp:examples/Abc/AbcSolution.cpp
-#                test/AbcSolution.h:examples/Abc/AbcSolution.h
-#                test/AbcTreeNode.cpp:examples/Abc/AbcTreeNode.cpp
-#                test/AbcTreeNode.h:examples/Abc/AbcTreeNode.h)
-#
-## In case this is a VPATH configuration we need to make sure that the
-## input files for the examples are available in the VPATH directory.
-#
-## ToDo
-##AC_COIN_VPATH_LINK(examples/Abc/abc.par)
-##AC_COIN_VPATH_LINK(examples/input.130)
-#
+                                                                                                                                                                ac_config_links="$ac_config_links test/BAC/LP/BB_lp.cpp:examples/BAC/LP/BB_lp.cpp test/BAC/TM/BB_tm.cpp:examples/BAC/TM/BB_tm.cpp test/BAC/Member/BB_user_data.cpp:examples/BAC/Member/BB_user_data.cpp test/BAC/Member/BB_init.cpp:examples/BAC/Member/BB_init.cpp test/BAC/Member/BB.cpp:examples/BAC/Member/BB.cpp test/BAC/Member/BB_cut.cpp:examples/BAC/Member/BB_cut.cpp test/BAC/bb.par:examples/BAC/bb.par test/BAC/bac.lp:examples/BAC/bac.lp test/BAC/bac.mps:examples/BAC/bac.mps test/BAC/bac.pdf:examples/BAC/bac.pdf test/BAC/include/BB_user_data.hpp:examples/BAC/include/BB_user_data.hpp test/BAC/include/BB_lp.hpp:examples/BAC/include/BB_lp.hpp test/BAC/include/BB_init.hpp:examples/BAC/include/BB_init.hpp test/BAC/include/BB_tm.hpp:examples/BAC/include/BB_tm.hpp test/BAC/include/BB.hpp:examples/BAC/include/BB.hpp test/BAC/include/BB_cut.hpp:examples/BAC/include/BB_cut.hpp"
+
+
+# In case this is a VPATH configuration we need to make sure that the
+# input files for the examples are available in the VPATH directory.
+
+# ToDo
+#AC_COIN_VPATH_LINK(examples/Abc/abc.par)
+#AC_COIN_VPATH_LINK(examples/input.130)
+
 ##############################################################################
 #                   Finishing up by writing all the output                   #
 ##############################################################################
 
 # Here list all the files that configure should create (except for the
 # configuration header file)
-                              ac_config_files="$ac_config_files Makefile src/Makefile bcp_addlibs.txt"
+                                        ac_config_files="$ac_config_files Makefile src/Makefile test/BAC/Makefile bcp_addlibs.txt"
 
 
 # Here put the location and name of the configuration header file
@@ -21105,6 +21087,9 @@ $config_files
 Configuration headers:
 $config_headers
 
+Configuration links:
+$config_links
+
 Configuration commands:
 $config_commands
 
@@ -21225,7 +21210,24 @@ do
   # Handling of arguments.
   "Makefile" ) CONFIG_FILES="$CONFIG_FILES Makefile" ;;
   "src/Makefile" ) CONFIG_FILES="$CONFIG_FILES src/Makefile" ;;
+  "test/BAC/Makefile" ) CONFIG_FILES="$CONFIG_FILES test/BAC/Makefile" ;;
   "bcp_addlibs.txt" ) CONFIG_FILES="$CONFIG_FILES bcp_addlibs.txt" ;;
+  "test/BAC/LP/BB_lp.cpp" ) CONFIG_LINKS="$CONFIG_LINKS test/BAC/LP/BB_lp.cpp:examples/BAC/LP/BB_lp.cpp" ;;
+  "test/BAC/TM/BB_tm.cpp" ) CONFIG_LINKS="$CONFIG_LINKS test/BAC/TM/BB_tm.cpp:examples/BAC/TM/BB_tm.cpp" ;;
+  "test/BAC/Member/BB_user_data.cpp" ) CONFIG_LINKS="$CONFIG_LINKS test/BAC/Member/BB_user_data.cpp:examples/BAC/Member/BB_user_data.cpp" ;;
+  "test/BAC/Member/BB_init.cpp" ) CONFIG_LINKS="$CONFIG_LINKS test/BAC/Member/BB_init.cpp:examples/BAC/Member/BB_init.cpp" ;;
+  "test/BAC/Member/BB.cpp" ) CONFIG_LINKS="$CONFIG_LINKS test/BAC/Member/BB.cpp:examples/BAC/Member/BB.cpp" ;;
+  "test/BAC/Member/BB_cut.cpp" ) CONFIG_LINKS="$CONFIG_LINKS test/BAC/Member/BB_cut.cpp:examples/BAC/Member/BB_cut.cpp" ;;
+  "test/BAC/bb.par" ) CONFIG_LINKS="$CONFIG_LINKS test/BAC/bb.par:examples/BAC/bb.par" ;;
+  "test/BAC/bac.lp" ) CONFIG_LINKS="$CONFIG_LINKS test/BAC/bac.lp:examples/BAC/bac.lp" ;;
+  "test/BAC/bac.mps" ) CONFIG_LINKS="$CONFIG_LINKS test/BAC/bac.mps:examples/BAC/bac.mps" ;;
+  "test/BAC/bac.pdf" ) CONFIG_LINKS="$CONFIG_LINKS test/BAC/bac.pdf:examples/BAC/bac.pdf" ;;
+  "test/BAC/include/BB_user_data.hpp" ) CONFIG_LINKS="$CONFIG_LINKS test/BAC/include/BB_user_data.hpp:examples/BAC/include/BB_user_data.hpp" ;;
+  "test/BAC/include/BB_lp.hpp" ) CONFIG_LINKS="$CONFIG_LINKS test/BAC/include/BB_lp.hpp:examples/BAC/include/BB_lp.hpp" ;;
+  "test/BAC/include/BB_init.hpp" ) CONFIG_LINKS="$CONFIG_LINKS test/BAC/include/BB_init.hpp:examples/BAC/include/BB_init.hpp" ;;
+  "test/BAC/include/BB_tm.hpp" ) CONFIG_LINKS="$CONFIG_LINKS test/BAC/include/BB_tm.hpp:examples/BAC/include/BB_tm.hpp" ;;
+  "test/BAC/include/BB.hpp" ) CONFIG_LINKS="$CONFIG_LINKS test/BAC/include/BB.hpp:examples/BAC/include/BB.hpp" ;;
+  "test/BAC/include/BB_cut.hpp" ) CONFIG_LINKS="$CONFIG_LINKS test/BAC/include/BB_cut.hpp:examples/BAC/include/BB_cut.hpp" ;;
   "depfiles" ) CONFIG_COMMANDS="$CONFIG_COMMANDS depfiles" ;;
   "inc/config_bcp.h" ) CONFIG_HEADERS="$CONFIG_HEADERS inc/config_bcp.h" ;;
   *) { { echo "$as_me:$LINENO: error: invalid argument: $ac_config_target" >&5
@@ -21241,6 +21243,7 @@ done
 if $ac_need_defaults; then
   test "${CONFIG_FILES+set}" = set || CONFIG_FILES=$config_files
   test "${CONFIG_HEADERS+set}" = set || CONFIG_HEADERS=$config_headers
+  test "${CONFIG_LINKS+set}" = set || CONFIG_LINKS=$config_links
   test "${CONFIG_COMMANDS+set}" = set || CONFIG_COMMANDS=$config_commands
 fi
 
@@ -21917,6 +21920,144 @@ echo X$ac_file |
   	  /^X\(\/\/\)$/{ s//\1/; q; }
   	  /^X\(\/\).*/{ s//\1/; q; }
   	  s/.*/./; q'`/stamp-h$_am_stamp_count
+done
+_ACEOF
+cat >>$CONFIG_STATUS <<\_ACEOF
+
+#
+# CONFIG_LINKS section.
+#
+
+for ac_file in : $CONFIG_LINKS; do test "x$ac_file" = x: && continue
+  ac_dest=`echo "$ac_file" | sed 's,:.*,,'`
+  ac_source=`echo "$ac_file" | sed 's,[^:]*:,,'`
+
+  { echo "$as_me:$LINENO: linking $srcdir/$ac_source to $ac_dest" >&5
+echo "$as_me: linking $srcdir/$ac_source to $ac_dest" >&6;}
+
+  if test ! -r $srcdir/$ac_source; then
+    { { echo "$as_me:$LINENO: error: $srcdir/$ac_source: file not found" >&5
+echo "$as_me: error: $srcdir/$ac_source: file not found" >&2;}
+   { (exit 1); exit 1; }; }
+  fi
+  rm -f $ac_dest
+
+  # Make relative symlinks.
+  ac_dest_dir=`(dirname "$ac_dest") 2>/dev/null ||
+$as_expr X"$ac_dest" : 'X\(.*[^/]\)//*[^/][^/]*/*$' \| \
+	 X"$ac_dest" : 'X\(//\)[^/]' \| \
+	 X"$ac_dest" : 'X\(//\)$' \| \
+	 X"$ac_dest" : 'X\(/\)' \| \
+	 .     : '\(.\)' 2>/dev/null ||
+echo X"$ac_dest" |
+    sed '/^X\(.*[^/]\)\/\/*[^/][^/]*\/*$/{ s//\1/; q; }
+  	  /^X\(\/\/\)[^/].*/{ s//\1/; q; }
+  	  /^X\(\/\/\)$/{ s//\1/; q; }
+  	  /^X\(\/\).*/{ s//\1/; q; }
+  	  s/.*/./; q'`
+  { if $as_mkdir_p; then
+    mkdir -p "$ac_dest_dir"
+  else
+    as_dir="$ac_dest_dir"
+    as_dirs=
+    while test ! -d "$as_dir"; do
+      as_dirs="$as_dir $as_dirs"
+      as_dir=`(dirname "$as_dir") 2>/dev/null ||
+$as_expr X"$as_dir" : 'X\(.*[^/]\)//*[^/][^/]*/*$' \| \
+	 X"$as_dir" : 'X\(//\)[^/]' \| \
+	 X"$as_dir" : 'X\(//\)$' \| \
+	 X"$as_dir" : 'X\(/\)' \| \
+	 .     : '\(.\)' 2>/dev/null ||
+echo X"$as_dir" |
+    sed '/^X\(.*[^/]\)\/\/*[^/][^/]*\/*$/{ s//\1/; q; }
+  	  /^X\(\/\/\)[^/].*/{ s//\1/; q; }
+  	  /^X\(\/\/\)$/{ s//\1/; q; }
+  	  /^X\(\/\).*/{ s//\1/; q; }
+  	  s/.*/./; q'`
+    done
+    test ! -n "$as_dirs" || mkdir $as_dirs
+  fi || { { echo "$as_me:$LINENO: error: cannot create directory \"$ac_dest_dir\"" >&5
+echo "$as_me: error: cannot create directory \"$ac_dest_dir\"" >&2;}
+   { (exit 1); exit 1; }; }; }
+
+  ac_builddir=.
+
+if test "$ac_dest_dir" != .; then
+  ac_dir_suffix=/`echo "$ac_dest_dir" | sed 's,^\.[\\/],,'`
+  # A "../" for each directory in $ac_dir_suffix.
+  ac_top_builddir=`echo "$ac_dir_suffix" | sed 's,/[^\\/]*,../,g'`
+else
+  ac_dir_suffix= ac_top_builddir=
+fi
+
+case $srcdir in
+  .)  # No --srcdir option.  We are building in place.
+    ac_srcdir=.
+    if test -z "$ac_top_builddir"; then
+       ac_top_srcdir=.
+    else
+       ac_top_srcdir=`echo $ac_top_builddir | sed 's,/$,,'`
+    fi ;;
+  [\\/]* | ?:[\\/]* )  # Absolute path.
+    ac_srcdir=$srcdir$ac_dir_suffix;
+    ac_top_srcdir=$srcdir ;;
+  *) # Relative path.
+    ac_srcdir=$ac_top_builddir$srcdir$ac_dir_suffix
+    ac_top_srcdir=$ac_top_builddir$srcdir ;;
+esac
+
+# Do not use `cd foo && pwd` to compute absolute paths, because
+# the directories may not exist.
+case `pwd` in
+.) ac_abs_builddir="$ac_dest_dir";;
+*)
+  case "$ac_dest_dir" in
+  .) ac_abs_builddir=`pwd`;;
+  [\\/]* | ?:[\\/]* ) ac_abs_builddir="$ac_dest_dir";;
+  *) ac_abs_builddir=`pwd`/"$ac_dest_dir";;
+  esac;;
+esac
+case $ac_abs_builddir in
+.) ac_abs_top_builddir=${ac_top_builddir}.;;
+*)
+  case ${ac_top_builddir}. in
+  .) ac_abs_top_builddir=$ac_abs_builddir;;
+  [\\/]* | ?:[\\/]* ) ac_abs_top_builddir=${ac_top_builddir}.;;
+  *) ac_abs_top_builddir=$ac_abs_builddir/${ac_top_builddir}.;;
+  esac;;
+esac
+case $ac_abs_builddir in
+.) ac_abs_srcdir=$ac_srcdir;;
+*)
+  case $ac_srcdir in
+  .) ac_abs_srcdir=$ac_abs_builddir;;
+  [\\/]* | ?:[\\/]* ) ac_abs_srcdir=$ac_srcdir;;
+  *) ac_abs_srcdir=$ac_abs_builddir/$ac_srcdir;;
+  esac;;
+esac
+case $ac_abs_builddir in
+.) ac_abs_top_srcdir=$ac_top_srcdir;;
+*)
+  case $ac_top_srcdir in
+  .) ac_abs_top_srcdir=$ac_abs_builddir;;
+  [\\/]* | ?:[\\/]* ) ac_abs_top_srcdir=$ac_top_srcdir;;
+  *) ac_abs_top_srcdir=$ac_abs_builddir/$ac_top_srcdir;;
+  esac;;
+esac
+
+
+  case $srcdir in
+  [\\/$]* | ?:[\\/]* ) ac_rel_source=$srcdir/$ac_source ;;
+      *) ac_rel_source=$ac_top_builddir$srcdir/$ac_source ;;
+  esac
+
+  # Try a symlink, then a hard link, then a copy.
+  ln -s $ac_rel_source $ac_dest 2>/dev/null ||
+    ln $srcdir/$ac_source $ac_dest 2>/dev/null ||
+    cp -p $srcdir/$ac_source $ac_dest ||
+    { { echo "$as_me:$LINENO: error: cannot link or copy $srcdir/$ac_source to $ac_dest" >&5
+echo "$as_me: error: cannot link or copy $srcdir/$ac_source to $ac_dest" >&2;}
+   { (exit 1); exit 1; }; }
 done
 _ACEOF
 cat >>$CONFIG_STATUS <<\_ACEOF

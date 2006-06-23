@@ -78,7 +78,7 @@ BCP_pvm_environment::check_error(const int code, const char* str) const {
 //-----------------------------------------------------------------------------
 
 BCP_proc_id*
-BCP_pvm_environment::register_process() {
+BCP_pvm_environment::register_process(USER_initialize* user_init) {
    int pid = pvm_mytid();
    check_error(pid, "pvm_mytid()");
    BCP_proc_id* parent = parent_process();

@@ -34,27 +34,24 @@
 
 //#############################################################################
 
-int bcp_main(int argc, char* argv[])
+int bcp_main(int argc, char* argv[], USER_initialize* user_init)
 {
-   USER_initialize* user_init = BCP_user_init();
-
    BCP_message_environment* msg_env = user_init->msgenv_init(argc, argv);
-   {
-     BCP_single_environment* single_env =
-       dynamic_cast<BCP_single_environment*>(msg_env);
-     if (single_env) {
+   BCP_single_environment* single_env =
+	   dynamic_cast<BCP_single_environment*>(msg_env);
+   if (single_env) {
        // this way when register_process takes over the execution the single
        // environment will have access to the command line arguments and can
        // parse it.
        single_env->set_arguments(argc, argv);
-     }
    }
 
-   BCP_proc_id* my_id = msg_env->register_process();
-   if (my_id == 0) {
-      // Using BCP_single_environment will return '0'.
+   BCP_proc_id* my_id = msg_env->register_process(user_init);
+
+   if (single_env) {
+	   // register process did everything. We just return.
       delete msg_env;
-      throw BCP_fatal_error("Exiting.\n");
+	  return 0;
    }
 
    BCP_proc_id* parent = msg_env->parent_process();
