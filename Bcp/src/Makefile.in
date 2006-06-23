@@ -1283,7 +1283,7 @@ install-exec-local:
 	echo "#ifndef HAVE_CONFIG_H" >bla
 	echo "#define HAVE_CONFIG_H" >>bla
 	echo "#endif" >> bla
-	cat $(srcdir)/$(ConfigHeader) >> bla
+	cat $(srcdir)/include/$(ConfigHeader) >> bla
 	$(install_sh_DATA) bla $(DESTDIR)$(includedir)/$(ConfigHeader)
 	rm -f bla
 

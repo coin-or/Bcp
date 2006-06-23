@@ -19,7 +19,7 @@ SUBDIRS = src
 # included in the tarball
 
 if ALWAYS_FALSE
-  SUBDIRS += test
+  SUBDIRS += test/BAC
 endif
 
 ########################################################################
