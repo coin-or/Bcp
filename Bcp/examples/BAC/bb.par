@@ -1,4 +1,4 @@
-// Last edit: 12/27/05
+// Last edit: 6/23/06
 //
 // Name:     bb.par
 // Author:   Francois Margot
@@ -71,6 +71,9 @@ BCP_QualityRatioToAllowDiving_HasUB     -1 // Ratio to allow diving when UB
 BCP_QualityRatioToAllowDiving_NoUB      -1 // Ratio to allow diving when no UB
                                            // -1: No diving
                                            // Default: 2.0 
+
+BCP_RemoveExploredBranches               1 // Cleanup memory
+                                           // Default: 0
 
 /***************************************************************************/
 //  BRANCHING:
