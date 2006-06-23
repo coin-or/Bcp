@@ -1,8 +1,12 @@
 * text=auto !eol
 Bcp/Makefile.am -text
+Bcp/Makefile.in -text
+Bcp/bcp_addlibs.txt.in -text
 Bcp/configure.ac -text
 Bcp/doc/man.pdf svneol=native#unset
 Bcp/inc/config_bcp.h.in -text
+Bcp/src/Makefile.am -text
+Bcp/src/Makefile.in -text
 Bcp/src/include/BcpConfig.h -text
 /Externals -text
 /Makefile.am -text
