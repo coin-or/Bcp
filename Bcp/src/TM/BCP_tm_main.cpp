@@ -7,6 +7,13 @@
 
 #include "CoinTime.hpp"
 
+#include "BcpConfig.h"
+
+#if HAVE_SYS_RESOURCE_H
+#  include <sys/resources.h>
+#else
+#  define setpriority(x,y,z)
+#endif
 
 #include "BCP_USER.hpp"
 #include "BCP_string.hpp"
@@ -194,7 +201,7 @@ Number of process in parameter file %d != n_proc in mpirun -np %d!\n",
       // delete parent; -- not needed: TM has no parent, it's a 0 pointer
       delete my_id;   my_id = 0;
       delete msg_env;   msg_env = 0;
-      return 0;
+      return;
    }
 
    // Fire up the LP/CG/CP/VG/VP processes

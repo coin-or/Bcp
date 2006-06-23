@@ -38,32 +38,22 @@ public:
 	/*@}*/
 
 private:
-	inline void destroy(iterator pos) {
-		pos->~T();
-	}
-	/** A method used internally to delete a range of objects */
-	void destroy_range(iterator first, iterator last);
-
-	inline void construct(iterator pos) {
-		::new(static_cast<void*>(pos)) T();
-	}
-	inline void construct(iterator pos, const_reference x) {
-		::new(static_cast<void*>(pos)) T(x);
-	}
+	inline void destroy(iterator pos);
+	inline void destroy_range(iterator first, iterator last);
+	inline void construct(iterator pos);
+	inline void construct(iterator pos, const_reference x);
 
 protected:
 	/**@name Internal methods */
 	/*@{*/
+	/** allocate raw, uninitialized memory for <code>len</code> entries. */
+	inline iterator allocate(size_t len);
+	/** Destroy the entries in the vector and free the memory allocated for the
+		vector. */
+	inline void deallocate();
 	/** insert <code>x</code> into the given <code>position</code> in the
 		vector. Reallocate the vector if necessary. */
 	void insert_aux(iterator position, const_reference x);
-	/** allocate raw, uninitialized memory for <code>len</code> entries. */
-	inline iterator allocate(size_t len) {
-		return static_cast<iterator>(::operator new(len * sizeof(T)));
-	}
-	/** Destroy the entries in the vector and free the memory allocated for the
-		vector. */
-	void deallocate();
 	/*@}*/
 
 protected:
@@ -83,11 +73,9 @@ public:
 	/**@name Constructors / Destructor */
 	/*@{*/
 	/** The default constructor initializes the data members as 0 pointers. */
-	BCP_vec() : start(0), finish(0), end_of_storage(0) {}
+	BCP_vec();
 	/** The copy constructor copies over the content of <code>x</code>. */
-	BCP_vec(const BCP_vec<T>& x) : start(0), finish(0), end_of_storage(0) {
-		*this = x;
-	}
+	BCP_vec(const BCP_vec<T>& x);
 	/** Construct a <code>BCP_vec</code> with <code>n</code> elements, all
 		initialized with the second argument (or initialized with the default
 		constructor of <code>T</code> if the second argument is missing). */
@@ -150,7 +138,7 @@ public:
 	/** Reallocate the object to make space for <code>n</code> entries. */
 	void reserve(const size_t n);
 	/** Exchange the contents of the object with that of <code>x</code>. */
-	void swap(BCP_vec<T>& x);
+	inline void swap(BCP_vec<T>& x);
 
 	/** Copy the contents of <code>x</code> into the object and return a
 		reference the the object itself. */
@@ -185,35 +173,24 @@ public:
 
 	/** Append <code>x</code> to the end of the vector. Check if enough space
 		is allocated (reallocate if necessary). */
-	inline void push_back(const_reference x) {
-		if (finish != end_of_storage) {
-			construct(finish++, x);
-		} else
-			insert_aux(finish, x);
-	}
+	inline void push_back(const_reference x);
 	/** Append <code>x</code> to the end of the vector. Does not check if
 		enough space is allcoated. */
-	inline void unchecked_push_back(const_reference x) {
-		construct(finish++, x);
-	}
+	inline void unchecked_push_back(const_reference x);
 	/** Delete the last entry. */
-	inline void pop_back() {
-		destroy(--finish);
-	}
+	inline void pop_back();
 
 	/** Delete every entry. */
-	void clear() {
-		if (start) erase(start, finish);
-	}
+	inline void clear();
 
 	/** Update those entries listed in <code>positions</code> to the given
 		<code>values</code>. The two argument vector must be of equal length.
 		Sanity checks are done on the given positions. */
-	void update(const BCP_vec<int>& positions,
-				const BCP_vec<T>& values);
+	inline void update(const BCP_vec<int>& positions,
+					   const BCP_vec<T>& values);
 	/** Same as the previous method but without sanity checks. */
-	void unchecked_update(const BCP_vec<int>& positions,
-						  const BCP_vec<T>& values);
+	inline void unchecked_update(const BCP_vec<int>& positions,
+								 const BCP_vec<T>& values);
 
 	/*@}*/
 
@@ -222,19 +199,20 @@ public:
 	/**@name Methods for selectively keeping entries */
 	/*@{*/
 	/** Keep only the entry pointed to by <code>pos</code>. */
-	void keep(iterator pos);
+	inline void keep(iterator pos);
 	/** Keep the entries <code>[first,last)</code>. */
-	void keep(iterator first, iterator last);
+	inline void keep(iterator first, iterator last);
 	/** Keep the entries indexed by <code>indices</code>. Abort if the indices
 		are not in increasing order, if there are duplicate indices or if any
 		of the indices is outside of the range <code>[0,size())</code>. */
-	void keep_by_index(const BCP_vec<int>& positions);
+	inline void keep_by_index(const BCP_vec<int>& positions);
 	/** Same as the previous method but without the sanity checks. */
-	void unchecked_keep_by_index(const BCP_vec<int>& positions);
-	/** Like the other <code>keep_by_index</code> method (including sanity
-		checks), just the indices of the entries to be kept are given in
-		<code>[firstpos,lastpos)</code>. */
-	void keep_by_index(const int * firstpos, const int * lastpos);
+	inline void unchecked_keep_by_index(const BCP_vec<int>& positions);
+	/** Keep the entries indexed by the values in
+		<code>[firstpos,lastpos)</code>. Abort if the indices are not in
+		increasing order, if there are duplicate indices or if any of the
+		indices is outside of the range <code>[0,size())</code>. */
+	inline void keep_by_index(const int * firstpos, const int * lastpos);
 	/** Same as the previous method but without the sanity checks. */
 	void unchecked_keep_by_index(const int * firstpos, const int * lastpos);
 	/*@}*/
@@ -244,31 +222,37 @@ public:
 	/**@name Methods for selectively erasing entries */
 	/*@{*/
 	/** Erase the entry pointed to by <code>pos</code>. */
-	void erase(iterator pos);
+	inline void erase(iterator pos);
 	/** Erase the entries <code>[first,last)</code>. */
-	void erase(iterator first, iterator last);
+	inline void erase(iterator first, iterator last);
 	/** Erase the entries indexed by <code>indices</code>. Abort if the indices
 		are not in increasing order, if there are duplicate indices or if any
 		of the indices is outside of the range <code>[0,size())</code>. */
-	void erase_by_index(const BCP_vec<int>& positions);
+	inline void erase_by_index(const BCP_vec<int>& positions);
 	/** Same as the previous method but without the sanity check. */
-	void unchecked_erase_by_index(const BCP_vec<int>& positions);
+	inline void unchecked_erase_by_index(const BCP_vec<int>& positions);
 	/** Like the other <code>erase_by_index</code> method (including sanity
 		checks), just the indices of the entries to be erased are given in
 		<code>[firstpos,lastpos)</code>. */
-	void erase_by_index(const int * firstpos, const int * lastpos);
+	inline void erase_by_index(const int * firstpos, const int * lastpos);
 	/** Same as the previous method but without the sanity checks. */
 	void unchecked_erase_by_index(const int * firstpos, const int * lastpos);
 	/*@}*/
 };
 
-//============================================================================
+//##############################################################################
 
-// template <class T>
-// bool operator==(const BCP_vec<T>& x, const BCP_vec<T>& y);
+template <class T>
+bool operator==(const BCP_vec<T>& x, const BCP_vec<T>& y)
+{
+	return x.size() == y.size() && equal(x.begin(), x.end(), y.begin());
+}
 
-// template <class T>
-// bool operator< (BCP_vec<T>& x, BCP_vec<T>& y);
+template <class T>
+bool operator< (BCP_vec<T>& x, BCP_vec<T>& y)
+{
+	return lexicographical_compare(x.begin(), x.end(), y.begin(), y.end());
+}
 
 //#############################################################################
 
@@ -364,5 +348,7 @@ void keep_ptr_vector_by_index(BCP_vec<T*>& pvec,
 #include "BCP_vector_short.hpp"
 #include "BCP_vector_int.hpp"
 #include "BCP_vector_double.hpp"
+
+#include "BCP_vector_general.hpp"
 
 #endif

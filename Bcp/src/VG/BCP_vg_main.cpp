@@ -4,16 +4,20 @@
 #include <cstdio>
 #include <cerrno>
 
+#include "BcpConfig.h"
+
+#if HAVE_SYS_RESOURCE_H
+#  include <sys/resources.h>
+#else
+#  define setpriority(x,y,z)
+#endif
 
 #include "BCP_USER.hpp"
-
 #include "BCP_error.hpp"
 #include "BCP_buffer.hpp"
 #include "BCP_message.hpp"
 #include "BCP_problem_core.hpp"
-
 #include "BCP_main_fun.hpp"
-
 #include "BCP_vg_user.hpp"
 #include "BCP_vg.hpp"
 

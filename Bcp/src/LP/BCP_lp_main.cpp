@@ -3,6 +3,13 @@
 #include <cfloat>
 #include <cerrno>
 
+#include "BcpConfig.h"
+
+#if HAVE_SYS_RESOURCE_H
+#  include <sys/resources.h>
+#else
+#  define setpriority(x,y,z)
+#endif
 
 #include "BCP_USER.hpp"
 #include "BCP_buffer.hpp"

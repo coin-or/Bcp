@@ -50,6 +50,11 @@
 /* Define to 1 if the Mpi package is used */
 /* #define COIN_HAS_MPI 1 */
 
+/* a few things that exists under unix, but not under windows */
+#include <Windows.h>
+#define gethostname(c, l) { DWORD cnlen = l; GetComputerName(c, &cnlen); }
+#include <process.h>
+
 #endif /* HAVE_CONFIG_H */
 
 #endif /*__HAVE_BCP_CONFIG_H__*/
