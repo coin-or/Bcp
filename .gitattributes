@@ -12,5 +12,11 @@ Bcp/src/include/BcpConfig.h -text
 /Externals -text
 /Makefile.am -text
 /Makefile.in -text
+/config.guess -text
+/config.sub -text
 /configure -text
 /configure.ac -text
+/depcomp -text
+/install-sh -text
+/ltmain.sh -text
+/missing -text
