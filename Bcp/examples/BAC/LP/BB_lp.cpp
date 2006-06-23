@@ -1,4 +1,4 @@
-// Last edit: 2/24/05
+// Last edit: 6/23/06
 //
 // Name:     BB_lp.cpp
 // Author:   Francois Margot
@@ -97,8 +97,14 @@ BB_lp::modify_lp_parameters(OsiSolverInterface* lp, bool in_strong_branching)
      lp->setIntParam(OsiMaxNumIterationHotStart, 50);
    }
 
-   lp->writeMps("lpnode", "mps", 0.0);
-   cout << "LP node written in file lpnode.mps" << endl;
+   // write the current LP in file lpnode.lp
+   lp->writeLp("lpnode", "lp");
+   cout << "LP node written in file lpnode.lp" << endl;
+
+   // to write the current LP file in file lpnode.mps use the following:
+   // lp->writeMps("lpnode", "mps", 0.0);
+   // cout << "LP node written in file lpnode.mps" << endl;
+
 }
 
 /************************************************************************/
@@ -118,9 +124,13 @@ BB_lp::test_feasibility(const BCP_lp_result& lp_result,
     return(0);
   }
   
-  // Don't test feasibility if the node LP was infeasible
+  // Don't test feasibility if the node LP was infeasible or
+  // termination was not clean
 
-  if(getLpProblemPointer()->lp_solver->isProvenPrimalInfeasible()) {
+  if(getLpProblemPointer()->lp_solver->isAbandoned() ||
+     getLpProblemPointer()->lp_solver->isProvenPrimalInfeasible() ||
+     getLpProblemPointer()->lp_solver->isDualObjectiveLimitReached() ||
+     getLpProblemPointer()->lp_solver->isIterationLimitReached()) {
     return(0);
   }
 
@@ -150,17 +160,18 @@ BB_lp::test_feasibility(const BCP_lp_result& lp_result,
     j = (i+1) % cn;
     k = (i+2) % cn;
 
+    cutcoef[0] = 1;
+    cutcoef[1] = 1;
+    cutcoef[2] = 1;
+    cut_nz = 3;
+
     if(x[i] + x[j] + x[k] > 1 + EPS) {
 
       // cut is violated 
 
       cutind[0] = i;
-      cutcoef[0] = 1;
       cutind[1] = j;
-      cutcoef[1] = 1;
       cutind[2] = k;
-      cutcoef[2] = 1;
-      cut_nz = 3;
       
       rcut->setLb(-DBL_MAX);
       rcut->setUb(cutrhs);
