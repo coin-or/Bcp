@@ -18,7 +18,7 @@ the code.
 PROJECT TRAC PAGE
 ============+====
 
-https://projects.coin-or.org/Cgl
+https://projects.coin-or.org/Bcp
 
 Additional introductory material for BCP and other COIN-OR
 modules is available at:
@@ -49,7 +49,8 @@ by typing
 
    make doxydoc
 
-in the main directory of the package, say coin-Pkg. Then open the file 
+in the directory from which you built the package Pkg dowloaded in,
+say coin-Pkg. Then open the file 
 
    coin-Pkg/doxydoc/html/index.html 
 
