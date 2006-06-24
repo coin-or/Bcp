@@ -28,7 +28,8 @@ using namespace std;
 
 int main(int argc, char* argv[])
 {
-	return bcp_main(argc, argv, &(BB_init()));
+	BB_init bb_init;
+	return bcp_main(argc, argv, &bb_init);
 }
 
 /*************************************************************************/

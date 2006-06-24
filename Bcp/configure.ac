@@ -80,6 +80,7 @@ AC_COIN_HAS_USER_LIBRARY([Mpi], [MPI], [mpi.h], [MPI_Irecv])
 # AC_COIN_HAS_USER_LIBRARY([Pvm], [PVM], [pvm3.h], [???])
 
 AC_CHECK_HEADER(sys/resource.h)
+AC_CHECK_HEADER(unistd.h)
 
 ##############################################################################
 #                   VPATH links for example input files                      #
