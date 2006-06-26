@@ -8,6 +8,7 @@ Bcp/doc/man.pdf svneol=native#unset
 Bcp/examples/BAC/AUTHORS -text
 Bcp/examples/BAC/LICENSE -text
 Bcp/examples/BAC/LP/BB_lp.cpp -text
+Bcp/examples/BAC/Makefile.in -text
 Bcp/examples/BAC/Member/BB.cpp -text
 Bcp/examples/BAC/Member/BB_cut.cpp -text
 Bcp/examples/BAC/Member/BB_init.cpp -text
@@ -18,12 +19,14 @@ Bcp/examples/BAC/bac.lp -text
 Bcp/examples/BAC/bac.mps -text
 Bcp/examples/BAC/bac.pdf -text
 Bcp/examples/BAC/bb.par -text
+Bcp/examples/BAC/examplefiles.txt -text
 Bcp/examples/BAC/include/BB.hpp -text
 Bcp/examples/BAC/include/BB_cut.hpp -text
 Bcp/examples/BAC/include/BB_init.hpp -text
 Bcp/examples/BAC/include/BB_lp.hpp -text
 Bcp/examples/BAC/include/BB_tm.hpp -text
 Bcp/examples/BAC/include/BB_user_data.hpp -text
+Bcp/examples/BAC/testfilelist.txt -text
 Bcp/examples/MCF/MCF.cpp -text
 Bcp/examples/MCF/MCF.hpp -text
 Bcp/examples/MCF/MCF.tex -text
