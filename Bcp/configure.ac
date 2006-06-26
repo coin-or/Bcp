@@ -81,31 +81,75 @@ AC_COIN_HAS_USER_LIBRARY([Mpi], [MPI], [mpi.h], [MPI_Irecv])
 
 AC_CHECK_HEADER(sys/resource.h)
 AC_CHECK_HEADER(unistd.h)
+AC_CHECK_FUNCS(gethostname)
+AC_CHECK_FUNCS(getpid)
 
 ##############################################################################
 #                   VPATH links for example input files                      #
 ##############################################################################
+AC_PROG_LN_S
 
-# In this case, the source code is taken from the Bcp examples directory
+AC_DEFUN([COIN_UPPATH],
+[
+if test $1 = . ; then
+	$2=.
+else
+	t=`echo $1 | sed -e 's=/\./=/=g' -e 's=^\./==' -e 's=/\.$==' -e 's=[[^/]]*=..=g'`
+	if test $t = "" ; then
+		t=.
+	fi
+	$2=$t
+fi
+])
+	
+AC_DEFUN([COIN_LINK_FROM_FILELIST], 
+[
+echo Creating links in $1 ...
+mkdir -p $1
+COIN_UPPATH([$1], updir)
+cd $1
+fromdir=$updir/$srcdir/`dirname $2`
+if test -e $updir/$srcdir/$2 ; then
+	for f in `cat $updir/$srcdir/$2` ; do
+		if test ! -e $f ; then
+		   	fdir=`dirname $f`
+		    mkdir -p $fdir
+			COIN_UPPATH([$fdir], uppath)
+			cd $fdir
+		    $LN_S $uppath/$fromdir/$f `basename $f`
+			cd $uppath
+		fi
+	done
+	cd $updir
+fi
+])
 
-AC_CONFIG_LINKS(
-test/BAC/LP/BB_lp.cpp:examples/BAC/LP/BB_lp.cpp
-test/BAC/TM/BB_tm.cpp:examples/BAC/TM/BB_tm.cpp
-test/BAC/Member/BB_user_data.cpp:examples/BAC/Member/BB_user_data.cpp
-test/BAC/Member/BB_init.cpp:examples/BAC/Member/BB_init.cpp
-test/BAC/Member/BB.cpp:examples/BAC/Member/BB.cpp
-test/BAC/Member/BB_cut.cpp:examples/BAC/Member/BB_cut.cpp
-test/BAC/bb.par:examples/BAC/bb.par
-test/BAC/bac.lp:examples/BAC/bac.lp
-test/BAC/bac.mps:examples/BAC/bac.mps
-test/BAC/bac.pdf:examples/BAC/bac.pdf
-test/BAC/include/BB_user_data.hpp:examples/BAC/include/BB_user_data.hpp
-test/BAC/include/BB_lp.hpp:examples/BAC/include/BB_lp.hpp
-test/BAC/include/BB_init.hpp:examples/BAC/include/BB_init.hpp
-test/BAC/include/BB_tm.hpp:examples/BAC/include/BB_tm.hpp
-test/BAC/include/BB.hpp:examples/BAC/include/BB.hpp
-test/BAC/include/BB_cut.hpp:examples/BAC/include/BB_cut.hpp
-)
+AC_DEFUN([COIN_COPY_FROM_FILELIST], 
+[AC_REQUIRE([AC_COIN_CHECK_VPATH])
+if test $coin_vpath_config = yes; then
+	echo Copying example $1 ...
+	mkdir -p $1
+	COIN_UPPATH([$1], updir)
+	cd $1
+	fromdir=$updir/$srcdir/`dirname $2`
+	if test -e $updir/$srcdir/$2 ; then
+		for f in `cat $updir/$srcdir/$2` ; do
+			if test ! -e $f ; then
+		   		fdir=`dirname $f`
+				mkdir -p $fdir
+				COIN_UPPATH([$fdir], uppath)
+				cd $fdir
+				cp -p $uppath/$fromdir/$f `basename $f`
+				cd $uppath
+			fi
+		done
+		cd $updir
+	fi
+fi
+])
+
+COIN_LINK_FROM_FILELIST(test/BAC, examples/BAC/testfiles.txt)
+COIN_COPY_FROM_FILELIST(examples/BAC, examples/BAC/examplefiles.txt)
 
 # In case this is a VPATH configuration we need to make sure that the
 # input files for the examples are available in the VPATH directory.
@@ -113,6 +157,25 @@ test/BAC/include/BB_cut.hpp:examples/BAC/include/BB_cut.hpp
 # ToDo
 #AC_COIN_VPATH_LINK(examples/Abc/abc.par)
 #AC_COIN_VPATH_LINK(examples/input.130)
+
+##############################################################################
+#                   Copy over the examples                                   #
+##############################################################################
+
+AC_DEFUN([AC_COPY_FROM_FILE], 
+[
+	if test -f $2 ; then 
+		AC_MSG_CHECKING(Creating target dir $1)
+	    mkdir -p $1
+		cd $1
+		for f in `cat $srcdir/$2` ; do
+			if test ! -e $srcdir/`dirname $2`/$f ; then
+			    mkdir -p `dirname $f`
+			    $LN_S $srcdir/`dirname $2`/$f $f
+			fi
+		done
+	fi
+])
 
 ##############################################################################
 #                   Finishing up by writing all the output                   #
@@ -123,6 +186,7 @@ test/BAC/include/BB_cut.hpp:examples/BAC/include/BB_cut.hpp
 AC_CONFIG_FILES([Makefile
                  src/Makefile
                  test/BAC/Makefile
+                 examples/BAC/Makefile
 				 bcp_addlibs.txt])
 
 # Here put the location and name of the configuration header file

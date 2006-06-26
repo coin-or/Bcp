@@ -62,22 +62,7 @@ DIST_COMMON = README $(am__configure_deps) \
 	$(srcdir)/../ltmain.sh $(srcdir)/../missing \
 	$(srcdir)/Makefile.am $(srcdir)/Makefile.in \
 	$(srcdir)/bcp_addlibs.txt.in $(top_srcdir)/configure \
-	$(top_srcdir)/examples/BAC/LP/BB_lp.cpp \
-	$(top_srcdir)/examples/BAC/Member/BB.cpp \
-	$(top_srcdir)/examples/BAC/Member/BB_cut.cpp \
-	$(top_srcdir)/examples/BAC/Member/BB_init.cpp \
-	$(top_srcdir)/examples/BAC/Member/BB_user_data.cpp \
-	$(top_srcdir)/examples/BAC/TM/BB_tm.cpp \
-	$(top_srcdir)/examples/BAC/bac.lp \
-	$(top_srcdir)/examples/BAC/bac.mps \
-	$(top_srcdir)/examples/BAC/bac.pdf \
-	$(top_srcdir)/examples/BAC/bb.par \
-	$(top_srcdir)/examples/BAC/include/BB.hpp \
-	$(top_srcdir)/examples/BAC/include/BB_cut.hpp \
-	$(top_srcdir)/examples/BAC/include/BB_init.hpp \
-	$(top_srcdir)/examples/BAC/include/BB_lp.hpp \
-	$(top_srcdir)/examples/BAC/include/BB_tm.hpp \
-	$(top_srcdir)/examples/BAC/include/BB_user_data.hpp \
+	$(top_srcdir)/examples/BAC/Makefile.in \
 	$(top_srcdir)/inc/config_bcp.h.in AUTHORS INSTALL TODO
 @HAVE_EXTERNALS_TRUE@am__append_2 = Externals
 @HAVE_EXTERNALS_TRUE@am__append_3 = .Externals-stamp
@@ -91,13 +76,7 @@ am__CONFIG_DISTCLEAN_FILES = config.status config.cache config.log \
  configure.lineno configure.status.lineno
 mkinstalldirs = $(install_sh) -d
 CONFIG_HEADER = $(top_builddir)/inc/config_bcp.h
-CONFIG_CLEAN_FILES = bcp_addlibs.txt test/BAC/LP/BB_lp.cpp \
-	test/BAC/TM/BB_tm.cpp test/BAC/Member/BB_user_data.cpp \
-	test/BAC/Member/BB_init.cpp test/BAC/Member/BB.cpp \
-	test/BAC/Member/BB_cut.cpp test/BAC/include/BB_user_data.hpp \
-	test/BAC/include/BB_lp.hpp test/BAC/include/BB_init.hpp \
-	test/BAC/include/BB_tm.hpp test/BAC/include/BB.hpp \
-	test/BAC/include/BB_cut.hpp
+CONFIG_CLEAN_FILES = examples/BAC/Makefile bcp_addlibs.txt
 SOURCES =
 DIST_SOURCES =
 RECURSIVE_TARGETS = all-recursive check-recursive dvi-recursive \
@@ -181,6 +160,7 @@ ECHO_T = @ECHO_T@
 EGREP = @EGREP@
 EXEEXT = @EXEEXT@
 F77 = @F77@
+FADDLIBS = @FADDLIBS@
 FFLAGS = @FFLAGS@
 HAVE_EXTERNALS_FALSE = @HAVE_EXTERNALS_FALSE@
 HAVE_EXTERNALS_TRUE = @HAVE_EXTERNALS_TRUE@
@@ -189,6 +169,7 @@ INSTALL_PROGRAM = @INSTALL_PROGRAM@
 INSTALL_SCRIPT = @INSTALL_SCRIPT@
 INSTALL_STRIP_PROGRAM = @INSTALL_STRIP_PROGRAM@
 LDFLAGS = @LDFLAGS@
+LIBEXT = @LIBEXT@
 LIBOBJS = @LIBOBJS@
 LIBS = @LIBS@
 LIBTOOL = @LIBTOOL@
@@ -364,6 +345,8 @@ $(top_srcdir)/inc/config_bcp.h.in: @MAINTAINER_MODE_TRUE@ $(am__configure_deps)
 
 distclean-hdr:
 	-rm -f inc/config_bcp.h inc/stamp-h1
+examples/BAC/Makefile: $(top_builddir)/config.status $(top_srcdir)/examples/BAC/Makefile.in
+	cd $(top_builddir) && $(SHELL) ./config.status $@
 bcp_addlibs.txt: $(top_builddir)/config.status $(srcdir)/bcp_addlibs.txt.in
 	cd $(top_builddir) && $(SHELL) ./config.status $@
 
@@ -585,7 +568,7 @@ check-TESTS: $(TESTS)
 distdir: $(DISTFILES)
 	$(am__remove_distdir)
 	mkdir $(distdir)
-	$(mkdir_p) $(distdir)/. $(distdir)/.. $(distdir)/../BuildTools $(distdir)/doc $(distdir)/examples/BAC $(distdir)/examples/BAC/LP $(distdir)/examples/BAC/Member $(distdir)/examples/BAC/TM $(distdir)/examples/BAC/include $(distdir)/inc
+	$(mkdir_p) $(distdir)/. $(distdir)/.. $(distdir)/../BuildTools $(distdir)/doc $(distdir)/examples/BAC $(distdir)/inc
 	@srcdirstrip=`echo "$(srcdir)" | sed 's|.|.|g'`; \
 	topsrcdirstrip=`echo "$(top_srcdir)" | sed 's|.|.|g'`; \
 	list='$(DISTFILES)'; for file in $$list; do \

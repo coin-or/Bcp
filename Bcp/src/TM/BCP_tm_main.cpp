@@ -8,12 +8,7 @@
 #include "CoinTime.hpp"
 
 #include "BcpConfig.h"
-
-#if HAVE_SYS_RESOURCE_H
-#  include <sys/resources.h>
-#else
-#  define setpriority(x,y,z)
-#endif
+#include "BCP_os.hpp"
 
 #include "BCP_USER.hpp"
 #include "BCP_string.hpp"
@@ -166,7 +161,7 @@ Number of process in parameter file %d != n_proc in mpirun -np %d!\n",
       gethostname(logname + len, 255);
       len = strlen(logname);
       logname[len++] = '-';
-      sprintf(logname + len, "%i", static_cast<int>(getpid()));
+      sprintf(logname + len, "%i", static_cast<int>(GETPID));
       logfile = freopen(logname, "a", stdout);
       if (logfile == 0) {
 	 fprintf(stderr, "Error while redirecting stdout: %i\n", errno);

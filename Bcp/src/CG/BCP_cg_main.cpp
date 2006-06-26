@@ -4,12 +4,7 @@
 #include <cerrno>
 
 #include "BcpConfig.h"
-
-#if HAVE_SYS_RESOURCE_H
-#  include <sys/resources.h>
-#else
-#  define setpriority(x,y,z)
-#endif
+#include "BCP_os.hpp"
 
 #include "BCP_USER.hpp"
 #include "BCP_error.hpp"
@@ -49,7 +44,7 @@ void BCP_cg_main(BCP_message_environment* msg_env, USER_initialize* user_init,
       gethostname(logname + len, 255);
       len = strlen(logname);
       logname[len++] = '-';
-      sprintf(logname + len, "%i", static_cast<int>(getpid()));
+      sprintf(logname + len, "%i", static_cast<int>(GETPID));
       logfile = freopen(logname, "a", stdout);
       if (logfile == 0) {
 	 fprintf(stderr, "Error while redirecting stdout: %i\n", errno);

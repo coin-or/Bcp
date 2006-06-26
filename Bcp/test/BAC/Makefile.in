@@ -54,7 +54,7 @@ am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \
 	$(ACLOCAL_M4)
 mkinstalldirs = $(install_sh) -d
 CONFIG_HEADER = $(top_builddir)/inc/config_bcp.h
-CONFIG_CLEAN_FILES = bb.par bac.lp bac.mps bac.pdf
+CONFIG_CLEAN_FILES =
 PROGRAMS = $(noinst_PROGRAMS)
 nodist_unitTest_OBJECTS = BB_lp.$(OBJEXT) BB_tm.$(OBJEXT) \
 	BB_user_data.$(OBJEXT) BB_init.$(OBJEXT) BB.$(OBJEXT) \
@@ -148,6 +148,7 @@ ECHO_T = @ECHO_T@
 EGREP = @EGREP@
 EXEEXT = @EXEEXT@
 F77 = @F77@
+FADDLIBS = @FADDLIBS@
 FFLAGS = @FFLAGS@
 HAVE_EXTERNALS_FALSE = @HAVE_EXTERNALS_FALSE@
 HAVE_EXTERNALS_TRUE = @HAVE_EXTERNALS_TRUE@
@@ -156,6 +157,7 @@ INSTALL_PROGRAM = @INSTALL_PROGRAM@
 INSTALL_SCRIPT = @INSTALL_SCRIPT@
 INSTALL_STRIP_PROGRAM = @INSTALL_STRIP_PROGRAM@
 LDFLAGS = @LDFLAGS@
+LIBEXT = @LIBEXT@
 LIBOBJS = @LIBOBJS@
 
 # List additional libraries

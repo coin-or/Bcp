@@ -3,44 +3,24 @@
 #ifndef _BCP_OS_H
 #define _BCP_OS_H
 
-// This file is fully docified.
-// There's nothing to docify...
-
-#if (defined(__GNUC__) && defined(__linux__))
-#  include "BCP_linux.hpp"
+//------------------------------------------------------------------------------
+#if HAVE_SYS_RESOURCE_H
+#  include <sys/resources.h>
+#else
+#  define setpriority(x,y,z)
 #endif
-
-#if defined(BLUE_GENE_XLC)
-#  include "BCP_bluegene_xlc.hpp"
+//------------------------------------------------------------------------------
+#if HAVE_UNISTD_H
+#  include <unistd.h>
 #endif
-
-#if defined(__CYGWIN__) && defined(__GNUC__) 
-#  include "BCP_cygwin.hpp"
+#ifndef HAVE_GETHOSTNAME
+#  define gethostname(x,y)
 #endif
-
-#if defined(_AIX43)
-#  include "BCP_aix43.hpp"
+#if HAVE_GETPID
+#  define GETPID (getpid())
+#else
+#  define GETPID (0)
 #endif
-
-#if defined(__hpux)
-#  include "BCP_hpux.hpp"
-#endif
-
-#if defined(__sparc) && defined(__sun)
-#  include "BCP_sunos.hpp"
-#endif
-
-#if defined(__MACH__) && defined(__GNUC__)
-#  include "BCP_MACH.hpp"
-#endif
-
-#if (defined(__GNUC__) && defined(__FreeBSD__))
-#  include "BCP_freebsd.hpp"
-#endif
-
-
-#if defined(_MSC_VER) && (_MSC_VER > 1300)
-#  include "BCP_msvc.hpp"
-#endif
+//------------------------------------------------------------------------------
 
 #endif
