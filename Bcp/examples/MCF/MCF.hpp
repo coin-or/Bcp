@@ -197,6 +197,12 @@ public:
 						const bool before_fathom,
 						BCP_vec<BCP_var*>& new_vars,
 						BCP_vec<BCP_col*>& new_cols);
+	virtual void
+	vars_to_cols(const BCP_vec<BCP_cut*>& cuts,
+				 BCP_vec<BCP_var*>& vars,
+				 BCP_vec<BCP_col*>& cols,
+				 const BCP_lp_result& lpres,
+				 BCP_object_origin origin, bool allow_multiple);
     virtual BCP_branching_decision
     select_branching_candidates(const BCP_lp_result& lpres,
 								const BCP_vec<BCP_var*>& vars,

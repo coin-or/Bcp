@@ -538,7 +538,7 @@ public:
     //-------------------------------------------------------------------------
     /** Convert a set of variables into corresponding columns for
         the current LP relaxation. Converting means to compute for each
-	variable the coefficients corresponding to each cut and create
+		variable the coefficients corresponding to each cut and create
         BCP_col objects that can be added to the formulation.
   
         See the documentation of cuts_to_rows() above for the use of

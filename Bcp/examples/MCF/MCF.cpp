@@ -305,6 +305,26 @@ MCF_lp::generate_vars_in_lp(const BCP_lp_result& lpres,
 
 /*----------------------------------------------------------------------------*/
 
+void
+MCF_lp::vars_to_cols(const BCP_vec<BCP_cut*>& cuts,
+					 BCP_vec<BCP_var*>& vars,
+					 BCP_vec<BCP_col*>& cols,
+					 const BCP_lp_result& lpres,
+					 BCP_object_origin origin, bool allow_multiple)
+{
+	const int numvars = vars.size();
+	for (int i = 0; i < numvars; ++i) {
+		// Since we do not generate cuts, we can just disregard the "cuts"
+		// argument, since the column corresponding to the var is exactly the
+		// flow
+		cols.push_back(vars[i]->flow, vars[i]->weight, 0.0, 1.0);
+		// Excercise: if we had generated cuts, then the coefficients for
+		// those rows would be appended to the end of each column
+	}
+}
+
+/*----------------------------------------------------------------------------*/
+
 BCP_branching_decision
 MCF_lp::select_branching_candidates(const BCP_lp_result& lpres,
 									const BCP_vec<BCP_var*>& vars,

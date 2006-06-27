@@ -106,7 +106,7 @@ fi
 AC_DEFUN([COIN_LINK_FROM_FILELIST], 
 [
 COIN_UPPATH([$1], updir)
-if test -e $updir/$srcdir/$2 ; then
+if test -e $srcdir/$2 ; then
 	echo Creating links in $1 ...
 	fromdir=$updir/$srcdir/`dirname $2`
 	mkdir -p $1
@@ -129,7 +129,9 @@ AC_DEFUN([COIN_COPY_FROM_FILELIST],
 [
 if test $coin_vpath_config = yes; then
 	COIN_UPPATH([$1], updir)
-	if test -e $updir/$srcdir/$2 ; then
+	echo `pwd`
+	echo $updir/$srcdir/$2
+	if test -e $srcdir/$2 ; then
 		echo Copying example $1 ...
 		fromdir=$updir/$srcdir/`dirname $2`
 		mkdir -p $1
@@ -151,6 +153,9 @@ fi
 
 COIN_LINK_FROM_FILELIST(test/BAC, examples/BAC/testfiles.txt)
 COIN_COPY_FROM_FILELIST(examples/BAC, examples/BAC/examplefiles.txt)
+
+echo ============================================================
+COIN_COPY_FROM_FILELIST(examples/MCF, examples/MCF/examplefiles.txt)
 
 # In case this is a VPATH configuration we need to make sure that the
 # input files for the examples are available in the VPATH directory.
@@ -188,6 +193,7 @@ AC_CONFIG_FILES([Makefile
                  src/Makefile
                  test/BAC/Makefile
                  examples/BAC/Makefile
+                 examples/MCF/Makefile
 				 bcp_addlibs.txt])
 
 # Here put the location and name of the configuration header file
