@@ -88,6 +88,7 @@ AC_CHECK_FUNCS(getpid)
 #                   VPATH links for example input files                      #
 ##############################################################################
 AC_PROG_LN_S
+AC_COIN_CHECK_VPATH
 
 AC_DEFUN([COIN_UPPATH],
 [
@@ -104,12 +105,12 @@ fi
 	
 AC_DEFUN([COIN_LINK_FROM_FILELIST], 
 [
-echo Creating links in $1 ...
-mkdir -p $1
 COIN_UPPATH([$1], updir)
-cd $1
-fromdir=$updir/$srcdir/`dirname $2`
 if test -e $updir/$srcdir/$2 ; then
+	echo Creating links in $1 ...
+	fromdir=$updir/$srcdir/`dirname $2`
+	mkdir -p $1
+	cd $1
 	for f in `cat $updir/$srcdir/$2` ; do
 		if test ! -e $f ; then
 		   	fdir=`dirname $f`
@@ -125,14 +126,14 @@ fi
 ])
 
 AC_DEFUN([COIN_COPY_FROM_FILELIST], 
-[AC_REQUIRE([AC_COIN_CHECK_VPATH])
+[
 if test $coin_vpath_config = yes; then
-	echo Copying example $1 ...
-	mkdir -p $1
 	COIN_UPPATH([$1], updir)
-	cd $1
-	fromdir=$updir/$srcdir/`dirname $2`
 	if test -e $updir/$srcdir/$2 ; then
+		echo Copying example $1 ...
+		fromdir=$updir/$srcdir/`dirname $2`
+		mkdir -p $1
+		cd $1
 		for f in `cat $updir/$srcdir/$2` ; do
 			if test ! -e $f ; then
 		   		fdir=`dirname $f`

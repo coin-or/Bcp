@@ -20911,6 +20911,15 @@ else
 echo "${ECHO_T}no, using $LN_S" >&6
 fi
 
+echo "$as_me:$LINENO: checking whether this is a VPATH configuration" >&5
+echo $ECHO_N "checking whether this is a VPATH configuration... $ECHO_C" >&6
+if test `cd $srcdir; pwd` != `pwd`; then
+  coin_vpath_config=yes;
+else
+  coin_vpath_config=no;
+fi
+echo "$as_me:$LINENO: result: $coin_vpath_config" >&5
+echo "${ECHO_T}$coin_vpath_config" >&6
 
 
 
@@ -20919,8 +20928,7 @@ fi
 
 
 
-echo Creating links in test/BAC ...
-mkdir -p test/BAC
+
 
 if test test/BAC = . ; then
 	updir=.
@@ -20932,9 +20940,11 @@ else
 	updir=$t
 fi
 
-cd test/BAC
-fromdir=$updir/$srcdir/`dirname examples/BAC/testfiles.txt`
 if test -e $updir/$srcdir/examples/BAC/testfiles.txt ; then
+	echo Creating links in test/BAC ...
+	fromdir=$updir/$srcdir/`dirname examples/BAC/testfiles.txt`
+	mkdir -p test/BAC
+	cd test/BAC
 	for f in `cat $updir/$srcdir/examples/BAC/testfiles.txt` ; do
 		if test ! -e $f ; then
 		   	fdir=`dirname $f`
@@ -20958,20 +20968,8 @@ fi
 	cd $updir
 fi
 
-echo "$as_me:$LINENO: checking whether this is a VPATH configuration" >&5
-echo $ECHO_N "checking whether this is a VPATH configuration... $ECHO_C" >&6
-if test `cd $srcdir; pwd` != `pwd`; then
-  coin_vpath_config=yes;
-else
-  coin_vpath_config=no;
-fi
-echo "$as_me:$LINENO: result: $coin_vpath_config" >&5
-echo "${ECHO_T}$coin_vpath_config" >&6
-
 
 if test $coin_vpath_config = yes; then
-	echo Copying example examples/BAC ...
-	mkdir -p examples/BAC
 
 if test examples/BAC = . ; then
 	updir=.
@@ -20983,9 +20981,11 @@ else
 	updir=$t
 fi
 
-	cd examples/BAC
-	fromdir=$updir/$srcdir/`dirname examples/BAC/examplefiles.txt`
 	if test -e $updir/$srcdir/examples/BAC/examplefiles.txt ; then
+		echo Copying example examples/BAC ...
+		fromdir=$updir/$srcdir/`dirname examples/BAC/examplefiles.txt`
+		mkdir -p examples/BAC
+		cd examples/BAC
 		for f in `cat $updir/$srcdir/examples/BAC/examplefiles.txt` ; do
 			if test ! -e $f ; then
 		   		fdir=`dirname $f`
