@@ -129,8 +129,6 @@ AC_DEFUN([COIN_COPY_FROM_FILELIST],
 [
 if test $coin_vpath_config = yes; then
 	COIN_UPPATH([$1], updir)
-	echo `pwd`
-	echo $updir/$srcdir/$2
 	if test -e $srcdir/$2 ; then
 		echo Copying example $1 ...
 		fromdir=$updir/$srcdir/`dirname $2`

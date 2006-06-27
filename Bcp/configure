@@ -20981,8 +20981,6 @@ else
 	updir=$t
 fi
 
-	echo `pwd`
-	echo $updir/$srcdir/examples/BAC/examplefiles.txt
 	if test -e $srcdir/examples/BAC/examplefiles.txt ; then
 		echo Copying example examples/BAC ...
 		fromdir=$updir/$srcdir/`dirname examples/BAC/examplefiles.txt`
@@ -21027,8 +21025,6 @@ else
 	updir=$t
 fi
 
-	echo `pwd`
-	echo $updir/$srcdir/examples/MCF/examplefiles.txt
 	if test -e $srcdir/examples/MCF/examplefiles.txt ; then
 		echo Copying example examples/MCF ...
 		fromdir=$updir/$srcdir/`dirname examples/MCF/examplefiles.txt`
