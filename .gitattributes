@@ -30,6 +30,7 @@ Bcp/examples/BAC/testfilelist.txt -text
 Bcp/examples/MCF/MCF.cpp -text
 Bcp/examples/MCF/MCF.hpp -text
 Bcp/examples/MCF/MCF.tex -text
+Bcp/examples/MCF/examplefiles.txt -text
 Bcp/inc/config_bcp.h.in -text
 Bcp/src/Makefile.am -text
 Bcp/src/Makefile.in -text
