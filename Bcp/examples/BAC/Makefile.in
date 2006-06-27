@@ -14,24 +14,32 @@ EXE = bac@EXEEXT@
 
 # CHANGEME: Here is the name of all object files corresponding to the source
 #           code that you wrote in order to define the problem statement
-OBJS =
-OBJS += ./LP/BB_lp.@OBJEXT@
-OBJS += ./TM/BB_tm.@OBJEXT@
-OBJS += ./Member/BB_user_data.@OBJEXT@
-OBJS += ./Member/BB_init.@OBJEXT@
-OBJS += ./Member/BB.@OBJEXT@
-OBJS += ./Member/BB_cut.@OBJEXT@
+OBJS = \
+	./LP/BB_lp.@OBJEXT@ \
+	./TM/BB_tm.@OBJEXT@ \
+	./Member/BB_user_data.@OBJEXT@ \
+	./Member/BB_init.@OBJEXT@ \
+	./Member/BB.@OBJEXT@ \
+	./Member/BB_cut.@OBJEXT@
 
-# CHANGEME: Additional libraries
-ADDLIBS =
+# CHANGEME: 
+# The first two variables contain the osisolverinterface and the
+# actual solver library the code should be linked against. In the third
+# variable any additional libraries should be listed along with any other
+# necessary flags, like -L or -rpath, etc. Note that no -L flag needs to be
+# added for libraries from COIN.
+USER_OSI_LIBS = -lOsiClp
+USER_SOLVER_LIBS = -lClp
+USER_EXTRA_LIBS =
 
-# CHANGEME: Additional flags for compilation (e.g., include flags)
-ADDINCFLAGS = -Iinclude
+# CHANGEME: Additional include directories for compilation. Note that no
+# include directory needs to be listed here for headers from COIN.
+USER_INCDIRS = include
 
 ##########################################################################
 #  Usually, you don't have to change anything below.  Note that if you   #
 #  change certain compiler options, you might have to recompile the      #
-#  COIN package.                                                         #
+#  Bcp package.                                                          #
 ##########################################################################
 
 # C++ Compiler command
@@ -50,19 +58,23 @@ COININCDIR = @abs_include_dir@
 COINLIBDIR = @abs_lib_dir@
 
 # Libraries necessary to link with Clp
-LIBS = -L$(COINLIBDIR) -lBcp -lCgl -lOsiClp -lOsi -lClp -lCoinUtils @ADDLIBS@
-LIBS += `cat $(COINLIBDIR)/cgl_addlibs.txt`
-LIBS += `cat $(COINLIBDIR)/osi_addlibs.txt`
-LIBS += `cat $(COINLIBDIR)/clp_addlibs.txt`
-LIBS += `cat $(COINLIBDIR)/coinutils_addlibs.txt`
-
-# Necessary Include dirs (we use the CYGPATH_W variables to allow
-# compilation with Windows compilers)
-INCL =  $(ADDINCFLAGS)
-INCL +=  -I`$(CYGPATH_W) $(COININCDIR)`
+LIBS = -L$(COINLIBDIR) \
+	-lBcp \
+	-lCgl \
+	$(USER_OSI_LIBS) -lOsi $(USER_SOLVER_LIBS) \
+	-lCoinUtils \
+	$(USER_EXTRA_LIBS) \
+	`cat $(COINLIBDIR)/cgl_addlibs.txt` \
+	`cat $(COINLIBDIR)/osi_addlibs.txt` \
+	`cat $(COINLIBDIR)/clp_addlibs.txt` \
+	`cat $(COINLIBDIR)/coinutils_addlibs.txt`
 
 # The following is necessary under cygwin, if native compilers are used
 CYGPATH_W = @CYGPATH_W@
+
+# Necessary Include dirs (we use the CYGPATH_W variables to allow
+# compilation with Windows compilers)
+INCL = `for i in $(USER_INCDIRS) $(COININCDIR); do $(CYGPATH_W) $$i | sed -e 's/^/-I/'; done`
 
 all: $(EXE)
 
