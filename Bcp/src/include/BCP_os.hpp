@@ -5,7 +5,7 @@
 
 //------------------------------------------------------------------------------
 #if HAVE_SYS_RESOURCE_H
-#  include <sys/resources.h>
+#  include <sys/resource.h>
 #else
 #  define setpriority(x,y,z)
 #endif
