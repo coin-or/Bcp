@@ -9,6 +9,20 @@
 #    Usually, you only need to change the five CHANGEME entries below.   #
 ##########################################################################
 
+#CHANGEME: If you want to compile under Cygwin, uncomment the following
+# line.
+#CYGFLAG = -mno-cygwin
+
+# CHANGEME: add extra definitions here
+USER_DEFINES = -DLP
+
+# Possibilities: -DLP :            read from file bac.lp
+#                -DMPS :           read from file bac.mps
+#                -DHEUR_SOL :      generate heuristic solutions
+#                -DCUSTOM_BRANCH : branch on first non integer variable
+#                -DUSER_DATA :     define data associated with each node
+#
+
 # CHANGEME: This should be the name of your executable
 EXE = bac@EXEEXT@
 
@@ -22,19 +36,26 @@ OBJS = \
 	./Member/BB.@OBJEXT@ \
 	./Member/BB_cut.@OBJEXT@
 
+# Add access tp Cplex if available (see bac.pdf for installation)
+ifneq ($(ENV_CPLEX_LIB),)
+  LIB_CPLEX = -L$(ENV_CPLEX_LIB) -lcplex
+  CPLEX_H = $(ENV_CPLEX_H)
+  LIB_OsiCpx = -lOsiCpx
+endif
+
 # CHANGEME: 
 # The first two variables contain the osisolverinterface and the
 # actual solver library the code should be linked against. In the third
 # variable any additional libraries should be listed along with any other
 # necessary flags, like -L or -rpath, etc. Note that no -L flag needs to be
 # added for libraries from COIN.
-USER_OSI_LIBS = -lOsiClp
-USER_SOLVER_LIBS = -lClp
+USER_OSI_LIBS = -lOsiClp $(LIB_OsiCpx)
+USER_SOLVER_LIBS = -lClp $(LIB_CPLEX)
 USER_EXTRA_LIBS =
 
 # CHANGEME: Additional include directories for compilation. Note that no
 # include directory needs to be listed here for headers from COIN.
-USER_INCDIRS = include
+USER_INCDIRS = include $(CPLEX_H)
 
 ##########################################################################
 #  Usually, you don't have to change anything below.  Note that if you   #
@@ -46,7 +67,7 @@ USER_INCDIRS = include
 CXX = @CXX@
 
 # C++ Compiler options
-CXXFLAGS = @CXXFLAGS@
+CXXFLAGS = $(CYGFLAG) @CXXFLAGS@ $(USER_DEFINES)
 
 # additional C++ Compiler options for linking
 CXXLINKFLAGS = @RPATH_FLAGS@
