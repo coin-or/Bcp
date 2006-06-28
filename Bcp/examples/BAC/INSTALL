@@ -1,0 +1,137 @@
+
+BAC INSTALL FILE
+================
+
+In this document, the following names are used:
+
+1. 'Pkg' is the name of the package containing BCP and BAC that you have 
+   downloaded.
+
+2. 'coin-Pkg' is the full path to the directory in which you have 
+    downloaded Pkg.
+
+3. BACdir is the main directory of the BAC example containing this INSTALL
+   file.
+
+4. 'build' is the directory used for the installation of Pkg. This
+   directory must have 'lib' and 'include' subdirectories containing
+   all the libraries and header files of Pkg, including all the 
+   BCP libraries and header files. 
+
+
+COMPILATION OF BAC
+==================
+
+1. In BACdir, use 'make' to compile the example BAC.
+
+2. The executable bac is created in BACdir.
+
+
+DOCUMENTATION
+=============
+
+If you have Doxygen available, you can create the html documentation 
+by typing
+
+   make doxydoc
+
+in the directory 'build'. Then open the file 
+
+   coin-Pkg/doxydoc/html/index.html 
+
+with a browser. Note that this creates the documentation for all the
+projects in the package. If you prefer to generate the documentation 
+only for a subset of these projects, you can edit the file 
+  
+   coin-Pkg/doxydoc/doxygen.conf 
+
+to exclude directories (using the EXCLUDE variable, for example).
+
+If Doxygen is not available, the html documentation is available at:
+
+   http://www.coin-or.org/Doxygen/
+
+
+RUNNING BAC
+===========
+
+1. In BACdir, use './bac' to run the example code . The output should 
+   start with:
+
+Compilation flags:
+
+readInput(): core size: 10   indexed size: 6
+############################################################
+TM: Starting phase 0
+############################################################
+ TM: Default init_new_phase() executed.
+
+LP: **** Processing NODE 0 on LEVEL 0 (from TM) ****
+ LP: Default purge_slack_pool() executed.
+
+LP: *** Starting iteration 1 ***
+LP node written in file lpnode.lp
+LP:   Matrix size: 10 vars x 10 cuts
+LP:   Solution value: -5.0000 / 2 , 10 
+ LP: Default display_lp_solution() executed.
+  LP : Displaying LP solution (RelaxedSolution) :
+  LP : Displaying solution :
+  Core  var (internal index:      1                    ) at 1.0000
+  Core  var (internal index:      3                    ) at 1.0000
+  Core  var (internal index:      5                    ) at 1.0000
+  Core  var (internal index:      7                    ) at 1.0000
+  Core  var (internal index:      9                    ) at 1.0000
+LP:   Row effectiveness: rownum: 10 ineffective: 0
+LP:   Number of leftover cuts: 0
+generate_cuts_in_lp(): found 4 indexed cuts
+generate_cuts_in_lp(): found 5 algorithmic cuts
+LP:   Number of cuts generated in the LP process: 9
+LP:   Non-violated (hence removed): 0
+
+...
+
+
+   The end of the output should be (slight variation might occur due to
+   machine precision):
+
+...
+LP: *** Starting iteration 1 ***
+LP node written in file lpnode.lp
+LP:   Matrix size: 10 vars x 18 cuts
+LP:   Solution value: -2.0000 / 2 , 2 
+ LP: Default display_lp_solution() executed.
+  LP : Displaying LP solution (RelaxedSolution) :
+  LP : Displaying solution :
+  Core  var (internal index:      1                    ) at 1.0000
+  Core  var (internal index:      6                    ) at 1.0000
+ LP: Default test_feasibility() executed.
+ LP: Default test_full() executed.
+ LP: Default pack_feasible_solution() executed.
+ TM: Default unpack_feasible_solution() executed.
+TM: Solution found at 0.004 sec.
+TM: Solution value: -2.000000 (best solution value so far: infinity)
+LP:   Terminating and fathoming due to proven high cost.
+TM: Pruning NODE 2 LEVEL 1 instead of sending it.
+TM: Running time: 0.004
+TM: search tree size: 3   max depth: 1
+LP statistics:
+   time in cut generation  :        0.000 sec
+   time in var generation  :        0.000 sec
+   time in heuristics      :        0.000 sec
+   time in solving LPs     :        0.000 sec
+   time in strong branching:        0.004 sec
+
+TM: The best solution found has value -2.000000
+Customized display of the feasible solution:
+
+0.00 1.00 0.00 0.00 0.00 0.00 1.00 0.00 0.00 0.00 
+
+Default BCP display of the feasible solution:
+
+ TM: Default BCP_tm_user::display_feasible_solution() executed.
+  Core  var (internal index:      1                    ) at 1.0000
+  Core  var (internal index:      6                    ) at 1.0000
+
+
+
+

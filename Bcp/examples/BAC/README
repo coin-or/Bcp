@@ -1,6 +1,21 @@
 BAC README
 ==========
 
+In this document, the following names are used:
+
+1. 'Pkg' is the name of the package containing BCP and BAC that you have 
+   downloaded.
+
+2. 'coin-Pkg' is the full path to the directory in which you have 
+    downloaded Pkg.
+
+3. BACdir is the main directory of the BAC example and containing this 
+   README file.
+
+
+OVERVIEW
+========
+
 BAC is distributed under the Common Public License Version 1.0 and is 
 freely redistributable. All source code and documentation is Copyright 
 2003-2006 Francois Margot, Carnegie Mellon University, International Business 
@@ -15,8 +30,8 @@ directory of the BAC example serves as main support for understanding
 the code.
 
 
-PROJECT TRAC PAGE
-============+====
+BCP TRAC PAGE
+=============
 
 https://projects.coin-or.org/Bcp
 
@@ -34,37 +49,15 @@ If you have downloaded the package
    https://projects.coin-or.org/svn/Bcp/trunk
 
 in the local directory coin-Bcp, please see the INSTALL file in 
-coin-Bcp for a guide to install this package. 
+coin-Bcp for a guide to install this package. Alternatively, 
+the installation of BCP is covered in BACdir/bac.pdf.
 
-If you have obtained BCP by downloading another package, BAC should be 
-installed as part of the installation of that package. See the INSTALL 
-file in the main directory of the package.
+To install BAC itself, see the file BACdir/INSTALL. This installation 
+is also covered in the file BACdir/bac.pdf.
 
-
-DOCUMENTATION
-=============
-
-If you have Doxygen available, you can build the html documentation 
-by typing
-
-   make doxydoc
-
-in the directory from which you built the package Pkg dowloaded in,
-say coin-Pkg. Then open the file 
-
-   coin-Pkg/doxydoc/html/index.html 
-
-with a browser. Note that this creates the documentation for all the
-projects in the package. If you prefer to generate the documentation 
-only for a subset of these projects, you can edit the file 
-  
-   coin-pkg/doxydoc/doxygen.conf 
-
-to exclude directories (using the EXCLUDE variable, for example).
-
-If Doxygen is not available, html documentation is available at:
-
-   http://www.coin-or.org/Doxygen/
+If you have obtained BAC by downloading another package Pkg containing 
+BCP, BCP should be installed as part of the installation of Pkg. 
+See the INSTALL file in coin-Pkg.
 
 
 SUPPORT

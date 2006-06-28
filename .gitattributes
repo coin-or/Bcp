@@ -6,6 +6,7 @@ Bcp/configure -text
 Bcp/configure.ac -text
 Bcp/doc/man.pdf svneol=native#unset
 Bcp/examples/BAC/AUTHORS -text
+Bcp/examples/BAC/INSTALL -text
 Bcp/examples/BAC/LICENSE -text
 Bcp/examples/BAC/LP/BB_lp.cpp -text
 Bcp/examples/BAC/Makefile.in -text
