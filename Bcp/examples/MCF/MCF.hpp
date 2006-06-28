@@ -1,6 +1,10 @@
 #ifndef MCF_hpp
 #define MCF_hpp
 
+#include <iostream>
+#include "BCP_buffer.hpp"
+#include "OsiSolverInterface.hpp"
+
 //#############################################################################
 
 // These are the parameters for the MCF code
@@ -60,19 +64,22 @@ public:
 	MCF_data() :
 		arcs(NULL), commodities(NULL),
 		numarcs(0), numnodes(0), numcommodities(0) {}
-	MCF_data(BCP_buffer& buf);
 
-	~MCF_data {
+	~MCF_data() {
 		delete[] arcs;
 		delete[] commodities;
 		delete[] problem_name;
 	}
 
-	int readDimacsFormat(istream& s);
-	void pack(BCP_buffer& buf);
+	int readDimacsFormat(std::istream& s, bool addDummyArcs);
+	void pack(BCP_buffer& buf) const;
+	void unpack(BCP_buffer& buf);
 };
 
 //#############################################################################
+
+#include "CoinPackedVector.hpp"
+#include "BCP_var.hpp"
 
 // Here are two kind of variables. The first is a "real" variable, i.e., it
 // describes a column of the master problem, that is a flow for a
@@ -87,17 +94,17 @@ public:
 	double weight;
 
 public:
-	MCF_var(int com, CoinPackedVectorint& f, double w) :
+	MCF_var(int com, const CoinPackedVector& f, double w) :
 		BCP_var_algo(BCP_ContinuousVar, w, 0, 1),
 		commodity(com), weight(w)
 	{
-		new (&flow) CoinPackedvector(f.getNumElements(),
-									 f.getIndices(), f.getelements());
+		new (&flow) CoinPackedVector(f.getNumElements(),
+									 f.getIndices(), f.getElements(), false);
 	}
 	MCF_var(BCP_buffer& buf);
 	~MCF_var() {}
 
-	void pack(BCP_buffer& buf);
+	void pack(BCP_buffer& buf) const;
 };
 
 /*----------------------------------------------------------------------------*/
@@ -117,21 +124,21 @@ public:
 		commodity(comm), arc_index(ind),
 		lb_child0(lb0), ub_child0(ub0), lb_child1(lb1), ub_child1(ub1) {}
 	MCF_branching_var(BCP_buffer& buf);
-	MCF_
 	~MCF_branching_var() {}
 
-	void pack(BCP_buffer& buf);
+	void pack(BCP_buffer& buf) const;
 };
 
 BCP_var_algo* MCF_unpack_var(BCP_buffer& buf);
 
 //#############################################################################
 
+#include "BCP_parameters.hpp"
 #include "BCP_tm_user.hpp"
 
 class MCF_tm : public BCP_tm_user
 {
-private:
+public:
 	BCP_parameter_set<MCF_par> par;
 	MCF_data data;
 
@@ -158,6 +165,7 @@ public:
 
 class MCF_lp : public BCP_lp_user
 {
+	OsiSolverInterface* osi;
 	BCP_parameter_set<MCF_par> par;
 	MCF_data data;
 	std::vector<MCF_branching_var*>* branching_vars;
