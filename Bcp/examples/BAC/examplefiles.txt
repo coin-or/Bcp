@@ -14,3 +14,7 @@ include/BB_init.hpp
 include/BB_tm.hpp
 include/BB.hpp
 include/BB_cut.hpp
+INSTALL
+README
+AUTHORS
+LICENSE
