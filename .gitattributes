@@ -47,6 +47,7 @@ Bcp/test/BAC/Makefile.in -text
 /configure -text
 /configure.ac -text
 /depcomp -text
+doxydoc/doxygen.conf -text
 /install-sh -text
 /ltmain.sh -text
 /missing -text
