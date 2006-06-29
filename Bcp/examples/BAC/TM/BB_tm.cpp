@@ -63,9 +63,21 @@ BB_tm::readInput(const char* filename)
      }
      if (found_file) {
        solver.readLp("bac.lp");
+     }
+   }
 
-       // to read the file bac.mps use the following:
-       // solver.readMps("bac.mps");
+   if (!found_file) {
+     // Try bac.mps
+     try {
+       found_file = true;
+       fi = CoinFileInput::create("bac.mps");
+     }
+     catch (CoinError& err) {
+       // bac.lp not found
+       found_file = false;
+     }
+     if (found_file) {
+	   solver.readMps("bac.mps");
      }
    }
 
