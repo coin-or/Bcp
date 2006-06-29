@@ -4,8 +4,6 @@
 
 ## $Id$
 
-# Author:  Laszlo Ladanyi           IBM    2006-06-17
-
 AUTOMAKE_OPTIONS = foreign
 
 EXTRA_DIST = doxydoc/doxygen.conf

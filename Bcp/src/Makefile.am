@@ -4,8 +4,6 @@
 
 ## $Id$
 
-# Author:  Laszlo Ladanyi   IBM  2006-06-20
-
 AUTOMAKE_OPTIONS = foreign
 
 ########################################################################

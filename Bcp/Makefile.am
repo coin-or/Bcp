@@ -4,8 +4,6 @@
 
 ## $Id$
 
-# Author:  Laszlo Ladanyi      IBM    2006-06-17
-
 AUTOMAKE_OPTIONS = foreign
 
 ########################################################################
@@ -65,6 +63,7 @@ EXTRA_DIST += doc/man-develop.tex
 ########################################################################
 
 TESTS = BAC
+EXAMPLES = BAC
 
 test: all
 	for t in $(TESTS); do \
@@ -77,11 +76,17 @@ clean-local:
 	for t in $(TESTS); do \
 		(if test -r test/$$t/Makefile; then cd test/$$t; make clean; fi); \
 	done
+	for t in $(EXAMPLES); do \
+		for f in `find examples/$$t -name "*.o"`; do \
+			rm -f $$f; \
+		done; \
+	done
 
 distclean-local:
 	for t in $(TESTS); do \
 		(if test -r test/$$t/Makefile; then cd test/$$t; make distclean; fi); \
 	done
+	rm -rf examples
 
 .PHONY: test unitTest
 

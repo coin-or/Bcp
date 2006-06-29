@@ -2,9 +2,7 @@
 # All Rights Reserved.
 # This file is distributed under the Common Public License.
 
-# $Id$
-
-# Author:  Laszlo Ladanyi           IBM    2006-06-21
+## $Id$
 
 AUTOMAKE_OPTIONS = foreign
 

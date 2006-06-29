@@ -282,6 +282,7 @@ EXTRA_DIST = doc/flow-lpfathom.fig doc/man.pdf doc/man.tex \
 #                           Extra Targets                              #
 ########################################################################
 TESTS = BAC
+EXAMPLES = BAC
 
 ########################################################################
 #                  Installation of the addlibs file                    #
@@ -823,11 +824,17 @@ clean-local:
 	for t in $(TESTS); do \
 		(if test -r test/$$t/Makefile; then cd test/$$t; make clean; fi); \
 	done
+	for t in $(EXAMPLES); do \
+		for f in `find examples/$$t -name "*.o"`; do \
+			rm -f $$f; \
+		done; \
+	done
 
 distclean-local:
 	for t in $(TESTS); do \
 		(if test -r test/$$t/Makefile; then cd test/$$t; make distclean; fi); \
 	done
+	rm -rf examples
 
 .PHONY: test unitTest
 
