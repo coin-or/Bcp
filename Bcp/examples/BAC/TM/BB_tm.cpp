@@ -66,6 +66,8 @@ BB_tm::readInput(const char* filename)
      }
    }
 
+   // For MPS files, use the following:
+   /**********
    if (!found_file) {
      // Try bac.mps
      try {
@@ -80,6 +82,7 @@ BB_tm::readInput(const char* filename)
 	   solver.readMps("bac.mps");
      }
    }
+   **********/
 
    if (found_file) {
      

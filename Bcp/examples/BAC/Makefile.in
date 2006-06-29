@@ -16,8 +16,7 @@
 # CHANGEME: add extra definitions here
 USER_DEFINES = -DLP
 
-# Possibilities: -DLP :            read from file bac.lp
-#                -DMPS :           read from file bac.mps
+# Possibilities: 
 #                -DHEUR_SOL :      generate heuristic solutions
 #                -DCUSTOM_BRANCH : branch on first non integer variable
 #                -DUSER_DATA :     define data associated with each node
