@@ -301,7 +301,9 @@ BCP_lp_perform_strong_branching(BCP_lp_prob& p,
 						p.param(BCP_lp_par::MaxPresolveIter));
 	}
 
-	printf("\nLP: Starting strong branching:\n\n");
+	if (p.param(BCP_lp_par::LpVerb_StrongBranchResult)) {
+                printf("\nLP: Starting strong branching:\n\n");
+	}
 
 	const OsiBabSolver* babSolver = p.user->getOsiBabSolver();
 
