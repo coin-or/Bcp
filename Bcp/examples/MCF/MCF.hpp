@@ -172,6 +172,7 @@ class MCF_lp : public BCP_lp_user
 	std::vector<int>* arcs_affected;
 	// the solution to the original formulation
 	std::map<int,double>* flows;
+	bool generated_vars;
 
 public:
 	MCF_lp() {}

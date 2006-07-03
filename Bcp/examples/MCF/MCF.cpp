@@ -8,6 +8,14 @@ using std::make_pair;
 
 //#############################################################################
 
+int main(int argc, char* argv[])
+{
+	MCF_init init;
+	return bcp_main(argc, argv, &init);
+}
+
+//#############################################################################
+
 template <>
 void BCP_parameter_set<MCF_par>::create_keyword_list()
 {
@@ -32,7 +40,7 @@ USER_initialize * BCP_user_init()
   return new MCF_init;
 }
 
-/*----------------------------------------------------------------------------*/
+/*---------------------------------------------------------------------------*/
 
 BCP_tm_user *
 MCF_init::tm_init(BCP_tm_prob& p,
@@ -45,7 +53,7 @@ MCF_init::tm_init(BCP_tm_prob& p,
   return tm;
 }
 
-/*----------------------------------------------------------------------------*/
+/*---------------------------------------------------------------------------*/
 
 BCP_lp_user *
 MCF_init::lp_init(BCP_lp_prob& p)
@@ -62,7 +70,7 @@ void MCF_tm::initialize_core(BCP_vec<BCP_var_core*>& vars,
 	// there is nothing in the core
 }
 
-/*----------------------------------------------------------------------------*/
+/*---------------------------------------------------------------------------*/
 
 void MCF_tm::create_root(BCP_vec<BCP_var*>& added_vars,
 						 BCP_vec<BCP_cut*>& added_cuts,
@@ -90,7 +98,7 @@ void MCF_tm::create_root(BCP_vec<BCP_var*>& added_vars,
 	}
 }
 
-/*----------------------------------------------------------------------------*/
+/*---------------------------------------------------------------------------*/
 
 void MCF_tm::display_feasible_solution(const BCP_solution* sol)
 {
@@ -201,7 +209,7 @@ void MCF_lp::initialize_new_search_tree_node(const BCP_vec<BCP_var*>& vars,
 	delete[] lb;
 }
 
-/*----------------------------------------------------------------------------*/
+/*---------------------------------------------------------------------------*/
 
 BCP_solution* MCF_lp::test_feasibility(const BCP_lp_result& lp_result,
 									   const BCP_vec<BCP_var*>& vars,
@@ -253,7 +261,7 @@ BCP_solution* MCF_lp::test_feasibility(const BCP_lp_result& lp_result,
 	return sol;
 }
 
-/*----------------------------------------------------------------------------*/
+/*---------------------------------------------------------------------------*/
 
 void
 MCF_lp::generate_vars_in_lp(const BCP_lp_result& lpres,
@@ -310,9 +318,11 @@ MCF_lp::generate_vars_in_lp(const BCP_lp_result& lpres,
 	delete[] val;
 	delete[] ind;
 	delete[] cost;
+
+	generated_vars = new_vars.size() > 0;
 }
 
-/*----------------------------------------------------------------------------*/
+/*---------------------------------------------------------------------------*/
 
 void
 MCF_lp::vars_to_cols(const BCP_vec<BCP_cut*>& cuts,
@@ -343,7 +353,7 @@ MCF_lp::vars_to_cols(const BCP_vec<BCP_cut*>& cuts,
 	}
 }
 
-/*----------------------------------------------------------------------------*/
+/*---------------------------------------------------------------------------*/
 
 BCP_branching_decision
 MCF_lp::select_branching_candidates(const BCP_lp_result& lpres,
@@ -353,6 +363,14 @@ MCF_lp::select_branching_candidates(const BCP_lp_result& lpres,
 									const BCP_lp_cut_pool& local_cut_pool,
 									BCP_vec<BCP_lp_branching_object*>& cands)
 {
+	if (generated_vars) {
+		return BCP_DoNotBranch;
+	}
+
+	if (lpres.objval() > upper_bound() - 1e-6) {
+		return BCP_DoNotBranch_Fathomed;
+	}
+		
 	// This vector will contain one entry only, but we must pass in a vector
 	BCP_vec<BCP_var*> new_vars;
 	// This vector contains which vars have their ounds forcibly changed. It's
@@ -403,14 +421,15 @@ MCF_lp::select_branching_candidates(const BCP_lp_result& lpres,
 			new_vars.clear();
 		}
 	}
+	return BCP_DoBranch;
 }
 
 /*
-  ##############################################################################
-  #    Here are the various methods that pack/unpack stuff from a BCP_buffer   #
-  ##############################################################################
-  # They are presented in pairs so it's easy to catch if there is a mismatch   #
-  ##############################################################################
+  #############################################################################
+  #   Here are the various methods that pack/unpack stuff from a BCP_buffer   #
+  #############################################################################
+  # They are presented in pairs so it's easy to catch if there is a mismatch  #
+  #############################################################################
 */
 
 void MCF_tm::pack_var_algo(const BCP_var_algo* var, BCP_buffer& buf)
@@ -427,14 +446,14 @@ void MCF_tm::pack_var_algo(const BCP_var_algo* var, BCP_buffer& buf)
 	}
 }
 
-/*----------------------------------------------------------------------------*/
+/*---------------------------------------------------------------------------*/
 
 BCP_var_algo* MCF_tm::unpack_var_algo(BCP_buffer& buf)
 {
 	return MCF_unpack_var(buf);
 }
 
-/*----------------------------------------------------------------------------*/
+/*---------------------------------------------------------------------------*/
 
 void MCF_tm::pack_module_data(BCP_buffer& buf, BCP_process_t ptype)
 {
@@ -447,7 +466,7 @@ void MCF_tm::pack_module_data(BCP_buffer& buf, BCP_process_t ptype)
 	}
 }			
 
-/*============================================================================*/
+/*===========================================================================*/
 
 void MCF_lp::unpack_module_data(BCP_buffer& buf)
 {
@@ -460,10 +479,43 @@ void MCF_lp::unpack_module_data(BCP_buffer& buf)
 
 	// Create the LP that will be used to generate columns
 	osi = new OsiClpSolverInterface();
-	xxx;
+
+	const int numCols = data.numarcs;
+	const int numRows = data.numnodes;
+	const int numNz = 2*numCols;
+
+	double *clb = new double[numCols];
+	double *cub = new double[numCols];
+	double *obj = new double[numCols];
+	double *rlb = new double[numRows];
+	double *rub = new double[numRows];
+	CoinBigIndex *start = new int[numCols+1];
+	int *index = new int[numNz];
+	double *value = new double[numNz];
+
+	// all these will be properly set for the search tree node in the
+	// initialize_new_search_tree_node method
+	CoinZeroN(obj, numCols);
+	CoinZeroN(clb, numCols);
+	CoinZeroN(cub, numCols);
+	// and these will be properly set for the subproblem in the
+	// generate_vars_in_lp method
+	CoinZeroN(rlb, numRows);
+	CoinZeroN(rub, numRows);
+
+	for (int i = 0; i < data.numarcs; ++i) {
+		start[i] = 2*i;
+		index[2*i] = data.arcs[i].tail;
+		index[2*i+1] = data.arcs[i].head;
+		value[2*i] = -1;
+		value[2*i+1] = 1;
+	}
+
+	osi->loadProblem(numCols, numRows, start, index, value,
+					 clb, cub, obj, rlb, rub);
 }			
 
-/*----------------------------------------------------------------------------*/
+/*---------------------------------------------------------------------------*/
 
 void MCF_lp::pack_var_algo(const BCP_var_algo* var, BCP_buffer& buf)
 {
@@ -479,7 +531,7 @@ void MCF_lp::pack_var_algo(const BCP_var_algo* var, BCP_buffer& buf)
 	}
 }
 
-/*----------------------------------------------------------------------------*/
+/*---------------------------------------------------------------------------*/
 
 BCP_var_algo* MCF_lp::unpack_var_algo(BCP_buffer& buf)
 {
@@ -510,7 +562,7 @@ void MCF_data::pack(BCP_buffer& buf) const
 	}
 }
 
-/*----------------------------------------------------------------------------*/
+/*---------------------------------------------------------------------------*/
 
 void MCF_data::unpack(BCP_buffer& buf)
 {
@@ -549,7 +601,7 @@ void MCF_var::pack(BCP_buffer& buf) const
 	buf.pack(weight);
 }
 
-/*----------------------------------------------------------------------------*/
+/*---------------------------------------------------------------------------*/
 
 MCF_var::MCF_var(BCP_buffer& buf) :
 	// we don't know the onj coeff (weight) yet, so temporarily set it to 0
@@ -567,7 +619,7 @@ MCF_var::MCF_var(BCP_buffer& buf) :
 	set_obj(weight);
 }
 
-/*============================================================================*/
+/*===========================================================================*/
 
 void MCF_branching_var::pack(BCP_buffer& buf) const
 {
@@ -581,7 +633,7 @@ void MCF_branching_var::pack(BCP_buffer& buf) const
 	buf.pack(ub_child1);
 }
 
-/*----------------------------------------------------------------------------*/
+/*---------------------------------------------------------------------------*/
 
 MCF_branching_var::MCF_branching_var(BCP_buffer& buf) :
 	BCP_var_algo(BCP_BinaryVar, 0, 0, 1)
@@ -594,7 +646,7 @@ MCF_branching_var::MCF_branching_var(BCP_buffer& buf) :
 	buf.unpack(ub_child1);
 }
 
-/*============================================================================*/
+/*===========================================================================*/
 
 BCP_var_algo* MCF_unpack_var(BCP_buffer& buf)
 {
@@ -609,9 +661,9 @@ BCP_var_algo* MCF_unpack_var(BCP_buffer& buf)
 }
 
 /*
-  ##############################################################################
+  #############################################################################
   #    Here is the method that reads in the input file
-  ##############################################################################
+  #############################################################################
 */
 
 int MCF_data::readDimacsFormat(std::istream& s, bool addDummyArcs)
