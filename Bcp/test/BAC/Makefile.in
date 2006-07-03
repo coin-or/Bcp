@@ -18,10 +18,6 @@
 # All Rights Reserved.
 # This file is distributed under the Common Public License.
 
-# $Id$
-
-# Author:  Laszlo Ladanyi           IBM    2006-06-21
-
 srcdir = @srcdir@
 top_srcdir = @top_srcdir@
 VPATH = @srcdir@

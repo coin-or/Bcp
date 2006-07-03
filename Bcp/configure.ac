@@ -79,8 +79,8 @@ AC_COIN_HAS_USER_LIBRARY([Mpi], [MPI], [mpi.h], [MPI_Irecv])
 # ToDo: Automatically choose MPI compiler
 # AC_COIN_HAS_USER_LIBRARY([Pvm], [PVM], [pvm3.h], [???])
 
-AC_CHECK_HEADER(sys/resource.h)
-AC_CHECK_HEADER(unistd.h)
+AC_COIN_CHECK_HEADER(sys/resource.h)
+AC_COIN_CHECK_HEADER(unistd.h)
 AC_CHECK_FUNCS(gethostname)
 AC_CHECK_FUNCS(getpid)
 
