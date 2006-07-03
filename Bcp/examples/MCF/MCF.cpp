@@ -400,7 +400,6 @@ MCF_lp::select_branching_candidates(const BCP_lp_result& lpres,
 														NULL, // no new cuts
 														&fvp,NULL,&fvb,NULL,
 														NULL,NULL,NULL,NULL));
-			delete new_vars[0];
 			new_vars.clear();
 		}
 	}
