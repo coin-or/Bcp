@@ -50,11 +50,11 @@ endif
 # added for libraries from COIN.
 USER_OSI_LIBS = -lOsiClp $(LIB_OsiCpx)
 USER_SOLVER_LIBS = -lClp $(LIB_CPLEX)
-USER_EXTRA_LIBS =
+USER_EXTRA_LIBS = @MPILIB@
 
 # CHANGEME: Additional include directories for compilation. Note that no
 # include directory needs to be listed here for headers from COIN.
-USER_INCDIRS = include $(CPLEX_H)
+USER_INCDIRS = include $(CPLEX_H) @MPIINCDIR@
 
 ##########################################################################
 #  Usually, you don't have to change anything below.  Note that if you   #
