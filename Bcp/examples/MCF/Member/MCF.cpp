@@ -28,7 +28,7 @@ void BCP_parameter_set<MCF_par>::create_keyword_list()
 template <>
 void BCP_parameter_set<MCF_par>::set_default_entries()
 {
-    set_entry(InputFilename, "mcf");
+    set_entry(InputFilename, "small");
     set_entry(AddDummySourceSinkArcs, true);
 }
 

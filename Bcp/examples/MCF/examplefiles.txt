@@ -1,3 +1,4 @@
+small
 include/MCF_data.hpp
 include/MCF_init.hpp
 include/MCF_lp.hpp

@@ -43,6 +43,7 @@ Bcp/examples/MCF/include/MCF_lp.hpp -text
 Bcp/examples/MCF/include/MCF_par.hpp -text
 Bcp/examples/MCF/include/MCF_tm.hpp -text
 Bcp/examples/MCF/include/MCF_var.hpp -text
+Bcp/examples/MCF/small -text
 Bcp/inc/config_bcp.h.in -text
 Bcp/src/Makefile.am -text
 Bcp/src/Makefile.in -text

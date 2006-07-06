@@ -61,7 +61,7 @@ int MCF_data::readDimacsFormat(std::istream& s, bool addDummyArcs)
 {
     double maxweight = 0;
 
-    bool size_read = false;
+    bool size_read = true;
     int arcs_read = 0;
     int commodities_read = 0;;
 
