@@ -43,7 +43,8 @@ void MCF_lp::initialize_new_search_tree_node(const BCP_vec<BCP_var*>& vars,
 	const double* vval = v->flow.getElements();
 
 	bool violated = false;
-	const std::vector<MCF_branching_var*>& bvars = branching_vars[v->commodity];
+	const std::vector<MCF_branching_var*>& bvars =
+	    branching_vars[v->commodity];
 	for (j = bvars.size()-1; !violated && j >= 0; --j) {
 	    const MCF_branching_var* bv = bvars[j];
 	    const int* pos = std::lower_bound(vind, vind+vsize, bv->arc_index);
@@ -62,34 +63,6 @@ void MCF_lp::initialize_new_search_tree_node(const BCP_vec<BCP_var*>& vars,
 	    var_new_bd.push_back(0.0); // the new upper bound on the var
 	}
     }
-
-    /* Finally, the solver for the subproblems need to be initialized: the
-       lower/upper bounds on the vars must be set. */
-    double* lb = new double[data.numarcs];
-    double* ub = new double[data.numarcs];
-    for (i = data.numarcs-1; i >= 0; --i) {
-	lb[i] = data.arcs[i].lb;
-	ub[i] = data.arcs[i].ub;
-    }
-    for (i = data.numcommodities-1; i >= 0; --i) {
-	const std::vector<MCF_branching_var*>& bvars = branching_vars[i];
-	for (j = bvars.size() - 1; j >= 0; --j) {
-	    const MCF_branching_var* bv = bvars[j];
-	    if (bv->ub() == 0.0) {
-		// the upper bound of the branching var in this child is set
-		// to 0, so we are in child 0
-		lb[bv->arc_index] = bv->lb_child0;
-		ub[bv->arc_index] = bv->ub_child0;
-	    } else {
-		lb[bv->arc_index] = bv->lb_child1;
-		ub[bv->arc_index] = bv->ub_child1;
-	    }
-	}
-    }
-    cg_lp->setColLower(lb);
-    cg_lp->setColUpper(ub);
-    delete[] ub;
-    delete[] lb;
 }
 
 /*---------------------------------------------------------------------------*/
@@ -174,6 +147,18 @@ MCF_lp::generate_vars_in_lp(const BCP_lp_result& lpres,
 	const MCF_data::commodity& comm = data.commodities[i];
 	cg_lp->setRowBounds(comm.source, -comm.demand, -comm.demand);
 	cg_lp->setRowBounds(comm.sink, comm.demand, comm.demand);
+	const std::vector<MCF_branching_var*>& bvars = branching_vars[i];
+	for (j = bvars.size() - 1; j >= 0; --j) {
+	    const MCF_branching_var* bv = bvars[j];
+	    const int ind = bv->arc_index;
+	    if (bv->ub() == 0.0) {
+		// the upper bound of the branching var in this child is set
+		// to 0, so we are in child 0
+		cg_lp->setColBounds(ind, bv->lb_child0, bv->ub_child0);
+	    } else {
+		cg_lp->setColBounds(ind, bv->lb_child1, bv->ub_child1);
+	    }
+	}
 	cg_lp->initialSolve();
 	if (cg_lp->getObjValue() < nu[i] - 1e-8) {
 	    // we have generated a column Create a var out of it. Round the
@@ -194,6 +179,11 @@ MCF_lp::generate_vars_in_lp(const BCP_lp_result& lpres,
 	    }
 	    new_vars.push_back(new MCF_var(i, CoinPackedVector(cnt, ind, val,
 							       false), obj));
+	}
+	for (j = bvars.size() - 1; j >= 0; --j) {
+	    const MCF_branching_var* bv = bvars[j];
+	    const int ind = bv->arc_index;
+	    cg_lp->setColBounds(ind, data.arcs[ind].lb, data.arcs[ind].ub);
 	}
 	cg_lp->setRowBounds(comm.source, 0, 0);
 	cg_lp->setRowBounds(comm.sink, 0, 0);
