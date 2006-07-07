@@ -4,6 +4,13 @@
 
 //#############################################################################
 
+OsiSolverInterface* MCF_lp::initialize_solver_interface()
+{
+    return new OsiClpSolverInterface;
+}
+
+/*---------------------------------------------------------------------------*/
+
 void MCF_lp::initialize_new_search_tree_node(const BCP_vec<BCP_var*>& vars,
 					     const BCP_vec<BCP_cut*>& cuts,
 					     const BCP_vec<BCP_obj_status>& var_status,
@@ -307,6 +314,7 @@ void MCF_lp::unpack_module_data(BCP_buffer& buf)
     // This is the place where we can preallocate some data structures
     branching_vars = new std::vector<MCF_branching_var*>[data.numcommodities];
     arcs_affected = new std::vector<int>[data.numcommodities];
+    flows = new std::map<int,double>[data.numcommodities];
 
     // Create the LP that will be used to generate columns
     cg_lp = new OsiClpSolverInterface();
@@ -341,6 +349,7 @@ void MCF_lp::unpack_module_data(BCP_buffer& buf)
 	value[2*i] = -1;
 	value[2*i+1] = 1;
     }
+    start[numCols] = 2*numCols;
 
     cg_lp->loadProblem(numCols, numRows, start, index, value,
 		       clb, cub, obj, rlb, rub);

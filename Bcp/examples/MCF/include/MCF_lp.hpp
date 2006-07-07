@@ -36,6 +36,8 @@ public:
 	return MCF_unpack_var(buf);
     }
 
+    virtual OsiSolverInterface* initialize_solver_interface();
+
     virtual void
     initialize_new_search_tree_node(const BCP_vec<BCP_var*>& vars,
 				    const BCP_vec<BCP_cut*>& cuts,

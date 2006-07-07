@@ -9,7 +9,13 @@ void MCF_tm::initialize_core(BCP_vec<BCP_var_core*>& vars,
 			     BCP_vec<BCP_cut_core*>& cuts,
 			     BCP_lp_relax*& matrix)
 {
-    // there is nothing in the core
+    // The core cuts are the cuts that specify that the sum of the flows must
+    // not be out of bounds. However, since there are no core variables, the
+    // core matrix is empty.
+    for (int i = 0; i < data.numarcs; ++i) {
+	cuts.push_back(new BCP_cut_core(data.arcs[i].lb, data.arcs[i].ub));
+    }
+    matrix = new BCP_lp_relax;
 }
 
 /*---------------------------------------------------------------------------*/
@@ -69,6 +75,7 @@ void MCF_tm::pack_module_data(BCP_buffer& buf, BCP_process_t ptype)
     case BCP_ProcessType_LP:
 	par.pack(buf);
 	data.pack(buf);
+	break;
     default:
 	throw BCP_fatal_error("In this example we have only an LP process!\n");
     }

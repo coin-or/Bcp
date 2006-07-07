@@ -35,6 +35,9 @@ void MCF_data::unpack(BCP_buffer& buf)
     buf.unpack(numnodes);
     buf.unpack(numarcs);
     buf.unpack(numcommodities);
+
+    arcs = new arc[numarcs];
+    commodities = new commodity[numcommodities];
 	
     int i;
     for (i = 0; i < numarcs; ++i) {
