@@ -82,6 +82,10 @@ BCP_solution* MCF_lp::test_feasibility(const BCP_lp_result& lp_result,
     // columns (according to \lambda, the current primal solution) is integer
     // feasible for the original problem. The only thing that can be violated
     // is integrality
+  
+     getLpProblemPointer()->lp_solver->writeLp("currlp", "lp");
+     printf("Current LP written in file currlp.lp\n");
+
     int i, j;
     for (i = data.numcommodities-1; i >= 0; --i) {
 	flows[i].clear();
