@@ -132,7 +132,7 @@ MCF_lp::generate_vars_in_lp(const BCP_lp_result& lpres,
     double* cost = new double[data.numarcs];
     const double* pi = lpres.pi();
     const double* nu = pi + data.numarcs;
-    int i;
+    int i, j;
     for (i = data.numarcs-1; i >= 0; --i) {
 	cost[i] = data.arcs[i].weight - pi[i];
     }
