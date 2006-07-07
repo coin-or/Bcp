@@ -20,56 +20,6 @@ void MCF_lp::initialize_new_search_tree_node(const BCP_vec<BCP_var*>& vars,
 					     BCP_vec<int>& cut_changed_pos,
 					     BCP_vec<double>& cut_new_bd)
 {
-    // Go through all the variables, select the MCF_branching_var's and save
-    // the upper/lower bounds to be applied in the subproblems
-    int i, j;
-    for (i = data.numcommodities-1; i >= 0; --i) {
-	branching_vars[i].clear();
-	arcs_affected[i].clear();
-    }
-    for (i = vars.size()-1; i >= 0; --i) {
-	MCF_branching_var* v = dynamic_cast<MCF_branching_var*>(vars[i]);
-	if (v) {
-	    branching_vars[v->commodity].push_back(v);
-	    arcs_affected[v->commodity].push_back(v->arc_index);
-	}
-    }
-
-    /* The branching decisions may set bounds that are violated by some
-       of the variables (more precisely by the flow they represent). Find them
-       and set their upper bounds to 0, since it's highly unlikely that we'd
-       be able to find a fractional \lambda vector such that:
-       1) such a flow has nonzero coefficient;
-       2) the convex combination of all flows with nonzero \lambda is integer.
-    */
-    for (i = vars.size()-1; i >= 0; --i) {
-	MCF_var* v = dynamic_cast<MCF_var*>(vars[i]);
-	if (!v) continue;
-	const int vsize = v->flow.getNumElements();
-	const int* vind = v->flow.getIndices();
-	const double* vval = v->flow.getElements();
-
-	bool violated = false;
-	const std::vector<MCF_branching_var*>& bvars =
-	    branching_vars[v->commodity];
-	for (j = bvars.size()-1; !violated && j >= 0; --j) {
-	    const MCF_branching_var* bv = bvars[j];
-	    const int* pos = std::lower_bound(vind, vind+vsize, bv->arc_index);
-	    const double f = pos == vind+vsize ? 0.0 : vval[pos-vind];
-	    if (bv->ub() == 0.0) {
-		// the upper bound of the branching var in this child is set
-		// to 0, so we are in child 0
-		violated = (f < bv->lb_child0 || f > bv->ub_child0);
-	    } else {
-		violated = (f < bv->lb_child1 || f > bv->ub_child1);
-	    }
-	}
-	if (violated) {
-	    var_changed_pos.push_back(i);
-	    var_new_bd.push_back(0.0); // the new lower bound on the var
-	    var_new_bd.push_back(0.0); // the new upper bound on the var
-	}
-    }
 }
 
 /*---------------------------------------------------------------------------*/
@@ -78,19 +28,20 @@ BCP_solution* MCF_lp::test_feasibility(const BCP_lp_result& lp_result,
 				       const BCP_vec<BCP_var*>& vars,
 				       const BCP_vec<BCP_cut*>& cuts)
 {
-    // Here we need to test whether the convex combination of the current
-    // columns (according to \lambda, the current primal solution) is integer
-    // feasible for the original problem. The only thing that can be violated
-    // is integrality
-    int i, j;
-    for (i = data.numcommodities-1; i >= 0; --i) {
-	flows[i].clear();
+    // Here we need to test whether the left-hand-side of each row is integer
+    // or not.
+    const double* lhs = lpres.lhs();
+    const int numrows = cuts.size();
+    int i;
+    for (i = 0; i < numrows; ++i) {
+	const double frac = fabs(lhs[i] - floor(lhs[i]) - 0.5);
+	if (frac < 0.5-1e-6)
+	    return NULL;
     }
 
     const double* x = lp_result.x();
     for (i = vars.size()-1; i >= 0; --i) {
 	MCF_var* v = dynamic_cast<MCF_var*>(vars[i]);
-	if (!v) continue;
 	std::map<int,double>& f = flows[v->commodity];
 	const int vsize = v->flow.getNumElements();
 	const int* vind = v->flow.getIndices();
@@ -99,28 +50,23 @@ BCP_solution* MCF_lp::test_feasibility(const BCP_lp_result& lp_result,
 	    f[vind[j]] += vval[j]*x[i];
 	}
     }
-    for (i = data.numcommodities-1; i >= 0; --i) {
-	std::map<int,double>& f = flows[i];
-	for (std::map<int,double>::iterator fi=f.begin(); fi != f.end(); ++fi) {
-	    const double frac = fabs(fi->second - floor(fi->second) - 0.5);
-	    if (frac < 0.5-1e-6)
-		return NULL;
-	}
-    }
 
-    // Found an integer solution
     BCP_solution_generic* sol = new BCP_solution_generic;
     for (i = data.numcommodities-1; i >= 0; --i) {
 	std::map<int,double>& f = flows[i];
 	CoinPackedVector flow(false);
 	double weight = 0;
-	for (std::map<int,double>::iterator fi=f.begin(); fi != f.end(); ++fi) {
-	    const double val = floor(fi->second + 0.5);
-	    flow.insert(fi->first, val);
-	    weight += val * data.arcs[fi->first].weight;
+	for (std::map<int,double>::iterator fi=f.begin(); fi!=f.end(); ++fi) {
+	    flow.insert(fi->first, fi->second);
+	    weight += fi->second * data.arcs[fi->first].weight;
 	}
 	sol->add_entry(new MCF_var(i, flow, weight), 1.0);
     }
+
+    for (i = data.numcommodities-1; i >= 0; --i) {
+	flows[i].clear();
+    }
+
     return sol;
 }
 
@@ -154,18 +100,6 @@ MCF_lp::generate_vars_in_lp(const BCP_lp_result& lpres,
 	const MCF_data::commodity& comm = data.commodities[i];
 	cg_lp->setRowBounds(comm.source, -comm.demand, -comm.demand);
 	cg_lp->setRowBounds(comm.sink, comm.demand, comm.demand);
-	const std::vector<MCF_branching_var*>& bvars = branching_vars[i];
-	for (j = bvars.size() - 1; j >= 0; --j) {
-	    const MCF_branching_var* bv = bvars[j];
-	    const int ind = bv->arc_index;
-	    if (bv->ub() == 0.0) {
-		// the upper bound of the branching var in this child is set
-		// to 0, so we are in child 0
-		cg_lp->setColBounds(ind, bv->lb_child0, bv->ub_child0);
-	    } else {
-		cg_lp->setColBounds(ind, bv->lb_child1, bv->ub_child1);
-	    }
-	}
 	cg_lp->initialSolve();
 	if (cg_lp->getObjValue() < nu[i] - 1e-8) {
 	    // we have generated a column Create a var out of it. Round the
@@ -186,11 +120,6 @@ MCF_lp::generate_vars_in_lp(const BCP_lp_result& lpres,
 	    }
 	    new_vars.push_back(new MCF_var(i, CoinPackedVector(cnt, ind, val,
 							       false), obj));
-	}
-	for (j = bvars.size() - 1; j >= 0; --j) {
-	    const MCF_branching_var* bv = bvars[j];
-	    const int ind = bv->arc_index;
-	    cg_lp->setColBounds(ind, data.arcs[ind].lb, data.arcs[ind].ub);
 	}
 	cg_lp->setRowBounds(comm.source, 0, 0);
 	cg_lp->setRowBounds(comm.sink, 0, 0);
@@ -214,8 +143,7 @@ MCF_lp::vars_to_cols(const BCP_vec<BCP_cut*>& cuts,
     static const CoinPackedVector emptyVector(false);
     const int numvars = vars.size();
     for (int i = 0; i < numvars; ++i) {
-	const MCF_var* v =
-	    dynamic_cast<const MCF_var*>(vars[i]);
+	const MCF_var* v = dynamic_cast<const MCF_var*>(vars[i]);
 	if (v) {
 	    // Since we do not generate cuts, we can just disregard the "cuts"
 	    // argument, since the column corresponding to the var is exactly
@@ -224,11 +152,6 @@ MCF_lp::vars_to_cols(const BCP_vec<BCP_cut*>& cuts,
 	    // Excercise: if we had generated cuts, then the coefficients for
 	    // those rows would be appended to the end of each column
 	    continue;
-	}
-	const MCF_branching_var* bv =
-	    dynamic_cast<const MCF_branching_var*>(vars[i]);
-	if (bv) {
-	    cols.push_back(new BCP_col(emptyVector, 0.0, bv->lb(), bv->ub()));
 	}
     }
 }
@@ -312,8 +235,6 @@ void MCF_lp::unpack_module_data(BCP_buffer& buf)
     data.unpack(buf);
 
     // This is the place where we can preallocate some data structures
-    branching_vars = new std::vector<MCF_branching_var*>[data.numcommodities];
-    arcs_affected = new std::vector<int>[data.numcommodities];
     flows = new std::map<int,double>[data.numcommodities];
 
     // Create the LP that will be used to generate columns
@@ -336,7 +257,7 @@ void MCF_lp::unpack_module_data(BCP_buffer& buf)
     // initialize_new_search_tree_node method
     CoinZeroN(obj, numCols);
     CoinZeroN(clb, numCols);
-    CoinZeroN(cub, numCols);
+    CoinZeroFillN(cub, numCols, 1.0);
     // and these will be properly set for the subproblem in the
     // generate_vars_in_lp method
     CoinZeroN(rlb, numRows);

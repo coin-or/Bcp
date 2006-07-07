@@ -14,8 +14,6 @@ class MCF_lp : public BCP_lp_user
     OsiSolverInterface* cg_lp;
     BCP_parameter_set<MCF_par> par;
     MCF_data data;
-    std::vector<MCF_branching_var*>* branching_vars;
-    std::vector<int>* arcs_affected;
     // the solution to the original formulation
     std::map<int,double>* flows;
     bool generated_vars;
@@ -23,8 +21,6 @@ class MCF_lp : public BCP_lp_user
 public:
     MCF_lp() {}
     virtual ~MCF_lp() {
-	delete[] branching_vars;
-	delete[] arcs_affected;
 	delete[] flows;
 	delete cg_lp;
     }

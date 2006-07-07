@@ -61,7 +61,7 @@ DIST_COMMON = README $(am__configure_deps) \
 	$(srcdir)/Makefile.am $(srcdir)/Makefile.in \
 	$(srcdir)/bcp_addlibs.txt.in $(top_srcdir)/configure \
 	$(top_srcdir)/examples/BAC/Makefile.in \
-	$(top_srcdir)/examples/MCF/Makefile.in \
+	$(top_srcdir)/examples/MCF-1/Makefile.in \
 	$(top_srcdir)/inc/config_bcp.h.in AUTHORS INSTALL TODO
 @HAVE_EXTERNALS_TRUE@am__append_2 = Externals
 @HAVE_EXTERNALS_TRUE@am__append_3 = .Externals-stamp
@@ -75,7 +75,7 @@ am__CONFIG_DISTCLEAN_FILES = config.status config.cache config.log \
  configure.lineno configure.status.lineno
 mkinstalldirs = $(install_sh) -d
 CONFIG_HEADER = $(top_builddir)/inc/config_bcp.h
-CONFIG_CLEAN_FILES = examples/BAC/Makefile examples/MCF/Makefile \
+CONFIG_CLEAN_FILES = examples/BAC/Makefile examples/MCF-1/Makefile \
 	bcp_addlibs.txt
 SOURCES =
 DIST_SOURCES =
@@ -348,7 +348,7 @@ distclean-hdr:
 	-rm -f inc/config_bcp.h inc/stamp-h1
 examples/BAC/Makefile: $(top_builddir)/config.status $(top_srcdir)/examples/BAC/Makefile.in
 	cd $(top_builddir) && $(SHELL) ./config.status $@
-examples/MCF/Makefile: $(top_builddir)/config.status $(top_srcdir)/examples/MCF/Makefile.in
+examples/MCF-1/Makefile: $(top_builddir)/config.status $(top_srcdir)/examples/MCF-1/Makefile.in
 	cd $(top_builddir) && $(SHELL) ./config.status $@
 bcp_addlibs.txt: $(top_builddir)/config.status $(srcdir)/bcp_addlibs.txt.in
 	cd $(top_builddir) && $(SHELL) ./config.status $@
@@ -571,7 +571,7 @@ check-TESTS: $(TESTS)
 distdir: $(DISTFILES)
 	$(am__remove_distdir)
 	mkdir $(distdir)
-	$(mkdir_p) $(distdir)/. $(distdir)/.. $(distdir)/../BuildTools $(distdir)/doc $(distdir)/examples/BAC $(distdir)/examples/MCF $(distdir)/inc
+	$(mkdir_p) $(distdir)/. $(distdir)/.. $(distdir)/../BuildTools $(distdir)/doc $(distdir)/examples/BAC $(distdir)/examples/MCF-1 $(distdir)/inc
 	@srcdirstrip=`echo "$(srcdir)" | sed 's|.|.|g'`; \
 	topsrcdirstrip=`echo "$(top_srcdir)" | sed 's|.|.|g'`; \
 	list='$(DISTFILES)'; for file in $$list; do \

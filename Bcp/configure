@@ -20882,22 +20882,64 @@ fi
 
 if test $coin_vpath_config = yes; then
 
-if test examples/MCF = . ; then
+if test examples/MCF-1 = . ; then
 	updir=.
 else
-	t=`echo examples/MCF | sed -e 's=/\./=/=g' -e 's=^\./==' -e 's=/\.$==' -e 's=[^/]*=..=g'`
+	t=`echo examples/MCF-1 | sed -e 's=/\./=/=g' -e 's=^\./==' -e 's=/\.$==' -e 's=[^/]*=..=g'`
 	if test $t = "" ; then
 		t=.
 	fi
 	updir=$t
 fi
 
-	if test -e $srcdir/examples/MCF/examplefiles.txt ; then
-		echo Copying example examples/MCF ...
-		fromdir=$updir/$srcdir/`dirname examples/MCF/examplefiles.txt`
-		mkdir -p examples/MCF
-		cd examples/MCF
-		for f in `cat $updir/$srcdir/examples/MCF/examplefiles.txt` ; do
+	if test -e $srcdir/examples/MCF-1/examplefiles.txt ; then
+		echo Copying example examples/MCF-1 ...
+		fromdir=$updir/$srcdir/`dirname examples/MCF-1/examplefiles.txt`
+		mkdir -p examples/MCF-1
+		cd examples/MCF-1
+		for f in `cat $updir/$srcdir/examples/MCF-1/examplefiles.txt` ; do
+			if test ! -e $f ; then
+		   		fdir=`dirname $f`
+				mkdir -p $fdir
+
+if test $fdir = . ; then
+	uppath=.
+else
+	t=`echo $fdir | sed -e 's=/\./=/=g' -e 's=^\./==' -e 's=/\.$==' -e 's=[^/]*=..=g'`
+	if test $t = "" ; then
+		t=.
+	fi
+	uppath=$t
+fi
+
+				cd $fdir
+				cp -p $uppath/$fromdir/$f `basename $f`
+				cd $uppath
+			fi
+		done
+		cd $updir
+	fi
+fi
+
+
+if test $coin_vpath_config = yes; then
+
+if test examples/MCF-2 = . ; then
+	updir=.
+else
+	t=`echo examples/MCF-2 | sed -e 's=/\./=/=g' -e 's=^\./==' -e 's=/\.$==' -e 's=[^/]*=..=g'`
+	if test $t = "" ; then
+		t=.
+	fi
+	updir=$t
+fi
+
+	if test -e $srcdir/examples/MCF-2/examplefiles.txt ; then
+		echo Copying example examples/MCF-2 ...
+		fromdir=$updir/$srcdir/`dirname examples/MCF-2/examplefiles.txt`
+		mkdir -p examples/MCF-2
+		cd examples/MCF-2
+		for f in `cat $updir/$srcdir/examples/MCF-2/examplefiles.txt` ; do
 			if test ! -e $f ; then
 		   		fdir=`dirname $f`
 				mkdir -p $fdir
@@ -20941,7 +20983,7 @@ fi
 
 # Here list all the files that configure should create (except for the
 # configuration header file)
-                                                            ac_config_files="$ac_config_files Makefile src/Makefile test/BAC/Makefile examples/BAC/Makefile examples/MCF/Makefile bcp_addlibs.txt"
+                                                            ac_config_files="$ac_config_files Makefile src/Makefile test/BAC/Makefile examples/BAC/Makefile examples/MCF-1/Makefile bcp_addlibs.txt"
 
 
 # Here put the location and name of the configuration header file
@@ -21604,7 +21646,7 @@ do
   "src/Makefile" ) CONFIG_FILES="$CONFIG_FILES src/Makefile" ;;
   "test/BAC/Makefile" ) CONFIG_FILES="$CONFIG_FILES test/BAC/Makefile" ;;
   "examples/BAC/Makefile" ) CONFIG_FILES="$CONFIG_FILES examples/BAC/Makefile" ;;
-  "examples/MCF/Makefile" ) CONFIG_FILES="$CONFIG_FILES examples/MCF/Makefile" ;;
+  "examples/MCF-1/Makefile" ) CONFIG_FILES="$CONFIG_FILES examples/MCF-1/Makefile" ;;
   "bcp_addlibs.txt" ) CONFIG_FILES="$CONFIG_FILES bcp_addlibs.txt" ;;
   "depfiles" ) CONFIG_COMMANDS="$CONFIG_COMMANDS depfiles" ;;
   "inc/config_bcp.h" ) CONFIG_HEADERS="$CONFIG_HEADERS inc/config_bcp.h" ;;
