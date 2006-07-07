@@ -353,4 +353,13 @@ void MCF_lp::unpack_module_data(BCP_buffer& buf)
 
     cg_lp->loadProblem(numCols, numRows, start, index, value,
 		       clb, cub, obj, rlb, rub);
+
+    delete[] value;
+    delete[] index;
+    delete[] start;
+    delete[] rub;
+    delete[] rlb;
+    delete[] obj;
+    delete[] cub;
+    delete[] clb;
 }			

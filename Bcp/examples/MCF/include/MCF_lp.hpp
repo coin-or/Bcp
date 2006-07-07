@@ -26,6 +26,7 @@ public:
 	delete[] branching_vars;
 	delete[] arcs_affected;
 	delete[] flows;
+	delete cg_lp;
     }
 
     virtual void unpack_module_data(BCP_buffer& buf);

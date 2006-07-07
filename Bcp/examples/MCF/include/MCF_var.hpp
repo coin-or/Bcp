@@ -22,7 +22,7 @@ public:
 public:
     MCF_var(int com, const CoinPackedVector& f, double w) :
 	BCP_var_algo(BCP_ContinuousVar, w, 0, 1),
-	commodity(com), weight(w)
+	commodity(com), flow(false), weight(w)
     {
 	new (&flow) CoinPackedVector(f.getNumElements(),
 				     f.getIndices(), f.getElements(), false);
