@@ -152,7 +152,7 @@ fi
 COIN_LINK_FROM_FILELIST(test/BAC, examples/BAC/testfiles.txt)
 COIN_COPY_FROM_FILELIST(examples/BAC, examples/BAC/examplefiles.txt)
 
-COIN_COPY_FROM_FILELIST(examples/MCF, examples/MCF/examplefiles.txt)
+COIN_COPY_FROM_FILELIST(examples/MCF-1, examples/MCF-1/examplefiles.txt)
 
 # In case this is a VPATH configuration we need to make sure that the
 # input files for the examples are available in the VPATH directory.
