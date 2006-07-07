@@ -191,7 +191,7 @@ AC_CONFIG_FILES([Makefile
                  src/Makefile
                  test/BAC/Makefile
                  examples/BAC/Makefile
-                 examples/MCF/Makefile
+                 examples/MCF-1/Makefile
 				 bcp_addlibs.txt])
 
 # Here put the location and name of the configuration header file
