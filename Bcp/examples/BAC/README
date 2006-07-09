@@ -9,8 +9,13 @@ In this document, the following names are used:
 2. 'coin-Pkg' is the full path to the directory in which you have 
     downloaded Pkg.
 
-3. BACdir is the main directory of the BAC example and containing this 
-   README file.
+3. 'build' is the directory used for the installation of Pkg. This
+   directory must have 'lib' and 'include' subdirectories containing
+   all the libraries and header files of Pkg, including all the 
+   BCP libraries and header files.
+
+4. 'BACdir' is the main directory of the BAC example and containing this 
+   README file. It is located in build/Bcp/examples/BAC.
 
 
 OVERVIEW
@@ -25,9 +30,8 @@ BAC is an illustrative example for the Branch-Cut-Price code BCP of
 COIN-OR. BAC illustrates several basic features of BCP and it is hoped
 that a study of the BAC example is an almost painless introduction
 to BCP. BAC is not an efficient code for doing anything interesting,
-besides serving as an example for BCP. The file bac.pdf in the main 
-directory of the BAC example serves as main support for understanding 
-the code.
+besides serving as an example for BCP. The file bac.pdf BACdir serves 
+as main support for understanding the code.
 
 
 BCP TRAC PAGE
@@ -63,7 +67,7 @@ See the INSTALL file in coin-Pkg.
 SUPPORT
 =======
 
-1. Author
+1. Authors
 
    See the AUTHORS file.
 
