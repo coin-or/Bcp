@@ -42,6 +42,7 @@ Bcp/examples/MCF-1/include/MCF_lp.hpp -text
 Bcp/examples/MCF-1/include/MCF_par.hpp -text
 Bcp/examples/MCF-1/include/MCF_tm.hpp -text
 Bcp/examples/MCF-1/include/MCF_var.hpp -text
+Bcp/examples/MCF-1/mcf.par -text
 Bcp/examples/MCF-1/small -text
 Bcp/examples/MCF-2/LP/MCF_lp.cpp -text
 Bcp/examples/MCF-2/MCF.tex -text
@@ -58,6 +59,7 @@ Bcp/examples/MCF-2/include/MCF_lp.hpp -text
 Bcp/examples/MCF-2/include/MCF_par.hpp -text
 Bcp/examples/MCF-2/include/MCF_tm.hpp -text
 Bcp/examples/MCF-2/include/MCF_var.hpp -text
+Bcp/examples/MCF-2/mcf.par -text
 Bcp/examples/MCF-2/small -text
 Bcp/examples/MCF-2/small.dat -text
 Bcp/inc/config_bcp.h.in -text
