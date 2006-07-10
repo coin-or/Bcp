@@ -44,6 +44,12 @@ public:
 				    BCP_vec<double>& var_new_bd,
 				    BCP_vec<int>& cut_changed_pos,
 				    BCP_vec<double>& cut_new_bd);
+
+    virtual BCP_solution*
+    test_feasibility(const BCP_lp_result& lp_result,
+		     const BCP_vec<BCP_var*>& vars,
+		     const BCP_vec<BCP_cut*>& cuts);
+
     virtual void
     process_lp_result(const BCP_lp_result& lpres,
 		      const BCP_vec<BCP_var*>& vars,

@@ -51,6 +51,7 @@ Bcp/examples/MCF-2/Member/MCF_data.cpp -text
 Bcp/examples/MCF-2/Member/MCF_var.cpp -text
 Bcp/examples/MCF-2/TM/MCF_tm.cpp -text
 Bcp/examples/MCF-2/examplefiles.txt -text
+Bcp/examples/MCF-2/frac2.dat -text
 Bcp/examples/MCF-2/include/MCF_data.hpp -text
 Bcp/examples/MCF-2/include/MCF_init.hpp -text
 Bcp/examples/MCF-2/include/MCF_lp.hpp -text
@@ -58,6 +59,7 @@ Bcp/examples/MCF-2/include/MCF_par.hpp -text
 Bcp/examples/MCF-2/include/MCF_tm.hpp -text
 Bcp/examples/MCF-2/include/MCF_var.hpp -text
 Bcp/examples/MCF-2/small -text
+Bcp/examples/MCF-2/small.dat -text
 Bcp/inc/config_bcp.h.in -text
 Bcp/src/Makefile.am -text
 Bcp/src/Makefile.in -text

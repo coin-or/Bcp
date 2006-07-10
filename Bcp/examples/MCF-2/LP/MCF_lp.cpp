@@ -50,8 +50,21 @@ void MCF_lp::initialize_new_search_tree_node(const BCP_vec<BCP_var*>& vars,
     }
 
     delete[] ub;
+
+    generated_vars = 0;
 }
 
+/*---------------------------------------------------------------------------*/
+
+BCP_solution* MCF_lp::test_feasibility(const BCP_lp_result& lp_result,
+				       const BCP_vec<BCP_var*>& vars,
+				       const BCP_vec<BCP_cut*>& cuts)
+{
+     getLpProblemPointer()->lp_solver->writeLp("currlp", "lp");
+     printf("Current LP written in file currlp.lp\n");
+
+     return(0);
+}
 /*---------------------------------------------------------------------------*/
 
 void MCF_lp::process_lp_result(const BCP_lp_result& lpres,
@@ -241,6 +254,11 @@ MCF_lp::select_branching_candidates(const BCP_lp_result& lpres,
 	    most_frac_ind = i;
 	    most_frac_val = frac;
 	}
+    }
+
+    if(most_frac_ind == -1) {
+      printf("### ERROR: MCF_lp::select_braching_candidates(): most_frac_ind = -1\n");
+      exit(1);
     }
 
     // This vector contains which vars have their ounds forcibly changed.
