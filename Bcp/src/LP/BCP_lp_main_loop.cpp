@@ -93,15 +93,6 @@ void BCP_lp_main_loop(BCP_lp_prob& p)
 
 	BCP_lp_process_result(p, lpres);
 
-
-
-
-
-
-	
-
-
-	
 	BCP_lp_test_feasibility(p, lpres);
 	p.stat.time_feas_testing += CoinCpuTime() - time0;
 
