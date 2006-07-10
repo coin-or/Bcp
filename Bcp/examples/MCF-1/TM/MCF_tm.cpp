@@ -9,11 +9,16 @@ void MCF_tm::initialize_core(BCP_vec<BCP_var_core*>& vars,
 			     BCP_vec<BCP_cut_core*>& cuts,
 			     BCP_lp_relax*& matrix)
 {
+    int i;
     // The core cuts are the cuts that specify that the sum of the flows must
-    // not be out of bounds. However, since there are no core variables, the
+    // not be out of bounds, and the convexity constraints for the generated
+    // algo variables (flows). However, since there are no core variables, the
     // core matrix is empty.
     for (int i = 0; i < data.numarcs; ++i) {
 	cuts.push_back(new BCP_cut_core(data.arcs[i].lb, data.arcs[i].ub));
+    }
+    for (i = 0; i < data.numcommodities; ++i) {
+	cuts.push_back(new BCP_cut_core(1.0, 1.0));
     }
     matrix = new BCP_lp_relax;
 }

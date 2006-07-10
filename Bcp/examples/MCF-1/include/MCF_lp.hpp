@@ -48,17 +48,17 @@ public:
 				    BCP_vec<double>& var_new_bd,
 				    BCP_vec<int>& cut_changed_pos,
 				    BCP_vec<double>& cut_new_bd);
-    virtual BCP_solution*
-    test_feasibility(const BCP_lp_result& lp_result,
-		     const BCP_vec<BCP_var*>& vars,
-		     const BCP_vec<BCP_cut*>& cuts);
     virtual void
-    generate_vars_in_lp(const BCP_lp_result& lpres,
-			const BCP_vec<BCP_var*>& vars,
-			const BCP_vec<BCP_cut*>& cuts,
-			const bool before_fathom,
-			BCP_vec<BCP_var*>& new_vars,
-			BCP_vec<BCP_col*>& new_cols);
+    process_lp_result(const BCP_lp_result& lpres,
+		      const BCP_vec<BCP_var*>& vars,
+		      const BCP_vec<BCP_cut*>& cuts,
+		      const double old_lower_bound,
+		      double& true_lower_bound,
+		      BCP_solution*& sol,
+		      BCP_vec<BCP_cut*>& new_cuts,
+		      BCP_vec<BCP_row*>& new_rows,
+		      BCP_vec<BCP_var*>& new_vars,
+		      BCP_vec<BCP_col*>& new_cols);
     virtual void
     vars_to_cols(const BCP_vec<BCP_cut*>& cuts,
 		 BCP_vec<BCP_var*>& vars,
