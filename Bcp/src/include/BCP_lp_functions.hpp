@@ -65,8 +65,10 @@ int BCP_lp_generate_vars(BCP_lp_prob& p,
 
 //-----------------------------------------------------------------------------
 // BCP_lp_misc.cpp
+void BCP_lp_process_result(BCP_lp_prob& p, const BCP_lp_result& lpres);
 void BCP_lp_purge_slack_pool(BCP_lp_prob& p);
 void BCP_lp_test_feasibility(BCP_lp_prob& p, const BCP_lp_result& lpres);
+double BCP_lp_compute_lower_bound(BCP_lp_prob& p, const BCP_lp_result& lpres);
 void BCP_lp_clean_up_node(BCP_lp_prob& p);
 BCP_message_tag BCP_lp_pack_for_cg(BCP_lp_prob& p);
 BCP_message_tag BCP_lp_pack_for_vg(BCP_lp_prob& p);

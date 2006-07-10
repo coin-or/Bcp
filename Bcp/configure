@@ -20983,7 +20983,7 @@ fi
 
 # Here list all the files that configure should create (except for the
 # configuration header file)
-                                                            ac_config_files="$ac_config_files Makefile src/Makefile test/BAC/Makefile examples/BAC/Makefile examples/MCF-1/Makefile bcp_addlibs.txt"
+                                                                      ac_config_files="$ac_config_files Makefile src/Makefile test/BAC/Makefile examples/BAC/Makefile examples/MCF-1/Makefile examples/MCF-2/Makefile bcp_addlibs.txt"
 
 
 # Here put the location and name of the configuration header file
@@ -21647,6 +21647,7 @@ do
   "test/BAC/Makefile" ) CONFIG_FILES="$CONFIG_FILES test/BAC/Makefile" ;;
   "examples/BAC/Makefile" ) CONFIG_FILES="$CONFIG_FILES examples/BAC/Makefile" ;;
   "examples/MCF-1/Makefile" ) CONFIG_FILES="$CONFIG_FILES examples/MCF-1/Makefile" ;;
+  "examples/MCF-2/Makefile" ) CONFIG_FILES="$CONFIG_FILES examples/MCF-2/Makefile" ;;
   "bcp_addlibs.txt" ) CONFIG_FILES="$CONFIG_FILES bcp_addlibs.txt" ;;
   "depfiles" ) CONFIG_COMMANDS="$CONFIG_COMMANDS depfiles" ;;
   "inc/config_bcp.h" ) CONFIG_HEADERS="$CONFIG_HEADERS inc/config_bcp.h" ;;
