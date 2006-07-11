@@ -36,10 +36,6 @@ struct BCP_tm_par{
 	  (false). Default: 0. */
     // *FIXME* name of parameter is not the best. 
     DoBranchAndCut,
-    /** Indicator whether the LP computed objective value is a true lower
-	bound on the node. This should be set to false if column generation is
-	done. Values: 1 (true), 0 (false). Default: 1. */
-    LpValueIsTrueLowerBound,
     /** Indicates whether message passing is serial (all processes are on
 	the same processor) or not. Values: 1 (true), 0 (false). Default: 0.
     */
