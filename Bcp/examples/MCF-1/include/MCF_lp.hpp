@@ -18,6 +18,8 @@ class MCF_lp : public BCP_lp_user
     std::vector<int>* arcs_affected;
     // the solution to the original formulation
     std::map<int,double>* flows;
+
+    BCP_vec<BCP_var*> gen_vars;
     bool generated_vars;
 
 public:
@@ -26,6 +28,7 @@ public:
 	delete[] branching_vars;
 	delete[] arcs_affected;
 	delete[] flows;
+	purge_ptr_vector(gen_vars);
 	delete cg_lp;
     }
 
@@ -48,17 +51,22 @@ public:
 				    BCP_vec<double>& var_new_bd,
 				    BCP_vec<int>& cut_changed_pos,
 				    BCP_vec<double>& cut_new_bd);
+    virtual BCP_solution*
+    test_feasibility(const BCP_lp_result& lp_result,
+		     const BCP_vec<BCP_var*>& vars,
+		     const BCP_vec<BCP_cut*>& cuts);
+    virtual double
+    compute_lower_bound(const double old_lower_bound,
+			const BCP_lp_result& lpres,
+			const BCP_vec<BCP_var*>& vars,
+			const BCP_vec<BCP_cut*>& cuts);
     virtual void
-    process_lp_result(const BCP_lp_result& lpres,
-		      const BCP_vec<BCP_var*>& vars,
-		      const BCP_vec<BCP_cut*>& cuts,
-		      const double old_lower_bound,
-		      double& true_lower_bound,
-		      BCP_solution*& sol,
-		      BCP_vec<BCP_cut*>& new_cuts,
-		      BCP_vec<BCP_row*>& new_rows,
-		      BCP_vec<BCP_var*>& new_vars,
-		      BCP_vec<BCP_col*>& new_cols);
+    generate_vars_in_lp(const BCP_lp_result& lpres,
+			const BCP_vec<BCP_var*>& vars,
+			const BCP_vec<BCP_cut*>& cuts,
+			const bool before_fathom,
+			BCP_vec<BCP_var*>& new_vars,
+			BCP_vec<BCP_col*>& new_cols);
     virtual void
     vars_to_cols(const BCP_vec<BCP_cut*>& cuts,
 		 BCP_vec<BCP_var*>& vars,
