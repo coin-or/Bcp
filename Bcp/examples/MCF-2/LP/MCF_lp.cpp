@@ -51,35 +51,20 @@ void MCF_lp::initialize_new_search_tree_node(const BCP_vec<BCP_var*>& vars,
 
     delete[] ub;
 
-    generated_vars = 0;
+    // clear out our local pool
+    purge_ptr_vector(gen_vars);
 }
 
 /*---------------------------------------------------------------------------*/
 
-BCP_solution* MCF_lp::test_feasibility(const BCP_lp_result& lp_result,
+BCP_solution* MCF_lp::test_feasibility(const BCP_lp_result& lpres,
 				       const BCP_vec<BCP_var*>& vars,
 				       const BCP_vec<BCP_cut*>& cuts)
 {
-     getLpProblemPointer()->lp_solver->writeLp("currlp", "lp");
-     printf("Current LP written in file currlp.lp\n");
-
-     return(0);
-}
-/*---------------------------------------------------------------------------*/
-
-void MCF_lp::process_lp_result(const BCP_lp_result& lpres,
-			       const BCP_vec<BCP_var*>& vars,
-			       const BCP_vec<BCP_cut*>& cuts,
-			       const double old_lower_bound,
-			       double& true_lower_bound,
-			       BCP_solution*& sol,
-			       BCP_vec<BCP_cut*>& new_cuts,
-			       BCP_vec<BCP_row*>& new_rows,
-			       BCP_vec<BCP_var*>& new_vars,
-			       BCP_vec<BCP_col*>& new_cols)
-{
-    // Here we need to test feasibility, compute a new true lower bound and
-    // generate variables
+    getLpProblemPointer()->lp_solver->writeMps("currlp", "mps");
+    printf("Current LP written in file currlp.mps\n");
+    getLpProblemPointer()->lp_solver->writeLp("currlp", "lp");
+    printf("Current LP written in file currlp.lp\n");
 
     // testing feasibility: we need to test whether the left-hand-side of each
     // row is integer or not.
@@ -89,42 +74,57 @@ void MCF_lp::process_lp_result(const BCP_lp_result& lpres,
     for (i = 0; i < numarcs; ++i) {
 	const double frac = fabs(lhs[i] - floor(lhs[i]) - 0.5);
 	if (frac < 0.5-1e-6)
-	    break;
+	    return NULL;
     }
 
-    if (i == numarcs) {
-	// Solution is feasible, for each commodity combine the correspondng
-	// flows into one
-	const double* x = lpres.x();
-	for (i = vars.size()-1; i >= 0; --i) {
-	    MCF_var* v = dynamic_cast<MCF_var*>(vars[i]);
-	    std::map<int,double>& f = flows[v->commodity];
-	    const int vsize = v->flow.getNumElements();
-	    const int* vind = v->flow.getIndices();
-	    const double* vval = v->flow.getElements();
-	    for (j = 0; j < vsize; ++j) {
-		f[vind[j]] += vval[j]*x[i];
-	    }
+    // Solution is feasible, for each commodity combine the correspondng
+    // flows into one
+    const double* x = lpres.x();
+    for (i = vars.size()-1; i >= 0; --i) {
+	MCF_var* v = dynamic_cast<MCF_var*>(vars[i]);
+	std::map<int,double>& f = flows[v->commodity];
+	const int vsize = v->flow.getNumElements();
+	const int* vind = v->flow.getIndices();
+	const double* vval = v->flow.getElements();
+	for (j = 0; j < vsize; ++j) {
+	    f[vind[j]] += vval[j]*x[i];
 	}
-	BCP_solution_generic* gsol = new BCP_solution_generic;
-	for (i = data.numcommodities-1; i >= 0; --i) {
-	    std::map<int,double>& f = flows[i];
-	    CoinPackedVector flow(false);
-	    double weight = 0;
-	    for (std::map<int,double>::iterator fi = f.begin();
-		 fi != f.end(); ++fi) {
+    }
+    BCP_solution_generic* gsol = new BCP_solution_generic;
+    for (i = data.numcommodities-1; i >= 0; --i) {
+	std::map<int,double>& f = flows[i];
+	CoinPackedVector flow(false);
+	double weight = 0;
+	for (std::map<int,double>::iterator fi = f.begin(); fi!=f.end(); ++fi){
+	    if (fi->second > 1e-6) {
 		flow.insert(fi->first, fi->second);
 		weight += fi->second * data.arcs[fi->first].weight;
 	    }
-	    gsol->add_entry(new MCF_var(i, flow, weight), 1.0);
 	}
-	for (i = data.numcommodities-1; i >= 0; --i) {
-	    flows[i].clear();
-	}
-	sol = gsol;
+	gsol->add_entry(new MCF_var(i, flow, weight), 1.0);
     }
+    for (i = data.numcommodities-1; i >= 0; --i) {
+	flows[i].clear();
+    }
+    return gsol;
+}
 
+/*---------------------------------------------------------------------------*/
+
+double
+MCF_lp::compute_lower_bound(const double old_lower_bound,
+			    const BCP_lp_result& lpres,
+			    const BCP_vec<BCP_var*>& vars,
+			    const BCP_vec<BCP_cut*>& cuts)
+{
+    // To compute a true lower bound we need to generate variables first (if
+    // we can). These are saved so that we can return them in
+    // generate_vars_in_lp.
+
+    int i, j;
+    
     // Now generate variables:  for each commodity generate a flow.
+    const int numarcs = data.numarcs;
     double* cost = new double[numarcs];
     const double* pi = lpres.pi();
     const double* nu = pi + numarcs;
@@ -151,7 +151,7 @@ void MCF_lp::process_lp_result(const BCP_lp_result& lpres,
 	    const double* x = cg_lp->getColSolution();
 	    cnt = 0;
 	    double obj = 0.0;
-	    for (int j = 0; j < numarcs; ++j) {
+	    for (j = 0; j < numarcs; ++j) {
 		const double xval = floor(x[j] + 0.5);
 		if (xval != 0.0) {
 		    ind[cnt] = j;
@@ -160,13 +160,8 @@ void MCF_lp::process_lp_result(const BCP_lp_result& lpres,
 		    obj += data.arcs[j].weight * xval;
 		}
 	    }
-	    new_vars.push_back(new MCF_var(i, CoinPackedVector(cnt, ind, val,
+	    gen_vars.push_back(new MCF_var(i, CoinPackedVector(cnt, ind, val,
 							       false), obj));
-	    // The corresponding column
-	    ind[cnt] = numarcs + i;
-	    val[cnt] = 1.0;
-	    new_cols.push_back(new BCP_col());
-	    new_cols.back()->copy(cnt+1, ind, val, obj, 0.0, 1.0);
 	}
 	cg_lp->setRowBounds(comm.source, 0, 0);
 	cg_lp->setRowBounds(comm.sink, 0, 0);
@@ -175,12 +170,15 @@ void MCF_lp::process_lp_result(const BCP_lp_result& lpres,
     delete[] ind;
     delete[] cost;
 
-    generated_vars = new_vars.size() > 0;
-
     // Excercise: do the same in a random order and apply dual discounting
     // Not yet implemented.
 
+    generated_vars = gen_vars.size() > 0;
+
     // Now get a true lower bound
+    double true_lower_bound = 0.0;
+    generated_vars = (gen_vars.size() > 0);
+
     if (generated_vars) {
 	true_lower_bound = old_lower_bound;
     } else {
@@ -193,6 +191,22 @@ void MCF_lp::process_lp_result(const BCP_lp_result& lpres,
 
 	// Not yet implemented.
     }
+
+    return true_lower_bound;
+}
+
+/*---------------------------------------------------------------------------*/
+
+void
+MCF_lp::generate_vars_in_lp(const BCP_lp_result& lpres,
+			    const BCP_vec<BCP_var*>& vars,
+			    const BCP_vec<BCP_cut*>& cuts,
+			    const bool before_fathom,
+			    BCP_vec<BCP_var*>& new_vars,
+			    BCP_vec<BCP_col*>& new_cols)
+{
+    new_vars.append(gen_vars);
+    gen_vars.clear();
 }
 
 /*---------------------------------------------------------------------------*/

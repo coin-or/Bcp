@@ -65,9 +65,9 @@ void MCF_tm::display_feasible_solution(const BCP_solution* sol)
 	const int* ind = f.getIndices();
 	const double* val = f.getElements();
 	for (int j = 0; j < f.getNumElements(); ++j) {
-	    printf("    arc %6i  ( %5i -> %5i )     flow %i\n",
+	    printf("    arc %6i  ( %5i -> %5i )     flow %f\n",
 		   ind[j], data.arcs[ind[j]].tail, data.arcs[ind[j]].head,
-		   static_cast<int>(val[j]));
+		   val[j]);
 	}
     }
 }

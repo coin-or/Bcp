@@ -62,7 +62,7 @@ void MCF_data::unpack(BCP_buffer& buf)
 
 int MCF_data::readDimacsFormat(std::istream& s, bool addDummyArcs)
 {
-    double maxweight = 0;
+    double sumweight = 0;
 
     bool size_read = true;
     int arcs_read = 0;
@@ -111,9 +111,7 @@ int MCF_data::readDimacsFormat(std::istream& s, bool addDummyArcs)
 		printf("Input file is incorrect. (a line)\n");
 		return 1;
 	    }
-	    if (fabs(arcs[arcs_read].weight) > maxweight) {
-		maxweight = fabs(arcs[arcs_read].weight);
-	    }
+	    sumweight += fabs(arcs[arcs_read].weight);
 	    ++arcs_read;
 	    break;
 	default:
@@ -137,7 +135,7 @@ int MCF_data::readDimacsFormat(std::istream& s, bool addDummyArcs)
 	    arcs[numarcs].head   = commodities[i].sink;
 	    arcs[numarcs].lb     = 0;
 	    arcs[numarcs].ub     = commodities[i].demand;
-	    arcs[numarcs].weight = maxweight+1;
+	    arcs[numarcs].weight = sumweight+1;
 	    ++numarcs;
 	}
     }

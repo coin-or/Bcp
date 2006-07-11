@@ -1,6 +1,7 @@
 small
 small.dat
 frac2.dat
+frac3.dat
 mcf.par
 include/MCF_data.hpp
 include/MCF_init.hpp
