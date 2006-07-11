@@ -31,7 +31,7 @@ void MCF_tm::create_root(BCP_vec<BCP_var*>& added_vars,
 			 BCP_pricing_status& pricing_status)
 {
     // create a column (a flow) for each commodity
-  if ((1) || (par.entry(MCF_par::AddDummySourceSinkArcs))) {
+    if (par.entry(MCF_par::AddDummySourceSinkArcs)) {
 	// In this case just send all the demand through the artificial arc
 	// for each commodity. That'll get the algorithm started.
 	for (int i = 0; i < data.numcommodities; ++i) {
@@ -49,6 +49,8 @@ void MCF_tm::create_root(BCP_vec<BCP_var*>& added_vars,
 	// branching the master problem may become infeasible, subproblems can
 	// be infeasible, etc...
     }
+
+    pricing_status = BCP_PriceAlgoVars;
 }
 
 /*---------------------------------------------------------------------------*/

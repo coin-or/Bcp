@@ -143,7 +143,7 @@ MCF_lp::compute_lower_bound(const double old_lower_bound,
 	cg_lp->setRowBounds(comm.source, -comm.demand, -comm.demand);
 	cg_lp->setRowBounds(comm.sink, comm.demand, comm.demand);
 	cg_lp->initialSolve();
-	if (cg_lp->getObjValue() < nu[i] - 1e-8) {
+	if (cg_lp->isProvenOptimal() && cg_lp->getObjValue() < nu[i] - 1e-8) {
 	    // we have generated a column Create a var out of it. Round the
 	    // double values while we are here, after all, they should be
 	    // integer. there can only be some tiny roundoff error by the LP
@@ -309,6 +309,7 @@ void MCF_lp::unpack_module_data(BCP_buffer& buf)
 
     // Create the LP that will be used to generate columns
     cg_lp = new OsiClpSolverInterface();
+    cg_lp->messageHandler()->setLogLevel(0);
 
     const int numCols = data.numarcs;
     const int numRows = data.numnodes;

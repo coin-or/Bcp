@@ -87,16 +87,16 @@ MCF_lp::test_feasibility(const BCP_lp_result& lpres,
 			 const BCP_vec<BCP_var*>& vars,
 			 const BCP_vec<BCP_cut*>& cuts)
 {
-    // Feasibility testing: we need to test whether the convex combination of
-    // the current columns (according to \lambda, the current primal solution)
-    // is integer feasible for the original problem. The only thing that can
-    // be violated is integrality.
-  
     getLpProblemPointer()->lp_solver->writeMps("currlp", "mps");
     printf("Current LP written in file currlp.mps\n");
     getLpProblemPointer()->lp_solver->writeLp("currlp", "lp");
     printf("Current LP written in file currlp.lp\n");
 
+    // Feasibility testing: we need to test whether the convex combination of
+    // the current columns (according to \lambda, the current primal solution)
+    // is integer feasible for the original problem. The only thing that can
+    // be violated is integrality.
+  
     int i, j;
     for (i = data.numcommodities-1; i >= 0; --i) {
 	flows[i].clear();
@@ -384,7 +384,6 @@ void MCF_lp::unpack_module_data(BCP_buffer& buf)
 
     // Create the LP that will be used to generate columns
     cg_lp = new OsiClpSolverInterface();
-    cg_lp->messageHandler()->setLogLevel(0);
 
     const int numCols = data.numarcs;
     const int numRows = data.numnodes;
