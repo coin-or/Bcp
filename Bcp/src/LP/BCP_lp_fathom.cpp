@@ -355,32 +355,34 @@ BCP_price_vars(BCP_lp_prob& p, const bool from_fathom,
     }
 
     bool generated_algo_var = false;
-    const size_t to_add = vars_to_add.size();
-    if (p.user_has_lp_result_processing) {
-	vars_to_add.append(p.new_vars);
-	cols_to_add.append(p.new_cols);
-	p.new_vars.clear();
-	p.new_cols.clear();
-    } else {
-	p.user->generate_vars_in_lp(lpres, p.node->vars, p.node->cuts,
-				    from_fathom, vars_to_add, cols_to_add);
-    }
-    if (vars_to_add.size() > to_add) {
-	generated_algo_var = true;
-	if (cols_to_add.size() > to_add) {
-	    if (cols_to_add.size() !=  vars_to_add.size()) {
-		throw BCP_fatal_error("\
-LP: uneven new_vars/new_cols sizes in BCP_price_vars().\n");
-	    }
+    if (p.node->indexed_pricing.get_status() & BCP_PriceAlgoVars) {
+	const size_t to_add = vars_to_add.size();
+	if (p.user_has_lp_result_processing) {
+	    vars_to_add.append(p.new_vars);
+	    cols_to_add.append(p.new_cols);
+	    p.new_vars.clear();
+	    p.new_cols.clear();
 	} else {
-	    // expand the generated vars
-	    BCP_vec<BCP_var*> new_vars(vars_to_add.begin() + to_add,
-				       vars_to_add.end());
-	    BCP_vec<BCP_col*> new_cols;
-	    p.user->vars_to_cols(p.node->cuts, new_vars, new_cols,
-				 lpres, BCP_Object_FromGenerator, false);
-	    cols_to_add.insert(cols_to_add.end(),
-			       new_cols.begin(), new_cols.end());
+	    p.user->generate_vars_in_lp(lpres, p.node->vars, p.node->cuts,
+					from_fathom, vars_to_add, cols_to_add);
+	}
+	if (vars_to_add.size() > to_add) {
+	    generated_algo_var = true;
+	    if (cols_to_add.size() > to_add) {
+		if (cols_to_add.size() !=  vars_to_add.size()) {
+		    throw BCP_fatal_error("\
+LP: uneven new_vars/new_cols sizes in BCP_price_vars().\n");
+		}
+	    } else {
+		// expand the generated vars
+		BCP_vec<BCP_var*> new_vars(vars_to_add.begin() + to_add,
+					   vars_to_add.end());
+		BCP_vec<BCP_col*> new_cols;
+		p.user->vars_to_cols(p.node->cuts, new_vars, new_cols,
+				     lpres, BCP_Object_FromGenerator, false);
+		cols_to_add.insert(cols_to_add.end(),
+				   new_cols.begin(), new_cols.end());
+	    }
 	}
     }
   
@@ -504,34 +506,36 @@ BCP_restore_feasibility(BCP_lp_prob& p,
 	// OK, we have restored feasibility
 	return;
 
-    // Now try to restore feasibility with algo vars
-    // now we want to pass only the uncut dual rays, so collect them
-    std::vector<double*> dual_rays_uncut;
-    for (int i = 0; i < numrays; ++i) {
-	if (!rays_cut[i]) {
-	    dual_rays_uncut.push_back(dual_rays[i]);
-	}
-    }
-    const size_t to_add = vars_to_add.size();
-    p.user->restore_feasibility(*p.lp_result, dual_rays_uncut,
-				p.node->vars, p.node->cuts,
-				vars_to_add, cols_to_add);
-    if (vars_to_add.size() > to_add) {
-	if (cols_to_add.size() > to_add) {
-	    if (cols_to_add.size() !=  vars_to_add.size()) {
-		throw BCP_fatal_error("\
-LP: uneven new_vars/new_cols sizes in BCP_restore_feasibility().\n");
+    if (p.node->indexed_pricing.get_status() & BCP_PriceAlgoVars) {
+	// Now try to restore feasibility with algo vars
+	// now we want to pass only the uncut dual rays, so collect them
+	std::vector<double*> dual_rays_uncut;
+	for (int i = 0; i < numrays; ++i) {
+	    if (!rays_cut[i]) {
+		dual_rays_uncut.push_back(dual_rays[i]);
 	    }
-	} else {
-	    // expand the generated vars
-	    BCP_vec<BCP_var*> new_vars(vars_to_add.begin() + to_add,
-				       vars_to_add.end());
-	    BCP_vec<BCP_col*> new_cols;
-	    p.user->vars_to_cols(p.node->cuts, new_vars, new_cols,
-				 *p.lp_result, BCP_Object_FromGenerator,
-				 false);
-	    cols_to_add.insert(cols_to_add.end(),
-			       new_cols.begin(), new_cols.end());
+	}
+	const size_t to_add = vars_to_add.size();
+	p.user->restore_feasibility(*p.lp_result, dual_rays_uncut,
+				    p.node->vars, p.node->cuts,
+				    vars_to_add, cols_to_add);
+	if (vars_to_add.size() > to_add) {
+	    if (cols_to_add.size() > to_add) {
+		if (cols_to_add.size() !=  vars_to_add.size()) {
+		    throw BCP_fatal_error("\
+LP: uneven new_vars/new_cols sizes in BCP_restore_feasibility().\n");
+		}
+	    } else {
+		// expand the generated vars
+		BCP_vec<BCP_var*> new_vars(vars_to_add.begin() + to_add,
+					   vars_to_add.end());
+		BCP_vec<BCP_col*> new_cols;
+		p.user->vars_to_cols(p.node->cuts, new_vars, new_cols,
+				     *p.lp_result, BCP_Object_FromGenerator,
+				     false);
+		cols_to_add.insert(cols_to_add.end(),
+				   new_cols.begin(), new_cols.end());
+	    }
 	}
     }
 }
