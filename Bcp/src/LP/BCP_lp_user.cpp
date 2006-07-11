@@ -67,7 +67,7 @@ BCP_lp_user::send_feasible_solution(const BCP_solution* sol)
     // update the UB if necessary
     const double objval = sol->objective_value();
     const bool over_ub = p->ub(objval);
-    if (! p->param(BCP_lp_par::SolveLpToOptimality) && over_ub)
+    if (p->node->indexed_pricing.get_status() == BCP_PriceNothing && over_ub)
 	p->lp_solver->setDblParam(OsiDualObjectiveLimit,
 				  objval-p->granularity());
 }

@@ -184,7 +184,7 @@ LP: BCP_Msg_InitialUserInfo arrived in BCP_lp_prob::process_message().\n");
       BCP_lp_unpack_active_node(*this, msg_buf);
       // load the lp formulation into the lp solver
       lp_solver = master_lp->clone();
-      if (! param(BCP_lp_par::SolveLpToOptimality))
+      if (node->indexed_pricing.get_status() == BCP_PriceNothing)
 	 lp_solver->setDblParam(OsiDualObjectiveLimit, ub() - granularity());
       BCP_lp_create_lp(*this);
       BCP_lp_main_loop(*this);
@@ -274,9 +274,10 @@ void BCP_lp_process_ub_message(BCP_lp_prob& p, BCP_buffer& buf)
 {
    double new_ub;
    buf.unpack(new_ub);
-   if (! p.param(BCP_lp_par::SolveLpToOptimality) &&
-       p.ub(new_ub) &&
-       p.lp_solver)
+   if (p.ub(new_ub) &&
+       p.lp_solver &&
+       p.node &&
+       p.node->indexed_pricing.get_status() == BCP_PriceNothing)
      p.lp_solver->setDblParam(OsiDualObjectiveLimit, new_ub - p.granularity());
 }
 

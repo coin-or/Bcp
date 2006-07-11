@@ -57,13 +57,6 @@ struct BCP_lp_par{
 	  manager. <br>
 	  Values: true (1), false (0). Default: 0. */
       NoCompressionAtFathom,
-      /** Whether the LP solver can stop when it reaches the dual objective
-	  limit. In branch-and-cut this is not necessary as a search tree node
-	  can be fathomed as soon as the dual is provably above the current
-	  best solution value. However, in olumn generation schemes one wants
-	  an optimal dual solution to generate good new columns.<br>
-	  Values: true (1), false (0). Default: 0. */
-      SolveLpToOptimality,
 
       /**@name Verbosity Parameters.
 
