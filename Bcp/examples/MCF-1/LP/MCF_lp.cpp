@@ -230,14 +230,13 @@ MCF_lp::compute_lower_bound(const double old_lower_bound,
 	true_lower_bound = old_lower_bound;
     } else {
 	true_lower_bound = lpres.objval();
-	// Excercise: Get a better true lower bound
-
-	// Hint: lpres.objval() + The sum of the reduced costs of the
-	// variables with the most negative reduced cost in each subproblem
-	// yield a true lower bound
-
-	// Not yet implemented.
     }
+
+    // Excercise: Get a better true lower bound
+    // Hint: lpres.objval() + The sum of the reduced costs of the
+    // variables with the most negative reduced cost in each subproblem
+    // yield a true lower bound
+    // Not yet implemented.
 
     return true_lower_bound;
 }
