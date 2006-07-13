@@ -9,13 +9,23 @@
 #include "MCF_var.hpp"
 #include "MCF_data.hpp"
 
+class MCF_branch_decision
+{
+public:
+    int arc_index;
+    int lb;
+    int ub;
+public: 
+    MCF_branch_decision() : arc_index(-1), lb(0), ub(0) {}
+    MCF_branch_decision(int i, int l, int u) : arc_index(i), lb(l), ub(u) {}
+};
+
 class MCF_lp : public BCP_lp_user
 {
     OsiSolverInterface* cg_lp;
     BCP_parameter_set<MCF_par> par;
     MCF_data data;
-    std::vector<MCF_branching_var*>* branching_vars;
-    std::vector<int>* arcs_affected;
+    std::vector<MCF_branch_decision>* branch_history;
     // the solution to the original formulation
     std::map<int,double>* flows;
 
@@ -25,8 +35,7 @@ class MCF_lp : public BCP_lp_user
 public:
     MCF_lp() {}
     virtual ~MCF_lp() {
-	delete[] branching_vars;
-	delete[] arcs_affected;
+	delete[] branch_history;
 	delete[] flows;
 	purge_ptr_vector(gen_vars);
 	delete cg_lp;
