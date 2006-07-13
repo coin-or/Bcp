@@ -377,15 +377,14 @@ MCF_lp::select_branching_candidates(const BCP_lp_result& lpres,
 	    // creating a merged list (need not be ordered!) is easy
 	    ivp.append(child0_pos);
 	    ivp.append(child1_pos);
-	    ivb.reserve(4*(child1_pos.size() + child0_pos.size()));
 	    ivb.append(child0_bd);
 	    for (j = child1_pos.size() - 1; j >= 0; --j) {
-		fvb.push_back(0.0);
-		fvb.push_back(1.0);
+		ivb.push_back(0.0);
+		ivb.push_back(1.0);
 	    }
 	    for (j = child0_pos.size() - 1; j >= 0; --j) {
-		fvb.push_back(0.0);
-		fvb.push_back(1.0);
+		ivb.push_back(0.0);
+		ivb.push_back(1.0);
 	    }
 	    ivb.append(child1_bd);
 	    cands.push_back(new BCP_lp_branching_object(2, // num of children
