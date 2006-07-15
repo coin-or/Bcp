@@ -30,46 +30,11 @@ MCF_var::MCF_var(BCP_buffer& buf) :
 
 /*===========================================================================*/
 
-void MCF_branching_var::pack(BCP_buffer& buf) const
-{
-    buf.pack(commodity);
-    buf.pack(arc_index);
-    buf.pack(lb_child0);
-    buf.pack(ub_child0);
-    buf.pack(lb_child1);
-    buf.pack(ub_child1);
-}
-
-/*---------------------------------------------------------------------------*/
-
-MCF_branching_var::MCF_branching_var(BCP_buffer& buf) :
-    BCP_var_algo(BCP_BinaryVar, 0, 0, 1)
-{
-    buf.unpack(commodity);
-    buf.unpack(arc_index);
-    buf.unpack(lb_child0);
-    buf.unpack(ub_child0);
-    buf.unpack(lb_child1);
-    buf.unpack(ub_child1);
-}
-
-/*===========================================================================*/
-
 void MCF_pack_var(const BCP_var_algo* var, BCP_buffer& buf)
 {
     const MCF_var* v = dynamic_cast<const MCF_var*>(var);
     if (v) {
-	int type = 0;
-	buf.pack(type);
 	v->pack(buf);
-	return;
-    }
-    const MCF_branching_var* bv = dynamic_cast<const MCF_branching_var*>(var);
-    if (bv) {
-	int type = 1;
-	buf.pack(type);
-	bv->pack(buf);
-	return;
     }
 }
 
@@ -77,13 +42,6 @@ void MCF_pack_var(const BCP_var_algo* var, BCP_buffer& buf)
 
 BCP_var_algo* MCF_unpack_var(BCP_buffer& buf)
 {
-    int type;
-    buf.unpack(type);
-    switch (type) {
-    case 0: return new MCF_var(buf);
-    case 1: return new MCF_branching_var(buf);
-    default: throw BCP_fatal_error("MCF_unpack_var: bad var type");
-    }
-    return NULL; // fake return
+    return new MCF_var(buf);
 }
 

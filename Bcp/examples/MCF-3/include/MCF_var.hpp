@@ -7,8 +7,7 @@
 
 /*---------------------------------------------------------------------------*/
 
-// Here are two kind of variables. The first is a "real" variable, i.e., it
-// describes a column of the master problem, that is a flow for a
+// A var describing a column of the master problem, that is a flow for a
 // commodity. The second is a "fake" variable. It simply holds information on
 // the branching decision so that in the subproblems we can make the
 // appropriate restrictions on the flow values.
@@ -29,28 +28,6 @@ public:
     }
     MCF_var(BCP_buffer& buf);
     ~MCF_var() {}
-
-    void pack(BCP_buffer& buf) const;
-};
-
-/*---------------------------------------------------------------------------*/
-
-class MCF_branching_var : public BCP_var_algo {
-public:
-    int commodity;
-    int arc_index;
-    int lb_child0;
-    int ub_child0;
-    int lb_child1;
-    int ub_child1;
-
-public:
-    MCF_branching_var(int comm, int ind, int lb0, int ub0, int lb1, int ub1) :
-	BCP_var_algo(BCP_BinaryVar, 0, 0, 1),
-	commodity(comm), arc_index(ind),
-	lb_child0(lb0), ub_child0(ub0), lb_child1(lb1), ub_child1(ub1) {}
-    MCF_branching_var(BCP_buffer& buf);
-    ~MCF_branching_var() {}
 
     void pack(BCP_buffer& buf) const;
 };
