@@ -9,17 +9,6 @@
 #include "MCF_var.hpp"
 #include "MCF_data.hpp"
 
-class MCF_branch_decision
-{
-public:
-    int arc_index;
-    int lb;
-    int ub;
-public: 
-    MCF_branch_decision() : arc_index(-1), lb(0), ub(0) {}
-    MCF_branch_decision(int i, int l, int u) : arc_index(i), lb(l), ub(u) {}
-};
-
 class MCF_lp : public BCP_lp_user
 {
     OsiSolverInterface* cg_lp;

@@ -9,23 +9,15 @@
 #include "MCF_var.hpp"
 #include "MCF_data.hpp"
 
-class MCF_branch_decision
-{
-public:
-    int arc_index;
-    int lb;
-    int ub;
-public: 
-    MCF_branch_decision() : arc_index(-1), lb(0), ub(0) {}
-    MCF_branch_decision(int i, int l, int u) : arc_index(i), lb(l), ub(u) {}
-};
-
 class MCF_lp : public BCP_lp_user
 {
     OsiSolverInterface* cg_lp;
     BCP_parameter_set<MCF_par> par;
     MCF_data data;
     std::vector<MCF_branch_decision>* branch_history;
+    std::vector<MCF_branch_decision>* new_branch;
+    std::vector<int> commodities_with_candidate;
+    
     // the solution to the original formulation
     std::map<int,double>* flows;
 
@@ -35,8 +27,8 @@ class MCF_lp : public BCP_lp_user
 public:
     MCF_lp() {}
     virtual ~MCF_lp() {
-	delete[] branch_history;
 	delete[] flows;
+	delete[] new_branch;
 	purge_ptr_vector(gen_vars);
 	delete cg_lp;
     }
@@ -47,6 +39,16 @@ public:
     }
     virtual BCP_var_algo* unpack_var_algo(BCP_buffer& buf) {
 	return MCF_unpack_var(buf);
+    }
+    
+    virtual void pack_user_data(const BCP_user_data* ud, BCP_buffer& buf) {
+	const MCF_user* u = dynamic_cast<const MCF_user*>(ud);
+	u->pack(buf);
+    }
+    virtual BCP_user_data* unpack_user_data(BCP_buffer& buf) {
+	MCF_user* u = new MCF_user;
+	u->unpack(buf);
+	return u;
     }
 
     virtual OsiSolverInterface* initialize_solver_interface();
@@ -89,6 +91,9 @@ public:
 				const BCP_lp_var_pool& local_var_pool,
 				const BCP_lp_cut_pool& local_cut_pool,
 				BCP_vec<BCP_lp_branching_object*>& cands);
+    virtual void
+    set_user_data_for_children(BCP_presolved_lp_brobj* best, 
+			       const int selected);
 };
 
 #endif

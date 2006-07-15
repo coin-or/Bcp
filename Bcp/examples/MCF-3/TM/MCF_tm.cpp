@@ -50,6 +50,8 @@ void MCF_tm::create_root(BCP_vec<BCP_var*>& added_vars,
 	// be infeasible, etc...
     }
 
+    user_data = new MCF_user(data.numcommodities);
+
     pricing_status = BCP_PriceAlgoVars;
 }
 

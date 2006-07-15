@@ -46,6 +46,39 @@ void MCF_adjust_bounds(const BCP_vec<BCP_var*>& vars,
 
 /*---------------------------------------------------------------------------*/
 
+void MCF_adjust_bounds(const BCP_vec<BCP_var*>& vars,
+		       const int commodity,
+		       const MCF_branch_decision& decision,
+		       BCP_vec<int>& var_changed_pos,
+		       BCP_vec<double>& var_new_bd)
+{
+    for (int i = vars.size()-1; i >= 0; --i) {
+	MCF_var* v = dynamic_cast<MCF_var*>(vars[i]);
+	if (!v)
+	    continue;
+	if (v->commodity != commodity)
+	    continue;
+	const int vsize = v->flow.getNumElements();
+	const int* vind = v->flow.getIndices();
+	const double* vval = v->flow.getElements();
+
+	double f = 0.0;
+	for (int k = 0; k < vsize; ++k) {
+	    if (vind[k] == decision.arc_index) {
+		f = vval[k];
+		break;
+	    }
+	}
+	if (f < decision.lb || f > decision.ub) {
+	    var_changed_pos.push_back(i);
+	    var_new_bd.push_back(0.0); // the new lower bound on the var
+	    var_new_bd.push_back(0.0); // the new upper bound on the var
+	}
+    }
+}
+
+/*---------------------------------------------------------------------------*/
+
 void MCF_lp::initialize_new_search_tree_node(const BCP_vec<BCP_var*>& vars,
 					     const BCP_vec<BCP_cut*>& cuts,
 					     const BCP_vec<BCP_obj_status>& var_status,
@@ -91,10 +124,13 @@ MCF_lp::test_feasibility(const BCP_lp_result& lpres,
 			 const BCP_vec<BCP_var*>& vars,
 			 const BCP_vec<BCP_cut*>& cuts)
 {
-    getLpProblemPointer()->lp_solver->writeMps("currlp", "mps");
-    printf("Current LP written in file currlp.mps\n");
-    getLpProblemPointer()->lp_solver->writeLp("currlp", "lp");
-    printf("Current LP written in file currlp.lp\n");
+    static int cnt = 0;
+    char name[100];
+    sprintf(name, "currlp-%i", cnt++);
+    getLpProblemPointer()->lp_solver->writeMps(name, "mps");
+    printf("Current LP written in file %s.mps\n", name);
+    getLpProblemPointer()->lp_solver->writeLp(name, "lp");
+    printf("Current LP written in file %s.lp\n", name);
 
     // Feasibility testing: we need to test whether the convex combination of
     // the current columns (according to \lambda, the current primal solution)
@@ -313,8 +349,6 @@ MCF_lp::select_branching_candidates(const BCP_lp_result& lpres,
 	data.numarcs - data.numcommodities : data.numarcs;
 		
     // find a few fractional original variables and do strong branching on them
-    std::vector<MCF_branch_decision>* history =
-	new std::vector<MCF_branch_decision>[data.numcommodities];
     for (i = data.numcommodities-1; i >= 0; --i) {
 	std::map<int,double>& f = flows[i];
 	int most_frac_ind = -1;
@@ -351,12 +385,13 @@ MCF_lp::select_branching_candidates(const BCP_lp_result& lpres,
 	    // Look at the consequences of of this branch
 	    BCP_vec<int> child0_pos, child1_pos;
 	    BCP_vec<double> child0_bd, child1_bd;
-	    history[i].push_back(MCF_branch_decision(most_frac_ind, lb, mid));
-	    MCF_adjust_bounds(vars, history, child0_pos, child0_bd);
-	    history[i].back().lb = mid+1;
-	    history[i].back().ub = ub;
-	    MCF_adjust_bounds(vars, history, child1_pos, child1_bd);
-	    history[i].clear();
+
+	    MCF_branch_decision child0(most_frac_ind, lb, mid);
+	    MCF_adjust_bounds(vars, i, child0, child0_pos, child0_bd);
+
+	    MCF_branch_decision child1(most_frac_ind, mid+1, ub);
+	    MCF_adjust_bounds(vars, i, child1, child1_pos, child1_bd);
+
 	    // Now put together the changes
 	    fvp.push_back(-1);
 	    fvp.append(child0_pos);

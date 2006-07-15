@@ -144,3 +144,50 @@ int MCF_data::readDimacsFormat(std::istream& s, bool addDummyArcs)
 
 //#############################################################################
 
+void MCF_branch_decision::pack(BCP_buffer& buf) const
+{
+    buf.pack(arc_index);
+    buf.pack(lb);
+    buf.pack(ub);
+}
+
+/*---------------------------------------------------------------------------*/
+
+void MCF_branch_decision::unpack(BCP_buffer& buf)
+{
+    buf.unpack(arc_index);
+    buf.unpack(lb);
+    buf.unpack(ub);
+}
+
+//#############################################################################
+
+void MCF_user::pack(BCP_buffer& buf) const
+{
+    buf.pack(numCommodities);
+    for (int i = 0; i < numCommodities; ++i) {
+	int s = branch_history[i].size();
+	buf.pack(s);
+	for (int j = 0; j < s; ++j) {
+	    branch_history[i][j].pack(buf);
+	}
+    }
+}
+
+/*---------------------------------------------------------------------------*/
+
+void MCF_user::unpack(BCP_buffer& buf)
+{
+    delete[] branch_history;
+    buf.unpack(numCommodities);
+    branch_history = new std::vector<MCF_branch_decision>[numCommodities];
+    MCF_branch_decision d;
+    for (int i = 0; i < numCommodities; ++i) {
+	int s;
+	buf.unpack(s);
+	for (int j = 0; j < s; ++j) {
+	    d.unpack(buf);
+	    branch_history[i].push_back(d);
+	}
+    }
+}

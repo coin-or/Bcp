@@ -25,6 +25,17 @@ public:
     virtual BCP_var_algo* unpack_var_algo(BCP_buffer& buf) {
 	return MCF_unpack_var(buf);
     }
+
+    virtual void pack_user_data(const BCP_user_data* ud, BCP_buffer& buf) {
+	const MCF_user* u = dynamic_cast<const MCF_user*>(ud);
+	u->pack(buf);
+    }
+    virtual BCP_user_data* unpack_user_data(BCP_buffer& buf) {
+	MCF_user* u = new MCF_user;
+	u->unpack(buf);
+	return u;
+    }
+
     virtual void initialize_core(BCP_vec<BCP_var_core*>& vars,
 				 BCP_vec<BCP_cut_core*>& cuts,
 				 BCP_lp_relax*& matrix);

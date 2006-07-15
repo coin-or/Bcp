@@ -46,6 +46,39 @@ void MCF_adjust_bounds(const BCP_vec<BCP_var*>& vars,
 
 /*---------------------------------------------------------------------------*/
 
+void MCF_adjust_bounds(const BCP_vec<BCP_var*>& vars,
+		       const int commodity,
+		       const MCF_branch_decision& decision,
+		       BCP_vec<int>& var_changed_pos,
+		       BCP_vec<double>& var_new_bd)
+{
+    for (int i = vars.size()-1; i >= 0; --i) {
+	MCF_var* v = dynamic_cast<MCF_var*>(vars[i]);
+	if (!v)
+	    continue;
+	if (v->commodity != commodity)
+	    continue;
+	const int vsize = v->flow.getNumElements();
+	const int* vind = v->flow.getIndices();
+	const double* vval = v->flow.getElements();
+
+	double f = 0.0;
+	for (int k = 0; k < vsize; ++k) {
+	    if (vind[k] == decision.arc_index) {
+		f = vval[k];
+		break;
+	    }
+	}
+	if (f < decision.lb || f > decision.ub) {
+	    var_changed_pos.push_back(i);
+	    var_new_bd.push_back(0.0); // the new lower bound on the var
+	    var_new_bd.push_back(0.0); // the new upper bound on the var
+	}
+    }
+}
+
+/*---------------------------------------------------------------------------*/
+
 void MCF_lp::initialize_new_search_tree_node(const BCP_vec<BCP_var*>& vars,
 					     const BCP_vec<BCP_cut*>& cuts,
 					     const BCP_vec<BCP_obj_status>& var_status,
@@ -55,30 +88,7 @@ void MCF_lp::initialize_new_search_tree_node(const BCP_vec<BCP_var*>& vars,
 					     BCP_vec<int>& cut_changed_pos,
 					     BCP_vec<double>& cut_new_bd)
 {
-    // Go through all the variables, select the MCF_branching_var's and save
-    // the upper/lower bounds to be applied in the subproblems
-    int i;
-    for (i = data.numcommodities-1; i >= 0; --i) {
-	branch_history[i].clear();
-    }
-    for (i = vars.size()-1; i >= 0; --i) {
-	MCF_branching_var* v = dynamic_cast<MCF_branching_var*>(vars[i]);
-	if (v) {
-	    if (v->ub() == 0.0) {
-		// the upper bound of the branching var in this child is set
-		// to 0, so we are in child 0v->lb_child0
-		branch_history[v->commodity].
-		    push_back(MCF_branch_decision(v->arc_index,
-						  v->lb_child0,
-						  v->ub_child0));
-	    } else {
-		branch_history[v->commodity].
-		    push_back(MCF_branch_decision(v->arc_index,
-						  v->lb_child1,
-						  v->ub_child1));
-	    }
-	}
-    }
+    branch_history = dynamic_cast<MCF_user*>(get_user_data())->branch_history;
 
     /* The branching decisions may set bounds that are violated by some
        of the variables (more precisely by the flow they represent). Find them
@@ -100,10 +110,13 @@ MCF_lp::test_feasibility(const BCP_lp_result& lpres,
 			 const BCP_vec<BCP_var*>& vars,
 			 const BCP_vec<BCP_cut*>& cuts)
 {
-    getLpProblemPointer()->lp_solver->writeMps("currlp", "mps");
-    printf("Current LP written in file currlp.mps\n");
-    getLpProblemPointer()->lp_solver->writeLp("currlp", "lp");
-    printf("Current LP written in file currlp.lp\n");
+    static int cnt = 0;
+    char name[100];
+    sprintf(name, "currlp-%i", cnt++);
+    getLpProblemPointer()->lp_solver->writeMps(name, "mps");
+    printf("Current LP written in file %s.mps\n", name);
+    getLpProblemPointer()->lp_solver->writeLp(name, "lp");
+    printf("Current LP written in file %s.lp\n", name);
 
     // Feasibility testing: we need to test whether the convex combination of
     // the current columns (according to \lambda, the current primal solution)
@@ -290,11 +303,6 @@ MCF_lp::vars_to_cols(const BCP_vec<BCP_cut*>& cuts,
 	    // those rows would be appended to the end of each column
 	    continue;
 	}
-	const MCF_branching_var* bv =
-	    dynamic_cast<const MCF_branching_var*>(vars[i]);
-	if (bv) {
-	    cols.push_back(new BCP_col(emptyVector, 0.0, bv->lb(), bv->ub()));
-	}
     }
 }
 
@@ -322,9 +330,9 @@ MCF_lp::select_branching_candidates(const BCP_lp_result& lpres,
 	data.numarcs - data.numcommodities : data.numarcs;
 		
     // find a few fractional original variables and do strong branching on them
-    std::vector<MCF_branch_decision>* history =
-	new std::vector<MCF_branch_decision>[data.numcommodities];
+    commodities_with_candidate.clear();
     for (i = data.numcommodities-1; i >= 0; --i) {
+	new_branch[i].clear();
 	std::map<int,double>& f = flows[i];
 	int most_frac_ind = -1;
 	double most_frac_val = 0.5-1e-6;
@@ -340,9 +348,6 @@ MCF_lp::select_branching_candidates(const BCP_lp_result& lpres,
 	    }
 	}
 	if (most_frac_ind >= 0) {
-	    BCP_vec<BCP_var*> new_vars;
-	    BCP_vec<int> fvp;
-	    BCP_vec<double> fvb;
 	    BCP_vec<int> ivp;
 	    BCP_vec<double> ivb;
 	    int lb = data.arcs[most_frac_ind].lb;
@@ -357,45 +362,62 @@ MCF_lp::select_branching_candidates(const BCP_lp_result& lpres,
 		}
 	    }
 	    const int mid = static_cast<int>(floor(frac_val));
-	    new_vars.push_back(new MCF_branching_var(i, most_frac_ind,
-						     lb, mid, mid+1, ub));
-	    fvp.push_back(-1);
-	    fvb.push_back(0.0);
-	    fvb.push_back(0.0);
-	    fvb.push_back(1.0);
-	    fvb.push_back(1.0);
 	    // Now the implied changes
 	    BCP_vec<int> child0_pos, child1_pos;
 	    BCP_vec<double> child0_bd, child1_bd;
-	    history[i].push_back(MCF_branch_decision(most_frac_ind, lb, mid));
-	    MCF_adjust_bounds(vars, history, child0_pos, child0_bd);
-	    history[i].back().lb = mid+1;
-	    history[i].back().ub = ub;
-	    MCF_adjust_bounds(vars, history, child1_pos, child1_bd);
-	    history[i].clear();
+
+	    MCF_branch_decision child0(most_frac_ind, lb, mid);
+	    new_branch[i].push_back(child0);
+	    MCF_adjust_bounds(vars, i, child0, child0_pos, child0_bd);
+
+	    MCF_branch_decision child1(most_frac_ind, mid+1, ub);
+	    new_branch[i].push_back(child1);
+	    MCF_adjust_bounds(vars, i, child1, child1_pos, child1_bd);
+
 	    // child0_pos and child1_pos are going to be disjoint, thus
 	    // creating a merged list (need not be ordered!) is easy
 	    ivp.append(child0_pos);
 	    ivp.append(child1_pos);
-	    ivb.reserve(4*(child1_pos.size() + child0_pos.size()));
 	    ivb.append(child0_bd);
 	    for (j = child1_pos.size() - 1; j >= 0; --j) {
-		fvb.push_back(0.0);
-		fvb.push_back(1.0);
+		ivb.push_back(0.0);
+		ivb.push_back(1.0);
 	    }
 	    for (j = child0_pos.size() - 1; j >= 0; --j) {
-		fvb.push_back(0.0);
-		fvb.push_back(1.0);
+		ivb.push_back(0.0);
+		ivb.push_back(1.0);
 	    }
 	    ivb.append(child1_bd);
 	    cands.push_back(new BCP_lp_branching_object(2, // num of children
-							&new_vars,
+							NULL,
 							NULL, // no new cuts
-							&fvp,NULL,&fvb,NULL,
+							NULL,NULL,NULL,NULL,
 							&ivp,NULL,&ivb,NULL));
+	    commodities_with_candidate.push_back(i);
 	}
     }
     return BCP_DoBranch;
+}
+
+/*---------------------------------------------------------------------------*/
+
+void MCF_lp::set_user_data_for_children(BCP_presolved_lp_brobj* best, 
+					const int selected)
+{
+    const int commodity_branched_on = commodities_with_candidate[selected];
+    BCP_vec<BCP_user_data*>& ud = best->user_data();
+    MCF_user* node_user = dynamic_cast<MCF_user*>(get_user_data());
+    MCF_user* u;
+
+    u = new MCF_user(*node_user);
+    u->branch_history[commodity_branched_on].
+	push_back(new_branch[commodity_branched_on][0]);
+    ud[0] = u;
+    
+    u = new MCF_user(*node_user);
+    u->branch_history[commodity_branched_on].
+	push_back(new_branch[commodity_branched_on][1]);
+    ud[1] = u;
 }
 
 /*===========================================================================*/
@@ -406,8 +428,8 @@ void MCF_lp::unpack_module_data(BCP_buffer& buf)
     data.unpack(buf);
 
     // This is the place where we can preallocate some data structures
-    branch_history = new std::vector<MCF_branch_decision>[data.numcommodities];
     flows = new std::map<int,double>[data.numcommodities];
+    new_branch = new std::vector<MCF_branch_decision>[data.numcommodities];
 
     // Create the LP that will be used to generate columns
     cg_lp = new OsiClpSolverInterface();
