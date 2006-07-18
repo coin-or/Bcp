@@ -154,6 +154,7 @@ COIN_COPY_FROM_FILELIST(examples/BAC, examples/BAC/examplefiles.txt)
 
 COIN_COPY_FROM_FILELIST(examples/MCF-1, examples/MCF-1/examplefiles.txt)
 COIN_COPY_FROM_FILELIST(examples/MCF-2, examples/MCF-2/examplefiles.txt)
+COIN_COPY_FROM_FILELIST(examples/MCF-3, examples/MCF-3/examplefiles.txt)
 
 # In case this is a VPATH configuration we need to make sure that the
 # input files for the examples are available in the VPATH directory.
@@ -193,6 +194,7 @@ AC_CONFIG_FILES([Makefile
                  examples/BAC/Makefile
                  examples/MCF-1/Makefile
                  examples/MCF-2/Makefile
+                 examples/MCF-3/Makefile
 		 bcp_addlibs.txt])
 
 # Here put the location and name of the configuration header file
