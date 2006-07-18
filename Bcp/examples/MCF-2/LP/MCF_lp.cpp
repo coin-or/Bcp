@@ -135,7 +135,8 @@ MCF_lp::test_feasibility(const BCP_lp_result& lpres,
 {
     static int cnt = 0;
     char name[100];
-    sprintf(name, "currlp-%i", cnt++);
+    //    sprintf(name, "currlp-%i", cnt++);
+    sprintf(name, "currlp");
     getLpProblemPointer()->lp_solver->writeMps(name, "mps");
     printf("Current LP written in file %s.mps\n", name);
     getLpProblemPointer()->lp_solver->writeLp(name, "lp");
