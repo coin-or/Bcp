@@ -1,8 +1,5 @@
 /* inc/config_bcp.h.in.  Generated from configure.ac by autoheader.  */
 
-/* If defined, debug sanity checks are performed during runtime */
-#undef COIN_DEBUG
-
 /* Define to 1 if the Bcp package is used */
 #undef COIN_HAS_BCP
 
