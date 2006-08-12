@@ -1,11 +1,11 @@
 // For 0/1 parameters, only the default is listed
 
 /***************************************************************************/
-// MCF parameters
+// MCF1 parameters
 
-MCF_AddDummySourceSinkArcs             1  // 1: Add summy arcs
+MCF1_AddDummySourceSinkArcs             1  // 1: Add summy arcs
 
-MCF_InputFilename                  small  // small : input file
+MCF1_InputFilename                  small  // small : input file
  
 /***************************************************************************/
 // VERBOSITY:

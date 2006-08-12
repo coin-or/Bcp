@@ -14,11 +14,11 @@ EXE = mcf@EXEEXT@
 
 # CHANGEME: Here is the name of all object files corresponding to the source
 #           code that you wrote in order to define the problem statement
-OBJS = 	Member/MCF.@OBJEXT@ \
-	Member/MCF_var.@OBJEXT@ \
-	Member/MCF_data.@OBJEXT@ \
-	TM/MCF_tm.@OBJEXT@ \
-	LP/MCF_lp.@OBJEXT@
+OBJS = 	Member/MCF1.@OBJEXT@ \
+	Member/MCF1_var.@OBJEXT@ \
+	Member/MCF1_data.@OBJEXT@ \
+	TM/MCF1_tm.@OBJEXT@ \
+	LP/MCF1_lp.@OBJEXT@
 
 # CHANGEME: Additional include directories for compilation. Note that no
 # include directory needs to be listed here for headers from COIN.
