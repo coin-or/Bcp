@@ -183,7 +183,9 @@ LP:   Terminating and fathoming due to proven high cost.\n",
 	}
 
 	if (fix_vars_while_external_processes_working) {
-	    if (BCP_lp_fix_vars(p) || !p.lp_solver->basisIsAvailable()) {
+	    if (BCP_lp_fix_vars(p) ||
+		(p.lp_solver->canDoSimplexInterface() &&
+		 !p.lp_solver->basisIsAvailable())) {
 		// during variable fixing primal feasibility is lost (must be
 		// due to logical fixing by the user). Go back and resolve,
 		// but keep the same iteration number
