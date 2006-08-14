@@ -44,7 +44,7 @@ AC_CANONICAL_BUILD
 AC_COIN_PROJECTDIR_INIT
 
 # Check if user wants to produce debugging code
-AC_COIN_DEBUG_COMPILE
+AC_COIN_DEBUG_COMPILE(Bcp)
 
 # Get the name of the C++ compiler and appropriate compiler options
 AC_COIN_PROG_CXX
@@ -151,6 +151,7 @@ fi
 
 COIN_LINK_FROM_FILELIST(test/BAC, examples/BAC/testfiles.txt)
 COIN_COPY_FROM_FILELIST(examples/BAC, examples/BAC/examplefiles.txt)
+COIN_COPY_FROM_FILELIST(examples/MaxCut, examples/MaxCut/examplefiles.txt)
 
 COIN_COPY_FROM_FILELIST(examples/MCF-1, examples/MCF-1/examplefiles.txt)
 COIN_COPY_FROM_FILELIST(examples/MCF-2, examples/MCF-2/examplefiles.txt)
@@ -195,6 +196,7 @@ AC_CONFIG_FILES([Makefile
                  examples/MCF-1/Makefile
                  examples/MCF-2/Makefile
                  examples/MCF-3/Makefile
+                 examples/MaxCut/Makefile
 		 bcp_addlibs.txt])
 
 # Here put the location and name of the configuration header file
