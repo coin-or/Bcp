@@ -17,7 +17,6 @@ EXE = maxcut@EXEEXT@
 OBJS = \
 	CG/MC_cutgen.@OBJEXT@ \
 	CG/MC_ising_cycles.@OBJEXT@ \
-	CG/MC_trianglegen.@OBJEXT@ \
 	CG/MC_shortest_path_cycle.@OBJEXT@ \
 	LP/MC_lp_branch.@OBJEXT@ \
 	LP/MC_lp_param.@OBJEXT@ \
