@@ -173,6 +173,7 @@ libBcp_la_LDFLAGS = $(LT_LDFLAGS)
 # "cygpath" stuff is necessary to compile with native compilers on Windows.
 AM_CPPFLAGS = 
 AM_CPPFLAGS += -I`$(CYGPATH_W) $(COINUTILSSRCDIR)/src`
+AM_CPPFLAGS += -I`$(CYGPATH_W) $(COINUTILSOBJDIR)/inc`
 AM_CPPFLAGS += -I`$(CYGPATH_W) $(OSISRCDIR)/src`
 
 # Include MPI header directory if MPI is used
