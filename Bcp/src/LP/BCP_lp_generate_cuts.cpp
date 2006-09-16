@@ -143,7 +143,7 @@ LP: uneven new_cuts/new_rows sizes in generate_cuts_in_lp().\n");
 			       p.msg_buf, tout);
 	    if (p.msg_buf.msgtag() == BCP_Msg_NoMessage){
 		// check that everyone is still alive
-		if (! p.msg_env->alive(p.tree_manager))
+		if (! p.msg_env->alive(p.get_parent() /*tree_manager*/))
 		    throw BCP_fatal_error("\
 LP:   The TM has died -- LP exiting\n");
 		if (p.node->cg && ! p.msg_env->alive(p.node->cg))

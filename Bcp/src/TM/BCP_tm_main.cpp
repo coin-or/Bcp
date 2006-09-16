@@ -97,8 +97,6 @@ int bcp_main(int argc, char* argv[], USER_initialize* user_init)
        throw BCP_fatal_error("New process identity is BCP_ProcessType_TM!\n");
      }
    }
-   delete parent;
-   delete my_id;
    delete msg_env;
    delete user_init;
 
@@ -114,7 +112,7 @@ BCP_tm_main(BCP_message_environment* msg_env,
 	    const int argnum, const char* const * arglist)
 {
    // Start to create the universe... (we don't have a user universe yet).
-   BCP_tm_prob p;
+   BCP_tm_prob p(my_id, NULL);
 
    // If we ever get here then the environment is parallel
    p.par.set_entry(BCP_tm_par::MessagePassingIsSerial,false);

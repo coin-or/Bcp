@@ -40,6 +40,11 @@ enum BCP_message_tag{
    BCP_Msg_NoMessage,
    /** Used when receiving, message with any message tag will be received. */
    BCP_Msg_AnyMessage,
+   /** Used by the user to send a message to the user portion of the other
+       process. Note that the other process will NOT be interrupted to process
+       the message. Message processing will happen when that process decides
+       to check for messages on its own. */
+   BCP_Msg_User,
    /*@}*/
 
    /**@name Messages between any process and the Tree Manager */

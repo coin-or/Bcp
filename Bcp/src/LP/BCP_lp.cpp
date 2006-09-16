@@ -58,7 +58,8 @@ BCP_lp_statistics::add(const BCP_lp_statistics& stat)
 
 //#############################################################################
 
-BCP_lp_prob::BCP_lp_prob() :
+BCP_lp_prob::BCP_lp_prob(BCP_proc_id* my_id, BCP_proc_id* parent) :
+   BCP_process(my_id, parent),
    user(0),
    master_lp(0),
    lp_solver(0),
@@ -76,8 +77,7 @@ BCP_lp_prob::BCP_lp_prob() :
    next_cut_index(0),
    last_cut_index(0),
    upper_bound(DBL_MAX),
-   phase(0),
-   tree_manager(0)
+   phase(0)
 {}
 
 BCP_lp_prob::~BCP_lp_prob() {

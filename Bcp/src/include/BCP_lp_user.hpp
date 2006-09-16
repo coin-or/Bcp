@@ -227,6 +227,19 @@ public:
     /*@}*/
 
     //=========================================================================
+    /** What is the process id of the current process */
+    const BCP_proc_id* process_id() const;
+    /** Send a message to a particular process */
+    void
+    send_message(const BCP_proc_id* const target, const BCP_buffer& buf);
+    /** Broadcast the message to all processes of the given type */
+    void
+    broadcast_message(const BCP_process_t proc_type, const BCP_buffer& buf);
+    /** Process a message that has been sent by another process' user part to
+	this process' user part. */
+    virtual void
+    process_message(BCP_buffer& buf);
+    //=========================================================================
     /** Create LP solver environment.
 	Create the LP solver class that will be used for solving the LP
 	relaxations. The default implementation picks up which

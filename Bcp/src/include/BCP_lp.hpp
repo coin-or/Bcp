@@ -112,7 +112,7 @@ public:
     /**@name Constructor and destructor */
     /*@{*/
     /** */
-    BCP_lp_prob();
+    BCP_lp_prob(BCP_proc_id* my_id, BCP_proc_id* parent);
     /** */
     virtual ~BCP_lp_prob();
     /*@}*/
@@ -220,7 +220,7 @@ public:
     /**@name Message passing related fields */
     /*@{*/
     /** */
-    BCP_proc_id* tree_manager;
+    //    BCP_proc_id* tree_manager;
     /** */
     BCP_buffer  msg_buf;
     /*@}*/
@@ -308,7 +308,6 @@ public:
     /*@}*/  // end of query methods 
     //-------------------------------------------------------------------------
     virtual BCP_buffer& get_message_buffer() { return msg_buf; }
-    virtual BCP_proc_id* get_parent() { return tree_manager; }
     virtual void process_message();
 };
 

@@ -316,11 +316,11 @@ LP: there is ws info in BCP_lp_send_node_description()!\n");
       // (20 lines below) to decide whether we have to get the diving info or
       // not.
       p.node->dive = BCP_UnknownDivingStatus;
-      p.msg_env->send(p.tree_manager,
+      p.msg_env->send(p.get_parent() /*tree_manager*/,
 		      BCP_Msg_NodeDescriptionWithBranchingInfo, buf);
    }else{
       // we came from fathom()
-      p.msg_env->send(p.tree_manager, msgtag, buf);
+      p.msg_env->send(p.get_parent() /*tree_manager*/, msgtag, buf);
    }
 
    if (keep == -1){
@@ -337,7 +337,8 @@ LP: there is ws info in BCP_lp_send_node_description()!\n");
    if (p.node->dive == BCP_UnknownDivingStatus) {
       // We got to receive the diving information by hand
       p.msg_buf.clear();
-      p.msg_env->receive(p.tree_manager, BCP_Msg_DivingInfo, buf, -1);
+      p.msg_env->receive(p.get_parent() /*tree_manager*/,
+			 BCP_Msg_DivingInfo, buf, -1);
       BCP_lp_unpack_diving_info(p, p.msg_buf);
    }
 

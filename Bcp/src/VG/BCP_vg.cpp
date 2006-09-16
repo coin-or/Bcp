@@ -8,8 +8,9 @@
 #include "BCP_vg.hpp"
 #include "BCP_vg_user.hpp"
 
-BCP_vg_prob::BCP_vg_prob() :
-   user(0), msg_env(0), core(new BCP_problem_core), tree_manager(0),
+BCP_vg_prob::BCP_vg_prob(BCP_proc_id* my_id, BCP_proc_id* parent) :
+   BCP_process(my_id, parent),
+   user(0), msg_env(0), core(new BCP_problem_core),
    upper_bound(DBL_MAX), phase(0) {}
 
 

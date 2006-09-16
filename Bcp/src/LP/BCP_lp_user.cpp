@@ -62,7 +62,8 @@ BCP_lp_user::send_feasible_solution(const BCP_solution* sol)
     // send the feas sol to the tree manager
     p->msg_buf.clear();
     pack_feasible_solution(p->msg_buf, sol);
-    p->msg_env->send(p->tree_manager, BCP_Msg_FeasibleSolution, p->msg_buf);
+    p->msg_env->send(p->get_parent() /*tree_manager*/,
+		     BCP_Msg_FeasibleSolution, p->msg_buf);
 
     // update the UB if necessary
     const double objval = sol->objective_value();
@@ -207,6 +208,41 @@ BCP_lp_user::unpack_user_data(BCP_buffer& buf)
     throw BCP_fatal_error("\
 BCP_lp_user::unpack_user_data() invoked but not overridden!\n");
     return 0; // to satisfy aCC on HP-UX
+}
+
+//#############################################################################
+
+/** What is the process id of the current process */
+const BCP_proc_id*
+BCP_lp_user::process_id() const
+{
+    return p->get_process_id();
+}
+
+/** Send a message to a particular process */
+void
+BCP_lp_user::send_message(const BCP_proc_id* const target,
+			  const BCP_buffer& buf)
+{
+    p->msg_env->send(target, BCP_Msg_User, buf);
+}    
+
+/** Broadcast the message to all processes of the given type */
+void
+BCP_lp_user::broadcast_message(const BCP_process_t proc_type,
+			       const BCP_buffer& buf)
+{
+    throw BCP_fatal_error("\
+BCP_lp_user::broadcast_message: can't broadcast from an LP process.\n");
+}
+
+/** Process a message that has been sent by another process' user part to
+    this process' user part. */
+void
+BCP_lp_user::process_message(BCP_buffer& buf)
+{
+    throw BCP_fatal_error("\
+BCP_lp_user::process_message() invoked but not overridden!\n");
 }
 
 //#############################################################################

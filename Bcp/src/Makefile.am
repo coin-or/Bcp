@@ -57,7 +57,6 @@ libBcp_la_SOURCES += VG/BCP_vg_user.cpp
 libBcp_la_SOURCES += VG/BCP_vg_main.cpp
 libBcp_la_SOURCES += VG/BCP_vg.cpp
 libBcp_la_SOURCES += Member/BCP_solution.cpp
-libBcp_la_SOURCES += Member/BCP_process.cpp
 libBcp_la_SOURCES += Member/BCP_node_change.cpp
 libBcp_la_SOURCES += Member/BCP_indexed_pricing.cpp
 libBcp_la_SOURCES += Member/BCP_USER.cpp

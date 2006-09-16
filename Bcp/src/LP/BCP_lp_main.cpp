@@ -54,13 +54,13 @@ BCP_lp_process_core(BCP_lp_prob& p, BCP_buffer& buf)
 void BCP_lp_main(BCP_message_environment* msg_env, USER_initialize* user_init,
 		 BCP_proc_id* my_id, BCP_proc_id* parent)
 {
-   BCP_lp_prob p;
+    BCP_lp_prob p(my_id, parent);
    p.msg_env = msg_env;
-   p.tree_manager = parent;
 
    // wait for the message with the parameters and unpack it
    p.msg_buf.clear();
-   msg_env->receive(p.tree_manager, BCP_Msg_ProcessParameters, p.msg_buf, -1);
+   msg_env->receive(parent /*tree_manager*/,
+		    BCP_Msg_ProcessParameters, p.msg_buf, -1);
    p.par.unpack(p.msg_buf);
    p.msg_buf.unpack(p.upper_bound);
 
@@ -97,12 +97,14 @@ void BCP_lp_main(BCP_message_environment* msg_env, USER_initialize* user_init,
 
    // wait for the core description and process it
    p.msg_buf.clear();
-   p.msg_env->receive(p.tree_manager, BCP_Msg_CoreDescription, p.msg_buf, -1);
+   p.msg_env->receive(parent /*tree_manager*/,
+		      BCP_Msg_CoreDescription, p.msg_buf, -1);
    BCP_lp_process_core(p, p.msg_buf);
 
    // wait for the user info
    p.msg_buf.clear();
-   msg_env->receive(p.tree_manager, BCP_Msg_InitialUserInfo, p.msg_buf, -1);
+   msg_env->receive(parent /*tree_manager*/,
+		    BCP_Msg_InitialUserInfo, p.msg_buf, -1);
    p.user->unpack_module_data(p.msg_buf);
 
    p.master_lp = p.user->initialize_solver_interface();
@@ -112,7 +114,8 @@ void BCP_lp_main(BCP_message_environment* msg_env, USER_initialize* user_init,
    BCP_message_tag msgtag;
    while (true) {
       p.msg_buf.clear();
-      msg_env->receive(p.tree_manager, BCP_Msg_AnyMessage, p.msg_buf, -1);
+      msg_env->receive(parent /*tree_manager*/,
+		       BCP_Msg_AnyMessage, p.msg_buf, -1);
       msgtag = p.msg_buf.msgtag();
       p.no_more_cuts_cnt = -1; // not waiting for cuts
       p.process_message();

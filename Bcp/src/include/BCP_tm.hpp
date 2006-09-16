@@ -224,7 +224,7 @@ public:
   /**@name Constructor and destructor */
   /*@{*/
     /** */
-    BCP_tm_prob();
+    BCP_tm_prob(BCP_proc_id* my_id, BCP_proc_id* parent);
     /** */
     virtual ~BCP_tm_prob();
   /*@}*/
@@ -296,7 +296,6 @@ public:
    /*@}*/
    //--------------------------------------------------------------------------
    virtual BCP_buffer& get_message_buffer() { return msg_buf; }
-   virtual BCP_proc_id* get_parent() { return 0; }
    virtual void process_message();
 };
 

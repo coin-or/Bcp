@@ -21,13 +21,13 @@
 void BCP_vg_main(BCP_message_environment* msg_env, USER_initialize* user_init,
 		 BCP_proc_id* my_id, BCP_proc_id* parent)
 {
-   BCP_vg_prob p;
+   BCP_vg_prob p(my_id, parent);
    p.msg_env = msg_env;
-   p.tree_manager = parent;
 
    // wait for the message with the parameters and unpack it
    p.msg_buf.clear();
-   msg_env->receive(p.tree_manager, BCP_Msg_ProcessParameters, p.msg_buf, -1);
+   msg_env->receive(parent /*tree_manager*/,
+		    BCP_Msg_ProcessParameters, p.msg_buf, -1);
    p.par.unpack(p.msg_buf);
 
    // Let us be nice
@@ -63,12 +63,14 @@ void BCP_vg_main(BCP_message_environment* msg_env, USER_initialize* user_init,
 
    // wait for the core description and process it
    p.msg_buf.clear();
-   p.msg_env->receive(p.tree_manager, BCP_Msg_CoreDescription, p.msg_buf, -1);
+   p.msg_env->receive(parent /*tree_manager*/,
+		      BCP_Msg_CoreDescription, p.msg_buf, -1);
    p.core->unpack(p.msg_buf);
 
    // wait for the user info
    p.msg_buf.clear();
-   msg_env->receive(p.tree_manager, BCP_Msg_InitialUserInfo, p.msg_buf, -1);
+   msg_env->receive(parent /*tree_manager*/,
+		    BCP_Msg_InitialUserInfo, p.msg_buf, -1);
    p.user->unpack_module_data(p.msg_buf);
 
    // ok, we're all geared up to generate vars
@@ -80,7 +82,7 @@ void BCP_vg_main(BCP_message_environment* msg_env, USER_initialize* user_init,
       msgtag = p.msg_buf.msgtag();
       if (msgtag == BCP_Msg_NoMessage) {
 	 // test if the TM is still alive
-	 if (! p.msg_env->alive(p.tree_manager))
+	 if (! p.msg_env->alive(parent /*tree_manager*/))
 	    throw BCP_fatal_error("VG:   The TM has died -- VG exiting\n");
       } else {
 	 if (BCP_vg_process_message(p, p.msg_buf)) {

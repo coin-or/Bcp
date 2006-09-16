@@ -69,7 +69,7 @@ public:
     /// Get the pointer
     BCP_tm_prob * getTmProblemPointer() { return p; }
   /*@}*/
-  
+
   /**@name Informational methods for the user. */
   /*@{*/
     /// Return what is the best known upper bound (might be DBL_MAX)
@@ -181,6 +181,19 @@ public:
     /*@}*/
   /*@}*/
 
+  //--------------------------------------------------------------------------
+  /** What is the process id of the current process */
+  const BCP_proc_id* process_id() const;
+  /** Send a message to a particular process */
+  void
+  send_message(const BCP_proc_id* const target, const BCP_buffer& buf);
+  /** Broadcast the message to all processes of the given type */
+  void
+  broadcast_message(const BCP_process_t proc_type, const BCP_buffer& buf);
+  /** Process a message that has been sent by another process' user part to
+      this process' user part. */
+  virtual void
+  process_message(BCP_buffer& buf);
   //--------------------------------------------------------------------------
   /**@name Initial setup (creating core and root) */
   /*@{*/

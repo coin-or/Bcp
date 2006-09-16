@@ -63,7 +63,7 @@ public:
    BCP_problem_core* core;
    
    /** The proc id of the tree manager. */
-   BCP_proc_id* tree_manager;
+    //   BCP_proc_id* tree_manager;
 
    /** The best currently known upper bound. */
    double upper_bound;
@@ -100,7 +100,7 @@ public:
    /*@{*/
    /** The default constructor. Initializes every data member to a natural
        state. */
-   BCP_cg_prob();
+   BCP_cg_prob(BCP_proc_id* my_id, BCP_proc_id* parent);
    /** The destructor deletes everything. */
    virtual ~BCP_cg_prob();
    /*@}*/
@@ -129,7 +129,6 @@ public:
    BCP_var* unpack_var();
    //--------------------------------------------------------------------------
    virtual BCP_buffer& get_message_buffer() { return msg_buf; }
-   virtual BCP_proc_id* get_parent() { return tree_manager; }
    virtual void process_message();
 };
 

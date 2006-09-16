@@ -131,7 +131,7 @@ int BCP_lp_generate_vars(BCP_lp_prob& p,
 			    p.msg_buf, tout);
 	 if (p.msg_buf.msgtag() == BCP_Msg_NoMessage){
 	    // check that everyone is still alive
-	    if (! p.msg_env->alive(p.tree_manager))
+	    if (! p.msg_env->alive(p.get_parent() /*tree_manager*/))
 	       throw BCP_fatal_error("LP:   The TM has died -- LP exiting\n");
 	    if (p.node->cg && ! p.msg_env->alive(p.node->cg))
 	       throw BCP_fatal_error("LP:   The CG has died -- LP exiting\n");

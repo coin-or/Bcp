@@ -200,7 +200,8 @@ LP: BCP_Msg_InitialUserInfo arrived in BCP_lp_prob::process_message().\n");
       msg_buf.clear();
       // First send back timing data for the previous phase
       stat.pack(msg_buf);
-      msg_env->send(tree_manager, BCP_Msg_LpStatistics, msg_buf);
+      msg_env->send(get_parent() /*ree_manager*/,
+		    BCP_Msg_LpStatistics, msg_buf);
       phase++;
       break;
 
@@ -208,7 +209,8 @@ LP: BCP_Msg_InitialUserInfo arrived in BCP_lp_prob::process_message().\n");
       // No need to clean up anything since the destructor of 'p' will do that.
       // However, send back the statistics.
       stat.pack(msg_buf);
-      msg_env->send(tree_manager, BCP_Msg_LpStatistics, msg_buf);
+      msg_env->send(get_parent() /*ree_manager*/,
+		    BCP_Msg_LpStatistics, msg_buf);
       return;
 
 //     case BCP_Msg_UserMessageToLp:
@@ -233,12 +235,14 @@ BCP_lp_next_var_index(BCP_lp_prob& p)
       BCP_buffer& buf = p.msg_buf;
       // get new set of indices
       buf.clear();
-      p.msg_env->send(p.tree_manager, BCP_Msg_RequestVarIndexSet);
+      p.msg_env->send(p.get_parent() /*ree_manager*/,
+		      BCP_Msg_RequestVarIndexSet);
       // In a single process environment the new index range has already
       // been received (and unpacked), thus we've got to receive it only if
       // the range still has length 0.
       if (p.next_var_index == p.last_var_index) {
-	 p.msg_env->receive(p.tree_manager, BCP_Msg_VarIndexSet, buf, -1);
+	 p.msg_env->receive(p.get_parent() /*ree_manager*/,
+			    BCP_Msg_VarIndexSet, buf, -1);
 	 p.process_message();
       }
    }
@@ -255,12 +259,14 @@ BCP_lp_next_cut_index(BCP_lp_prob& p)
       BCP_buffer& buf = p.msg_buf;
       // get new set of indices
       buf.clear();
-      p.msg_env->send(p.tree_manager, BCP_Msg_RequestCutIndexSet);
+      p.msg_env->send(p.get_parent() /*ree_manager*/,
+		      BCP_Msg_RequestCutIndexSet);
       // In a single process environment the new index range has already
       // been received (and unpacked), thus we've got to receive it only if
       // the range still has length 0.
       if (p.next_cut_index == p.last_cut_index) {
-	 p.msg_env->receive(p.tree_manager, BCP_Msg_CutIndexSet, buf, -1);
+	 p.msg_env->receive(p.get_parent() /*ree_manager*/,
+			    BCP_Msg_CutIndexSet, buf, -1);
 	 p.process_message();
       }
    }

@@ -13,7 +13,8 @@
 
 #include "BCP_warmstart.hpp"
 
-BCP_tm_prob::BCP_tm_prob() :
+BCP_tm_prob::BCP_tm_prob(BCP_proc_id* my_id, BCP_proc_id* parent) :
+   BCP_process(my_id, parent),
    user(0),
    msg_env(0),
    lp_stat(0),
