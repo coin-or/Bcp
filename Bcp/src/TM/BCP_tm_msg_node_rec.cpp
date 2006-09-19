@@ -44,7 +44,6 @@ BCP_tm_print_info_line(BCP_tm_prob& p, BCP_tm_node& node)
 	return;
 
     static int lines = 0;
-    static int processed = 0;
 
     if ((lines % 40) == 0) {
 	printf("\n");
@@ -57,7 +56,7 @@ BCP_tm_print_info_line(BCP_tm_prob& p, BCP_tm_node& node)
 	printf("BelowUB ");
 	printf("\n");
     }
-    ++processed;
+    const int processed = p.search_tree.processed();
     if ((processed % freq) == 0 || processed == 1) {
 	++lines;
 	int quality_above_UB;
@@ -84,6 +83,7 @@ BCP_tm_unpack_node_description(BCP_tm_prob& p, BCP_buffer& buf)
     buf.unpack(index);
     // get a pointer to this node
     BCP_tm_node* node = p.search_tree[index];
+    p.search_tree.increase_processed();
 
     // XXX
     if (node != p.active_nodes[p.slaves.lp->index_of_proc(node->lp)]) {
