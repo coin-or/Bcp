@@ -279,9 +279,41 @@ void
 BCP_tm_user::display_final_information(const BCP_lp_statistics& lp_stat)
 {
     if (p->param(BCP_tm_par::TmVerb_FinalStatistics)) {
-	printf("TM: Running time: %.3f\n", CoinCpuTime() - p->start_time);
+	double runtime = CoinCpuTime() - p->start_time;
+	int processed = -1;
+	if (runtime > p->param(BCP_tm_par::MaxRunTime) && p->has_ub()) {
+	    // ran out of time... count the number of processed nodes so those
+	    // that are over ub but were not yet sent to an LP are counted as
+	    // processed
+	    processed = 0;
+	    int over_ub = 0;
+	    for (BCP_vec<BCP_tm_node*>::iterator node = p->search_tree.begin();
+		 node != p->search_tree.end();
+		 ++node) {
+		BCP_tm_node_status st = (*node)->status;
+		if (st == BCP_ProcessedNode ||
+		    st == BCP_PrunedNode_OverUB ||
+		    st == BCP_PrunedNode_Infeas ||
+		    st == BCP_PrunedNode_Discarded) {
+		    processed++;
+		    continue;
+		}
+		if ((st == BCP_ActiveNode || st == BCP_CandidateNode) &&
+		    p->over_ub((*node)->true_lower_bound())) {
+		    over_ub++;
+		    continue;
+		}
+	    }
+	    if (processed != p->search_tree.processed()) {
+		printf("WARNING! processed != p->search_tree.processed()\n");
+		printf("WARNING! Please file a bug report.\n");
+	    }
+	} else {
+	    processed = p->search_tree.processed();
+	}
+	printf("TM: Running time: %.3f\n", runtime);
 	printf("TM: search tree size: %i   ( processed %i )   max depth: %i\n",
-	       int(p->search_tree.size()), int(p->search_tree.processed()),
+	       int(p->search_tree.size()), processed,
 	       p->search_tree.maxdepth());
 	lp_stat.display();
 
