@@ -223,8 +223,7 @@ public:
      virtual void
      create_root(BCP_vec<BCP_var*>& added_vars,
 		 BCP_vec<BCP_cut*>& added_cuts,
-		 BCP_user_data*& user_data,
-		 BCP_pricing_status& pricing_status);
+		 BCP_user_data*& user_data);
   /*@}*/
 
   //--------------------------------------------------------------------------
@@ -250,21 +249,25 @@ public:
     /** Do whatever initialization is necessary before the
         <code>phase</code>-th phase. (E.g., setting the pricing strategy.) */
     virtual void
-    init_new_phase(int phase, BCP_column_generation& colgen);
+    init_new_phase(int phase,
+		   BCP_column_generation& colgen,
+		   CoinSearchTreeBase*& candidates);
   /*@}*/
 
   //---------------------------------------------------------------------------
   /**@name Search tree node comparison */
   /*@{*/
-    /**@name Compare two search tree nodes. Return true if the first node
-       should be processed before the second one.
+    /**@name If desired, change the tree (the candidate list) in the search
+       tree manager using the setTree() method. This method is invoked after
+       every insertion into the candidate list and also whenever a new
+       solution is found. In the latter case \c new_solution is \c true.
 
-       Default: The default behavior is controlled by the
-       \c TreeSearchStrategy  parameter which is set to
-       0 (\c BCP_BestFirstSearch) by default.
+       The default invokes the newSolution() and the
+       reevaluateSearchStrategy() methods from CoinSearchTreeManager.
     */
-    virtual bool compare_tree_nodes(const BCP_tm_node* node0,
-				    const BCP_tm_node* node1);
+    virtual void
+    change_candidate_heap(CoinSearchTreeManager& candidates,
+			  const bool new_solution);
   /*@}*/
 };
 

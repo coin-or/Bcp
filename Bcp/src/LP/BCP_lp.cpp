@@ -126,12 +126,6 @@ BCP_lp_prob::pack_var(BCP_process_t target_proc, const BCP_var& var)
   switch (obj_t) {
   case BCP_CoreObj:
     break;
-  case BCP_IndexedObj:
-    {
-      const int index = (dynamic_cast<const BCP_var_indexed&>(var)).index();
-      msg_buf.pack(index);
-    }
-    break;
   case BCP_AlgoObj:
     user->pack_var_algo(&dynamic_cast<const BCP_var_algo&>(var), msg_buf);
     break;
@@ -148,7 +142,6 @@ BCP_lp_prob::unpack_var()
   BCP_object_t obj_t;
   int bcpind;
   BCP_var_t var_t;
-  int index;
   double obj, lb, ub;
   BCP_obj_status varstat;
   msg_buf.unpack(bcpind)
@@ -159,10 +152,6 @@ BCP_lp_prob::unpack_var()
   switch (obj_t) {
   case BCP_CoreObj:
     var = new BCP_var_core(var_t, obj, lb, ub);
-    break;
-  case BCP_IndexedObj:
-    msg_buf.unpack(index);
-    var = new BCP_var_indexed(index, var_t, obj, lb, ub);
     break;
   case BCP_AlgoObj:
     var = user->unpack_var_algo(msg_buf);
@@ -197,12 +186,6 @@ BCP_lp_prob::pack_cut(BCP_process_t target_proc, const BCP_cut& cut)
   switch (obj_t) {
   case BCP_CoreObj:
     break;
-  case BCP_IndexedObj:
-    {
-      const int index = (dynamic_cast<const BCP_cut_indexed&>(cut)).index();
-      msg_buf.pack(index);
-    }
-    break;
   case BCP_AlgoObj:
     user->pack_cut_algo(&dynamic_cast<const BCP_cut_algo&>(cut), msg_buf);
     break;
@@ -218,7 +201,6 @@ BCP_lp_prob::unpack_cut()
 {
   BCP_object_t obj_t;
   int bcpind;
-  int index;
   double lb, ub;
   BCP_obj_status cutstat;
   msg_buf.unpack(bcpind)
@@ -228,10 +210,6 @@ BCP_lp_prob::unpack_cut()
   switch (obj_t) {
   case BCP_CoreObj:
     cut = new BCP_cut_core(lb, ub);
-    break;
-  case BCP_IndexedObj:
-    msg_buf.unpack(index);
-    cut = new BCP_cut_indexed(index, lb, ub);
     break;
   case BCP_AlgoObj:
     cut = user->unpack_cut_algo(msg_buf);

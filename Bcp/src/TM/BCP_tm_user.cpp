@@ -236,8 +236,7 @@ BCP_tm_user::initialize_core(BCP_vec<BCP_var_core*>& vars,
 void
 BCP_tm_user::create_root(BCP_vec<BCP_var*>& added_vars,
 			 BCP_vec<BCP_cut*>& added_cuts,
-			 BCP_user_data*& user_data,
-			 BCP_pricing_status& pricing_status)
+			 BCP_user_data*& user_data)
 {
     if (p->param(BCP_tm_par::ReportWhenDefaultIsExecuted)) {
 	printf(" TM: Default BCP_tm_user::create_root() executed.\n");
@@ -300,7 +299,9 @@ BCP_tm_user::display_final_information(const BCP_lp_statistics& lp_stat)
 //--------------------------------------------------------------------------
 // Initialize new phase 
 void
-BCP_tm_user::init_new_phase(int phase, BCP_column_generation& colgen)
+BCP_tm_user::init_new_phase(int phase,
+			    BCP_column_generation& colgen,
+			    CoinSearchTreeBase*& candidates)
 {
     if (p->param(BCP_tm_par::ReportWhenDefaultIsExecuted)) {
 	printf(" TM: Default init_new_phase() executed.\n");
@@ -310,18 +311,13 @@ BCP_tm_user::init_new_phase(int phase, BCP_column_generation& colgen)
 
 //--------------------------------------------------------------------------
 // Compare tree nodes
-bool
-BCP_tm_user::compare_tree_nodes(const BCP_tm_node* node0,
-				const BCP_tm_node* node1)
+void
+BCP_tm_user::change_candidate_heap(CoinSearchTreeManager& candidates,
+				   const bool new_solution)
 {
-    switch (p->param(BCP_tm_par::TreeSearchStrategy)) {
-    case BCP_BestFirstSearch:
-	return node0->quality() < node1->quality();
-    case BCP_BreadthFirstSearch:
-	return node0->index() < node1->index();
-    case BCP_DepthFirstSearch:
-	return node0->index() > node1->index();
+    if (new_solution) {
+	candidates.newSolution(p->ub());
+    } else {
+	candidates.reevaluateSearchStrategy();
     }
-    // fake return
-    return true;
 }

@@ -155,12 +155,12 @@ BCP_tm_start_one_node(BCP_tm_prob& p)
     BCP_node_change* desc;
 
     while (true){
-	if (p.candidates.empty()) {
+	if (p.candidate_list.empty()) {
 	    BCP_tm_free_nodes(p);
 	    return BCP_NodeStart_NoNode;
 	}
-	next_node = p.candidates.top();
-	p.candidates.pop();
+	next_node = dynamic_cast<BCP_tm_node*>(p.candidate_list.top());
+	p.candidate_list.pop();
 	desc = next_node->_desc;
 
 	// if no UB yet or lb is lower than UB then go ahead
@@ -181,9 +181,8 @@ BCP_tm_start_one_node(BCP_tm_prob& p)
 	if (process_this)
 	    break;
 
-	// ok, so we do have an UB and lb is "higher" than the UB.
-	if (desc->indexed_pricing.get_status() == BCP_PriceNothing ||
-	    p.current_phase_colgen == BCP_DoNotGenerateColumns_Fathom) {
+	// ok, so we do have an UB and true lb is "higher" than the UB.
+	if (p.current_phase_colgen == BCP_DoNotGenerateColumns_Fathom) {
 	    // nothing is left to price or in this phase we just fathom the
 	    // over-the-bound nodes. in either case this node can be pruned
 	    // right here.
@@ -214,7 +213,7 @@ TM: Moving NODE %i LEVEL %i into the next phase list \n\
     // assign processes to the node and send it off
     if (! BCP_tm_assign_processes(p, next_node)) {
 	// couldn't find free processes
-	p.candidates.insert(next_node);
+	p.candidate_list.push(next_node, false);
 	BCP_tm_free_nodes(p);
 	return BCP_NodeStart_Error;
     }
@@ -284,17 +283,13 @@ TM: couldn't start new node but there's a free LP ?!\n");
 
 void BCP_tm_list_candidates(BCP_tm_prob& p)
 {
-    BCP_vec<BCP_tm_node*> cands;
-    BCP_tm_node* can;
-    while (! p.candidates.empty()) {
-	can = p.candidates.top();
-	cands.push_back(can);
-	p.candidates.pop();
-	printf("%5i", can->index());
+    CoinSearchTreeBase& candidates = *p.candidate_list.getTree();
+    const int n = candidates.size();
+    const std::vector<CoinTreeNode*>& nodes = candidates.getNodes();
+    for (int i = 0; i < n; ++i) {
+	printf("%5i", dynamic_cast<BCP_tm_node*>(nodes[i])->index());
     }
     printf("\n");
-    for (size_t i = 0; i < cands.size(); ++i)
-	p.candidates.insert(cands[i]);
 }
 
 //#############################################################################
@@ -302,26 +297,6 @@ void BCP_tm_list_candidates(BCP_tm_prob& p)
 void BCP_check_parameters(BCP_tm_prob& p)
 {
     p.ub(p.param(BCP_tm_par::UpperBound));
-
-    if (p.param(BCP_tm_par::PriceInRootBeforePhase2)) {
-	if (! p.param(BCP_tm_par::IndexedVariablesAreGenerated)) {
-	    throw BCP_fatal_error("\
-TM: PriceInRootBeforePhase2 is set, but IndexedVariablesAreGenerated is not.\n\
-    This makes no sense.\n\
-    Aborting.\n\n");
-	}
-	 
-	printf("\
-TM: PriceInRootBeforePhase2 is set.\n\
-    Column generation will be disabled in the first phase.\n\n");
-	if (p.param(BCP_tm_par::AlgorithmicVariablesAreGenerated)) {
-	    printf("\
-TM: PriceInRootBeforePhase2\n\
-            *AND*\n\
-    AlgorithmicVariablesAreGenerated are both set.\n\
-TM: The final solution may not be optimal.\n\n");
-	}
-    }
 
     if (p.par.entry(BCP_tm_par::VerbosityShutUp)) {
 	int i;
@@ -381,54 +356,5 @@ create_root() method has changed. Now there's an extra user_data\n\
 argument. Please, update your own implementation of create_root().\n");
     }
 
-    if (! (root_desc->indexed_pricing.get_status() & BCP_PriceIndexedVars) &&
-	p.param(BCP_tm_par::IndexedVariablesAreGenerated)) {
-	// *FIXME* : kill all the processes
-	throw BCP_fatal_error("\
-BCP_PriceIndexedVars is not set in the root description, yet indexed\n\
-variables are supposed to be generated.\n");
-    }
-
-    if ((root_desc->indexed_pricing.get_status() & BCP_PriceIndexedVars) &&
-	! p.param(BCP_tm_par::IndexedVariablesAreGenerated)) {
-	// *FIXME* : kill all the processes
-	throw BCP_fatal_error("\
-BCP_PriceIndexedVars is set in the root description, yet indexed variables\n\
-are not supposed to be generated.\n");
-    }
-
-    if (p.param(BCP_tm_par::PriceInRootBeforePhase2) &&
-	( (root_desc->var_change.deleted_num() != 0) ||
-	  (root_desc->var_change.changed_num() != 0) ||
-	  (root_desc->var_change.added_num() != 0) )) {
-	// *FIXME* : kill all the processes
-	throw BCP_fatal_error("\
-BCP_PriceInRootBeforePhase2 is set and there is something in the var_change\n\
-part of the root description. Currently BCP allows only core variables if\n\
-BCP_PriceInRootBeforePhase2 is set.\n");
-    }
-    if (p.param(BCP_tm_par::PriceInRootBeforePhase2) &&
-	( (root_desc->cut_change.deleted_num() != 0) ||
-	  (root_desc->cut_change.changed_num() != 0) ||
-	  (root_desc->cut_change.added_num() != 0) )) {
-	// *FIXME* : kill all the processes
-	throw BCP_fatal_error("\
-BCP_PriceInRootBeforePhase2 is set and there is something in the cut_change\n\
-part of the root description. Currently BCP allows only core cuts if\n\
-BCP_PriceInRootBeforePhase2 is set.\n");
-    }
-
-    if (p.param(BCP_tm_par::PriceInRootBeforePhase2) &&
-	p.core->varnum() == 0) {
-	// *FIXME* : kill all the processes
-	throw BCP_fatal_error("\
-BCP_PriceInRootBeforePhase2 is set but there are no variables in the core!\n");
-    }
-    if (p.param(BCP_tm_par::PriceInRootBeforePhase2) &&
-	p.core->cutnum() == 0) {
-	// *FIXME* : kill all the processes
-	throw BCP_fatal_error("\
-BCP_PriceInRootBeforePhase2 is set but there are no cuts in the core!\n");
-    }
 }
 

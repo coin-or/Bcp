@@ -280,10 +280,6 @@ BCP_tm_prob::process_message()
 	throw BCP_fatal_error("TM: Got BCP_Msg_UpperBound message!\n");
 	break;
 
-    case BCP_Msg_PricedRoot:
-	BCP_tm_unpack_priced_root(*this, msg_buf);
-	break;
-
     case BCP_Msg_NodeDescription_OverUB:
 	node = BCP_tm_unpack_node_no_branching_info(*this, msg_buf);
 	next_phase_nodes.push_back(node);
@@ -354,6 +350,7 @@ TM: Solution value: %f (best solution value so far: %f)\n",
 		    }
 		}
 		if (better) {
+		    user->change_candidate_heap(candidate_list, true);
 		    ub(new_sol->objective_value());
 		    delete feas_sol;
 		    feas_sol = new_sol;
@@ -538,7 +535,7 @@ BCP_tm_remove_lp(BCP_tm_prob& p, const int index)
 
 	node->lp = node->cg = node->vg = 0;
 	node->status = BCP_CandidateNode;
-	p.candidates.insert(node);
+	p.candidate_list.push(node, false);
     }
 
     BCP_proc_id * proc;
@@ -581,7 +578,7 @@ BCP_tm_unpack_priced_root(BCP_tm_prob& p, BCP_buffer& buf)
     // only a BCP_named_pricing_list is sent over, unpack it.
     BCP_tm_node* root = p.search_tree.root();
 
-    root->_desc->indexed_pricing.unpack(buf);
+    // BROKEN: multistage is BROKEN
     p.flags.root_pricing_unpacked = true;
 
     BCP_tm_free_procs_of_node(p, root);

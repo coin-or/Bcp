@@ -76,8 +76,6 @@ enum BCP_message_tag{
 
    /**@name Messages from the Tree Manager to an LP process */
    /*@{*/
-   /** Repricing. Does not quite work yet... */
-   BCP_Msg_RootToPrice,       // TM -> LP
    /** TM sends the description of a new search tree node. */   
    BCP_Msg_ActiveNodeData,    // TM -> LP
    /** TM warns an LP process that the second phase will start. (An LP
@@ -114,8 +112,6 @@ enum BCP_message_tag{
        recreated. */
    BCP_Msg_NodeDescriptionWithBranchingInfo, // LP -> TM
    /*@}*/
-   /** Repricing??? */
-   BCP_Msg_PricedRoot,                       // LP -> TM
    /** The message contains a new MIP feasible solution. */
    BCP_Msg_FeasibleSolution,                 // LP -> TM
    /** The message contains the statistics the LP process collected. */

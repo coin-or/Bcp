@@ -55,7 +55,6 @@ BCP_cg_prob::unpack_var()
   BCP_object_t obj_t;
   int bcpind;
   BCP_var_t var_t;
-  int index;
   double obj, lb, ub;
   BCP_obj_status stat;
   msg_buf.unpack(bcpind)
@@ -66,10 +65,6 @@ BCP_cg_prob::unpack_var()
   switch (obj_t) {
   case BCP_CoreObj:
     var = new BCP_var_core(var_t, obj, lb, ub);
-    break;
-  case BCP_IndexedObj:
-    msg_buf.unpack(index);
-    var = new BCP_var_indexed(index, var_t, obj, lb, ub);
     break;
   case BCP_AlgoObj:
     var = user->unpack_var_algo(msg_buf);

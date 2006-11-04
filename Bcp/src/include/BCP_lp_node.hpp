@@ -7,7 +7,6 @@
 #include "BCP_problem_core.hpp"
 #include "BCP_var.hpp"
 #include "BCP_cut.hpp"
-#include "BCP_indexed_pricing.hpp"
 
 //#############################################################################
 
@@ -28,8 +27,6 @@ struct BCP_node_storage_in_tm{
    BCP_storage_t var_change;
    /** */
    BCP_storage_t cut_change;
-   /** */
-   BCP_storage_t indexed_pricing;
    /** */
    BCP_storage_t warmstart;
 };
@@ -64,8 +61,6 @@ public:
    /** */
    BCP_vec<BCP_obj_change>  added_cuts_desc;
    /** */
-   BCP_indexed_pricing_list indexed_pricing;
-   /** */
    BCP_warmstart* warmstart;
    /*@}*/
 
@@ -79,7 +74,6 @@ public:
       added_vars_desc(),
       added_cuts_index(),
       added_cuts_desc(),
-      indexed_pricing(),
       warmstart(0)
    {}
    /** */
@@ -146,8 +140,6 @@ public:
    /** */
    BCP_cut_set cuts;
    /** */
-   BCP_indexed_pricing_list indexed_pricing;
-   /** */
    BCP_warmstart* warmstart;
    // this is tricky. this vector stores for each cut the lower bound on the
    // lp formulation at the time when the cut was added *in this node* OR if
@@ -170,7 +162,6 @@ public:
       level(0), index(0), iteration_count(0),
       dive(BCP_DoNotDive), colgen(BCP_DoNotGenerateColumns_Fathom),
       quality(-DBL_MAX), true_lower_bound(-DBL_MAX), vars(), cuts(),
-      indexed_pricing(),
       warmstart(0),
       user_data(0) {}
    /** */

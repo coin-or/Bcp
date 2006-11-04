@@ -5,8 +5,8 @@
 
 #include <cfloat>
 
+#include "CoinSearchTree.hpp"
 #include "BCP_vector.hpp"
-
 
 /** Node status in the Tree Manager. */
 
@@ -44,7 +44,7 @@ class BCP_tm_prob;
 
 /** LITTLE OLD DESC */
 
-class BCP_tm_node {
+class BCP_tm_node : public CoinTreeNode {
 private:
     /**@name Disabled methods */
     /*@{*/
@@ -104,6 +104,7 @@ public:
     /*@{*/
     /** */
     BCP_tm_node(int level, BCP_node_change* desc) :
+	CoinTreeNode(),
 	status(BCP_DefaultNode),
 	_index(0),
 	_level(level),
@@ -124,6 +125,7 @@ public:
     /** */
     BCP_tm_node(int level, BCP_node_change* desc,
 		BCP_tm_node* parent, int index) :
+	CoinTreeNode(),
 	status(BCP_DefaultNode),
 	_index(0),
 	_level(level),
@@ -256,53 +258,6 @@ public:
 	_tree[index] = 0;
     }
     /*@}*/
-};
-
-//#############################################################################
-
-class BCP_node_queue {
-private:
-    BCP_node_queue();
-    BCP_node_queue(const BCP_node_queue&);
-    BCP_node_queue& operator=(const BCP_node_queue&);
-
-private:
-    /**@name Private data members */
-    /*@{*/
-    /** A reference to the problem structure so that we can invoke the method
-	comparing two search tree nodes. */
-    BCP_tm_prob& _p;
-    /** The tree nodes in the priority queue.
-	Note that the 0-th entry is not used in the tree (the loops are much
-	nicer that way) and is always a NULL pointer.
-    */
-    BCP_vec<BCP_tm_node*> _pq;
-    /*@}*/
-  
-public:
-    /**@name Constructor and destructor */
-    /*@{*/
-    /** */
-    BCP_node_queue(BCP_tm_prob& p) : _p(p), _pq() { _pq.push_back(NULL); }
-    /** */
-    ~BCP_node_queue() {}
-    /*@}*/
-
-    /** Return whether the queue is empty or not */
-    inline bool empty() const { return _pq.size() == 1; }
-
-    /** Return the top member of the queue */
-    BCP_tm_node* top() const { return _pq[1]; }
-
-    /** Delete the top member of the queue. */
-    void pop();
-
-    /** Insert a new node into the queue. */
-    void insert(BCP_tm_node* node);
-
-    /** Find out how many candidates are below/above the current best upper
-	bound (including the granularity!). */
-    void compare_to_UB(int& quality_above_UB, int& quality_below_UB);
 };
 
 //#############################################################################

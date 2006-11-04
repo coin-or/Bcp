@@ -62,12 +62,6 @@ BCP_vg_user::send_var(const BCP_var& var)
   switch (obj_t) {
   case BCP_CoreObj:
     break;
-  case BCP_IndexedObj:
-    {
-      const int index = (dynamic_cast<const BCP_var_indexed&>(var)).index();
-      buf.pack(index);
-    }
-    break;
   case BCP_AlgoObj:
     pack_var_algo(&dynamic_cast<const BCP_var_algo&>(var), buf);
     break;

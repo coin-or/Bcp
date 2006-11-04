@@ -19,7 +19,7 @@
 /**
    Abstract base class that defines members common to all types of variables.
    Classes describing the three types of variables
-   (\link BCP_var_core core \endlink, \link BCP_var_indexed indexed \endlink
+   (\link BCP_var_core core \endlink
    and \link BCP_var_algo algorithmic \endlink) are derived from this class.
    No object of type BCP_var can exist (having purely virtual
    members in the class enforces this restriction). */
@@ -250,54 +250,6 @@ public:
    /*@{*/
    /** Return BCP_CoreObj indicating that the object is a core variable. */
    inline BCP_object_t obj_type() const  { return BCP_CoreObj; }
-   /*@}*/
-};
-
-//#############################################################################
-
-/** Implementation-wise indexed variables differ from core variables only in
-    having a user given index. This index is a unique user
-    specified ID which enables the user to expand the variable into a column
-    that can be added to the LP formulation. */
-
-class BCP_var_indexed : public BCP_var {
-private:
-   /**@name Data members */
-   /*@{*/
-   /** The only (not inherited) data member is the user given index of the 
-       variable. */
-   int _index;  
-   /*@}*/
-private:
-   /**@name Disabled methods */
-   /*@{*/
-   /** The default constructor is declared but not defined to disable it. */
-   BCP_var_indexed();
-   /** The copy constructor is declared but not defined to disable it. */
-   BCP_var_indexed(const BCP_var_indexed&);
-   /** The assignment operator is declared but not defined to disable it. */
-   BCP_var_indexed& operator=(const BCP_var_indexed&);
-   /*@}*/
-
-public:
-   /**@name Constructor and destructor */
-   /*@{*/
-   /** This constructor just sets the data members to the given values. See
-       also the constructor of BCP_var. */
-   BCP_var_indexed(const int index, const BCP_var_t var_type,
-		   const double obj, const double lb, const double ub) :
-      BCP_var(var_type, obj, lb, ub), _index(index) {}
-   /** The destructor deletes the object. */
-   ~BCP_var_indexed() {}
-   /*@}*/
-
-   /**@name Query methods */
-   /*@{*/
-   /** Return the user index of the variable. */
-   inline int index() const               { return _index; }
-   /** Return BCP_IndexedObj indicating that the object is an indexed
-       variable. */
-   inline BCP_object_t obj_type() const   { return BCP_IndexedObj; }
    /*@}*/
 };
 

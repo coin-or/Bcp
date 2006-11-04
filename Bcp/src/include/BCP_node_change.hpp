@@ -21,7 +21,6 @@ public:
    BCP_problem_core_change core_change;
    BCP_var_set_change var_change;
    BCP_cut_set_change cut_change;
-   BCP_indexed_pricing_list indexed_pricing;
    BCP_warmstart* warmstart;
 public:
    BCP_node_change();

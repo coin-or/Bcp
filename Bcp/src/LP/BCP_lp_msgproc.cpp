@@ -184,8 +184,12 @@ LP: BCP_Msg_InitialUserInfo arrived in BCP_lp_prob::process_message().\n");
       BCP_lp_unpack_active_node(*this, msg_buf);
       // load the lp formulation into the lp solver
       lp_solver = master_lp->clone();
-      if (node->indexed_pricing.get_status() == BCP_PriceNothing)
-	 lp_solver->setDblParam(OsiDualObjectiveLimit, ub() - granularity());
+      if (node->colgen != BCP_GenerateColumns) {
+	  // FIXME: If we had a flag in the node that indicates not to
+	  // generate cols in it and in its descendants then the dual obj
+	  // limit could still be set...
+	  lp_solver->setDblParam(OsiDualObjectiveLimit, ub() - granularity());
+      }
       BCP_lp_create_lp(*this);
       BCP_lp_main_loop(*this);
       delete lp_solver;
@@ -278,13 +282,15 @@ BCP_lp_next_cut_index(BCP_lp_prob& p)
 
 void BCP_lp_process_ub_message(BCP_lp_prob& p, BCP_buffer& buf)
 {
-   double new_ub;
-   buf.unpack(new_ub);
-   if (p.ub(new_ub) &&
-       p.lp_solver &&
-       p.node &&
-       p.node->indexed_pricing.get_status() == BCP_PriceNothing)
-     p.lp_solver->setDblParam(OsiDualObjectiveLimit, new_ub - p.granularity());
+    double new_ub;
+    buf.unpack(new_ub);
+    if (p.ub(new_ub) && p.lp_solver && p.node &&
+	p.node->colgen != BCP_GenerateColumns) {
+	// FIXME: If we had a flag in the node that indicates not to
+	// generate cols in it and in its descendants then the dual obj
+	// limit could still be set...
+	p.lp_solver->setDblParam(OsiDualObjectiveLimit,new_ub-p.granularity());
+    }
 }
 
 //#############################################################################

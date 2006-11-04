@@ -28,9 +28,6 @@ BCP_tm_pack_added_cuts(BCP_tm_prob& p, const BCP_tm_node* node,
 		       const BCP_tm_node* const * root_path,
 		       const int* const child_index);
 static inline void
-BCP_tm_pack_indexed_pricing(BCP_tm_prob& p, const BCP_tm_node* node,
-			    const BCP_tm_node* const * root_path);
-static inline void
 BCP_tm_pack_warmstart(BCP_tm_prob& p, const BCP_tm_node* node,
 		      const BCP_tm_node* const * root_path);
 static inline void
@@ -123,26 +120,6 @@ BCP_tm_pack_added_cuts(BCP_tm_prob& p, const BCP_tm_node* node,
 //-----------------------------------------------------------------------------
 
 static inline void
-BCP_tm_pack_indexed_pricing(BCP_tm_prob& p, const BCP_tm_node* node,
-			    const BCP_tm_node* const * root_path)
-{
-   // Go up in the tree to find where do we store the indexed_pricing info
-   // explicitely for the first time (root at the latest). 
-   BCP_tm_node* n = const_cast<BCP_tm_node*>(node);
-   for ( ;
-	 n->_desc->indexed_pricing.get_storage() == BCP_Storage_WrtParent;
-	 n = n->parent());
-
-   BCP_indexed_pricing_list pricing;
-   const int level = node->level();
-   for (int i = n->level(); i < level; ++i)
-      pricing.update(root_path[i]->_desc->indexed_pricing);
-   pricing.pack(p.msg_buf);
-}
-
-//-----------------------------------------------------------------------------
-
-static inline void
 BCP_tm_pack_warmstart(BCP_tm_prob& p, const BCP_tm_node* node,
 		      const BCP_tm_node* const * root_path)
 {
@@ -186,8 +163,6 @@ BCP_tm_pack_parent(BCP_tm_prob& p, const BCP_tm_node* node)
       BCP_tm_pack_added_vars(p, node, root_path, child_index);
    if (desc->cut_change.storage() == BCP_Storage_WrtParent)
       BCP_tm_pack_added_cuts(p, node, root_path, child_index);
-   if (desc->indexed_pricing.get_storage() == BCP_Storage_WrtParent)
-      BCP_tm_pack_indexed_pricing(p, node, root_path);
    if (desc->warmstart && desc->warmstart->storage() == BCP_Storage_WrtParent)
       BCP_tm_pack_warmstart(p, node, root_path);
 
@@ -246,7 +221,6 @@ void BCP_tm_send_node(BCP_tm_prob& p, const BCP_tm_node* node,
    buf.pack(desc->core_change.storage())
       .pack(desc->var_change.storage())
       .pack(desc->cut_change.storage())
-      .pack(desc->indexed_pricing.get_storage())
       .pack(ws_storage);
 
    // Now pack the parent if there's one
@@ -257,7 +231,6 @@ void BCP_tm_send_node(BCP_tm_prob& p, const BCP_tm_node* node,
    desc->core_change.pack(buf);
    p.pack_var_set_change(desc->var_change);
    p.pack_cut_set_change(desc->cut_change);
-   desc->indexed_pricing.pack(buf);
    
    bool has_data = desc->warmstart != 0;
    buf.pack(has_data);

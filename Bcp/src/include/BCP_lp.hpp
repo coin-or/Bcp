@@ -27,7 +27,6 @@ class BCP_problem_core_change;
 
 class BCP_var;
 class BCP_cut;
-class BCP_var_indexed;
 
 class BCP_col;
 class BCP_row;

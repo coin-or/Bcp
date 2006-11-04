@@ -75,10 +75,6 @@ BCP_var::display(const double val) const
     printf("  Core  var (internal index: %6i                    ) at %.4f\n",
 	   _bcpind, val);
     break;
-  case BCP_IndexedObj:
-    printf("  Indexed var (internal index: %6i, user index: %6i) at %.4f\n",
-	   _bcpind,(dynamic_cast<const BCP_var_indexed*>(this))->index(), val);
-    break;
   case BCP_AlgoObj:
     printf("  Algo  var (internal index: %6i                    ) at %.4f\n",
 	   _bcpind, val);

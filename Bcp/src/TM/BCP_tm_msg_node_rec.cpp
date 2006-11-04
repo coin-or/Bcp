@@ -52,23 +52,27 @@ BCP_tm_print_info_line(BCP_tm_prob& p, BCP_tm_node& node)
 	printf(" Proc'd ");
 	printf("  BestUB   ");
 	printf(" LowestQ   ");
+	/*
 	printf("AboveUB ");
 	printf("BelowUB ");
+	*/
 	printf("\n");
     }
     const int processed = p.search_tree.processed();
     if ((processed % freq) == 0 || processed == 1) {
 	++lines;
+	printf("BCP: ");                                           // 5
+	printf("%7i ", p.search_tree.size());                      // 8
+	printf("%7i ", processed);                                 // 8
+	printf("%10g ", p.ub());                                   // 11
+	printf("%10g ", p.candidate_list.bestQuality());           // 11
+	/*
 	int quality_above_UB;
 	int quality_below_UB;
-	printf("BCP: ");                                // 5
-	printf("%7i ", p.search_tree.size());           // 8
-	printf("%7i ", processed);                      // 8
-	printf("%10g ", p.ub());                        // 11
-	printf("%10g ", p.candidates.top()->_quality);  // 11
 	p.candidates.compare_to_UB(quality_above_UB, quality_below_UB);
-	printf("%7i ", quality_above_UB);               // 8
-	printf("%7i ", quality_below_UB);               // 8
+	printf("%7i ", quality_above_UB);                          // 8
+	printf("%7i ", quality_below_UB);                          // 8
+	*/
 	printf("\n");
     }
 }
@@ -114,9 +118,6 @@ BCP_tm_unpack_node_description: received node is different from processed.\n");
 	p.unpack_var_set_change(desc->var_change);
 	p.unpack_cut_set_change(desc->cut_change);
 
-	// pricing status
-	desc->indexed_pricing.unpack(buf);
-
 	// warmstart info
 	bool has_data;
 	buf.unpack(has_data);
@@ -148,21 +149,20 @@ BCP_tm_shall_we_dive(BCP_tm_prob& p, const double quality)
     if (ratio < 0)
 	return BCP_DoNotDive;
 
-    const double topq = p.candidates.top()->quality();
+    const double topq = p.candidate_list.bestQuality();
 
     if (quality <= topq)
 	return BCP_TestBeforeDive;
 
-    if (topq > 0) {
-	if (quality / topq < ratio) return BCP_TestBeforeDive;
-    } else if (topq == 0) {
-	if (quality < ratio)        return BCP_TestBeforeDive;
-    } else {
-	if (quality < 0 &&
-	    topq / quality < ratio) return BCP_TestBeforeDive;
+    if (topq > 0.05) {
+	return (quality / topq < ratio) ? BCP_TestBeforeDive : BCP_DoNotDive;
     }
-
-    return BCP_DoNotDive;
+    if (topq >= -0.05) {
+	return (quality < ratio) ? BCP_TestBeforeDive : BCP_DoNotDive;
+    }
+    /* must be topq < -0.05 */
+    return (quality < 0 && topq / quality < ratio) ?
+	    BCP_TestBeforeDive : BCP_DoNotDive;
 }
 
 //#############################################################################
@@ -347,10 +347,10 @@ BCP_tm_unpack_branching_info(BCP_tm_prob& p, BCP_buffer& buf,
 
     BCP_vec<BCP_child_action> action;
     BCP_vec<BCP_user_data*> user_data;
-    BCP_vec<double> lpobj;
+    BCP_vec<double> true_lb;
     BCP_vec<double> qualities;
 
-    buf.unpack(dive).unpack(action).unpack(qualities).unpack(lpobj);
+    buf.unpack(dive).unpack(action).unpack(qualities).unpack(true_lb);
 
     const int child_num = action.size();
     user_data.insert(user_data.end(), child_num, 0);
@@ -395,15 +395,13 @@ BCP_tm_unpack_branching_info(BCP_tm_prob& p, BCP_buffer& buf,
 	}
     }
 
+    BCP_tm_node** children = new BCP_tm_node*[child_num];
+    int numCandidateChildren = 0;
     for (i = 0; i < child_num; ++i){
 	desc = new BCP_node_change;
 	BCP_tm_create_core_change(desc, bvarnum, bcutnum,	brobj, i);
 	BCP_tm_create_var_change(desc, nodedesc, bvarnum, brobj, i);
 	BCP_tm_create_cut_change(desc, nodedesc, bcutnum, brobj, i);
-	desc->indexed_pricing.set_status(nodedesc->indexed_pricing.get_status());
-	if (nodedesc->indexed_pricing.get_status() & BCP_PriceIndexedVars)
-	    // in this case set storage the WrtParent (and there's no change)
-	    desc->indexed_pricing.empty(BCP_Storage_WrtParent);
 	if (nodedesc->warmstart)
 	    // If the parent has warmstart info then 
 	    desc->warmstart = nodedesc->warmstart->empty_wrt_this();
@@ -411,17 +409,20 @@ BCP_tm_unpack_branching_info(BCP_tm_prob& p, BCP_buffer& buf,
 	child = new BCP_tm_node(node->level() + 1, desc);
 	p.search_tree.insert(child); // this sets _index
 	child->_quality = qualities[i];
-	child->_true_lower_bound =
-	    node->_desc->indexed_pricing.get_status() ?
-	    node->true_lower_bound(): lpobj[i];
+	child->_true_lower_bound = true_lb[i];
 	child->_user_data = user_data[i];
 	child->_parent = node;
 	child->_birth_index = node->child_num();
+	/* Fill out the fields in CoinTreeNode */
+	child->depth_ = node->level() + 1;
+	child->quality_ = qualities[i];
+	child->true_lower_bound_ = true_lb[i];
+	/* Add the child to the list of children in the parent */
 	node->new_child(child);
 	// _children  initialized to be empty -- OK
 	switch (action[i]){
 	case BCP_ReturnChild:
-	    p.candidates.insert(child);
+	    children[numCandidateChildren++] = child;
 	    child->status = BCP_CandidateNode;
 	    break;
 	case BCP_KeepChild:
@@ -438,8 +439,14 @@ BCP_tm_unpack_branching_info(BCP_tm_prob& p, BCP_buffer& buf,
 	// lp, cg, vg  initialized to 0 -- OK, none assigned yet
     }
 
+    for (i = 0; i < numCandidateChildren; ++i) {
+	p.candidate_list.push(children[i]);
+    }
+    delete[] children;
+    p.user->change_candidate_heap(p.candidate_list, false);
+
     // check the one that's proposed to be kept if there's one
-    if (keep >= 0){
+    if (keep >= 0) {
 	child = node->child(keep);
 	if (dive == BCP_DoDive || dive == BCP_TestBeforeDive){
 	    // we've got to answer
@@ -453,11 +460,13 @@ BCP_tm_unpack_branching_info(BCP_tm_prob& p, BCP_buffer& buf,
 		// if diving then send the new index and var/cut_names
 		buf.pack(child->index());
 	    } else {
-		p.candidates.insert(child);
+		p.candidate_list.push(child);
+		p.user->change_candidate_heap(p.candidate_list, false);
 	    }
 	    p.msg_env->send(node->lp, BCP_Msg_DivingInfo, buf);
 	}else{
-	    p.candidates.insert(child);
+	    p.candidate_list.push(child);
+	    p.user->change_candidate_heap(p.candidate_list, false);
 	}
     }else{
 	dive = BCP_DoNotDive;

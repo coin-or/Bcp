@@ -5,8 +5,7 @@
 #include "BCP_USER.hpp"
 
 BCP_node_change::BCP_node_change() : 
-   core_change(), var_change(), cut_change(), indexed_pricing(),
-   warmstart(0) {}
+   core_change(), var_change(), cut_change(), warmstart(0) {}
 
 BCP_node_change::~BCP_node_change() {
    delete warmstart;

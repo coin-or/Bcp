@@ -50,7 +50,6 @@ BCP_vg_prob::unpack_cut()
 {
   BCP_object_t obj_t;
   int bcpind;
-  int index;
   double lb, ub;
   BCP_obj_status stat;
   msg_buf.unpack(bcpind)
@@ -60,10 +59,6 @@ BCP_vg_prob::unpack_cut()
   switch (obj_t) {
   case BCP_CoreObj:
     cut = new BCP_cut_core(lb, ub);
-    break;
-  case BCP_IndexedObj:
-    msg_buf.unpack(index);
-    cut = new BCP_cut_indexed(index, lb, ub);
     break;
   case BCP_AlgoObj:
     cut = user->unpack_cut_algo(msg_buf);

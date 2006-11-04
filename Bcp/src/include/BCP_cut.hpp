@@ -18,7 +18,7 @@
 
 /**
    Abstract base class that defines members common to all types of cuts.
-   Classes describing the three types of cuts (core, indexed and algorithmic)
+   Classes describing the three types of cuts (core and algorithmic)
    are derived from this class. No object of type BCP_cut can
    exist (having purely virtual members in the class enforces this
    restriction).  
@@ -220,53 +220,6 @@ public:
    /** Return <code>BCP_CoreObj</code> indicating that the object is a core
        cut. */
    inline BCP_object_t obj_type() const  { return BCP_CoreObj; }
-   /*@}*/
-};
-
-//#############################################################################
-
-/** Implementation-wise indexed cuts differ from core cuts only in having a
-    user given index. This index is a unique user specified ID which enables
-    the user to expand the cut into a constraint that can be added to the LP
-    formulation. */
-
-class BCP_cut_indexed : public BCP_cut {
-private:
-   /**@name Disabled methods */
-   /*@{*/
-   /** The default constructor is declared but not defined to disable it. */
-   BCP_cut_indexed();
-   /** The copy constructor is declared but not defined to disable it. */
-   BCP_cut_indexed(const BCP_cut_indexed&);
-   /** The assignment operator is declared but not defined to disable it. */
-   BCP_cut_indexed& operator=(const BCP_cut_indexed&);
-   /*@}*/
-
-private:
-   /**@name Data members */
-   /*@{*/
-   /** The only (not inherited) data member is the user-given name of the 
-       cut. */
-   int _index;
-   /*@}*/
-
-public:
-   /**@name Constructor and destructor */
-   /*@{*/
-   /** This constructor just sets the data members to the given values. See
-       also the constructor of \URL[<code>BCP_cut</code>{BCP_cut.html}. */
-   BCP_cut_indexed(const int index, const double lb, const double ub) :
-      BCP_cut(lb, ub), _index(index) {}
-   /** The destructor deletes the object. */
-   ~BCP_cut_indexed() {}
-   /*@}*/
-
-   /**@name Query methods */
-   /*@{*/
-   /** Return the user index of the cut. */
-   inline int index() const             { return _index; }
-   /** Return BCP_IndexedObj indicating that the object is an indexed cut. */
-   inline BCP_object_t obj_type() const { return BCP_IndexedObj; }
    /*@}*/
 };
 

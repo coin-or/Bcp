@@ -22,7 +22,6 @@ static inline void BCP_lp_pack_noncore_vars(BCP_lp_prob& p,
 					    BCP_vec<int>& deleted_pos);
 static inline void BCP_lp_pack_noncore_cuts(BCP_lp_prob& p,
 					    BCP_vec<int>& deleted_pos);
-static inline void BCP_lp_pack_indexed_pricing(BCP_lp_prob& p);
 static inline void BCP_lp_pack_warmstart(BCP_lp_prob& p,
 					 BCP_vec<int>& del_vars,
 					 BCP_vec<int>& del_cuts);
@@ -152,26 +151,6 @@ BCP_lp_pack_noncore_cuts(BCP_lp_prob& p, BCP_vec<int>& deleted_pos)
 //#############################################################################
 
 static inline void
-BCP_lp_pack_indexed_pricing(BCP_lp_prob& p)
-{
-   BCP_indexed_pricing_list& indexed_pricing = p.node->indexed_pricing;
-   if (p.node->tm_storage.indexed_pricing != BCP_Storage_WrtParent) {
-      // if ! BCP_PriceIndexedVars then storage will be NoData, so OK.
-      indexed_pricing.pack(p.msg_buf);
-   } else {
-      BCP_indexed_pricing_list* pricing_change =
-	 indexed_pricing.as_change(p.parent->indexed_pricing);
-      if (pricing_change->pack_size() < indexed_pricing.pack_size())
-	 pricing_change->pack(p.msg_buf);
-      else
-	 indexed_pricing.pack(p.msg_buf);
-      delete pricing_change;   pricing_change = 0;
-   }
-}
-
-//#############################################################################
-
-static inline void
 BCP_lp_pack_warmstart(BCP_lp_prob& p,
 		      BCP_vec<int>& del_vars, BCP_vec<int>& del_cuts)
 {
@@ -281,15 +260,12 @@ int BCP_lp_send_node_description(BCP_lp_prob& p,
    if (send_desc) {
       // Pack the core (WrtCore, WrtParent or Explicit)
       BCP_lp_pack_core(p);  // BCP_problem_core_change
-      // pack the indexed/algo var set change (or pack them explicitly)
+      // pack the algo var set change (or pack them explicitly)
       BCP_vec<int> del_vars;
       BCP_lp_pack_noncore_vars(p, del_vars);
 
       BCP_vec<int> del_cuts;
       BCP_lp_pack_noncore_cuts(p, del_cuts);
-
-      // pack the pricing status
-      BCP_lp_pack_indexed_pricing(p);
 
       // At this point there aren't supposed to be any ws info. It was deleted
       // when the lp formulation was created. Test this.

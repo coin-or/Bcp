@@ -63,7 +63,7 @@ class BCP_lp_prob;
 	  perform the necessary function. This behavior is correct since such
 	  methods are invoked only if the parameter settings drive the flow of
 	  the algorithm that way, in which case the user better implement those
-	  methods (e.g., create_indexed_var()).
+	  methods
      <li> A default is given. Frequently there are multiple defaults and
           parameters govern which one is selected (e.g., test_feasibility()).
    </ul>
@@ -514,48 +514,11 @@ public:
     /*@}*/
 
     //=========================================================================
-    // Functions related to indexed vars. Must be written if BCP is supposed to
-    // track the indexed variables yet to be priced out, i.e., if the parameter
-    // MaintainIndexedVarPricingList is set to true.
-
-    /**@name
-       Methods related to indexed variables.
-
-       These methods must be overridden if and only if BCP is supposed to
-       track the indexed variables yet to be priced out, i.e., if the
-       parameter MaintainIndexedVarPricingList is set to true.
-    */
-    // *FIXME* : A link here to the description of various variable types?
-    /*@{*/
-    /** Return the index of the indexed variable following
-	<code>prev_index</code>.
-	Return -1 if there are no more indexed variables. If
-	<code>prev_index</code> is -1 then return the index of the first
-	indexed variable. <br> Default: Return -1. */
-    virtual int
-    next_indexed_var(int prev_index);
-    /** Create the variable corresponding to the given <code>index</code>. The
-	routine should return a pointer to a newly created indexed variable
-	and return the corresponding column in <code>col</code>.
-	<br>
-	Default: throw an exception.
-    */
-    virtual BCP_var_indexed*
-    create_indexed_var(int index, const BCP_vec<BCP_cut*>& cuts,
-		       BCP_col& col);
-    /*@}*/
-
-    //=========================================================================
     /** Restoring feasibility.
 
         This method is invoked before fathoming a search tree node that has
 	been found infeasible <em>and</em> the variable pricing did not
 	generate any new variables.
-
-	If the MaintainIndexedVarPricingList is set to true then BCP will take
-	care of going through the indexed variables to see if any will restore
-	feasibility and the user has to check only the algorithmic variables.
-	Otherwise the user has to check all variables here.
     */
     virtual void
     restore_feasibility(const BCP_lp_result& lpres,
@@ -851,7 +814,7 @@ public:
     /** Decide what to do with the children of the selected branching object.
         Fill out the <code>_child_action</code> field in <code>best</code>.
         This will specify for every child what to do with it. Possible values
-        for each individual child are <code>BCP_PruneChild</code>,
+        for each individual child are <code>BCP_FathomChild</code>,
         <code>BCP_ReturnChild</code> and <code>BCP_KeepChild</code>. There can
         be at most child with this last action specified. It means that in case
         of diving this child will be processed by this LP process as the next

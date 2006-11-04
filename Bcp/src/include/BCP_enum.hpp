@@ -49,8 +49,6 @@ enum BCP_CutViolationNorm {
 enum BCP_object_t{
    /** Base object. */
    BCP_CoreObj,
-   /** Indexed object. */
-   BCP_IndexedObj,
    /** Algorithmic object. */
    BCP_AlgoObj,
    /** No object type is given. */
@@ -225,44 +223,6 @@ enum BCP_feasibility_test{
    BCP_Integral_Feasible,
    /** The problem is feasible if all non-continuous variables are integral. */
    BCP_FullTest_Feasible
-};
-
-//-----------------------------------------------------------------------------
-// The possible return values of price_variables
-// *FIXME*: missing documentation 
-
-enum BCP_dual_status{
-   BCP_TotalDualFeasible = 1,
-   BCP_TotalDualFeasible_HasAllIndexed = 1,
-   BCP_TotalDualFeasible_NotAllIndexed = 2,
-   BCP_NotTotalDualFeasible = 0
-};
-
-//-----------------------------------------------------------------------------
-// *FIXME*: missing documentation 
-
-/**
-   This enumerative constant describes what sort of columns to generate in
-   case column generation is requested. This is a bitmap, various bits
-   indicating whether to generate that type.
- */
-enum BCP_pricing_status{
-   /** Generate nothing. Sort of stupid to request column generation and set
-       this. */
-   BCP_PriceNothing = 0x00,
-   /** Generate algorithmic variables. */
-   BCP_PriceAlgoVars = 0x01,
-   /** Generate indexed variables but only check those in the
-       yet-to-be-priced-named-variables buffer */
-   BCP_PriceUntilLastIndexedToPrice = 0x02,
-   /** Generate indexed variables, both those in the
-       yet-to-be-priced-indexed-variables buffer, and those with user index
-       bigger than the largest user index in the buffer */
-   BCP_PriceAfterLastIndexedToPrice = 0x04,
-   /** If either one of the previous two is set then we have to price indexed
-       variables. */
-   BCP_PriceIndexedVars = ( BCP_PriceUntilLastIndexedToPrice |
-			    BCP_PriceAfterLastIndexedToPrice )
 };
 
 //-----------------------------------------------------------------------------

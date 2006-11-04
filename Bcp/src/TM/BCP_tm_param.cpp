@@ -31,15 +31,9 @@ void BCP_parameter_set<BCP_tm_par>::create_keyword_list() {
     keys.push_back(make_pair(BCP_string("BCP_DoBranchAndCut"),
 			     BCP_parameter(BCP_CharPar,
 					   DoBranchAndCut)));
-    keys.push_back(make_pair(BCP_string("BCP_AlgorithmicVariablesAreGenerated"),
+    keys.push_back(make_pair(BCP_string("BCP_GenerateVars"),
 			     BCP_parameter(BCP_CharPar,
-					   AlgorithmicVariablesAreGenerated)));
-    keys.push_back(make_pair(BCP_string("BCP_IndexedVariablesAreGenerated"),
-			     BCP_parameter(BCP_CharPar,
-					   IndexedVariablesAreGenerated)));
-    keys.push_back(make_pair(BCP_string("BCP_PriceInRootBeforePhase2"),
-			     BCP_parameter(BCP_CharPar,
-					   PriceInRootBeforePhase2)));
+					   GenerateVars)));
     keys.push_back(make_pair(BCP_string("BCP_ReportWhenDefaultIsExecuted"),
 			     BCP_parameter(BCP_CharPar,
 					   ReportWhenDefaultIsExecuted)));
@@ -207,10 +201,8 @@ void BCP_parameter_set<BCP_tm_par>::set_default_entries(){
     set_entry(DebugCpProcesses, false);
     set_entry(DebugVpProcesses, false);
     set_entry(DoBranchAndCut, false);
-    set_entry(AlgorithmicVariablesAreGenerated, false);
-    set_entry(IndexedVariablesAreGenerated, false);
+    set_entry(GenerateVars, false);
     set_entry(MessagePassingIsSerial, false);
-    set_entry(PriceInRootBeforePhase2, false);
     set_entry(ReportWhenDefaultIsExecuted, true);
     set_entry(TrimTreeBeforeNewPhase, false);
     set_entry(RemoveExploredBranches, false);

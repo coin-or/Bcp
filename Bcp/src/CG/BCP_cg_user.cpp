@@ -59,12 +59,6 @@ BCP_cg_user::send_cut(const BCP_cut& cut)
   switch (obj_t) {
   case BCP_CoreObj:
     break;
-  case BCP_IndexedObj:
-    {
-      const int index = (dynamic_cast<const BCP_cut_indexed&>(cut)).index();
-      buf.pack(index);
-    }
-    break;
   case BCP_AlgoObj:
     pack_cut_algo(&dynamic_cast<const BCP_cut_algo&>(cut), buf);
     break;

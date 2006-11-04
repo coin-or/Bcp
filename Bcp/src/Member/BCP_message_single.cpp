@@ -315,7 +315,7 @@ BCP_single_environment::register_process(USER_initialize* user_init)
 	    // While there are nodes waiting to be processed (or being
 	    // processed) we don't go to the next phase
 	    something_died = false;
-	    while (! _tm_prob->candidates.empty() ||
+	    while (! _tm_prob->candidate_list.empty() ||
 		   _tm_prob->slaves.lp->busy_num() > 0){
 		// Fill up as many free LP processes as we can
 		if (BCP_tm_start_new_nodes(*_tm_prob) == BCP_NodeStart_Error) {
@@ -465,8 +465,7 @@ BCP_single_environment::receive(const BCP_proc_id* const source,
     // called with anything but:
     //   BCP_UpperBound, BCP_Msg_DivingInfo or BCP_Msg_PricedRoot.
     if (tag != BCP_Msg_UpperBound &&
-	tag != BCP_Msg_DivingInfo &&
-	tag != BCP_Msg_PricedRoot)
+	tag != BCP_Msg_DivingInfo)
 	printf("BCP_single_environment::receive() is called with %i as tag.\n",
 	       tag);
 }

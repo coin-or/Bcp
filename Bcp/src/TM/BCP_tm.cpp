@@ -24,7 +24,7 @@ BCP_tm_prob::BCP_tm_prob(BCP_proc_id* my_id, BCP_proc_id* parent) :
    core_as_change(0),
    next_cut_index_set_start(1),
    next_var_index_set_start(1),
-   candidates(*this)
+   candidate_list()
 {}
 
 BCP_tm_prob::~BCP_tm_prob()
@@ -65,12 +65,6 @@ BCP_tm_prob::pack_var(BCP_process_t target_proc, const BCP_var& var)
   switch (obj_t) {
   case BCP_CoreObj:
     break;
-  case BCP_IndexedObj:
-    {
-      const int index = (dynamic_cast<const BCP_var_indexed&>(var)).index();
-      msg_buf.pack(index);
-    }
-    break;
   case BCP_AlgoObj:
     user->pack_var_algo(&dynamic_cast<const BCP_var_algo&>(var), msg_buf);
     break;
@@ -87,7 +81,6 @@ BCP_tm_prob::unpack_var_without_bcpind(BCP_buffer& buf)
   BCP_var* var = 0;
   BCP_object_t obj_t;
   BCP_var_t var_t;
-  int index;
   double obj, lb, ub;
   BCP_obj_status stat;
   buf.unpack(obj_t).unpack(stat)
@@ -95,10 +88,6 @@ BCP_tm_prob::unpack_var_without_bcpind(BCP_buffer& buf)
   switch (obj_t) {
    case BCP_CoreObj:
      var = new BCP_var_core(var_t, obj, lb, ub);
-     break;
-   case BCP_IndexedObj:
-     buf.unpack(index);
-     var = new BCP_var_indexed(index, var_t, obj, lb, ub);
      break;
    case BCP_AlgoObj:
      var = user->unpack_var_algo(buf);
@@ -156,12 +145,6 @@ BCP_tm_prob::pack_cut(BCP_process_t target_proc, const BCP_cut& cut)
   switch (obj_t) {
   case BCP_CoreObj:
     break;
-  case BCP_IndexedObj:
-    {
-      const int index = (dynamic_cast<const BCP_cut_indexed&>(cut)).index();
-      msg_buf.pack(index);
-    }
-    break;
   case BCP_AlgoObj:
     user->pack_cut_algo(&dynamic_cast<const BCP_cut_algo&>(cut), msg_buf);
     break;
@@ -183,17 +166,12 @@ BCP_tm_prob::unpack_cut()
   }
   if (bcpind < 0) {
     BCP_object_t obj_t;
-    int index;
     double lb, ub;
     BCP_obj_status stat;
     msg_buf.unpack(obj_t).unpack(stat).unpack(lb).unpack(ub);
     switch (obj_t) {
     case BCP_CoreObj:
       cut = new BCP_cut_core(lb, ub);
-      break;
-    case BCP_IndexedObj:
-      msg_buf.unpack(index);
-      cut = new BCP_cut_indexed(index, lb, ub);
       break;
     case BCP_AlgoObj:
       cut = user->unpack_cut_algo(msg_buf);

@@ -66,11 +66,13 @@ BCP_lp_user::send_feasible_solution(const BCP_solution* sol)
 		     BCP_Msg_FeasibleSolution, p->msg_buf);
 
     // update the UB if necessary
-    const double objval = sol->objective_value();
-    const bool over_ub = p->ub(objval);
-    if (p->node->indexed_pricing.get_status() == BCP_PriceNothing && over_ub)
-	p->lp_solver->setDblParam(OsiDualObjectiveLimit,
-				  objval-p->granularity());
+    const double obj = sol->objective_value();
+    if (p->ub(obj) && ! p->node->colgen != BCP_GenerateColumns) {
+	// FIXME: If we had a flag in the node that indicates not to
+	// generate cols in it and in its descendants then the dual obj
+	// limit could still be set...
+	p->lp_solver->setDblParam(OsiDualObjectiveLimit, obj-p->granularity());
+    }
 }
 
 //#############################################################################
@@ -659,30 +661,6 @@ BCP_lp_user::display_lp_solution(const BCP_lp_result& lpres,
 	const int ind = coll[i];
 	vars[ind]->display(x[ind]);
     }
-}
-
-//#############################################################################
-
-// Functions related to indexed vars. 
-int
-BCP_lp_user::next_indexed_var(int prev_index)
-{
-    if (p->param(BCP_lp_par::ReportWhenDefaultIsExecuted)) {
-	printf(" LP: Default next_indexed_var() executed.\n");
-    }
-    return -1;
-}
-//-----------------------------------------------------------------------------
-BCP_var_indexed*
-BCP_lp_user::create_indexed_var(int index,
-				const BCP_vec<BCP_cut*>& cuts,
-				BCP_col& col)
-{
-    if (p->param(BCP_lp_par::ReportWhenDefaultIsExecuted)) {
-	printf(" LP: Default create_indexed_var() executed.\n");
-    }
-    throw BCP_fatal_error("create_indexed_var() missing.\n");
-    return 0; // to satisfy aCC on HP-UX
 }
 
 //#############################################################################

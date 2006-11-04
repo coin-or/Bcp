@@ -441,8 +441,8 @@ BCP_lp_select_branching_object: branching forced but no candidates selected\n");
     double time0 = CoinCpuTime();
     const int orig_colnum = p.node->vars.size();
 
-    // if branching candidates are not presolved then choose the first branching
-    // candidate as the best candidate.
+    // if branching candidates are not presolved then choose the first
+    // branching candidate as the best candidate.
     int selected = 0;
     if (p.param(BCP_lp_par::MaxPresolveIter) < 0) {
 	if (candidates.size() > 1) {
@@ -450,7 +450,8 @@ BCP_lp_select_branching_object: branching forced but no candidates selected\n");
 LP: Strong branching is disabled but more than one candidate is selected.\n\
     Deleting all candidates but the first.\n");
 	    // delete all other candidates
-	    BCP_vec<BCP_lp_branching_object*>::iterator can = candidates.begin();
+	    BCP_vec<BCP_lp_branching_object*>::iterator can =
+		candidates.begin();
 	    for (++can; can != candidates.end(); ++can) {
 		delete *can;
 	    }
@@ -484,17 +485,14 @@ LP: Strong branching is disabled but more than one candidate is selected.\n\
 	}
     }
 
+    // We don't know what is fathomable! strong branching may give an approx
+    // sol for the children's subproblems, but it may not be a lower
+    // bound. Let the tree manager decide what to do with them.
+
     // now throw out the fathomable ones. This can be done only if nothing
     // needs to be priced, there already is an upper bound and strong branching
     // was enabled (otherwise we don't have the LPs solved)
     if (p.param(BCP_lp_par::MaxPresolveIter) >= 0) {
-	if (p.node->indexed_pricing.get_status() == BCP_PriceNothing &&
-	    p.has_ub()) {
-	    for (int i = can->child_num - 1; i >= 0; --i) {
-		if (p.over_ub(best_presolved->lpres(i).objval()))
-		    action[i] = BCP_FathomChild;
-	    }
-	}
 	BCP_print_brobj_stat(p, orig_colnum, candidates.size(), selected,
 			     best_presolved);
     }
@@ -562,11 +560,6 @@ BCP_lp_make_parent_from_node(BCP_lp_prob& p)
 						       cut->status()));
     }
     node.tm_storage.cut_change = BCP_Storage_WrtParent;
-
-    parent.indexed_pricing = node.indexed_pricing;
-    node.tm_storage.indexed_pricing =
-	(node.indexed_pricing.get_status() & BCP_PriceIndexedVars ?
-	 BCP_Storage_WrtParent : BCP_Storage_Explicit);
 
     delete parent.warmstart;
     parent.warmstart = node.warmstart;

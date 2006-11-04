@@ -23,12 +23,6 @@ BCP_tm_pack_root_cut(BCP_tm_prob* tm, const BCP_cut& cut)
   switch (obj_t) {
   case BCP_CoreObj:
     break;
-  case BCP_IndexedObj:
-    {
-      const int index = (dynamic_cast<const BCP_cut_indexed&>(cut)).index();
-      buf.pack(index);
-    }
-    break;
   case BCP_AlgoObj:
     tm->user->pack_cut_algo(&dynamic_cast<const BCP_cut_algo&>(cut), buf);
     break;

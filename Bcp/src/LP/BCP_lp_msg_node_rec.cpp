@@ -79,9 +79,6 @@ void BCP_lp_unpack_parent(BCP_lp_prob& p, BCP_buffer& buf, BCP_lp_node& node,
 	 index.unchecked_push_back(parent_added_cuts._new_cuts[i]->bcpind());
    }
 
-   if (node.tm_storage.indexed_pricing == BCP_Storage_WrtParent)
-      p.parent->indexed_pricing.unpack(buf);
-
    if (node.tm_storage.warmstart == BCP_Storage_WrtParent) {
       p.parent->warmstart = p.user->unpack_warmstart(buf);
    }
@@ -230,32 +227,6 @@ void BCP_lp_create_added_cuts(BCP_lp_prob& p, BCP_node_change& node_change,
 
 //-----------------------------------------------------------------------------
 
-void BCP_lp_create_indexed_pricing(BCP_lp_prob& p,
-				   BCP_node_change& node_change)
-{
-   switch (p.node->tm_storage.indexed_pricing){
-    case BCP_Storage_WrtParent:
-      p.node->indexed_pricing = p.parent->indexed_pricing;
-      p.node->indexed_pricing.update(node_change.indexed_pricing);
-      break;
-
-    case BCP_Storage_Explicit:
-      p.node->indexed_pricing.swap(node_change.indexed_pricing);
-      break;
-
-    case BCP_Storage_NoData:   // there's no indexed to price
-      break;
-
-    case BCP_Storage_WrtCore:
-    default:
-      // impossible
-      throw BCP_fatal_error("BCP_lp_create_indexed_pricing: Bad storage.\n");
-   }
-   
-}
-
-//-----------------------------------------------------------------------------
-
 void BCP_lp_create_warmstart(BCP_lp_prob& p, BCP_node_change& node_change)
 {
    switch (p.node->tm_storage.warmstart){
@@ -291,7 +262,6 @@ void BCP_lp_create_node(BCP_lp_prob& p, BCP_node_change& node_change,
    BCP_lp_create_core(p, node_change);
    BCP_lp_create_added_vars(p, node_change, parent_added_vars);
    BCP_lp_create_added_cuts(p, node_change, parent_added_cuts);
-   BCP_lp_create_indexed_pricing(p, node_change);
    BCP_lp_create_warmstart(p, node_change);
 }
 
@@ -331,7 +301,6 @@ BCP_lp_unpack_active_node: parent's or node's warmstart is non-0.\n");
    buf.unpack(node.tm_storage.core_change)
       .unpack(node.tm_storage.var_change)
       .unpack(node.tm_storage.cut_change)
-      .unpack(node.tm_storage.indexed_pricing)
       .unpack(node.tm_storage.warmstart);
 
    BCP_var_set_change parent_added_vars;
@@ -343,7 +312,6 @@ BCP_lp_unpack_active_node: parent's or node's warmstart is non-0.\n");
    node_change.core_change.unpack(buf);
    p.unpack_var_set_change(node_change.var_change);
    p.unpack_cut_set_change(node_change.cut_change);
-   node_change.indexed_pricing.unpack(buf);
 
    bool has_data;
    buf.unpack(has_data);
