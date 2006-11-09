@@ -9,6 +9,8 @@
 
 #include "OsiSolverInterface.hpp"
 #include "OsiAuxInfo.hpp"
+#include "OsiBranchingObject.hpp"
+#include "OsiChooseVariable.hpp"
 
 #include "BCP_USER.hpp"
 
@@ -763,6 +765,12 @@ public:
 				BCP_vec<BCP_lp_branching_object*>& cands);
     /**@name Helper functions for select_branching_candidates() */
     /*@{*/
+    virtual int
+    try_to_branch(OsiBranchingInformation& branchInfo,
+		  OsiSolverInterface* solver,
+		  OsiChooseVariable* choose,
+		  OsiBranchingObject*& branchObject,
+		  bool allowVarFix);
     /** Select the "close-to-half" variables for strong branching. Variables
 	that are at least <code>etol</code> away from integrality are
 	considered and <code>to_be_selected</code> of them will be picked up.

@@ -3,6 +3,7 @@
 #include <cmath>
 
 #include "CoinHelperFunctions.hpp"
+#include "CoinTime.hpp"
 
 #include "BCP_error.hpp"
 #include "BCP_USER.hpp"
@@ -896,13 +897,80 @@ BCP_lp_user::reduced_cost_fixing(const double* dj, const double* x,
 //#############################################################################
 //#############################################################################
 
+int
+BCP_lp_user::try_to_branch(OsiBranchingInformation& branchInfo,
+			   OsiSolverInterface* solver,
+			   OsiChooseVariable* choose,
+			   OsiBranchingObject*& branchObject,
+			   bool allowVarFix)
+{
+    int returnStatus = 0;
+    int numUnsatisfied = choose->setupList(&branchInfo, true);
+    choose->setBestObjectIndex(-1);
+    if (numUnsatisfied > 0) {
+	if (choose->numberOnList() == 0) {
+	    // Nothing left for strong branching to evaluate
+	    if (choose->numberOnList() > 0 || choose->numberStrong() == 0) {
+		// There is something on the list
+		choose->setBestObjectIndex(choose->candidates()[0]);
+	    } else {
+		// There is nothing on the list
+		numUnsatisfied = choose->setupList(&branchInfo, false);
+		if (numUnsatisfied > 0) {
+		    choose->setBestObjectIndex(choose->candidates()[0]);
+		}
+	    }
+	} else {
+	    // Do the strong branching
+	    int ret = choose->chooseVariable(solver, &branchInfo, allowVarFix);
+	    /* update number of strong iterations etc
+	    model->incrementStrongInfo(choose->numberStrongDone(),
+				       choose->numberStrongIterations(),
+				       ret==-1 ? 0:choose->numberStrongFixed(),
+				       ret==-1);
+	    */
+	    if (ret > 1) {
+		// has fixed some
+		returnStatus = -1;
+	    } else if (ret == -1) {
+		// infeasible
+		returnStatus = -2;
+	    } else if (ret == 0) {
+		// normal
+		returnStatus = 0;
+		numUnsatisfied = 1;
+	    } else {
+		// ones on list satisfied - double check
+		numUnsatisfied = choose->setupList(&branchInfo, false);
+		if (numUnsatisfied > 0) {
+		    choose->setBestObjectIndex(choose->candidates()[0]);
+		}
+	    }
+	}
+    }
+    if (! returnStatus) {
+	if (numUnsatisfied > 0) {
+	    // create branching object
+	    /* FIXME: how the objects are created? */
+	    const OsiObject * obj = solver->object(choose->bestObjectIndex());
+	    branchObject = obj->createBranch(solver,
+					     &branchInfo,
+					     obj->whichWay());
+	}
+    }
+
+    return returnStatus;
+}
+
+//#############################################################################
+
 BCP_branching_decision BCP_lp_user::
 select_branching_candidates(const BCP_lp_result& lpres,
 			    const BCP_vec<BCP_var*>& vars,
 			    const BCP_vec<BCP_cut*>& cuts,
 			    const BCP_lp_var_pool& local_var_pool,
 			    const BCP_lp_cut_pool& local_cut_pool,
-			    BCP_vec<BCP_lp_branching_object*>& cans)
+			    BCP_vec<BCP_lp_branching_object*>& cands)
 {
     if (p->param(BCP_lp_par::ReportWhenDefaultIsExecuted)) {
 	printf(" LP: Default select_branching_candidates() executed.\n");
@@ -913,6 +981,7 @@ select_branching_candidates(const BCP_lp_result& lpres,
     if (local_var_pool.size() > 0 || local_cut_pool.size() > 0)
 	return BCP_DoNotBranch;
 
+#if 0
     if (p->param(BCP_lp_par::StrongBranch_CloseToHalfNum) > 0)
 	branch_close_to_half(lpres, vars,
 			     p->param(BCP_lp_par::StrongBranch_CloseToHalfNum),
@@ -936,8 +1005,99 @@ select_branching_candidates(const BCP_lp_result& lpres,
 	    cans.pop_back();
 	}
     }
-  
-    if (cans.size() == 0) {
+#else
+    OsiSolverInterface* lp = p->lp_solver;
+
+    OsiBranchingInformation brInfo(lp, true);
+    OsiChooseVariable * choose;
+    OsiBranchingObject* brObj = NULL;
+
+    brInfo.integerTolerance_ = p->param(BCP_lp_par::IntegerTolerance);
+    brInfo.timeRemaining_ = p->param(BCP_lp_par::MaxRunTime) - CoinCpuTime();
+    brInfo.numberSolutions_ = 0; /*FIXME*/
+    brInfo.numberBranchingSolutions_ = 0; /*FIXME numBranchingSolutions_;*/
+    brInfo.depth_ = p->node->level;
+
+    bool allowVarFix = true;
+    /*
+      <li>  0: A branching object has been installed
+      <li> -1: A monotone object was discovered
+      <li> -2: An infeasible object was discovered
+    */
+    int brResult =
+	try_to_branch(brInfo, lp, choose, brObj, allowVarFix);
+
+#if 0
+    /* FIXME:before doing anything check if we have found a new solution */
+    if (choose->goodSolution()
+	&&model->problemFeasibility()->feasible(model,-1)>=0) {
+	// yes
+	double objValue = choose->goodObjectiveValue();
+	model->setBestSolution(CBC_STRONGSOL,
+			       objValue,
+			       choose->goodSolution()) ;
+	model->setLastHeuristic(NULL);
+	model->incrementUsed(choose->goodSolution());
+	choose->clearGoodSolution();
+    }
+#endif
+
+    switch (brResult) {
+    case -2:
+	// when doing strong branching a candidate has proved that the
+	// problem is infeasible
+	return BCP_DoNotBranch_Fathomed;
+    case -1:
+	// OsiChooseVariable::chooseVariable() returned 2, 3, or 4
+	if (!brObj) {
+	    // just go back and resolve
+	    return BCP_DoNotBranch;
+	}
+	// otherwise might as well branch. The forced variable is
+	// unlikely to jump up one more (though who knows...)
+	break;
+    case 0:
+	if (!brObj) {
+	    // nothing got fixed, yet couldn't find something to branch on
+	    throw BCP_fatal_error("BM: Couldn't branch!\n");
+	}
+	// we've got a branching object
+	break;
+    default:
+	throw BCP_fatal_error("\
+BCP: BCP_lp_user::try_to_branch returned with unknown return code.\n");
+    }
+
+    // If there were some fixings (brResult < 0) then propagate them where
+    // needed
+    if (allowVarFix && brResult < 0) {
+	const double* clb = lp->getColLower();
+	const double* cub = lp->getColUpper();
+	/* There may or may not have been changes, but faster to set then to
+	   test... */
+	BCP_vec<BCP_var*>& vars = p->node->vars;
+	int numvars = vars.size();
+	for (int i = 0; i < numvars; ++i) {
+	    vars[i]->change_bounds(clb[i], cub[i]);
+	}
+    }
+    
+    // Now interpret the result (at this point we must have a brObj
+    OsiIntegerBranchingObject* intBrObj =
+	dynamic_cast<OsiIntegerBranchingObject*>(brObj);
+    if (intBrObj) {
+	BCP_lp_integer_branching_object o(intBrObj);
+	cands.push_back(new BCP_lp_branching_object(o));
+    }
+    OsiSOSBranchingObject* sosBrObj =
+	dynamic_cast<OsiSOSBranchingObject*>(brObj);
+    if (sosBrObj) {
+	BCP_lp_sos_branching_object o(sosBrObj);
+	cands.push_back(new BCP_lp_branching_object(lp, o));
+    }
+#endif
+    
+    if (cands.size() == 0) {
 	throw BCP_fatal_error("\
  LP : No var/cut in pool but couldn't select branching object.\n");
     }

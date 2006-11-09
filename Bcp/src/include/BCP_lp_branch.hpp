@@ -13,9 +13,35 @@
 #include "BCP_cut.hpp"
 #include "BCP_matrix.hpp"
 
-//#############################################################################
+#include "OsiBranchingObject.hpp"
 
 class OsiSolverInterface;
+
+//#############################################################################
+
+/** This class exist only so that we can extract information from
+    OsiIntegerBranchingObject */
+class BCP_lp_integer_branching_object : public OsiIntegerBranchingObject
+{
+public:
+    BCP_lp_integer_branching_object(const OsiIntegerBranchingObject* o) :
+	OsiIntegerBranchingObject(*o) {}
+    ~BCP_lp_integer_branching_object() {}
+    inline const double* downBounds() const { return down_; }
+    inline const double* upBounds() const { return up_; }
+};
+
+//-----------------------------------------------------------------------------
+
+/** This class exist only so that we can extract information from
+    OsiIntegerBranchingObject */
+class BCP_lp_sos_branching_object : public OsiSOSBranchingObject
+{
+public:
+    BCP_lp_sos_branching_object(const OsiSOSBranchingObject* o) :
+	OsiSOSBranchingObject(*o) {}
+    ~BCP_lp_sos_branching_object() {}
+};
 
 //#############################################################################
 // ASSUMPTION
@@ -69,7 +95,7 @@ public:
 	in the current LP formulation. If a position is negative (-i), it
 	refers to an added variable (i-1st). */ 
     BCP_vec<int>* forced_var_pos;
-    /** Positions of cutss whose bounds change ("forcibly", by branching)
+    /** Positions of cuts whose bounds change ("forcibly", by branching)
 	in the children. If a position is non-negative, it refers to a cut
 	in the current LP formulation. If a position is negative (-i), it
 	refers to an added cut (i-1st). */ 
@@ -161,6 +187,9 @@ public:
 	if (ivb) implied_var_bd = new BCP_vec<double>(*ivb);
 	if (icb) implied_cut_bd = new BCP_vec<double>(*icb);
     }
+    BCP_lp_branching_object(const BCP_lp_integer_branching_object& o);
+    BCP_lp_branching_object(const OsiSolverInterface* osi,
+			    const BCP_lp_sos_branching_object& o);
 
     // NOTE: when the desctructor `delete's vars_to_add and cuts_to_add, it
     // will just delete the pointers in the BCP_lp_..._sets (see the

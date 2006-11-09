@@ -413,7 +413,8 @@ BCP_lp_select_branching_object(BCP_lp_prob& p,
     BCP_vec<BCP_lp_branching_object*> candidates;
 
     BCP_branching_decision do_branch = 
-	p.user->select_branching_candidates(*p.lp_result, vars, cuts,
+	p.user->select_branching_candidates(*p.lp_result,
+					    vars, cuts,
 					    *p.local_var_pool,
 					    *p.local_cut_pool,
 					    candidates);

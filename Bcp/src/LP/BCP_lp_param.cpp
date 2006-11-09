@@ -280,6 +280,11 @@ void BCP_parameter_set<BCP_lp_par>::create_keyword_list() {
     keys.push_back(make_pair(BCP_string("BCP_LaterLP_AllVarsTimeout"),
 			     BCP_parameter(BCP_DoublePar, 
 					   LaterLP_AllVarsTimeout)));
+    keys.push_back(make_pair(BCP_string("BCP_MaxRunTime"),
+			     BCP_parameter(BCP_DoublePar, 
+					   MaxRunTime)));
+    /** Maximum allowed running time */
+    MaxRunTime,
     //    keys.push_back(make_pair(BCP_string("BCP_"),
     // 			      BCP_parameter(BCP_DoublePar, 
     // 					    )));
@@ -397,6 +402,7 @@ void BCP_parameter_set<BCP_lp_par>::set_default_entries() {
     set_entry(FirstLP_AllVarsTimeout, -1.0);
     set_entry(LaterLP_AllVarsTimeout, -1.0);
 
+    set_entry(MaxRunTime, 3600.0); // one hour
     //-------------------------------------------------------------------------
     // StringPar
     set_entry(LogFileName,"");

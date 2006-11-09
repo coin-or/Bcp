@@ -209,8 +209,8 @@ public:
     int phase;
     /** */
     int no_more_cuts_cnt; // a counter for how many places we got to get
-    // NO_MORE_CUTS message to know for sure not to
-    // expect more.
+                          // NO_MORE_CUTS message to know for sure not to
+                          // expect more.
     /** */
     int no_more_vars_cnt; // similar for vars
     /*@}*/

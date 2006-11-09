@@ -9,6 +9,7 @@
 #include "BCP_lp_branch.hpp"
 
 #include "OsiSolverInterface.hpp"
+#include "OsiBranchingObject.hpp"
 
 #include "BCP_var.hpp"
 #include "BCP_cut.hpp"
@@ -57,6 +58,73 @@ static void BCP_reorder_pos(const int child_num,
       }
    }
    bounds = new_bd;
+}
+
+//#############################################################################
+
+BCP_lp_branching_object::BCP_lp_branching_object(const BCP_lp_integer_branching_object& o) :
+    child_num(2),
+    vars_to_add(0), cuts_to_add(0),
+    forced_var_pos(new BCP_vec<int>(1,-1)), forced_cut_pos(0),
+    forced_var_bd(new BCP_vec<double>(4,0.0)), forced_cut_bd(0),
+    implied_var_pos(0), implied_cut_pos(0),
+    implied_var_bd(0), implied_cut_bd(0)
+{
+    BCP_vec<int>& fvp = *forced_var_pos;
+    BCP_vec<double>& fvb = *forced_var_bd;
+    fvp[0] = o.originalObject()->columnNumber();
+    fvb[0] = o.downBounds()[0];
+    fvb[1] = o.downBounds()[1];
+    fvb[2] = o.upBounds()[0];
+    fvb[3] = o.upBounds()[1];
+}
+
+//#############################################################################
+
+BCP_lp_branching_object::BCP_lp_branching_object(const OsiSolverInterface* osi,
+						 const BCP_lp_sos_branching_object& o) :
+    child_num(2),
+    vars_to_add(0), cuts_to_add(0),
+    forced_var_pos(0), forced_cut_pos(0),
+    forced_var_bd(0), forced_cut_bd(0),
+    implied_var_pos(0), implied_cut_pos(0),
+    implied_var_bd(0), implied_cut_bd(0)
+{
+    const OsiSOS* sos = dynamic_cast<const OsiSOS*>(o.originalObject());
+    const int * which = sos->members();
+    const double * weights = sos->weights();
+    const double value = o.value();
+    int i;
+
+    const double* clb = osi->getColLower();
+    const double* cub = osi->getColUpper();
+
+    const int len = sos->numberMembers();
+    forced_var_pos = new BCP_vec<int>(sos->members(), sos->members()+len);
+    forced_var_bd  = new BCP_vec<double>(4*len, 0.0);
+    BCP_vec<double>& fvb = *forced_var_bd;
+    for (i = 0; i < len; ++i) {
+	const int pos = which[i];
+	fvb[2*i]   = fvb[2*len+2*i]   = clb[pos];
+	fvb[2*i+1] = fvb[2*len+2*i+1] = cub[pos];
+    }
+    // upper bounds in child 0
+    for (i = 0; i < len; ++i) {
+	if (weights[i] > value)
+	    break;
+    }
+    assert (i < len);
+    for ( ; i < len; ++i) {
+	fvb[2*i+1] = 0.0;
+    }
+    // upper bounds in child 1
+    for (i = 0 ; i < len; ++i) {
+	if (weights[i] >= value)
+	    break;
+	else
+	    fvb[2*len+2*i+1] = 0.0;
+    }
+    assert ( i < len);
 }
 
 //#############################################################################

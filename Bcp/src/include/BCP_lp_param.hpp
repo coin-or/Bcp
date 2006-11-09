@@ -438,6 +438,8 @@ struct BCP_lp_par{
 	  seconds. Negative numbers indicate no time limit on
 	  waiting. Default: -1. */
       LaterLP_AllVarsTimeout,
+      /** Maximum allowed running time */
+      MaxRunTime,
 
       //
       end_of_dbl_params
