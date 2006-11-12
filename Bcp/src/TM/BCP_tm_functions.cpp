@@ -285,11 +285,14 @@ void BCP_tm_list_candidates(BCP_tm_prob& p)
 {
     CoinSearchTreeBase& candidates = *p.candidate_list.getTree();
     const int n = candidates.size();
+    /* FIXME: must walk through the siblings... */
+#if 0
     const std::vector<CoinTreeNode*>& nodes = candidates.getNodes();
     for (int i = 0; i < n; ++i) {
 	printf("%5i", dynamic_cast<BCP_tm_node*>(nodes[i])->index());
     }
     printf("\n");
+#endif
 }
 
 //#############################################################################

@@ -149,6 +149,9 @@ BCP_tm_shall_we_dive(BCP_tm_prob& p, const double quality)
     if (ratio < 0)
 	return BCP_DoNotDive;
 
+    if (p.candidate_list.empty())
+	return BCP_TestBeforeDive;
+
     const double topq = p.candidate_list.bestQuality();
 
     if (quality <= topq)
@@ -395,8 +398,8 @@ BCP_tm_unpack_branching_info(BCP_tm_prob& p, BCP_buffer& buf,
 	}
     }
 
-    BCP_tm_node** children = new BCP_tm_node*[child_num];
-    int numCandidateChildren = 0;
+    CoinTreeNode** children = new CoinTreeNode*[child_num];
+    int numChildrenAdded = 0;
     for (i = 0; i < child_num; ++i){
 	desc = new BCP_node_change;
 	BCP_tm_create_core_change(desc, bvarnum, bcutnum,	brobj, i);
@@ -422,10 +425,11 @@ BCP_tm_unpack_branching_info(BCP_tm_prob& p, BCP_buffer& buf,
 	// _children  initialized to be empty -- OK
 	switch (action[i]){
 	case BCP_ReturnChild:
-	    children[numCandidateChildren++] = child;
+	    children[numChildrenAdded++] = child;
 	    child->status = BCP_CandidateNode;
 	    break;
 	case BCP_KeepChild:
+	    children[numChildrenAdded++] = child;
 	    child->status = BCP_CandidateNode; // be conservative
 	    keep = i;
 	    break;
@@ -439,11 +443,8 @@ BCP_tm_unpack_branching_info(BCP_tm_prob& p, BCP_buffer& buf,
 	// lp, cg, vg  initialized to 0 -- OK, none assigned yet
     }
 
-    for (i = 0; i < numCandidateChildren; ++i) {
-	p.candidate_list.push(children[i]);
-    }
+    CoinTreeSiblings siblings(numChildrenAdded, children);
     delete[] children;
-    p.user->change_candidate_heap(p.candidate_list, false);
 
     // check the one that's proposed to be kept if there's one
     if (keep >= 0) {
@@ -459,16 +460,18 @@ BCP_tm_unpack_branching_info(BCP_tm_prob& p, BCP_buffer& buf,
 		child->status = BCP_ActiveNode;
 		// if diving then send the new index and var/cut_names
 		buf.pack(child->index());
-	    } else {
-		p.candidate_list.push(child);
-		p.user->change_candidate_heap(p.candidate_list, false);
+		siblings.advanceNode();
 	    }
+	    p.candidate_list.push(siblings);
+	    p.user->change_candidate_heap(p.candidate_list, false);
 	    p.msg_env->send(node->lp, BCP_Msg_DivingInfo, buf);
-	}else{
-	    p.candidate_list.push(child);
+	} else {
+	    p.candidate_list.push(siblings);
 	    p.user->change_candidate_heap(p.candidate_list, false);
 	}
-    }else{
+    } else {
+	p.candidate_list.push(siblings);
+	p.user->change_candidate_heap(p.candidate_list, false);
 	dive = BCP_DoNotDive;
     }
 

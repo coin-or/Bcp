@@ -27,8 +27,7 @@ public:
     BCP_lp_integer_branching_object(const OsiIntegerBranchingObject* o) :
 	OsiIntegerBranchingObject(*o) {}
     ~BCP_lp_integer_branching_object() {}
-    inline const double* downBounds() const { return down_; }
-    inline const double* upBounds() const { return up_; }
+    inline const double* childBounds(int i) const { return i==0 ? down_:up_; }
 };
 
 //-----------------------------------------------------------------------------
@@ -187,9 +186,11 @@ public:
 	if (ivb) implied_var_bd = new BCP_vec<double>(*ivb);
 	if (icb) implied_cut_bd = new BCP_vec<double>(*icb);
     }
-    BCP_lp_branching_object(const BCP_lp_integer_branching_object& o);
+    BCP_lp_branching_object(const BCP_lp_integer_branching_object& o,
+			    const int* order);
     BCP_lp_branching_object(const OsiSolverInterface* osi,
-			    const BCP_lp_sos_branching_object& o);
+			    const BCP_lp_sos_branching_object& o,
+			    const int* order);
 
     // NOTE: when the desctructor `delete's vars_to_add and cuts_to_add, it
     // will just delete the pointers in the BCP_lp_..._sets (see the

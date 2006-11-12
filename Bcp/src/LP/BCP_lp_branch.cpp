@@ -62,7 +62,9 @@ static void BCP_reorder_pos(const int child_num,
 
 //#############################################################################
 
-BCP_lp_branching_object::BCP_lp_branching_object(const BCP_lp_integer_branching_object& o) :
+BCP_lp_branching_object::
+BCP_lp_branching_object(const BCP_lp_integer_branching_object& o,
+			const int* order) :
     child_num(2),
     vars_to_add(0), cuts_to_add(0),
     forced_var_pos(new BCP_vec<int>(1,-1)), forced_cut_pos(0),
@@ -73,16 +75,16 @@ BCP_lp_branching_object::BCP_lp_branching_object(const BCP_lp_integer_branching_
     BCP_vec<int>& fvp = *forced_var_pos;
     BCP_vec<double>& fvb = *forced_var_bd;
     fvp[0] = o.originalObject()->columnNumber();
-    fvb[0] = o.downBounds()[0];
-    fvb[1] = o.downBounds()[1];
-    fvb[2] = o.upBounds()[0];
-    fvb[3] = o.upBounds()[1];
+    memcpy(&fvb[0], o.childBounds(order[0]), 2*sizeof(double));
+    memcpy(&fvb[2], o.childBounds(order[1]), 2*sizeof(double));
 }
 
 //#############################################################################
 
-BCP_lp_branching_object::BCP_lp_branching_object(const OsiSolverInterface* osi,
-						 const BCP_lp_sos_branching_object& o) :
+BCP_lp_branching_object::
+BCP_lp_branching_object(const OsiSolverInterface* osi,
+			const BCP_lp_sos_branching_object& o,
+			const int* order) :
     child_num(2),
     vars_to_add(0), cuts_to_add(0),
     forced_var_pos(0), forced_cut_pos(0),
@@ -103,10 +105,19 @@ BCP_lp_branching_object::BCP_lp_branching_object(const OsiSolverInterface* osi,
     forced_var_pos = new BCP_vec<int>(sos->members(), sos->members()+len);
     forced_var_bd  = new BCP_vec<double>(4*len, 0.0);
     BCP_vec<double>& fvb = *forced_var_bd;
+    double* downchildBounds = NULL;
+    double* upchildBounds = NULL;
+    if ( order[0] == 0) {
+	downchildBounds = &fvb[0];
+	upchildBounds = &fvb[2*len];
+    } else {
+	downchildBounds = &fvb[2*len];
+	upchildBounds = &fvb[0];
+    }
     for (i = 0; i < len; ++i) {
 	const int pos = which[i];
-	fvb[2*i]   = fvb[2*len+2*i]   = clb[pos];
-	fvb[2*i+1] = fvb[2*len+2*i+1] = cub[pos];
+	downchildBounds[2*i]   = upchildBounds[2*i]   = clb[pos];
+	downchildBounds[2*i+1] = upchildBounds[2*i+1] = cub[pos];
     }
     // upper bounds in child 0
     for (i = 0; i < len; ++i) {
@@ -115,14 +126,14 @@ BCP_lp_branching_object::BCP_lp_branching_object(const OsiSolverInterface* osi,
     }
     assert (i < len);
     for ( ; i < len; ++i) {
-	fvb[2*i+1] = 0.0;
+	downchildBounds[2*i+1] = 0.0;
     }
     // upper bounds in child 1
     for (i = 0 ; i < len; ++i) {
 	if (weights[i] >= value)
 	    break;
 	else
-	    fvb[2*len+2*i+1] = 0.0;
+	    upchildBounds[2*i+1] = 0.0;
     }
     assert ( i < len);
 }

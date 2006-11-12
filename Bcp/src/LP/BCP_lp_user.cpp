@@ -1082,18 +1082,25 @@ BCP: BCP_lp_user::try_to_branch returned with unknown return code.\n");
 	}
     }
     
+    // all possibilities are 2-way branches
+    int order[2] = {0, 1};
+    if (choose->bestWhichWay() == 1) {
+	order[0] = 1;
+	order[1] = 0;
+    }
+
     // Now interpret the result (at this point we must have a brObj
     OsiIntegerBranchingObject* intBrObj =
 	dynamic_cast<OsiIntegerBranchingObject*>(brObj);
     if (intBrObj) {
 	BCP_lp_integer_branching_object o(intBrObj);
-	cands.push_back(new BCP_lp_branching_object(o));
+	cands.push_back(new BCP_lp_branching_object(o, order));
     }
     OsiSOSBranchingObject* sosBrObj =
 	dynamic_cast<OsiSOSBranchingObject*>(brObj);
     if (sosBrObj) {
 	BCP_lp_sos_branching_object o(sosBrObj);
-	cands.push_back(new BCP_lp_branching_object(lp, o));
+	cands.push_back(new BCP_lp_branching_object(lp, o, order));
     }
 #endif
     
