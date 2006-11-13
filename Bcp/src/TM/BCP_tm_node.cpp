@@ -96,7 +96,7 @@ BCP_tree::enumerate_leaves(BCP_tm_node* node, const double obj_limit)
 double
 BCP_tree::true_lower_bound(const BCP_tm_node* node) const
 {
-    double worstlb = DBL_MAX;
+    double worstlb = 1e100;
     if (node->child_num() == 0) {
 	const BCP_tm_node_status st = node->status;
 	if (st == BCP_ActiveNode || st == BCP_CandidateNode)

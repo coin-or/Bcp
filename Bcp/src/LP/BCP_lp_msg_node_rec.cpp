@@ -41,6 +41,7 @@ void BCP_lp_unpack_parent(BCP_lp_prob& p, BCP_buffer& buf, BCP_lp_node& node,
 			  BCP_var_set_change& parent_added_vars,
 			  BCP_cut_set_change& parent_added_cuts)
 {
+   buf.unpack(p.parent->index);
    if (node.tm_storage.core_change == BCP_Storage_WrtParent){
       p.parent->core_as_change.unpack(buf);  // BCP_problem_core_change
       // make sure the parent's storage is Explicit (convert if it is WrtCore

@@ -280,7 +280,7 @@ public:
 
     //-------------------------------------------------------------------------
     /** */
-    inline bool has_ub() const { return upper_bound < DBL_MAX/2; }
+    inline bool has_ub() const { return upper_bound < 1e99; }
     /** */
     inline double ub() const { return upper_bound; }
     /** */

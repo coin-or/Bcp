@@ -62,6 +62,8 @@ public:
    BCP_vec<BCP_obj_change>  added_cuts_desc;
    /** */
    BCP_warmstart* warmstart;
+   /** */
+   int index;
    /*@}*/
 
 public:
@@ -161,7 +163,7 @@ public:
       cg(0), cp(0), vg(0), vp(0),
       level(0), index(0), iteration_count(0),
       dive(BCP_DoNotDive), colgen(BCP_DoNotGenerateColumns_Fathom),
-      quality(-DBL_MAX), true_lower_bound(-DBL_MAX), vars(), cuts(),
+      quality(-1e100), true_lower_bound(-1e100), vars(), cuts(),
       warmstart(0),
       user_data(0) {}
    /** */

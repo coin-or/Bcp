@@ -336,7 +336,7 @@ BCP_tm_prob::process_message()
 			printf("TM: Solution found at %.3f sec.\n",
 			       CoinCpuTime() - start_time);
 		    }
-		    if (upper_bound > DBL_MAX/2) {
+		    if (upper_bound > 1e99) {
 			printf("\
 TM: Solution value: %f (best solution value so far: infinity)\n",
 			       new_sol->objective_value());

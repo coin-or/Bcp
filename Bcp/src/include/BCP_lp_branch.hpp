@@ -453,7 +453,7 @@ public:
 	not have a valid lower bound fake the objective value depending on the
 	termination code:
 	<ul>
-	<li> primal infeasibility / dual objective limit: <code>DBL_MAX</code>
+	<li> primal infeasibility / dual objective limit: <code>1e100</code>
 	<li> iteration limit : maximum of the lower bound at termination and
 	<code>itlim_objval</code>
 	<li> abandoned : <code>itlim_objval</code>

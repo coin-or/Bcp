@@ -108,8 +108,8 @@ public:
    /**@name Query methods */
    /*@{*/
    /** Return true/false indicating whether any upper bound has been found. */
-   inline bool has_ub() const { return upper_bound < DBL_MAX; }
-   /** Return the current upper bound (<code>DBL_MAX</code> if there's no
+   inline bool has_ub() const { return upper_bound < 1e99; }
+   /** Return the current upper bound (<code>1e100</code> if there's no
        upper bound found yet.) */
    inline double ub() const   { return upper_bound; }
    /*@}*/

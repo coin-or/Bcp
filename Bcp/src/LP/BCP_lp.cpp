@@ -76,7 +76,7 @@ BCP_lp_prob::BCP_lp_prob(BCP_proc_id* my_id, BCP_proc_id* parent) :
    last_var_index(0),
    next_cut_index(0),
    last_cut_index(0),
-   upper_bound(DBL_MAX),
+   upper_bound(1e100),
    phase(0)
 {}
 

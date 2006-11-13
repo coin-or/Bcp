@@ -1355,14 +1355,14 @@ compare_branching_candidates(BCP_presolved_lp_brobj* new_presolved,
 	std::sort(new_obj.begin(), new_obj.end());
 	const int new_not_fathomed =
 	    new_obj.index(std::lower_bound(new_obj.begin(), new_obj.end(),
-					   DBL_MAX / 4));
+					   1e99));
 
 	BCP_vec<double> old_obj;
 	old_presolved->get_lower_bounds(old_obj);
 	std::sort(old_obj.begin(), old_obj.end());
 	const int old_not_fathomed =
 	    old_obj.index(std::lower_bound(old_obj.begin(), old_obj.end(),
-					   DBL_MAX / 4));
+					   1e99));
 
 	if (new_not_fathomed < old_not_fathomed)
 	    return BCP_NewPresolvedIsBetter;
@@ -1381,13 +1381,13 @@ compare_branching_candidates(BCP_presolved_lp_brobj* new_presolved,
 	    {
 		double newavg = 0;
 		for ( ; new_first != new_last; ++new_first) {
-		    if (*new_first < DBL_MAX / 4)
+		    if (*new_first < 1e99)
 			newavg += *new_first;
 		}
 		newavg /= new_not_fathomed;
 		double oldavg = 0;
 		for ( ; old_first != old_last; ++old_first) {
-		    if (*old_first < DBL_MAX / 4)
+		    if (*old_first < 1e99)
 			oldavg += *old_first;
 		}
 		oldavg /= old_not_fathomed;

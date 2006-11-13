@@ -225,7 +225,7 @@ public:
    /** The default constructor creates an empty row with -infinity as lower
        and +infinity as upper bound. */
    BCP_row() : CoinPackedVector(false /* no test for duplicate index */),
-	       _LowerBound(-DBL_MAX), _UpperBound(DBL_MAX) {}
+	       _LowerBound(-1e100), _UpperBound(1e100) {}
    /** The copy constructor makes a copy of <code>x</code>. */
    BCP_row(const BCP_row& x) :
       CoinPackedVector(x),

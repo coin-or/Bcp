@@ -148,6 +148,9 @@ BCP_tm_pack_parent(BCP_tm_prob& p, const BCP_tm_node* node)
    BCP_tm_node* n = const_cast<BCP_tm_node*>(node);
    int i;
 
+   int parentind = (node->parent() == NULL) ? -1 : node->parent()->_index ;
+   p.msg_buf.pack(parentind);
+
    // the path to the root
    BCP_tm_node** root_path = new BCP_tm_node*[level + 1];
    for (i = level + 1; n; root_path[--i] = n, n = n->parent());
