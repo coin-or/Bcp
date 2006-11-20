@@ -81,8 +81,7 @@ AC_COIN_HAS_USER_LIBRARY([Mpi], [MPI], [mpi.h], [MPI_Irecv])
 
 AC_COIN_CHECK_HEADER(sys/resource.h)
 AC_COIN_CHECK_HEADER(unistd.h)
-AC_CHECK_FUNCS(gethostname)
-AC_CHECK_FUNCS(getpid)
+AC_CHECK_FUNCS(gethostname getpid sysinfo)
 
 ##############################################################################
 #                   VPATH links for example input files                      #
