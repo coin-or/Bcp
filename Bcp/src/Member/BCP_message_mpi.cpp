@@ -8,6 +8,7 @@
 #include <mpi.h>
 
 #include "BCP_error.hpp"
+#include "BCP_process.hpp"
 #include "BCP_buffer.hpp"
 #include "BCP_vector.hpp"
 #include "BCP_message_mpi.hpp"
