@@ -63,8 +63,10 @@ int bcp_main(int argc, char* argv[], USER_initialize* user_init)
     } else {
 	// In MPI all processes get the argument list, so we must not check
 	// this
-#ifndef BCP_COMM_PROTOCOL_MPI
-	if (argc != 1) {
+#if COIN_HAS_MPI
+	BCP_mpi_environment* mpi_env =
+	    dynamic_cast<BCP_mpi_environment*>(msg_env);
+	if (!mpi_env && argc != 1) {
 	    throw BCP_fatal_error("The slaves do not take any argument!\n");
 	}
 #endif
@@ -134,17 +136,20 @@ BCP_tm_main(BCP_message_environment* msg_env,
     p.msg_env = msg_env;
 
     //We check if the number of BCP processes is the same as in MPI
-#ifdef BCP_COMM_PROTOCOL_MPI
-    const int n_proc =
-	p.param(BCP_tm_par::LpProcessNum) +
-	p.param(BCP_tm_par::CgProcessNum) +
-	p.param(BCP_tm_par::VgProcessNum) +
-	p.param(BCP_tm_par::CpProcessNum) +
-	p.param(BCP_tm_par::VpProcessNum) + 1;
-    if (p.msg_env->num_procs() != n_proc) {
-	throw BCP_fatal_error("\
+#if COIN_HAS_MPI
+    BCP_mpi_environment* mpi_env = dynamic_cast<BCP_mpi_environment*>(msg_env);
+    if (mpi_env) {
+	const int n_proc =
+	    p.param(BCP_tm_par::LpProcessNum) +
+	    p.param(BCP_tm_par::CgProcessNum) +
+	    p.param(BCP_tm_par::VgProcessNum) +
+	    p.param(BCP_tm_par::CpProcessNum) +
+	    p.param(BCP_tm_par::VpProcessNum) + 1;
+	if (p.msg_env->num_procs() != n_proc) {
+	    throw BCP_fatal_error("\
 Number of process in parameter file %d != n_proc in mpirun -np %d!\n",
-			      n_proc, p.msg_env->num_procs());
+				  n_proc, p.msg_env->num_procs());
+	}
     }
 #endif
 

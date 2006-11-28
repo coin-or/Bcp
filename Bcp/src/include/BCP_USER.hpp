@@ -57,9 +57,7 @@ public:
        environments are single and PVM, the default is single. To use PVM, the
        user has to override this method and return a pointer to a new
        <code>BCP_pvm_environment</code> object. */
-   virtual BCP_message_environment * msgenv_init(int argc, char* argv[]) {
-	  return new BCP_single_environment;
-   }
+   virtual BCP_message_environment * msgenv_init(int argc, char* argv[]);
    /*@}*/
 
    //--------------------------------------------------------------------------

@@ -12,14 +12,6 @@
 
 //#############################################################################
 
-BCP_process::~BCP_process()
-{
-    delete my_id;
-    delete parent_id;
-}
-    
-//#############################################################################
-
 int BCP_is_pvm_id(const BCP_proc_id* pid, const char* str) {
     const BCP_pvm_id* id = dynamic_cast<const BCP_pvm_id*>(pid);
     if (id == 0){

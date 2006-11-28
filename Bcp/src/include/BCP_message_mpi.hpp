@@ -24,6 +24,29 @@ public:
 
 //#############################################################################
 
+/** Function that determines what is the mpi id of the current process.
+    Returns the id if the process is in an mpi environment *and* there are
+    more than 1 processes. Otherwise returns -1 */
+static inline int BCP_mpi_myid(int argc, char *argv[])
+{
+    int pid, num_proc;
+    MPI_Init(&argc, &argv);
+    // MPI_Init may or may not have succeeded. In any case check if we can get
+    // the number of procs
+    if (MPI_Comm_size(MPI_COMM_WORLD, &num_proc) != MPI_SUCCESS) {
+	// Now it's certain. Not an MPI environment
+	return -1;
+    }
+    if (num_proc == 1) {
+	// Might as well execute everything as a serial environment
+	return -1;
+    }
+    MPI_Comm_rank(MPI_COMM_WORLD, &pid);
+    return pid;
+}
+
+//#############################################################################
+
 class BCP_mpi_environment : public BCP_message_environment {
 private:
    int seqproc;

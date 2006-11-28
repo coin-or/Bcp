@@ -15,14 +15,6 @@
 
 //#############################################################################
 
-BCP_process::~BCP_process()
-{
-    delete my_id;
-    delete parent_id;
-}
-    
-//#############################################################################
-
 int BCP_is_mpi_id(const BCP_proc_id* pid, const char* str) {
 
     const BCP_mpi_id* id = dynamic_cast<const BCP_mpi_id*>(pid);
@@ -79,6 +71,7 @@ BCP_mpi_environment::BCP_mpi_environment(int argc, char *argv[]) {
     /* Initialize the MPI environment. */
     seqproc = 1;
     int pid, num_proc;
+    // MPI_Init might fail if BCP_mpi_myid was already invoked, but that's OK.
     MPI_Init(&argc, &argv);
     MPI_Comm_size(MPI_COMM_WORLD, &num_proc);
     MPI_Comm_rank(MPI_COMM_WORLD, &pid);
