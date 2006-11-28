@@ -26,6 +26,9 @@
 #include "BCP_lp_user.hpp"
 
 #include "BCP_message_single.hpp"
+#if defined(COIN_HAS_MPI)
+#include "BCP_message_mpi.hpp"
+#endif
 
 //#############################################################################
 
@@ -63,7 +66,7 @@ int bcp_main(int argc, char* argv[], USER_initialize* user_init)
     } else {
 	// In MPI all processes get the argument list, so we must not check
 	// this
-#if COIN_HAS_MPI
+#if defined(COIN_HAS_MPI)
 	BCP_mpi_environment* mpi_env =
 	    dynamic_cast<BCP_mpi_environment*>(msg_env);
 	if (!mpi_env && argc != 1) {
@@ -136,7 +139,7 @@ BCP_tm_main(BCP_message_environment* msg_env,
     p.msg_env = msg_env;
 
     //We check if the number of BCP processes is the same as in MPI
-#if COIN_HAS_MPI
+#if defined(COIN_HAS_MPI)
     BCP_mpi_environment* mpi_env = dynamic_cast<BCP_mpi_environment*>(msg_env);
     if (mpi_env) {
 	const int n_proc =
@@ -145,9 +148,9 @@ BCP_tm_main(BCP_message_environment* msg_env,
 	    p.param(BCP_tm_par::VgProcessNum) +
 	    p.param(BCP_tm_par::CpProcessNum) +
 	    p.param(BCP_tm_par::VpProcessNum) + 1;
-	if (p.msg_env->num_procs() != n_proc) {
+	if (p.msg_env->num_procs() > n_proc) {
 	    throw BCP_fatal_error("\
-Number of process in parameter file %d != n_proc in mpirun -np %d!\n",
+Number of process in parameter file %d > n_proc in mpirun -np %d!\n",
 				  n_proc, p.msg_env->num_procs());
 	}
     }
