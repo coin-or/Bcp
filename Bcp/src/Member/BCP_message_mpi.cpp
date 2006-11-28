@@ -15,6 +15,26 @@
 
 //#############################################################################
 
+int BCP_is_mpi(int argc, char *argv[])
+{
+    int pid, num_proc;
+    MPI_Init(&argc, &argv);
+    // MPI_Init may or may not have succeeded. In any case check if we can get
+    // the number of procs
+    if (MPI_Comm_size(MPI_COMM_WORLD, &num_proc) != MPI_SUCCESS) {
+	// Now it's certain. Not an MPI environment
+	return -1;
+    }
+    if (num_proc == 1) {
+	// Might as well execute everything as a serial environment
+	return -1;
+    }
+    MPI_Comm_rank(MPI_COMM_WORLD, &pid);
+    return pid;
+}
+
+//#############################################################################
+
 int BCP_is_mpi_id(const BCP_proc_id* pid, const char* str) {
 
     const BCP_mpi_id* id = dynamic_cast<const BCP_mpi_id*>(pid);
