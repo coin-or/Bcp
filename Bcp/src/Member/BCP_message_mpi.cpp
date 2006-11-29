@@ -2,8 +2,12 @@
 // Sonya Marcarelli & Igor Vasil'ev (vil@icc.ru)
 // All Rights Reserved.
 
+#include "BcpConfig.h"
+#if defined(COIN_HAS_MPI)
+
 #include <cstdio>
 #include <cmath>
+
 #define MPICH_SKIP_MPICXX
 #include <mpi.h>
 
@@ -384,3 +388,5 @@ int BCP_mpi_environment::num_procs() {
     MPI_Comm_size(MPI_COMM_WORLD, &num_procs);
     return num_procs;
 }
+
+#endif /* COIN_HAS_MPI */

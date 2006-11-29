@@ -5,6 +5,10 @@
 #ifndef _BCP_MESSAGE_MPI_H
 #define _BCP_MESSAGE_MPI_H
 
+#include "BcpConfig.h"
+
+#if defined(COIN_HAS_MPI)
+
 #include "BCP_message.hpp"
 
 //#############################################################################
@@ -100,5 +104,7 @@ int BCP_is_mpi_id(const BCP_proc_id* pid, const char* str);
 
 int* BCP_process_array_2_int(const BCP_proc_array* const target,
 			     const char* str);
+
+#endif /* COIN_HAS_MPI */
 
 #endif

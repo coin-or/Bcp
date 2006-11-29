@@ -41,11 +41,9 @@ PRE_UNINSTALL = :
 POST_UNINSTALL = :
 build_triplet = @build@
 host_triplet = @host@
-@COIN_HAS_MPI_TRUE@am__append_1 = Member/BCP_message_mpi.cpp \
-@COIN_HAS_MPI_TRUE@	include/BCP_message_mpi.hpp
 
 # Include MPI header directory if MPI is used
-@COIN_HAS_MPI_TRUE@am__append_2 = -I`$(CYGPATH_W) $(MPIINCDIR)`
+@COIN_HAS_MPI_TRUE@am__append_1 = -I`$(CYGPATH_W) $(MPIINCDIR)`
 subdir = src
 DIST_COMMON = $(include_HEADERS) $(srcdir)/Makefile.am \
 	$(srcdir)/Makefile.in
@@ -67,70 +65,6 @@ am__installdirs = "$(DESTDIR)$(libdir)" "$(DESTDIR)$(includedir)"
 libLTLIBRARIES_INSTALL = $(INSTALL)
 LTLIBRARIES = $(lib_LTLIBRARIES)
 libBcp_la_LIBADD =
-am__libBcp_la_SOURCES_DIST = CG/BCP_cg_user.cpp CG/BCP_cg_param.cpp \
-	CG/BCP_cg.cpp CG/BCP_cg_main.cpp LP/BCP_lp_fathom.cpp \
-	LP/BCP_lp_branch.cpp LP/BCP_lp_branching.cpp \
-	LP/BCP_lp_misc.cpp LP/BCP_lp_main_loop.cpp \
-	LP/BCP_lp_msgproc.cpp LP/BCP_lp_user.cpp \
-	LP/BCP_lp_generate_vars.cpp LP/BCP_lp_msg_node_rec.cpp \
-	LP/BCP_lp_node.cpp LP/BCP_lp_create_lp.cpp \
-	LP/BCP_lp_msg_node_send.cpp LP/BCP_lp_convert_OsiWarmStart.cpp \
-	LP/BCP_lp_result.cpp LP/BCP_lp_generate_cuts.cpp \
-	LP/BCP_lp_colrow.cpp LP/BCP_lp.cpp LP/BCP_lp_main.cpp \
-	LP/BCP_lp_pool.cpp LP/BCP_lp_param.cpp TM/BCP_tm_trimming.cpp \
-	TM/BCP_tm_msg_node_send.cpp TM/BCP_tm_msg_node_rec.cpp \
-	TM/BCP_tm_param.cpp TM/BCP_tm_user.cpp \
-	TM/BCP_tm_commandline.cpp TM/BCP_tm_node.cpp \
-	TM/BCP_tm_msgproc.cpp TM/BCP_tm_functions.cpp \
-	TM/BCP_tm_main.cpp TM/BCP_tm_statistics.cpp TM/BCP_tm.cpp \
-	VG/BCP_vg_param.cpp VG/BCP_vg_user.cpp VG/BCP_vg_main.cpp \
-	VG/BCP_vg.cpp Member/BCP_solution.cpp \
-	Member/BCP_node_change.cpp Member/BCP_indexed_pricing.cpp \
-	Member/BCP_USER.cpp Member/BCP_warmstart_basis.cpp \
-	Member/BCP_branch.cpp Member/BCP_vector_sanity.cpp \
-	Member/BCP_cut.cpp Member/BCP_obj_change.cpp \
-	Member/BCP_warmstart_dual.cpp Member/BCP_matrix.cpp \
-	Member/BCP_problem_core.cpp Member/BCP_warmstart_pack.cpp \
-	Member/BCP_matrix_pack.cpp Member/BCP_var.cpp \
-	Member/BCP_vector_bool.cpp Member/BCP_vector_char.cpp \
-	Member/BCP_vector_double.cpp Member/BCP_vector_int.cpp \
-	Member/BCP_vector_short.cpp include/BCP_msvc.hpp \
-	include/BCP_vg_param.hpp include/BCP_message.hpp \
-	include/BCP_solution.hpp include/BCP_vector_change.hpp \
-	include/BCP_lp_branch.hpp include/BCP_process.hpp \
-	include/BCP_node_change.hpp include/BCP_indexed_pricing.hpp \
-	include/BCP_vector.hpp include/BCP_vector_char.hpp \
-	include/BCP_tm_param.hpp include/BCP_USER.hpp \
-	include/BCP_vg_user.hpp include/BCP_lp_main_loop.hpp \
-	include/BCP_warmstart_basis.hpp include/BCP_tm_user.hpp \
-	include/BCP_lp_user.hpp include/BCP_branch.hpp \
-	include/BCP_warmstart.hpp include/BCP_vector_sanity.hpp \
-	include/BCP_cut.hpp include/BCP_message_tag.hpp \
-	include/BCP_tm_node.hpp include/BCP_cg_user.hpp \
-	include/BCP_set_intersects.hpp include/BCP_cg_param.hpp \
-	include/BCP_obj_change.hpp include/BCP_warmstart_dual.hpp \
-	include/BCP_vector_int.hpp include/BCP_lp_node.hpp \
-	include/BCP_string.hpp include/BCP_matrix.hpp \
-	include/BCP_parameters.hpp include/BCP_enum.hpp \
-	include/BCP_enum_branch.hpp include/BCP_vector_general.hpp \
-	include/BCP_lp_functions.hpp include/BCP_functions.hpp \
-	include/BCP_vector_short.hpp include/BCP_cygwin.hpp \
-	include/BCP_problem_core.hpp include/BCP_vector_double.hpp \
-	include/BCP_lp_result.hpp include/BCP_main_fun.hpp \
-	include/BCP_tm_functions.hpp include/BCP_error.hpp \
-	include/BCP_linux.hpp include/BCP_enum_tm.hpp \
-	include/BCP_MACH.hpp include/BCP_enum_process_t.hpp \
-	include/BCP_cg.hpp include/BCP_vector_bool.hpp \
-	include/BCP_lp.hpp include/BCP_mempool.hpp \
-	include/BCP_bluegene_xlc.hpp include/BCP_var.hpp \
-	include/BCP_lp_pool.hpp include/BCP_os.hpp \
-	include/BCP_buffer.hpp include/BCP_lp_param.hpp \
-	include/BCP_sunos.hpp include/BCP_aix43.hpp \
-	include/BCP_freebsd.hpp include/BCP_tm.hpp include/BCP_vg.hpp \
-	include/BcpConfig.h Member/BCP_message_single.cpp \
-	include/BCP_message_single.hpp Member/BCP_message_mpi.cpp \
-	include/BCP_message_mpi.hpp
-@COIN_HAS_MPI_TRUE@am__objects_1 = BCP_message_mpi.lo
 am_libBcp_la_OBJECTS = BCP_cg_user.lo BCP_cg_param.lo BCP_cg.lo \
 	BCP_cg_main.lo BCP_lp_fathom.lo BCP_lp_branch.lo \
 	BCP_lp_branching.lo BCP_lp_misc.lo BCP_lp_main_loop.lo \
@@ -151,7 +85,7 @@ am_libBcp_la_OBJECTS = BCP_cg_user.lo BCP_cg_param.lo BCP_cg.lo \
 	BCP_problem_core.lo BCP_warmstart_pack.lo BCP_matrix_pack.lo \
 	BCP_var.lo BCP_vector_bool.lo BCP_vector_char.lo \
 	BCP_vector_double.lo BCP_vector_int.lo BCP_vector_short.lo \
-	BCP_message_single.lo $(am__objects_1)
+	BCP_message_single.lo BCP_message_mpi.lo BCP_message_pvm.lo
 libBcp_la_OBJECTS = $(am_libBcp_la_OBJECTS)
 depcomp = $(SHELL) $(top_srcdir)/../depcomp
 am__depfiles_maybe = depfiles
@@ -172,7 +106,7 @@ CCLD = $(CC)
 LINK = $(LIBTOOL) --tag=CC --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
 	$(AM_LDFLAGS) $(LDFLAGS) -o $@
 SOURCES = $(libBcp_la_SOURCES)
-DIST_SOURCES = $(am__libBcp_la_SOURCES_DIST)
+DIST_SOURCES = $(libBcp_la_SOURCES)
 includeHEADERS_INSTALL = $(INSTALL_HEADER)
 HEADERS = $(include_HEADERS)
 ETAGS = etags
@@ -346,75 +280,146 @@ AUTOMAKE_OPTIONS = foreign
 lib_LTLIBRARIES = libBcp.la
 
 # List all source files for this library, including headers
-libBcp_la_SOURCES = CG/BCP_cg_user.cpp CG/BCP_cg_param.cpp \
-	CG/BCP_cg.cpp CG/BCP_cg_main.cpp LP/BCP_lp_fathom.cpp \
-	LP/BCP_lp_branch.cpp LP/BCP_lp_branching.cpp \
-	LP/BCP_lp_misc.cpp LP/BCP_lp_main_loop.cpp \
-	LP/BCP_lp_msgproc.cpp LP/BCP_lp_user.cpp \
-	LP/BCP_lp_generate_vars.cpp LP/BCP_lp_msg_node_rec.cpp \
-	LP/BCP_lp_node.cpp LP/BCP_lp_create_lp.cpp \
-	LP/BCP_lp_msg_node_send.cpp LP/BCP_lp_convert_OsiWarmStart.cpp \
-	LP/BCP_lp_result.cpp LP/BCP_lp_generate_cuts.cpp \
-	LP/BCP_lp_colrow.cpp LP/BCP_lp.cpp LP/BCP_lp_main.cpp \
-	LP/BCP_lp_pool.cpp LP/BCP_lp_param.cpp TM/BCP_tm_trimming.cpp \
-	TM/BCP_tm_msg_node_send.cpp TM/BCP_tm_msg_node_rec.cpp \
-	TM/BCP_tm_param.cpp TM/BCP_tm_user.cpp \
-	TM/BCP_tm_commandline.cpp TM/BCP_tm_node.cpp \
-	TM/BCP_tm_msgproc.cpp TM/BCP_tm_functions.cpp \
-	TM/BCP_tm_main.cpp TM/BCP_tm_statistics.cpp TM/BCP_tm.cpp \
-	VG/BCP_vg_param.cpp VG/BCP_vg_user.cpp VG/BCP_vg_main.cpp \
-	VG/BCP_vg.cpp Member/BCP_solution.cpp \
-	Member/BCP_node_change.cpp Member/BCP_indexed_pricing.cpp \
-	Member/BCP_USER.cpp Member/BCP_warmstart_basis.cpp \
-	Member/BCP_branch.cpp Member/BCP_vector_sanity.cpp \
-	Member/BCP_cut.cpp Member/BCP_obj_change.cpp \
-	Member/BCP_warmstart_dual.cpp Member/BCP_matrix.cpp \
-	Member/BCP_problem_core.cpp Member/BCP_warmstart_pack.cpp \
-	Member/BCP_matrix_pack.cpp Member/BCP_var.cpp \
-	Member/BCP_vector_bool.cpp Member/BCP_vector_char.cpp \
-	Member/BCP_vector_double.cpp Member/BCP_vector_int.cpp \
-	Member/BCP_vector_short.cpp include/BCP_msvc.hpp \
-	include/BCP_vg_param.hpp include/BCP_message.hpp \
-	include/BCP_solution.hpp include/BCP_vector_change.hpp \
-	include/BCP_lp_branch.hpp include/BCP_process.hpp \
-	include/BCP_node_change.hpp include/BCP_indexed_pricing.hpp \
-	include/BCP_vector.hpp include/BCP_vector_char.hpp \
-	include/BCP_tm_param.hpp include/BCP_USER.hpp \
-	include/BCP_vg_user.hpp include/BCP_lp_main_loop.hpp \
-	include/BCP_warmstart_basis.hpp include/BCP_tm_user.hpp \
-	include/BCP_lp_user.hpp include/BCP_branch.hpp \
-	include/BCP_warmstart.hpp include/BCP_vector_sanity.hpp \
-	include/BCP_cut.hpp include/BCP_message_tag.hpp \
-	include/BCP_tm_node.hpp include/BCP_cg_user.hpp \
-	include/BCP_set_intersects.hpp include/BCP_cg_param.hpp \
-	include/BCP_obj_change.hpp include/BCP_warmstart_dual.hpp \
-	include/BCP_vector_int.hpp include/BCP_lp_node.hpp \
-	include/BCP_string.hpp include/BCP_matrix.hpp \
-	include/BCP_parameters.hpp include/BCP_enum.hpp \
-	include/BCP_enum_branch.hpp include/BCP_vector_general.hpp \
-	include/BCP_lp_functions.hpp include/BCP_functions.hpp \
-	include/BCP_vector_short.hpp include/BCP_cygwin.hpp \
-	include/BCP_problem_core.hpp include/BCP_vector_double.hpp \
-	include/BCP_lp_result.hpp include/BCP_main_fun.hpp \
-	include/BCP_tm_functions.hpp include/BCP_error.hpp \
-	include/BCP_linux.hpp include/BCP_enum_tm.hpp \
-	include/BCP_MACH.hpp include/BCP_enum_process_t.hpp \
-	include/BCP_cg.hpp include/BCP_vector_bool.hpp \
-	include/BCP_lp.hpp include/BCP_mempool.hpp \
-	include/BCP_bluegene_xlc.hpp include/BCP_var.hpp \
-	include/BCP_lp_pool.hpp include/BCP_os.hpp \
-	include/BCP_buffer.hpp include/BCP_lp_param.hpp \
-	include/BCP_sunos.hpp include/BCP_aix43.hpp \
-	include/BCP_freebsd.hpp include/BCP_tm.hpp include/BCP_vg.hpp \
-	include/BCP_vector_bool.hpp include/BCP_vector_char.hpp \
-	include/BCP_vector_double.hpp include/BCP_vector_int.hpp \
-	include/BCP_vector_short.hpp include/BcpConfig.h \
-	Member/BCP_message_single.cpp include/BCP_message_single.hpp \
-	$(am__append_1)
-#if COIN_HAS_PVM
-#libBcp_la_SOURCES += Member/BCP_message_pvm.cpp
-#libBcp_la_SOURCES += include/BCP_message_pvm.hpp
-#endif
+libBcp_la_SOURCES = \
+	CG/BCP_cg_user.cpp \
+	CG/BCP_cg_param.cpp \
+	CG/BCP_cg.cpp \
+	CG/BCP_cg_main.cpp \
+	LP/BCP_lp_fathom.cpp \
+	LP/BCP_lp_branch.cpp \
+	LP/BCP_lp_branching.cpp \
+	LP/BCP_lp_misc.cpp \
+	LP/BCP_lp_main_loop.cpp \
+	LP/BCP_lp_msgproc.cpp \
+	LP/BCP_lp_user.cpp \
+	LP/BCP_lp_generate_vars.cpp \
+	LP/BCP_lp_msg_node_rec.cpp \
+	LP/BCP_lp_node.cpp \
+	LP/BCP_lp_create_lp.cpp \
+	LP/BCP_lp_msg_node_send.cpp \
+	LP/BCP_lp_convert_OsiWarmStart.cpp \
+	LP/BCP_lp_result.cpp \
+	LP/BCP_lp_generate_cuts.cpp \
+	LP/BCP_lp_colrow.cpp \
+	LP/BCP_lp.cpp \
+	LP/BCP_lp_main.cpp \
+	LP/BCP_lp_pool.cpp \
+	LP/BCP_lp_param.cpp \
+	TM/BCP_tm_trimming.cpp \
+	TM/BCP_tm_msg_node_send.cpp \
+	TM/BCP_tm_msg_node_rec.cpp \
+	TM/BCP_tm_param.cpp \
+	TM/BCP_tm_user.cpp \
+	TM/BCP_tm_commandline.cpp \
+	TM/BCP_tm_node.cpp \
+	TM/BCP_tm_msgproc.cpp \
+	TM/BCP_tm_functions.cpp \
+	TM/BCP_tm_main.cpp \
+	TM/BCP_tm_statistics.cpp \
+	TM/BCP_tm.cpp \
+	VG/BCP_vg_param.cpp \
+	VG/BCP_vg_user.cpp \
+	VG/BCP_vg_main.cpp \
+	VG/BCP_vg.cpp \
+	Member/BCP_solution.cpp \
+	Member/BCP_node_change.cpp \
+	Member/BCP_indexed_pricing.cpp \
+	Member/BCP_USER.cpp \
+	Member/BCP_warmstart_basis.cpp \
+	Member/BCP_branch.cpp \
+	Member/BCP_vector_sanity.cpp \
+	Member/BCP_cut.cpp \
+	Member/BCP_obj_change.cpp \
+	Member/BCP_warmstart_dual.cpp \
+	Member/BCP_matrix.cpp \
+	Member/BCP_problem_core.cpp \
+	Member/BCP_warmstart_pack.cpp \
+	Member/BCP_matrix_pack.cpp \
+	Member/BCP_var.cpp \
+	Member/BCP_vector_bool.cpp \
+	Member/BCP_vector_char.cpp \
+	Member/BCP_vector_double.cpp \
+	Member/BCP_vector_int.cpp \
+	Member/BCP_vector_short.cpp \
+	include/BCP_msvc.hpp \
+	include/BCP_vg_param.hpp \
+	include/BCP_message.hpp \
+	include/BCP_solution.hpp \
+	include/BCP_vector_change.hpp \
+	include/BCP_lp_branch.hpp \
+	include/BCP_process.hpp \
+	include/BCP_node_change.hpp \
+	include/BCP_indexed_pricing.hpp \
+	include/BCP_vector.hpp \
+	include/BCP_vector_char.hpp \
+	include/BCP_tm_param.hpp \
+	include/BCP_USER.hpp \
+	include/BCP_vg_user.hpp \
+	include/BCP_lp_main_loop.hpp \
+	include/BCP_warmstart_basis.hpp \
+	include/BCP_tm_user.hpp \
+	include/BCP_lp_user.hpp \
+	include/BCP_branch.hpp \
+	include/BCP_warmstart.hpp \
+	include/BCP_vector_sanity.hpp \
+	include/BCP_cut.hpp \
+	include/BCP_message_tag.hpp \
+	include/BCP_tm_node.hpp \
+	include/BCP_cg_user.hpp \
+	include/BCP_set_intersects.hpp \
+	include/BCP_cg_param.hpp \
+	include/BCP_obj_change.hpp \
+	include/BCP_warmstart_dual.hpp \
+	include/BCP_vector_int.hpp \
+	include/BCP_lp_node.hpp \
+	include/BCP_string.hpp \
+	include/BCP_matrix.hpp \
+	include/BCP_parameters.hpp \
+	include/BCP_enum.hpp \
+	include/BCP_enum_branch.hpp \
+	include/BCP_vector_general.hpp \
+	include/BCP_lp_functions.hpp \
+	include/BCP_functions.hpp \
+	include/BCP_vector_short.hpp \
+	include/BCP_cygwin.hpp \
+	include/BCP_problem_core.hpp \
+	include/BCP_vector_double.hpp \
+	include/BCP_lp_result.hpp \
+	include/BCP_main_fun.hpp \
+	include/BCP_tm_functions.hpp \
+	include/BCP_error.hpp \
+	include/BCP_linux.hpp \
+	include/BCP_enum_tm.hpp \
+	include/BCP_MACH.hpp \
+	include/BCP_enum_process_t.hpp \
+	include/BCP_cg.hpp \
+	include/BCP_vector_bool.hpp \
+	include/BCP_lp.hpp \
+	include/BCP_mempool.hpp \
+	include/BCP_bluegene_xlc.hpp \
+	include/BCP_var.hpp \
+	include/BCP_lp_pool.hpp \
+	include/BCP_os.hpp \
+	include/BCP_buffer.hpp \
+	include/BCP_lp_param.hpp \
+	include/BCP_sunos.hpp \
+	include/BCP_aix43.hpp \
+	include/BCP_freebsd.hpp \
+	include/BCP_tm.hpp \
+	include/BCP_vg.hpp \
+	include/BCP_vector_bool.hpp \
+	include/BCP_vector_char.hpp \
+	include/BCP_vector_double.hpp \
+	include/BCP_vector_int.hpp \
+	include/BCP_vector_short.hpp \
+	Member/BCP_message_single.cpp \
+	include/BCP_message_single.hpp \
+	Member/BCP_message_mpi.cpp \
+	include/BCP_message_mpi.hpp \
+	Member/BCP_message_pvm.cpp \
+	include/BCP_message_pvm.hpp \
+	include/BcpConfig.h
+
 
 # This is for libtool (on Windows)
 libBcp_la_LDFLAGS = $(LT_LDFLAGS)
@@ -427,7 +432,7 @@ libBcp_la_LDFLAGS = $(LT_LDFLAGS)
 # "cygpath" stuff is necessary to compile with native compilers on Windows.
 AM_CPPFLAGS = -I`$(CYGPATH_W) $(COINUTILSSRCDIR)/src` -I`$(CYGPATH_W) \
 	$(COINUTILSOBJDIR)/inc` -I`$(CYGPATH_W) $(OSISRCDIR)/src` \
-	$(am__append_2)
+	$(am__append_1)
 
 # Include PVM header directory if PVM is used
 #if COIN_HAS_PVM
@@ -444,37 +449,71 @@ DEFAULT_INCLUDES = -I. -I`$(CYGPATH_W) $(srcdir)/include` -I$(top_builddir)/inc
 
 # Here list all the header files that are required by a user of the library,
 # and that therefore should be installed in 'install'
-include_HEADERS = ../inc/config_bcp.h include/BCP_vg_param.hpp \
-	include/BCP_message.hpp include/BCP_solution.hpp \
-	include/BCP_vector_change.hpp include/BCP_lp_branch.hpp \
-	include/BCP_message_pvm.hpp include/BCP_process.hpp \
-	include/BCP_node_change.hpp include/BCP_indexed_pricing.hpp \
-	include/BCP_vector.hpp include/BCP_vector_char.hpp \
-	include/BCP_tm_param.hpp include/BCP_USER.hpp \
-	include/BCP_vg_user.hpp include/BCP_lp_main_loop.hpp \
-	include/BCP_warmstart_basis.hpp include/BCP_tm_user.hpp \
-	include/BCP_lp_user.hpp include/BCP_branch.hpp \
-	include/BCP_warmstart.hpp include/BCP_vector_sanity.hpp \
-	include/BCP_cut.hpp include/BCP_message_tag.hpp \
-	include/BCP_tm_node.hpp include/BCP_cg_user.hpp \
-	include/BCP_set_intersects.hpp include/BCP_cg_param.hpp \
-	include/BCP_obj_change.hpp include/BCP_warmstart_dual.hpp \
-	include/BCP_vector_int.hpp include/BCP_lp_node.hpp \
-	include/BCP_string.hpp include/BCP_matrix.hpp \
-	include/BCP_parameters.hpp include/BCP_enum.hpp \
-	include/BCP_enum_branch.hpp include/BCP_vector_general.hpp \
-	include/BCP_lp_functions.hpp include/BCP_functions.hpp \
-	include/BCP_vector_short.hpp include/BCP_message_mpi.hpp \
-	include/BCP_problem_core.hpp include/BCP_message_single.hpp \
-	include/BCP_vector_double.hpp include/BCP_lp_result.hpp \
-	include/BCP_main_fun.hpp include/BCP_tm_functions.hpp \
-	include/BCP_error.hpp include/BCP_enum_tm.hpp \
-	include/BCP_enum_process_t.hpp include/BCP_cg.hpp \
-	include/BCP_vector_bool.hpp include/BCP_lp.hpp \
-	include/BCP_mempool.hpp include/BCP_var.hpp \
-	include/BCP_lp_pool.hpp include/BCP_os.hpp \
-	include/BCP_buffer.hpp include/BCP_lp_param.hpp \
-	include/BCP_tm.hpp include/BCP_vg.hpp include/BcpConfig.h
+include_HEADERS = \
+	../inc/config_bcp.h \
+	include/BCP_vg_param.hpp \
+	include/BCP_message.hpp \
+	include/BCP_solution.hpp \
+	include/BCP_vector_change.hpp \
+	include/BCP_lp_branch.hpp \
+	include/BCP_message_pvm.hpp \
+	include/BCP_process.hpp \
+	include/BCP_node_change.hpp \
+	include/BCP_indexed_pricing.hpp \
+	include/BCP_vector.hpp \
+	include/BCP_vector_char.hpp \
+	include/BCP_tm_param.hpp \
+	include/BCP_USER.hpp \
+	include/BCP_vg_user.hpp \
+	include/BCP_lp_main_loop.hpp \
+	include/BCP_warmstart_basis.hpp \
+	include/BCP_tm_user.hpp \
+	include/BCP_lp_user.hpp \
+	include/BCP_branch.hpp \
+	include/BCP_warmstart.hpp \
+	include/BCP_vector_sanity.hpp \
+	include/BCP_cut.hpp \
+	include/BCP_message_tag.hpp \
+	include/BCP_tm_node.hpp \
+	include/BCP_cg_user.hpp \
+	include/BCP_set_intersects.hpp \
+	include/BCP_cg_param.hpp \
+	include/BCP_obj_change.hpp \
+	include/BCP_warmstart_dual.hpp \
+	include/BCP_vector_int.hpp \
+	include/BCP_lp_node.hpp \
+	include/BCP_string.hpp \
+	include/BCP_matrix.hpp \
+	include/BCP_parameters.hpp \
+	include/BCP_enum.hpp \
+	include/BCP_enum_branch.hpp \
+	include/BCP_vector_general.hpp \
+	include/BCP_lp_functions.hpp \
+	include/BCP_functions.hpp \
+	include/BCP_vector_short.hpp \
+	include/BCP_message_mpi.hpp \
+	include/BCP_problem_core.hpp \
+	include/BCP_message_single.hpp \
+	include/BCP_vector_double.hpp \
+	include/BCP_lp_result.hpp \
+	include/BCP_main_fun.hpp \
+	include/BCP_tm_functions.hpp \
+	include/BCP_error.hpp \
+	include/BCP_enum_tm.hpp \
+	include/BCP_enum_process_t.hpp \
+	include/BCP_cg.hpp \
+	include/BCP_vector_bool.hpp \
+	include/BCP_lp.hpp \
+	include/BCP_mempool.hpp \
+	include/BCP_var.hpp \
+	include/BCP_lp_pool.hpp \
+	include/BCP_os.hpp \
+	include/BCP_buffer.hpp \
+	include/BCP_lp_param.hpp \
+	include/BCP_tm.hpp \
+	include/BCP_vg.hpp \
+	include/BcpConfig.h
+
 
 #############################################################################
 # Create the Config.h file that always defines HAVE_CONFIG_H and install it #
@@ -582,6 +621,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/BCP_matrix.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/BCP_matrix_pack.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/BCP_message_mpi.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/BCP_message_pvm.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/BCP_message_single.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/BCP_node_change.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/BCP_obj_change.Plo@am__quote@
@@ -1068,6 +1108,13 @@ BCP_message_mpi.lo: Member/BCP_message_mpi.cpp
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='Member/BCP_message_mpi.cpp' object='BCP_message_mpi.lo' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(LIBTOOL) --tag=CXX --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o BCP_message_mpi.lo `test -f 'Member/BCP_message_mpi.cpp' || echo '$(srcdir)/'`Member/BCP_message_mpi.cpp
+
+BCP_message_pvm.lo: Member/BCP_message_pvm.cpp
+@am__fastdepCXX_TRUE@	if $(LIBTOOL) --tag=CXX --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT BCP_message_pvm.lo -MD -MP -MF "$(DEPDIR)/BCP_message_pvm.Tpo" -c -o BCP_message_pvm.lo `test -f 'Member/BCP_message_pvm.cpp' || echo '$(srcdir)/'`Member/BCP_message_pvm.cpp; \
+@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/BCP_message_pvm.Tpo" "$(DEPDIR)/BCP_message_pvm.Plo"; else rm -f "$(DEPDIR)/BCP_message_pvm.Tpo"; exit 1; fi
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='Member/BCP_message_pvm.cpp' object='BCP_message_pvm.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(LIBTOOL) --tag=CXX --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o BCP_message_pvm.lo `test -f 'Member/BCP_message_pvm.cpp' || echo '$(srcdir)/'`Member/BCP_message_pvm.cpp
 
 mostlyclean-libtool:
 	-rm -f *.lo

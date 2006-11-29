@@ -1,8 +1,12 @@
 // Copyright (C) 2000, International Business Machines
 // Corporation and others.  All Rights Reserved.
 
+#include "BcpConfig.h"
+#if defined(COIN_HAS_PVM)
+
 #include <cstdio>
 #include <cmath>
+
 #include <pvm3.h>
 
 #include "BCP_error.hpp"
@@ -411,3 +415,5 @@ BCP_pvm_environment::start_processes(const BCP_string& exe,
 //       ++first;
 //    }
 // }
+
+#endif /* COIN_HAS_PVM */

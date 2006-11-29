@@ -26,9 +26,7 @@
 #include "BCP_lp_user.hpp"
 
 #include "BCP_message_single.hpp"
-#if defined(COIN_HAS_MPI)
 #include "BCP_message_mpi.hpp"
-#endif
 
 //#############################################################################
 
