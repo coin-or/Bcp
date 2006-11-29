@@ -146,7 +146,7 @@ BCP_tm_main(BCP_message_environment* msg_env,
 	    p.param(BCP_tm_par::VgProcessNum) +
 	    p.param(BCP_tm_par::CpProcessNum) +
 	    p.param(BCP_tm_par::VpProcessNum) + 1;
-	if (p.msg_env->num_procs() > n_proc) {
+	if (p.msg_env->num_procs() < n_proc) {
 	    throw BCP_fatal_error("\
 Number of process in parameter file %d > n_proc in mpirun -np %d!\n",
 				  n_proc, p.msg_env->num_procs());
@@ -188,20 +188,6 @@ Number of process in parameter file %d > n_proc in mpirun -np %d!\n",
     // BCP_slave_process_stub() function below. 
     p.user = user_init->tm_init(p, argnum, arglist);
     p.user->setTmProblemPointer(&p);
-
-    if (!p.param(BCP_tm_par::DoBranchAndCut)){
-	printf("\n**********************************************\n");
-	printf("* Heuristics Finished!!!!!!!                 *\n");
-	printf("* Now displaying stats and best solution.... *\n");
-	printf("**********************************************\n\n");
-	// *FIXME-NOW*
-	// Print out timing and solution
-
-	// delete parent; -- not needed: TM has no parent, it's a 0 pointer
-	delete my_id;   my_id = 0;
-	delete msg_env;   msg_env = 0;
-	return;
-    }
 
     // Fire up the LP/CG/CP/VG/VP processes
     // Actually, this is firing up enough copies of self.

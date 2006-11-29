@@ -28,21 +28,21 @@ public:
 
 //#############################################################################
 
-/** Function that determines whether we are running in an mpi environment.
-    Returns the mpi id of the process if we are *and* there are more than 1
-    processes. Otherwise returns -1 */
-int BCP_is_mpi(int argc, char *argv[]);
-
-//#############################################################################
-
 class BCP_mpi_environment : public BCP_message_environment {
 private:
-   int seqproc;
+    int seqproc;
+    static bool mpi_init_called;
    
 private:
    void check_error(const int code, const char* str) const;
+
 public:
-   /** Constructor will initialize the MPI environment */
+    /** Function that determines whether we are running in an mpi environment.
+	Returns the mpi id of the process if we are *and* there are more than 1
+	processes. Otherwise returns -1 */
+    static int is_mpi(int argc, char *argv[]);
+
+    /** Constructor will initialize the MPI environment */
    BCP_mpi_environment(int argc,char *argv[]);
    ~BCP_mpi_environment();
 

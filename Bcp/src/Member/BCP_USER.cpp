@@ -16,7 +16,7 @@ BCP_message_environment *
 USER_initialize::msgenv_init(int argc, char* argv[]) {
     int procid = -1; // assume no parallel environment
 #if defined(COIN_HAS_MPI)
-    procid = BCP_is_mpi(argc, argv);
+    procid = BCP_mpi_environment::is_mpi(argc, argv);
     if (procid >= 0) {
 	return new BCP_mpi_environment(argc, argv);
     }

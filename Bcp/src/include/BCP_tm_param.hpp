@@ -26,10 +26,6 @@ struct BCP_tm_par{
     /** Indicates whether to debug Variable Pool processes or not. Values: 1
 	(true), 0 (false). Default: 0. */
     DebugVpProcesses,
-      /** Indicates whether to do branching or not. Values: 1 (true), 0
-	  (false). Default: 0. */
-    // *FIXME* name of parameter is not the best. 
-    DoBranchAndCut,
     /** Indicates whether to variable generation will take place or not.
 	Values: 1 (true), 0 (false). Default: 0. */
     GenerateVars,

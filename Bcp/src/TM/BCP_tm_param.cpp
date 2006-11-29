@@ -28,9 +28,6 @@ void BCP_parameter_set<BCP_tm_par>::create_keyword_list() {
     keys.push_back(make_pair(BCP_string("BCP_DebugVpProcesses"),
 			     BCP_parameter(BCP_CharPar,
 					   DebugVpProcesses)));
-    keys.push_back(make_pair(BCP_string("BCP_DoBranchAndCut"),
-			     BCP_parameter(BCP_CharPar,
-					   DoBranchAndCut)));
     keys.push_back(make_pair(BCP_string("BCP_GenerateVars"),
 			     BCP_parameter(BCP_CharPar,
 					   GenerateVars)));
@@ -200,7 +197,6 @@ void BCP_parameter_set<BCP_tm_par>::set_default_entries(){
     set_entry(DebugVgProcesses, false);
     set_entry(DebugCpProcesses, false);
     set_entry(DebugVpProcesses, false);
-    set_entry(DoBranchAndCut, false);
     set_entry(GenerateVars, false);
     set_entry(MessagePassingIsSerial, false);
     set_entry(ReportWhenDefaultIsExecuted, true);

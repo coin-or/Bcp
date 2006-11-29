@@ -17,12 +17,15 @@
 #include "BCP_vector.hpp"
 #include "BCP_message_mpi.hpp"
 
+bool BCP_mpi_environment::mpi_init_called = false;
+
 //#############################################################################
 
-int BCP_is_mpi(int argc, char *argv[])
+int BCP_mpi_environment::is_mpi(int argc, char *argv[])
 {
     int pid, num_proc;
     MPI_Init(&argc, &argv);
+    BCP_mpi_environment::mpi_init_called = true;
     // MPI_Init may or may not have succeeded. In any case check if we can get
     // the number of procs
     if (MPI_Comm_size(MPI_COMM_WORLD, &num_proc) != MPI_SUCCESS) {
@@ -95,8 +98,9 @@ BCP_mpi_environment::BCP_mpi_environment(int argc, char *argv[]) {
     /* Initialize the MPI environment. */
     seqproc = 1;
     int pid, num_proc;
-    // MPI_Init might fail if BCP_mpi_myid was already invoked, but that's OK.
-    MPI_Init(&argc, &argv);
+    if (! mpi_init_called) {
+	MPI_Init(&argc, &argv);
+    }
     MPI_Comm_size(MPI_COMM_WORLD, &num_proc);
     MPI_Comm_rank(MPI_COMM_WORLD, &pid);
 }
