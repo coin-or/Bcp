@@ -5,6 +5,10 @@
 #ifndef _BCP_MESSAGE_MPI_H
 #define _BCP_MESSAGE_MPI_H
 
+#include "BcpConfig.h"
+
+#if defined(COIN_HAS_MPI)
+
 #include "BCP_message.hpp"
 
 //#############################################################################
@@ -26,12 +30,19 @@ public:
 
 class BCP_mpi_environment : public BCP_message_environment {
 private:
-   int seqproc;
+    int seqproc;
+    static bool mpi_init_called;
    
 private:
    void check_error(const int code, const char* str) const;
+
 public:
-   /** Constructor will initialize the MPI environment */
+    /** Function that determines whether we are running in an mpi environment.
+	Returns the mpi id of the process if we are *and* there are more than 1
+	processes. Otherwise returns -1 */
+    static int is_mpi(int argc, char *argv[]);
+
+    /** Constructor will initialize the MPI environment */
    BCP_mpi_environment(int argc,char *argv[]);
    ~BCP_mpi_environment();
 
@@ -93,5 +104,7 @@ int BCP_is_mpi_id(const BCP_proc_id* pid, const char* str);
 
 int* BCP_process_array_2_int(const BCP_proc_array* const target,
 			     const char* str);
+
+#endif /* COIN_HAS_MPI */
 
 #endif

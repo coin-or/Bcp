@@ -66,6 +66,7 @@ LIBS = \
 	-lClp \
 	-lVol \
 	-lCoinUtils \
+	`cat $(COINLIBDIR)/bcp_addlibs.txt` \
 	`cat $(COINLIBDIR)/cgl_addlibs.txt` \
 	`cat $(COINLIBDIR)/osi_addlibs.txt` \
 	`cat $(COINLIBDIR)/clp_addlibs.txt` \

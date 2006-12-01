@@ -2,24 +2,44 @@
 // Sonya Marcarelli & Igor Vasil'ev (vil@icc.ru)
 // All Rights Reserved.
 
+#include "BcpConfig.h"
+#if defined(COIN_HAS_MPI)
+
 #include <cstdio>
 #include <cmath>
+
 #define MPICH_SKIP_MPICXX
 #include <mpi.h>
 
 #include "BCP_error.hpp"
+#include "BCP_process.hpp"
 #include "BCP_buffer.hpp"
 #include "BCP_vector.hpp"
 #include "BCP_message_mpi.hpp"
 
+bool BCP_mpi_environment::mpi_init_called = false;
+
 //#############################################################################
 
-BCP_process::~BCP_process()
+int BCP_mpi_environment::is_mpi(int argc, char *argv[])
 {
-    delete my_id;
-    delete parent_id;
+    int pid, num_proc;
+    MPI_Init(&argc, &argv);
+    BCP_mpi_environment::mpi_init_called = true;
+    // MPI_Init may or may not have succeeded. In any case check if we can get
+    // the number of procs
+    if (MPI_Comm_size(MPI_COMM_WORLD, &num_proc) != MPI_SUCCESS) {
+	// Now it's certain. Not an MPI environment
+	return -1;
+    }
+    if (num_proc == 1) {
+	// Might as well execute everything as a serial environment
+	return -1;
+    }
+    MPI_Comm_rank(MPI_COMM_WORLD, &pid);
+    return pid;
 }
-    
+
 //#############################################################################
 
 int BCP_is_mpi_id(const BCP_proc_id* pid, const char* str) {
@@ -78,7 +98,9 @@ BCP_mpi_environment::BCP_mpi_environment(int argc, char *argv[]) {
     /* Initialize the MPI environment. */
     seqproc = 1;
     int pid, num_proc;
-    MPI_Init(&argc, &argv);
+    if (! mpi_init_called) {
+	MPI_Init(&argc, &argv);
+    }
     MPI_Comm_size(MPI_COMM_WORLD, &num_proc);
     MPI_Comm_rank(MPI_COMM_WORLD, &pid);
 }
@@ -370,3 +392,5 @@ int BCP_mpi_environment::num_procs() {
     MPI_Comm_size(MPI_COMM_WORLD, &num_procs);
     return num_procs;
 }
+
+#endif /* COIN_HAS_MPI */

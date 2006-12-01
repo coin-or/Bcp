@@ -28,9 +28,6 @@ void BCP_parameter_set<BCP_tm_par>::create_keyword_list() {
     keys.push_back(make_pair(BCP_string("BCP_DebugVpProcesses"),
 			     BCP_parameter(BCP_CharPar,
 					   DebugVpProcesses)));
-    keys.push_back(make_pair(BCP_string("BCP_DoBranchAndCut"),
-			     BCP_parameter(BCP_CharPar,
-					   DoBranchAndCut)));
     keys.push_back(make_pair(BCP_string("BCP_AlgorithmicVariablesAreGenerated"),
 			     BCP_parameter(BCP_CharPar,
 					   AlgorithmicVariablesAreGenerated)));
@@ -206,7 +203,6 @@ void BCP_parameter_set<BCP_tm_par>::set_default_entries(){
     set_entry(DebugVgProcesses, false);
     set_entry(DebugCpProcesses, false);
     set_entry(DebugVpProcesses, false);
-    set_entry(DoBranchAndCut, false);
     set_entry(AlgorithmicVariablesAreGenerated, false);
     set_entry(IndexedVariablesAreGenerated, false);
     set_entry(MessagePassingIsSerial, false);
@@ -247,7 +243,7 @@ void BCP_parameter_set<BCP_tm_par>::set_default_entries(){
     set_entry(MaxRunTime, 3600.0); // one hour
     set_entry(TerminationGap_Absolute, 0.0);
     set_entry(TerminationGap_Relative, 0.0);
-    set_entry(UpperBound, DBL_MAX);
+    set_entry(UpperBound, 1e100);
     //-------------------------------------------------------------------------
     // StringPar
     set_entry(ReadRootCutsFrom, "");

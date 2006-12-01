@@ -161,7 +161,7 @@ void BCP_presolved_lp_brobj::fake_objective_values(const double itlim_objval)
    for (int i = _candidate->child_num - 1; i >= 0; --i){
       const int tc = _lpres[i]->termcode();
       if (tc & (BCP_ProvenPrimalInf | BCP_DualObjLimReached)) {
-	 _lpres[i]->fake_objective_value(DBL_MAX / 2);
+	 _lpres[i]->fake_objective_value(1e100);
 	 continue;
       }
       // *THINK* : what to do in these cases?

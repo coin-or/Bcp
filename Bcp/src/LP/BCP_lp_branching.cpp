@@ -57,7 +57,7 @@ BCP_print_brobj_stat(BCP_lp_prob& p,
 	for (int i = 0; i < can->child_num; ++i) {
 	    const BCP_lp_result& res = best_presolved->lpres(i);
 	    const double lb = res.objval();
-	    printf((lb > DBL_MAX / 4 ? " [%e,%i,%i]" : " [%.4f,%i,%i]"),
+	    printf((lb > 1e99 ? " [%e,%i,%i]" : " [%.4f,%i,%i]"),
 		   lb, res.termcode(), res.iternum());
 	}
 	printf("\n");
@@ -349,7 +349,7 @@ BCP_lp_perform_strong_branching(BCP_lp_prob& p,
 	    for (i = 0; i < can->child_num; ++i) {
 		const BCP_lp_result& res = tmp_presolved->lpres(i);
 		const double lb = res.objval();
-		printf((lb > DBL_MAX / 4 ? " [%e,%i,%i]" : " [%.4f,%i,%i]"),
+		printf((lb > 1e99 ? " [%e,%i,%i]" : " [%.4f,%i,%i]"),
 		       lb, res.termcode(), res.iternum());
 	    }
 	    printf("\n");

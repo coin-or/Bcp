@@ -157,7 +157,8 @@ LIBEXT = @LIBEXT@
 LIBOBJS = @LIBOBJS@
 
 # List additional libraries
-LIBS = @LIBS@ $(ADDLIBS) `cat $(CGLOBJDIR)/cgl_addlibs.txt` `cat \
+LIBS = @LIBS@ $(ADDLIBS) `cat $(CGLOBJDIR)/bcp_addlibs.txt` `cat \
+	$(CGLOBJDIR)/cgl_addlibs.txt` `cat \
 	$(OSIOBJDIR)/osi_addlibs.txt` `cat \
 	$(CLPOBJDIR)/clp_addlibs.txt` `cat \
 	$(COINUTILSOBJDIR)/coinutils_addlibs.txt`
@@ -269,7 +270,8 @@ AM_CPPFLAGS = -I`$(CYGPATH_W) $(BCPSRCDIR)/src/include` \
 	$(CGLSRCDIR)/src/CglProbing` -I`$(CYGPATH_W) $(OSISRCDIR)/src` \
 	-I`$(CYGPATH_W) $(OSISRCDIR)/src/OsiClp` -I`$(CYGPATH_W) \
 	$(CLPSRCDIR)/src` -I`$(CYGPATH_W) $(CLPOBJDIR)/inc` \
-	-I`$(CYGPATH_W) $(COINUTILSSRCDIR)/src`
+	-I`$(CYGPATH_W) $(COINUTILSSRCDIR)/src` -I`$(CYGPATH_W) \
+	$(COINUTILSOBJDIR)/inc`
 
 # This line is necessary to allow VPATH compilation with MS compilers
 # on Cygwin

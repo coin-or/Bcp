@@ -84,6 +84,7 @@ LIBS = -L$(COINLIBDIR) \
 	$(USER_OSI_LIBS) -lOsi $(USER_SOLVER_LIBS) \
 	-lCoinUtils \
 	$(USER_EXTRA_LIBS) \
+	`cat $(COINLIBDIR)/bcp_addlibs.txt` \
 	`cat $(COINLIBDIR)/cgl_addlibs.txt` \
 	`cat $(COINLIBDIR)/osi_addlibs.txt` \
 	`cat $(COINLIBDIR)/clp_addlibs.txt` \
