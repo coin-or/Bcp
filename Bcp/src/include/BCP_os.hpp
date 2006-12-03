@@ -24,6 +24,8 @@
 #  define GETPID (0)
 #endif
 
+/** need to revive this in a platform independent way */
+#if 0
 /** Return the amount of memory left in kilobytes. Note that this works only
     if sysinfo() is available, otherwise returns -1. */
 #ifdef HAVE_SYSINFO
@@ -37,6 +39,7 @@ static inline int freemem() {
 static inline int freemem() {
     return -1;
 }
+#endif
 #endif
 
 #endif
