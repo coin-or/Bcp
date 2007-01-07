@@ -1,4 +1,4 @@
-// Last edit: 6/23/06
+// Last edit: 1/6/07
 //
 // Name:     BB_tm.cpp
 // Author:   Francois Margot
@@ -42,7 +42,7 @@ BB_tm::readInput(const char* filename)
    int i;
 
    // Try to read in the problem from file bac.lp. 
-   // If tht fails then build the problem from scratch.
+   // If that fails then build the problem from scratch.
    // Note: Do not try to replace the file bac.lp by another 
    // lp file. The code, most likely, will crash.
 
