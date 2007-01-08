@@ -37,6 +37,7 @@ unitTest_LDADD += $(COINUTILSOBJDIR)/src/libCoinUtils.la
 
 # List additional libraries
 LIBS += $(ADDLIBS)
+LIBS += `cat $(CGLOBJDIR)/bcp_addlibs.txt`
 LIBS += `cat $(CGLOBJDIR)/cgl_addlibs.txt`
 LIBS += `cat $(OSIOBJDIR)/osi_addlibs.txt`
 LIBS += `cat $(CLPOBJDIR)/clp_addlibs.txt`
@@ -57,6 +58,7 @@ AM_CPPFLAGS += -I`$(CYGPATH_W) $(OSISRCDIR)/src/OsiClp`
 AM_CPPFLAGS += -I`$(CYGPATH_W) $(CLPSRCDIR)/src`
 AM_CPPFLAGS += -I`$(CYGPATH_W) $(CLPOBJDIR)/inc`
 AM_CPPFLAGS += -I`$(CYGPATH_W) $(COINUTILSSRCDIR)/src`
+AM_CPPFLAGS += -I`$(CYGPATH_W) $(COINUTILSOBJDIR)/inc`
 
 # This line is necessary to allow VPATH compilation with MS compilers
 # on Cygwin
