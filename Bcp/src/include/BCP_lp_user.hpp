@@ -254,6 +254,14 @@ public:
 	the BCP_tm_user class. */
     virtual OsiSolverInterface *
     initialize_solver_interface();
+
+    //=========================================================================
+    /** Create the list of objects that can be used for branching (simple
+	integer vars and SOS sets). If nothing is done here then for each
+	search tree node (just before starting to process the node) BCP will
+	scan the variables and the matrix for candidates. */
+    virtual void
+    initialize_int_and_sos_list(std::vector<OsiObject *>& intAndSosObjects);
     
     //=========================================================================
     /** Initializing a new search tree node.

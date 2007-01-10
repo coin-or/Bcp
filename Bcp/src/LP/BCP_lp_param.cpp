@@ -206,12 +206,12 @@ void BCP_parameter_set<BCP_lp_par>::create_keyword_list() {
     keys.push_back(make_pair(BCP_string("BCP_MaxPresolveIter"),
 			     BCP_parameter(BCP_IntPar, 
 					   MaxPresolveIter)));
+    keys.push_back(make_pair(BCP_string("BCP_StrongBranchNum"),
+			     BCP_parameter(BCP_IntPar, 
+					   StrongBranchNum)));
     keys.push_back(make_pair(BCP_string("BCP_StrongBranch_CloseToHalfNum"),
 			     BCP_parameter(BCP_IntPar, 
-					   StrongBranch_CloseToHalfNum)));
-    keys.push_back(make_pair(BCP_string("BCP_StrongBranch_CloseToOneNum"),
-			     BCP_parameter(BCP_IntPar, 
-					   StrongBranch_CloseToOneNum)));
+					   StrongBranchNum)));
     keys.push_back(make_pair(BCP_string("BCP_BranchingObjectComparison"),
 			     BCP_parameter(BCP_IntPar, 
 					   BranchingObjectComparison)));
@@ -374,8 +374,7 @@ void BCP_parameter_set<BCP_lp_par>::set_default_entries() {
     set_entry(DeletedRowToCompress_Min, 10);
 
     set_entry(MaxPresolveIter, 100000);
-    set_entry(StrongBranch_CloseToHalfNum, 3);
-    set_entry(StrongBranch_CloseToOneNum, 3);
+    set_entry(StrongBranchNum, 3);
     set_entry(BranchingObjectComparison, BCP_HighestLowObjval);
     set_entry(ChildPreference, BCP_PreferChild_LowBound);
 

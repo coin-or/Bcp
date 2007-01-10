@@ -259,6 +259,14 @@ BCP_lp_user::initialize_solver_interface() invoked but not overridden!\n");
 }
 
 //#############################################################################
+
+void 
+BCP_lp_user::initialize_int_and_sos_list(std::vector<OsiObject *>& intAndSosObjects)
+{
+    return;
+}
+
+//#############################################################################
 void
 BCP_lp_user::initialize_new_search_tree_node(const BCP_vec<BCP_var*>& vars,
 					     const BCP_vec<BCP_cut*>& cuts,
@@ -981,42 +989,28 @@ select_branching_candidates(const BCP_lp_result& lpres,
     if (local_var_pool.size() > 0 || local_cut_pool.size() > 0)
 	return BCP_DoNotBranch;
 
-#if 0
-    if (p->param(BCP_lp_par::StrongBranch_CloseToHalfNum) > 0)
-	branch_close_to_half(lpres, vars,
-			     p->param(BCP_lp_par::StrongBranch_CloseToHalfNum),
-			     p->param(BCP_lp_par::IntegerTolerance),
-			     cans);
-    if (p->param(BCP_lp_par::StrongBranch_CloseToOneNum) > 0)
-	branch_close_to_one(lpres, vars,
-			    p->param(BCP_lp_par::StrongBranch_CloseToOneNum),
-			    p->param(BCP_lp_par::IntegerTolerance),
-			    cans);
-    // Get rid of duplicates in cans
-    BCP_vec<int> brvars;
-    brvars.reserve(cans.size());
-    for (size_t i = 0; i < cans.size(); ) {
-	const int brvar = (*cans[i]->forced_var_pos)[0];
-	if (std::find(brvars.begin(), brvars.end(), brvar) == brvars.end()) {
-	    brvars.unchecked_push_back(brvar);
-	    ++i;
-	} else {
-	    std::swap(cans[i], cans.back());
-	    cans.pop_back();
-	}
-    }
-#else
     OsiSolverInterface* lp = p->lp_solver;
 
     OsiBranchingInformation brInfo(lp, true);
-    OsiChooseVariable * choose;
-    OsiBranchingObject* brObj = NULL;
-
+    lp->getDblParam(OsiDualObjectiveLimit, brInfo.cutoff_);
     brInfo.integerTolerance_ = p->param(BCP_lp_par::IntegerTolerance);
-    brInfo.timeRemaining_ = p->param(BCP_lp_par::MaxRunTime) - CoinCpuTime();
+    brInfo.timeRemaining_ = get_param(BCP_lp_par::MaxRunTime) - CoinCpuTime();
     brInfo.numberSolutions_ = 0; /*FIXME*/
     brInfo.numberBranchingSolutions_ = 0; /*FIXME numBranchingSolutions_;*/
-    brInfo.depth_ = p->node->level;
+    brInfo.depth_ = current_level();
+
+    OsiChooseStrong* strong = new OsiChooseStrong(lp);
+    strong->setNumberBeforeTrusted(5); // the default in Cbc
+    strong->setNumberStrong(p->param(BCP_lp_par::StrongBranchNum));
+    /** Pseudo Shadow Price mode
+	0 - off
+	1 - use and multiply by strong info
+	2 - use 
+    */
+    strong->setShadowPriceMode(0);
+
+    OsiChooseVariable * choose = strong;
+    OsiBranchingObject* brObj = NULL;
 
     bool allowVarFix = true;
     /*
@@ -1102,7 +1096,6 @@ BCP: BCP_lp_user::try_to_branch returned with unknown return code.\n");
 	BCP_lp_sos_branching_object o(sosBrObj);
 	cands.push_back(new BCP_lp_branching_object(lp, o, order));
     }
-#endif
     
     if (cands.size() == 0) {
 	throw BCP_fatal_error("\
@@ -1111,185 +1104,6 @@ BCP: BCP_lp_user::try_to_branch returned with unknown return code.\n");
     return BCP_DoBranch;
 }
 
-//-----------------------------------------------------------------------------
-// A helper function for select_branching_candidates()
-void
-BCP_lp_user::branch_close_to_half(const BCP_lp_result& lpres,
-				  const BCP_vec<BCP_var*>& vars,
-				  const int to_be_selected,
-				  const double etol,
-				  BCP_vec<BCP_lp_branching_object*>& cans)
-{
-    // order the variables based on their distance from a MIP feasible value
-    const double etol5 = .5 - etol;
-    BCP_vec<BCP_var*>::const_iterator vi = vars.begin();
-    const double * x = lpres.x();
-    const double * xi = x;
-    const double * lastxi = x + vars.size();
-
-    // choose 5 times the required ones (ordered primarily by closeness to half
-    // and secondarily by cost)
-    int to_select = 5*to_be_selected;
-
-    BCP_vec<int> select_pos(to_select + 1, -1);
-    BCP_vec<double> select_val(to_select + 1, 1.0);
-    BCP_vec<double> select_cost(to_select + 1, -1e20);
-
-    const double* objcoeff = p->lp_solver->getObjCoefficients();
-
-    double val;
-    int pos, i, k;
-
-    for (pos = 0, k = 0; k < to_select && xi != lastxi; ++pos, ++xi, ++vi){
-	// check if the next var violates MIP feasibility
-	if ((*vi)->var_type() == BCP_ContinuousVar)
-	    continue;
-	val = CoinAbs(*xi - .5 - floor(*xi));
-	if (val > etol5)
-	    continue;
-	// if not, insert it into the list
-	const double cost = CoinAbs(objcoeff[pos]);
-	for (i = k - 1; i >= 0; --i) {
-	    if (select_val[i] < val ||
-		(select_val[i] == val && select_cost[i] >= cost))
-		break;
-	    select_pos[i+1] = select_pos[i];
-	    select_val[i+1] = select_val[i];
-	    select_cost[i+1] = select_cost[i];
-	}
-	select_pos[i+1] = pos;
-	select_val[i+1] = val;
-	select_cost[i+1] = cost;
-	++k;
-    }
-
-    for ( ; xi != lastxi; ++pos, ++xi, ++vi) {
-	// check if the next var violates MIP feasibility
-	if ((*vi)->var_type() == BCP_ContinuousVar)
-	    continue;
-	val = CoinAbs(*xi - .5 - floor(*xi));
-	if (val > etol5)
-	    continue;
-	// if not, insert it into the list
-	const double cost = objcoeff[pos];
-	for (i = to_select - 1; i >= 0; --i) {
-	    if (select_val[i] < val ||
-		(select_val[i] == val && select_cost[i] >= cost))
-		break;
-	    select_pos[i+1] = select_pos[i];
-	    select_val[i+1] = select_val[i];
-	    select_cost[i+1] = select_cost[i];
-	}
-	if (i != to_select - 1) {
-	    select_pos[i+1] = pos;
-	    select_val[i+1] = val;
-	    select_cost[i+1] = cost;
-	}
-    }
-
-    k = select_val.index(std::upper_bound(select_val.begin(),
-					  select_val.entry(k),
-					  2 * select_val[to_be_selected - 1]));
-
-    select_pos.erase(select_pos.entry(k), select_pos.end());
-    select_cost.erase(select_cost.entry(k), select_cost.end());
-
-    // now reorder these and keep only as many as required. this time order by
-    // cost alone.
-    if (k > to_be_selected) {
-	BCP_vec<double>::iterator di;
-	BCP_vec<int> new_pos;
-	new_pos.reserve(to_be_selected);
-	BCP_vec<double>& new_cost = select_val;
-	new_cost.clear();
-	for (pos = 0; pos < to_be_selected; ++pos) {
-	    const double val = select_cost[pos];
-	    // insert the next into the list
-	    di = std::upper_bound(new_cost.begin(), new_cost.end(), val,
-				  std::greater<double>());
-	    new_pos.insert(new_pos.entry(new_cost.index(di)), select_pos[pos]);
-	    new_cost.insert(di, val);
-	}
-	for ( ; pos < k; ++pos) {
-	    const double val = select_cost[pos];
-	    // insert the next into the list
-	    di = std::upper_bound(new_cost.begin(), new_cost.end(), val,
-				  std::greater<double>());
-	    if (di != new_cost.end()) {
-		new_cost.pop_back();
-		new_pos.pop_back();
-		new_pos.insert(new_pos.entry(new_cost.index(di)),
-			       select_pos[pos]);
-		new_cost.insert(di, val);
-	    }
-	}
-	select_pos.swap(new_pos);
-    }
-
-    append_branching_vars(lpres.x(), vars, select_pos, cans);
-}
-//-----------------------------------------------------------------------------
-void
-BCP_lp_user::branch_close_to_one(const BCP_lp_result& lpres,
-				 const BCP_vec<BCP_var*>& vars,
-				 const int to_be_selected,
-				 const double etol,
-				 BCP_vec<BCP_lp_branching_object*>& cans)
-{
-    // order the variables based on their distance from a MIP feasible value
-    BCP_vec<BCP_var*>::const_iterator vi = vars.begin();
-    const double * x = lpres.x();
-    const double * xi = x;
-    const double * lastxi = x + vars.size();
-
-    BCP_vec<int> select_pos;
-    select_pos.reserve(to_be_selected);
-    BCP_vec<double> select_val;
-    select_val.reserve(to_be_selected);
-    BCP_vec<double>::iterator spv;
-
-    double val;
-    int pos;
-
-    for (pos = 0;
-	 select_pos.size() < static_cast<const size_t>(to_be_selected) &&
-	     xi != lastxi;
-	 ++pos, ++xi, ++vi) {
-	// check if the next var violates MIP feasibility
-	if ((*vi)->var_type() == BCP_ContinuousVar)
-	    continue;
-	if (*xi < etol)
-	    continue;
-	val = 1 - *xi;
-	if (val < etol)
-	    continue;
-	// if not, insert it into the list
-	spv = std::upper_bound(select_val.begin(), select_val.end(), val);
-	select_pos.insert(select_pos.entry(select_val.index(spv)), pos);
-	select_val.insert(spv, val);
-    }
-
-    for ( ; xi != lastxi; ++pos, ++xi, ++vi) {
-	// check if the next var violates MIP feasibility
-	if ((*vi)->var_type() == BCP_ContinuousVar)
-	    continue;
-	if (*xi < etol)
-	    continue;
-	val = 1 - *xi;
-	if (val < etol)
-	    continue;
-	// if not, insert it into the list
-	spv = std::upper_bound(select_val.begin(), select_val.end(), val);
-	if (spv != select_val.end()) {
-	    select_pos.pop_back();
-	    select_pos.insert(select_pos.entry(select_val.index(spv)), pos);
-	    select_val.pop_back();
-	    select_val.insert(spv, val);
-	}
-    }
-
-    append_branching_vars(lpres.x(), vars, select_pos, cans);
-}
 //-----------------------------------------------------------------------------
 void
 BCP_lp_user::append_branching_vars(const double* x,

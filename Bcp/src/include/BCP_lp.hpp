@@ -16,6 +16,8 @@
 #include "BCP_process.hpp"
 
 //#############################################################################
+class OsiObject;
+
 class BCP_lp_user;
 class OsiSolverInterface;
 class BCP_message_environment;
@@ -150,6 +152,11 @@ public:
     /** */
     BCP_problem_core_change* core_as_change;
     /*@}*/
+
+    //------------------------------------------------------------------------
+    /** Things that can be branched on. If not filled out then BCP scans for
+	them every time a new node is processed.*/
+    std::vector<OsiObject *> intAndSosObjects;
    
     //------------------------------------------------------------------------
     // the search tree node we are working on and its parent

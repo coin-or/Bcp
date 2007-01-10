@@ -271,19 +271,14 @@ BB_tm::pack_module_data(BCP_buffer& buf, BCP_process_t ptype)
 void
 BB_tm::pack_cut_algo(const BCP_cut_algo* cut, BCP_buffer& buf)
 {
-  const BB_cut *bb_cut = dynamic_cast<const BB_cut*>(cut);
-  if (!bb_cut)
-    throw BCP_fatal_error("BB_lp::pack_cut_algo() : unknown cut type!\n");
-  
-  bb_cut->pack(buf);
-  return;
+  BB_pack_cut(cut, buf);
 }
 
 /*************************************************************************/
 BCP_cut_algo*
 BB_tm::unpack_cut_algo(BCP_buffer& buf)
 {
-  return new BB_cut(buf);
+  return BB_unpack_cut(buf);
 }
 
 /*************************************************************************/
@@ -328,8 +323,7 @@ BB_tm::initialize_core(BCP_vec<BCP_var_core*>& vars,
 void
 BB_tm::create_root(BCP_vec<BCP_var*>& added_vars,
                    BCP_vec<BCP_cut*>& added_cuts,
-		   BCP_user_data*& user_data,
-                   BCP_pricing_status& pricing_status)
+		   BCP_user_data*& user_data)
 {
   
 #ifdef USER_DATA

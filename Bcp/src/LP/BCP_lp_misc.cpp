@@ -174,6 +174,31 @@ BCP_lp_prepare_for_new_node(BCP_lp_prob& p)
 	p.lp_solver->setRowSetBounds(ccp.begin(), ccp.end(), cbd.begin());
 	cuts.set_lb_ub(ccp, cbd.begin());
     }
+
+    if (p.lp_solver->numberObjects() == 0) {
+	OsiSolverInterface& lp = *p.lp_solver;
+	if (!p.intAndSosObjects.empty()) {
+	    lp.addObjects(p.intAndSosObjects.size(), &p.intAndSosObjects[0]);
+	    const int numObj = lp.numberObjects();
+	    OsiObject** obj = lp.objects();
+	    for (int i = 0; i < numObj; ++i) {
+		OsiSimpleInteger* io = dynamic_cast<OsiSimpleInteger*>(obj[i]);
+		if (io) {
+		    io->resetBounds(&lp);
+		} else {
+		    // The rest is OsiSOS where we don't need to do anything
+		    break;
+		}
+	    }
+	} else {
+	    for (int i = 0; i < varnum; ++i) {
+		if (vars[i]->var_type() != BCP_ContinuousVar) {
+		    lp.setInteger(i);
+		}
+	    }
+	    lp.findIntegersAndSOS(false);
+	}
+    }
 }
 
 //#############################################################################

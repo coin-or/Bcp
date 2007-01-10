@@ -280,19 +280,11 @@ struct BCP_lp_par{
 	  between two integers should be chosen by the built-in branching
 	  variable selection routine
 	  <code>select_branching_candidates()</code> (if this routine is used
-	  at all). This number is passed onto the
-	  <code>branch_close_to_half()</code> helper function. <br> 
+	  at all). <br>
 	  Values: . Default: 3. */
+      StrongBranchNum,
+      /** <bf>Deprecated parameter. Use StrongBranchNum</bf> */
       StrongBranch_CloseToHalfNum,
-      /** Specifies how many branching variables with values close to an
-	  integer should be chosen by the built-in branching
-	  variable selection routine
-	  <code>select_branching_candidates()</code> (if this routine is used
-	  at all). This number is passed onto the
-	  <code>branch_close_to_one()</code> helper function. <br> 
-	  Values: . Default: 3. */
-      // *FIXME* change name to close to integer (change fn name as well!)
-       StrongBranch_CloseToOneNum,
       /** Specifies the rule used for built-in branching object comparison (if
 	  the buit-in routine is used at all). <br>
 	  Values: \link BCP_branching_object_comparison.<br>

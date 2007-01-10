@@ -108,6 +108,7 @@ void BCP_lp_main(BCP_message_environment* msg_env, USER_initialize* user_init,
    p.user->unpack_module_data(p.msg_buf);
 
    p.master_lp = p.user->initialize_solver_interface();
+   p.user->initialize_int_and_sos_list(p.intAndSosObjects);
 
    // ok, we're all geared up to process search tree nodes
    // wait for messages and process them...
