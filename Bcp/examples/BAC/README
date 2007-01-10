@@ -23,14 +23,14 @@ OVERVIEW
 
 BAC is distributed under the Common Public License Version 1.0 and is 
 freely redistributable. All source code and documentation is Copyright 
-2003-2006 Francois Margot, Carnegie Mellon University, International Business 
+2003-2007 Francois Margot, Carnegie Mellon University, International Business 
 Machines Corporation, and/or others. This README may be distributed freely.
 
 BAC is an illustrative example for the Branch-Cut-Price code BCP of 
 COIN-OR. BAC illustrates several basic features of BCP and it is hoped
 that a study of the BAC example is an almost painless introduction
 to BCP. BAC is not an efficient code for doing anything interesting,
-besides serving as an example for BCP. The file bac.pdf BACdir serves 
+besides serving as an example for BCP. The file bac.pdf in BACdir serves 
 as main support for understanding the code.
 
 
@@ -48,10 +48,7 @@ modules is available at:
 INSTALLATION
 ============
 
-If you have downloaded the package 
-
-   https://projects.coin-or.org/svn/Bcp/trunk
-
+If you have downloaded the package BCP
 in the local directory coin-Bcp, please see the INSTALL file in 
 coin-Bcp for a guide to install this package. Alternatively, 
 the installation of BCP is covered in BACdir/bac.pdf.

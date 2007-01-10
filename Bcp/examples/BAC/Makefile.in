@@ -14,7 +14,7 @@
 #CYGFLAG = -mno-cygwin
 
 # CHANGEME: add extra definitions here
-USER_DEFINES = -DLP
+USER_DEFINES =
 
 # Possibilities: 
 #                -DHEUR_SOL :      generate heuristic solutions
@@ -35,7 +35,7 @@ OBJS = \
 	./Member/BB.@OBJEXT@ \
 	./Member/BB_cut.@OBJEXT@
 
-# Add access tp Cplex if available (see bac.pdf for installation)
+# Add access to Cplex if available (see bac.pdf for installation)
 ifneq ($(ENV_CPLEX_LIB),)
   LIB_CPLEX = -L$(ENV_CPLEX_LIB) -lcplex
   CPLEX_H = $(ENV_CPLEX_H)
@@ -43,7 +43,7 @@ ifneq ($(ENV_CPLEX_LIB),)
 endif
 
 # CHANGEME: 
-# The first two variables contain the osisolverinterface and the
+# The first two variables contain the OsiSolverInterface and the
 # actual solver library the code should be linked against. In the third
 # variable any additional libraries should be listed along with any other
 # necessary flags, like -L or -rpath, etc. Note that no -L flag needs to be
@@ -84,7 +84,6 @@ LIBS = -L$(COINLIBDIR) \
 	$(USER_OSI_LIBS) -lOsi $(USER_SOLVER_LIBS) \
 	-lCoinUtils \
 	$(USER_EXTRA_LIBS) \
-	`cat $(COINLIBDIR)/bcp_addlibs.txt` \
 	`cat $(COINLIBDIR)/cgl_addlibs.txt` \
 	`cat $(COINLIBDIR)/osi_addlibs.txt` \
 	`cat $(COINLIBDIR)/clp_addlibs.txt` \
