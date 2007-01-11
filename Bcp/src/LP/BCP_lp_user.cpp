@@ -1002,6 +1002,7 @@ select_branching_candidates(const BCP_lp_result& lpres,
     OsiChooseStrong* strong = new OsiChooseStrong(lp);
     strong->setNumberBeforeTrusted(5); // the default in Cbc
     strong->setNumberStrong(p->param(BCP_lp_par::StrongBranchNum));
+    strong->setTrustStrongForSolution(false);
     /** Pseudo Shadow Price mode
 	0 - off
 	1 - use and multiply by strong info
