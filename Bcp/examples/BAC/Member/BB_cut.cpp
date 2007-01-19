@@ -1,6 +1,7 @@
 // Copyright (C) 2003, International Business Machines
 // Corporation and others.  All Rights Reserved.
 
+#include "BCP_math.hpp"
 #include "BCP_buffer.hpp"
 #include "BB_cut.hpp"
 
@@ -41,7 +42,7 @@ BB_cut::pack(BCP_buffer& buf) const
 
 /****************************************************************************/
 BB_cut::BB_cut(BCP_buffer& buf) :
-   BCP_cut_algo(-1e40, 1e40), OsiRowCut()
+   BCP_cut_algo(-BCP_DBL_MAX, BCP_DBL_MAX), OsiRowCut()
 {
    double lb, ub;
    buf.unpack(lb)

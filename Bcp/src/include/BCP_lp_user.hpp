@@ -99,7 +99,7 @@ public:
     
     /**@name Informational methods for the user. */
     /*@{*/
-    /// Return what is the best known upper bound (might be 1e100)
+    /// Return what is the best known upper bound (might be BCP_DBL_MAX)
     double upper_bound() const;
     /// Return the phase the algorithm is in
     int current_phase() const;

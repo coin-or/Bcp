@@ -7,6 +7,7 @@
 
 #include "CoinHelperFunctions.hpp"
 
+#include "BCP_math.hpp"
 #include "BCP_mempool.hpp"
 #include "BCP_cut.hpp"
 
@@ -49,7 +50,9 @@ public:
    int* edges;
 public:
    MC_cycle_cut(const int* ei, const int pos, const int len) :
-      BCP_cut_algo(-1e40, pos-1.0), cycle_len(len), pos_edges(pos), edges(0) {
+      BCP_cut_algo(-BCP_DBL_MAX, pos-1.0),
+      cycle_len(len), pos_edges(pos), edges(0)
+   {
       if (len > 0) {
 	 edges = new int[len];
 	 CoinDisjointCopyN(ei, len, edges);
@@ -85,7 +88,8 @@ public:
 public:
    MC_explicit_dense_cut(const double ub, const int num,
 			 const double * elements) :
-      BCP_cut_algo(-1e40, ub), rhs(ub), coeffs(new double[num]), varnum(num)
+      BCP_cut_algo(-BCP_DBL_MAX, ub),
+      rhs(ub), coeffs(new double[num]), varnum(num)
    {
       CoinDisjointCopyN(elements, num, coeffs);
    }

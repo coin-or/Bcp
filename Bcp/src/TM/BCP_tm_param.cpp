@@ -1,6 +1,7 @@
 // Copyright (C) 2000, International Business Machines
 // Corporation and others.  All Rights Reserved.
-#include <cfloat>
+
+#include "BCP_math.hpp"
 #include "BCP_tm_param.hpp"
 #include "BCP_parameters.hpp"
 
@@ -235,7 +236,7 @@ void BCP_parameter_set<BCP_tm_par>::set_default_entries(){
     set_entry(MaxRunTime, 3600.0); // one hour
     set_entry(TerminationGap_Absolute, 0.0);
     set_entry(TerminationGap_Relative, 0.0);
-    set_entry(UpperBound, 1e100);
+    set_entry(UpperBound, BCP_DBL_MAX);
     //-------------------------------------------------------------------------
     // StringPar
     set_entry(ReadRootCutsFrom, "");

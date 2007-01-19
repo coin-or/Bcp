@@ -1,6 +1,6 @@
 // Copyright (C) 2000, International Business Machines
 // Corporation and others.  All Rights Reserved.
-#include <cfloat>
+//#include <cfloat>
 #include <cstdio>
 #include <numeric>
 #include <utility> // for pair<>
@@ -8,6 +8,7 @@
 #include "CoinWarmStart.hpp"
 #include "CoinTime.hpp"
 
+#include "BCP_math.hpp"
 #include "BCP_enum.hpp"
 #include "BCP_matrix.hpp"
 #include "BCP_warmstart.hpp"
@@ -57,7 +58,7 @@ BCP_print_brobj_stat(BCP_lp_prob& p,
 	for (int i = 0; i < can->child_num; ++i) {
 	    const BCP_lp_result& res = best_presolved->lpres(i);
 	    const double lb = res.objval();
-	    printf((lb > 1e99 ? " [%e,%i,%i]" : " [%.4f,%i,%i]"),
+	    printf((lb > BCP_DBL_MAX/10 ? " [%e,%i,%i]" : " [%.4f,%i,%i]"),
 		   lb, res.termcode(), res.iternum());
 	}
 	printf("\n");
@@ -349,7 +350,7 @@ BCP_lp_perform_strong_branching(BCP_lp_prob& p,
 	    for (i = 0; i < can->child_num; ++i) {
 		const BCP_lp_result& res = tmp_presolved->lpres(i);
 		const double lb = res.objval();
-		printf((lb > 1e99 ? " [%e,%i,%i]" : " [%.4f,%i,%i]"),
+		printf((lb > BCP_DBL_MAX/10 ? " [%e,%i,%i]" : " [%.4f,%i,%i]"),
 		       lb, res.termcode(), res.iternum());
 	    }
 	    printf("\n");

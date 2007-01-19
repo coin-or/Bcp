@@ -48,7 +48,7 @@ MC_create_shortest_path_cut(const int n, const int sp_tree_root,
   CoinFillN(dtmp + pos, neg, -1.0);
   CoinSort_2(posedges, posedges + len, dtmp);
   new_rows.push_back(new BCP_row(posedges, posedges + len,
-				 dtmp, dtmp + len, -1e40, pos - 1.0));
+				 dtmp, dtmp + len, -BCP_DBL_MAX, pos - 1.0));
 }
 
 //#############################################################################

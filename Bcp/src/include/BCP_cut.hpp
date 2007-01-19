@@ -7,6 +7,7 @@
 
 //#############################################################################
 
+#include "BCP_math.hpp"
 #include "BCP_error.hpp"
 #include "BCP_enum.hpp"
 #include "BCP_vector.hpp"
@@ -133,14 +134,14 @@ public:
        _lb = change.lb;
        _ub = change.ub;
        _status = change.stat;
-       if (_lb < -1e30 && _ub > 1e30)
+       if (_lb < -BCP_DBL_MAX/10 && _ub > BCP_DBL_MAX/10)
   	 _status = static_cast<BCP_obj_status>(_status | BCP_ObjInactive);
     }
     /** Change just the lower/upper bounds. */
     inline void change_bounds(const double lb, const double ub) {
        _lb = lb;
        _ub = ub;
-       if (lb < -1e30 && ub > 1e30)
+       if (lb < BCP_DBL_MAX/10 && ub > BCP_DBL_MAX/10)
   	 _status = static_cast<BCP_obj_status>(_status | BCP_ObjInactive);
     }
     /** Set the internal index of the cut. */

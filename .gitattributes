@@ -121,6 +121,7 @@ Bcp/examples/MaxCut/junger1.par -text
 Bcp/inc/config_bcp.h.in -text
 Bcp/src/Makefile.am -text
 Bcp/src/Makefile.in -text
+Bcp/src/include/BCP_math.hpp -text
 Bcp/src/include/BcpConfig.h -text
 Bcp/test/BAC/Makefile.am -text
 Bcp/test/BAC/Makefile.in -text

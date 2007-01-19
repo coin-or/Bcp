@@ -1,5 +1,6 @@
 // Copyright (C) 2000, International Business Machines
 // Corporation and others.  All Rights Reserved.
+#include "BCP_math.hpp"
 #include "BCP_USER.hpp"
 #include "BCP_tm.hpp"
 #include "BCP_tm_user.hpp"
@@ -96,7 +97,7 @@ BCP_tree::enumerate_leaves(BCP_tm_node* node, const double obj_limit)
 double
 BCP_tree::true_lower_bound(const BCP_tm_node* node) const
 {
-    double worstlb = 1e100;
+    double worstlb = BCP_DBL_MAX;
     if (node->child_num() == 0) {
 	const BCP_tm_node_status st = node->status;
 	if (st == BCP_ActiveNode || st == BCP_CandidateNode)

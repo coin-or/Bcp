@@ -76,6 +76,7 @@ libBcp_la_SOURCES = \
 	Member/BCP_vector_double.cpp \
 	Member/BCP_vector_int.cpp \
 	Member/BCP_vector_short.cpp \
+	include/BCP_math.hpp \
 	include/BCP_msvc.hpp \
 	include/BCP_vg_param.hpp \
 	include/BCP_message.hpp \
@@ -191,6 +192,7 @@ DEFAULT_INCLUDES = -I. -I`$(CYGPATH_W) $(srcdir)/include` -I$(top_builddir)/inc
 # and that therefore should be installed in 'install'
 include_HEADERS = \
 	../inc/config_bcp.h \
+	include/BCP_math.hpp \
 	include/BCP_vg_param.hpp \
 	include/BCP_message.hpp \
 	include/BCP_solution.hpp \

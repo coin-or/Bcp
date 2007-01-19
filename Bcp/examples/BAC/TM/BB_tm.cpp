@@ -22,6 +22,8 @@
 #include "BB_cut.hpp"
 #include "BB_user_data.hpp"
 
+#include "BCP_math.hpp"
+
 using namespace std;
 
 /*************************************************************************/
@@ -209,7 +211,7 @@ BB_tm::readInput(const char* filename)
      // indexed constraints
      
      for(i=0; i<6; i++) {
-       desc.rlb_indexed[i] = -DBL_MAX;
+       desc.rlb_indexed[i] = -BCP_DBL_MAX;
        desc.rub_indexed[i] = 1;
      }
      

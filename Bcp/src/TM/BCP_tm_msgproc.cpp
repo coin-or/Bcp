@@ -2,6 +2,7 @@
 // Corporation and others.  All Rights Reserved.
 #include "CoinTime.hpp"
 
+#include "BCP_math.hpp"
 #include "BCP_node_change.hpp"
 #include "BCP_tm.hpp"
 #include "BCP_lp.hpp"
@@ -336,7 +337,7 @@ BCP_tm_prob::process_message()
 			printf("TM: Solution found at %.3f sec.\n",
 			       CoinCpuTime() - start_time);
 		    }
-		    if (upper_bound > 1e99) {
+		    if (upper_bound > BCP_DBL_MAX/10) {
 			printf("\
 TM: Solution value: %f (best solution value so far: infinity)\n",
 			       new_sol->objective_value());

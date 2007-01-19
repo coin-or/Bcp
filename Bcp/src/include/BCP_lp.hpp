@@ -5,6 +5,7 @@
 
 #include <cfloat>
 
+#include "BCP_math.hpp"
 #include "BCP_enum.hpp"
 #include "BCP_enum_process_t.hpp"
 #include "BCP_vector.hpp"
@@ -295,7 +296,7 @@ public:
     /**@name Accessing bounds */
     /*@{*/
     /** */
-    inline bool has_ub() const { return upper_bound < 1e99; }
+    inline bool has_ub() const { return upper_bound < BCP_DBL_MAX / 10; }
     /** */
     inline double ub() const   { return upper_bound; }
     /** */

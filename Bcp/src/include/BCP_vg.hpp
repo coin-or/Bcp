@@ -7,6 +7,7 @@
 
 #include <cfloat>
 
+#include "BCP_math.hpp"
 #include "BCP_message_tag.hpp"
 #include "BCP_vector.hpp"
 #include "BCP_buffer.hpp"
@@ -105,9 +106,9 @@ public:
    /**@name Query methods */
    /*@{*/
    /** Return true/false indicating whether any upper bound has been found. */
-   inline bool has_ub() const { return upper_bound < 1e99; }
-   /** Return the current upper bound (<code>1e99</code> if there's no
-       upper bound found yet.) */
+   inline bool has_ub() const { return upper_bound < BCP_DBL_MAX / 10; }
+   /** Return the current upper bound (<code>BCP_DBL_MAX/10</code> if there's
+       no upper bound found yet.) */
    inline double ub() const   { return upper_bound; }
    /*@}*/
 

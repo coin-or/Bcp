@@ -135,7 +135,7 @@ MC_cuts_from_mst(const MC_problem& mc, const double* x, const double minviol,
     CoinFillN(coefs + pos, neg, -1.0);
     CoinSort_2(posedges, posedges + len, coefs);
     new_rows.push_back(new BCP_row(posedges, posedges + len,
-				   coefs, coefs + len, -1e40, pos - 1.0));
+				   coefs, coefs + len, -BCP_DBL_MAX, pos - 1));
     if (static_cast<int>(new_cuts.size()) >= maxnewcuts)
       break;
   }

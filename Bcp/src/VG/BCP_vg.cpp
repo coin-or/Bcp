@@ -1,5 +1,6 @@
 // Copyright (C) 2000, International Business Machines
 // Corporation and others.  All Rights Reserved.
+#include "BCP_math.hpp"
 #include "BCP_message.hpp"
 #include "BCP_vector.hpp"
 #include "BCP_problem_core.hpp"
@@ -11,7 +12,7 @@
 BCP_vg_prob::BCP_vg_prob(BCP_proc_id* my_id, BCP_proc_id* parent) :
    BCP_process(my_id, parent),
    user(0), msg_env(0), core(new BCP_problem_core),
-   upper_bound(1e100), phase(0) {}
+   upper_bound(BCP_DBL_MAX), phase(0) {}
 
 
 BCP_vg_prob::~BCP_vg_prob()
