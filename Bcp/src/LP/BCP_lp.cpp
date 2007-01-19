@@ -1,7 +1,7 @@
 // Copyright (C) 2000, International Business Machines
 // Corporation and others.  All Rights Reserved.
-#include <cfloat>
 
+#include "BCP_math.hpp"
 #include "BCP_buffer.hpp"
 #include "BCP_message.hpp"
 #include "BCP_problem_core.hpp"
@@ -76,7 +76,7 @@ BCP_lp_prob::BCP_lp_prob(BCP_proc_id* my_id, BCP_proc_id* parent) :
    last_var_index(0),
    next_cut_index(0),
    last_cut_index(0),
-   upper_bound(1e100),
+   upper_bound(BCP_DBL_MAX),
    phase(0)
 {}
 

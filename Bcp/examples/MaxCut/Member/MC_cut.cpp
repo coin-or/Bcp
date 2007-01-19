@@ -17,7 +17,7 @@ MC_cycle_cut::pack(BCP_buffer& buf) const
 }
 
 MC_cycle_cut::MC_cycle_cut(BCP_buffer& buf) :
-  BCP_cut_algo(-1e40, 0.0), cycle_len(0), pos_edges(0), edges(0)
+  BCP_cut_algo(-BCP_DBL_MAX, 0.0), cycle_len(0), pos_edges(0), edges(0)
 {
   buf.unpack(pos_edges).unpack(edges, cycle_len);
   set_ub(pos_edges-1.0);
@@ -33,7 +33,7 @@ MC_explicit_dense_cut::pack(BCP_buffer& buf) const
 }
 
 MC_explicit_dense_cut::MC_explicit_dense_cut(BCP_buffer& buf) :
-  BCP_cut_algo(-1e40, 0.0), rhs(0.0), coeffs(0), varnum(0)
+  BCP_cut_algo(-BCP_DBL_MAX, 0.0), rhs(0.0), coeffs(0), varnum(0)
 {
   buf.unpack(rhs).unpack(coeffs, varnum);
 }

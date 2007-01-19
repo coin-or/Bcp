@@ -5,12 +5,13 @@
 
 // This file is fully docified.
 
-#include <cmath>
-#include <cfloat>
+// #include <cmath>
+// #include <cfloat>
 
 #include "CoinPackedVector.hpp"
 #include "CoinPackedMatrix.hpp"
 
+#include "BCP_math.hpp"
 #include "BCP_vector.hpp"
 
 //#############################################################################
@@ -110,7 +111,7 @@ public:
    /** The default constructor creates an empty column with 0 as objective
        coefficient, 0.0 as lower and +infinity as upper bound. */
    BCP_col() : CoinPackedVector(false /* no test for duplicate index */),
-	       _Objective(0), _LowerBound(0.0), _UpperBound(1e31) {}
+	       _Objective(0), _LowerBound(0.0), _UpperBound(BCP_DBL_MAX) {}
    /** The copy constructor makes a copy of <code>x</code>. */
    BCP_col(const BCP_col& x) :
       CoinPackedVector(x), _Objective(x.Objective()),
@@ -225,7 +226,7 @@ public:
    /** The default constructor creates an empty row with -infinity as lower
        and +infinity as upper bound. */
    BCP_row() : CoinPackedVector(false /* no test for duplicate index */),
-	       _LowerBound(-1e100), _UpperBound(1e100) {}
+	       _LowerBound(-BCP_DBL_MAX), _UpperBound(BCP_DBL_MAX) {}
    /** The copy constructor makes a copy of <code>x</code>. */
    BCP_row(const BCP_row& x) :
       CoinPackedVector(x),

@@ -3,6 +3,7 @@
 #ifndef _BCP_LP_NODE_H
 #define _BCP_LP_NODE_H
 
+#include "BCP_math.hpp"
 #include "BCP_enum_branch.hpp"
 #include "BCP_problem_core.hpp"
 #include "BCP_var.hpp"
@@ -64,9 +65,9 @@ public:
    /** */
    BCP_vec<BCP_obj_change>  added_cuts_desc;
    /** */
-   BCP_warmstart* warmstart;
-   /** */
    BCP_indexed_pricing_list indexed_pricing;
+   /** */
+   BCP_warmstart* warmstart;
    /*@}*/
 
 public:
@@ -146,9 +147,9 @@ public:
    /** */
    BCP_cut_set cuts;
    /** */
-   BCP_warmstart* warmstart;
-   /** */
    BCP_indexed_pricing_list indexed_pricing;
+   /** */
+   BCP_warmstart* warmstart;
    // this is tricky. this vector stores for each cut the lower bound on the
    // lp formulation at the time when the cut was added *in this node* OR if
    // there were columns added afterwards (stiil in the same node) then the
@@ -169,7 +170,7 @@ public:
       cg(0), cp(0), vg(0), vp(0),
       level(0), index(0), iteration_count(0),
       dive(BCP_DoNotDive), colgen(BCP_DoNotGenerateColumns_Fathom),
-      quality(-1e100), true_lower_bound(-1e100), vars(), cuts(),
+      quality(-BCP_DBL_MAX), true_lower_bound(-BCP_DBL_MAX), vars(), cuts(),
       indexed_pricing(),
       warmstart(0),
       user_data(0) {}

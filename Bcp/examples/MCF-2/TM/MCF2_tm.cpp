@@ -1,3 +1,4 @@
+#include "BCP_math.hpp"
 #include "BCP_solution.hpp"
 #include "MCF2_tm.hpp"
 
@@ -15,7 +16,7 @@ void MCF2_tm::initialize_core(BCP_vec<BCP_var_core*>& vars,
     // algo variables (flows). However, since there are no core variables, the
     // core matrix is empty.
     for (int i = 0; i < data.numarcs; ++i) {
-	cuts.push_back(new BCP_cut_core(-DBL_MAX, data.arcs[i].ub));
+	cuts.push_back(new BCP_cut_core(-BCP_DBL_MAX, data.arcs[i].ub));
     }
     for (i = 0; i < data.numcommodities; ++i) {
 	cuts.push_back(new BCP_cut_core(1.0, 1.0));

@@ -5,6 +5,8 @@
 
 #include "CoinTime.hpp"
 
+#include "BCP_math.hpp"
+
 #include "BCP_USER.hpp"
 
 #include "BCP_error.hpp"
@@ -266,7 +268,7 @@ BCP_single_environment::register_process(USER_initialize* user_init)
     _lp_prob->user->unpack_module_data(_tm_prob->msg_buf);
     _lp_prob->master_lp = _lp_prob->user->initialize_solver_interface();
 
-    _lp_prob->upper_bound = std::min<double>(_tm_prob->ub(), 1e100);
+    _lp_prob->upper_bound = std::min<double>(_tm_prob->ub(), BCP_DBL_MAX);
     //-------------------------------------------------------------------------
     if (_cg_prob) {
 	// CG (it already has the core)

@@ -16,6 +16,7 @@
 #include "BB_cut.hpp"
 #include "OsiClpSolverInterface.hpp"
 
+#include "BCP_math.hpp"
 #include "BCP_lp.hpp"
 #include "BCP_problem_core.hpp"
 
@@ -173,7 +174,7 @@ BB_lp::test_feasibility(const BCP_lp_result& lp_result,
       cutind[1] = j;
       cutind[2] = k;
       
-      rcut->setLb(-DBL_MAX);
+      rcut->setLb(-BCP_DBL_MAX);
       rcut->setUb(cutrhs);
       rcut->setRow(cut_nz, cutind, cutcoef);
       

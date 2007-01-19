@@ -1,12 +1,13 @@
 // Copyright (C) 2000, International Business Machines
 // Corporation and others.  All Rights Reserved.
 
-#include <cfloat>
+// #include <cfloat>
 #include <cstdio>
 #include <fstream>
 
 #include "CoinHelperFunctions.hpp"
 
+#include "BCP_math.hpp"
 #include "BCP_string.hpp"
 #include "BCP_buffer.hpp"
 #include "BCP_vector.hpp"
@@ -451,7 +452,7 @@ MC_solution::MC_solution(const BCP_vec<int>& sign,
   const double percentage[3] = {0.05, 0.01, 0.002};
 
   BCP_vec<int> bestsig;
-  double bestcost = DBL_MAX;
+  double bestcost = BCP_DBL_MAX;
 
   int i; 
   bool do_plain_switch = true;

@@ -7,6 +7,7 @@
 
 #include <cfloat>
 
+#include "BCP_math.hpp"
 #include "BCP_error.hpp"
 #include "BCP_vector.hpp"
 #include "OsiSolverInterface.hpp"
@@ -81,7 +82,7 @@ public:
     /** The default constructor initializes an empty solution, i.e., one 
         which holds neither an exact nor an approximate solution. */
     BCP_lp_result() :
-      _lower_bound(-1e100), _primal_tolerance(0), _dual_tolerance(0),
+      _lower_bound(-BCP_DBL_MAX), _primal_tolerance(0), _dual_tolerance(0),
       _termcode(BCP_ProvenOptimal), _iternum(0), _objval(0),
       _x(0), _pi(0), _dj(0), _lhs(0)
     {}

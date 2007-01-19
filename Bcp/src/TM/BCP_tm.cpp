@@ -3,6 +3,7 @@
 
 #include <map>
 
+#include "BCP_math.hpp"
 #include "BCP_lp.hpp"
 #include "BCP_tm.hpp"
 #include "BCP_problem_core.hpp"
@@ -19,7 +20,7 @@ BCP_tm_prob::BCP_tm_prob(BCP_proc_id* my_id, BCP_proc_id* parent) :
    msg_env(0),
    lp_stat(0),
    feas_sol(0),
-   upper_bound(DBL_MAX),
+   upper_bound(BCP_DBL_MAX),
    core(0),
    core_as_change(0),
    next_cut_index_set_start(1),

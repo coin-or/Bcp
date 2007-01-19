@@ -5,9 +5,9 @@
 
 // This file is fully docified.
 
+#include "BCP_math.hpp"
 #include "BCP_enum.hpp"
 #include "BCP_enum_process_t.hpp"
-
 #include "BCP_vector.hpp"
 #include "BCP_string.hpp"
 #include "BCP_buffer.hpp"
@@ -16,7 +16,6 @@
 #include "BCP_var.hpp"
 #include "BCP_cut.hpp"
 #include "BCP_matrix.hpp"
-
 #include "BCP_tm_param.hpp"
 #include "BCP_tm_node.hpp"
 #include "BCP_enum_tm.hpp"
@@ -72,7 +71,7 @@ public:
 
   /**@name Informational methods for the user. */
   /*@{*/
-    /// Return what is the best known upper bound (might be 1e100)
+    /// Return what is the best known upper bound (might be BCP_DBL_MAX)
     double upper_bound() const;
   /*@}*/
 

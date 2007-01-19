@@ -6,6 +6,7 @@
 #include <queue>
 #include <map>
 
+#include "BCP_math.hpp"
 #include "BCP_buffer.hpp"
 #include "BCP_enum.hpp"
 #include "BCP_enum_process_t.hpp"
@@ -278,7 +279,7 @@ public:
 
     //-------------------------------------------------------------------------
     /** */
-    inline bool has_ub() const { return upper_bound < 1e99; }
+    inline bool has_ub() const { return upper_bound < BCP_DBL_MAX / 10; }
     /** */
     inline double ub() const { return upper_bound; }
     /** */

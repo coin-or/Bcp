@@ -3,8 +3,9 @@
 #ifndef _BCP_TM_NODE
 #define _BCP_TM_NODE
 
-#include <cfloat>
+//#include <cfloat>
 
+#include "BCP_math.hpp"
 #include "BCP_vector.hpp"
 
 
@@ -107,8 +108,8 @@ public:
 	status(BCP_DefaultNode),
 	_index(0),
 	_level(level),
-	_quality(-1e100),
-	_true_lower_bound(-1e100),
+	_quality(-BCP_DBL_MAX),
+	_true_lower_bound(-BCP_DBL_MAX),
 	_desc(desc),
 	_parent(0),
 	_user_data(0),
@@ -127,8 +128,8 @@ public:
 	status(BCP_DefaultNode),
 	_index(0),
 	_level(level),
-	_quality(-1e100),
-	_true_lower_bound(-1e100),
+	_quality(-BCP_DBL_MAX),
+	_true_lower_bound(-BCP_DBL_MAX),
 	_desc(desc),
 	_parent(0),
 	_user_data(0),

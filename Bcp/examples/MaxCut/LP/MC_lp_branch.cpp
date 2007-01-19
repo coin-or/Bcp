@@ -14,6 +14,7 @@
 
 #include "MC_lp.hpp"
 
+#include "BCP_math.hpp"
 #include "BCP_lp.hpp"
 #include "BCP_lp_node.hpp"
 #include "BCP_lp_functions.hpp"
@@ -544,7 +545,7 @@ MC: Starting strong branching (the objective is transformed!):\
 
    assert(best_presolved == 0);
    int best_fathom_child = 0;
-   double best_objsum = DBL_MAX;
+   double best_objsum = BCP_DBL_MAX;
    BCP_vec<double> tmpobj;
 
    for (cani = cands.begin(); cani != cands.end(); ++cani){
@@ -574,7 +575,7 @@ MC: Starting strong branching (the objective is transformed!):\
 	 for (i = 0; i < can->child_num; ++i) {
 	    const BCP_lp_result& res = tmp_presolved->lpres(i);
 	    const double lb = res.objval();
-	    printf((lb > DBL_MAX / 4 ? " [%e,%i,%i]" : " [%.4f,%i,%i]"),
+	    printf((lb > BCP_DBL_MAX / 10 ? " [%e,%i,%i]" : " [%.4f,%i,%i]"),
 		   lb, res.termcode(), res.iternum());
 	 }
 	 printf("\n");

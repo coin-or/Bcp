@@ -9,6 +9,7 @@
 
 #include <pvm3.h>
 
+#include "BCP_math.hpp"
 #include "BCP_error.hpp"
 #include "BCP_buffer.hpp"
 #include "BCP_vector.hpp"

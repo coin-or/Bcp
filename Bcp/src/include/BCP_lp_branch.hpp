@@ -5,6 +5,7 @@
 
 // This file is fully docified.
 
+#include "BCP_math.hpp"
 #include "BCP_enum_branch.hpp"
 #include "BCP_vector.hpp"
 #include "BCP_lp_result.hpp"
@@ -426,7 +427,7 @@ public:
 		not have a valid lower bound fake the objective value depending on the
 		termination code:
 		<ul>
-		<li> primal infeasibility / dual objective limit: <code>DBL_MAX</code>
+		<li> primal infeasibility / dual objective limit: <code>BCP_DBL_MAX</code>
 		<li> iteration limit : maximum of the lower bound at termination and
 		<code>itlim_objval</code>
 		<li> abandoned : <code>itlim_objval</code>

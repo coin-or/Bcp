@@ -9,6 +9,7 @@
 #include <OsiVolSolverInterface.hpp>
 #include <OsiClpSolverInterface.hpp>
 
+#include "BCP_math.hpp"
 #include "BCP_lp.hpp"
 #include "BCP_lp_node.hpp"
 
@@ -401,7 +402,7 @@ MC_lp::cuts_to_rows(const BCP_vec<BCP_var*>& vars, // on what to expand
   rows.clear();
   rows.reserve(cutnum);
 
-  const double lb = -1e40;
+  const double lb = -BCP_DBL_MAX;
 
   const int varnum = vars.size();
   double* coefs = new double[varnum];

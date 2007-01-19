@@ -51,13 +51,13 @@ MC_test_ising_four_cycle(const double sum, const double minviol,
     cuts.push_back(new MC_cycle_cut(cut, 3, 4));
     double row[4] = {1.0, 1.0, 1.0, -1.0};
     CoinSort_2(cut, cut+4, row);
-    rows.push_back(new BCP_row(cut, cut+4, row, row+4, -1e40, 2));
+    rows.push_back(new BCP_row(cut, cut+4, row, row+4, -BCP_DBL_MAX, 2));
   } else if (sum < - minviol) {
     std::rotate(cut, cut+3, cut+4);
     cuts.push_back(new MC_cycle_cut(cut, 1, 4));
     double row[4] = {1.0, -1.0, -1.0, -1.0};
     CoinSort_2(cut, cut+4, row);
-    rows.push_back(new BCP_row(cut, cut+4, row, row+4, -1e40, 0));
+    rows.push_back(new BCP_row(cut, cut+4, row, row+4, -BCP_DBL_MAX, 0));
   }
 }
 
@@ -106,12 +106,12 @@ MC_test_ising_triangles(const int n, const int* cycles,
     if (x0+x1+x2 > 2 + minviol) {
       cuts.push_back(new MC_cycle_cut(cycle, 3, 3));
       double row[3] = {1.0, 1.0, 1.0};
-      rows.push_back(new BCP_row(cycle, cycle+3, row, row+3, -1e40, 2.0));
+      rows.push_back(new BCP_row(cycle, cycle+3, row, row+3, -BCP_DBL_MAX, 2));
     }
     if (+ x0 - x1 - x2 > minviol) {
       cuts.push_back(new MC_cycle_cut(cycle, 1, 3));
       double row[3] = {1.0, -1.0, -1.0};
-      rows.push_back(new BCP_row(cycle, cycle+3, row, row+3, -1e40, 0.0));
+      rows.push_back(new BCP_row(cycle, cycle+3, row, row+3, -BCP_DBL_MAX, 0));
     }
     if (- x0 + x1 - x2 > minviol) {
       cut[0] = c1;
@@ -119,7 +119,7 @@ MC_test_ising_triangles(const int n, const int* cycles,
       cut[2] = c2;
       cuts.push_back(new MC_cycle_cut(cut, 1, 3));
       double row[3] = {-1.0, 1.0, -1.0};
-      rows.push_back(new BCP_row(cycle, cycle+3, row, row+3, -1e40, 0.0));
+      rows.push_back(new BCP_row(cycle, cycle+3, row, row+3, -BCP_DBL_MAX, 0));
     }
     if (- x0 - x1 + x2 > minviol) {
       cut[0] = c2;
@@ -127,7 +127,7 @@ MC_test_ising_triangles(const int n, const int* cycles,
       cut[2] = c1;
       cuts.push_back(new MC_cycle_cut(cut, 1, 3));
       double row[3] = {-1.0, -1.0, 1.0};
-      rows.push_back(new BCP_row(cycle, cycle+3, row, row+3, -1e40, 0.0));
+      rows.push_back(new BCP_row(cycle, cycle+3, row, row+3, -BCP_DBL_MAX, 0));
     }
 
     cycle += 3;
