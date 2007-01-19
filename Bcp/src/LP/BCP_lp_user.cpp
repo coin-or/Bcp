@@ -387,11 +387,12 @@ BCP_lp_user::test_binary(const BCP_lp_result& lpres,
 
     const double * x = lpres.x();
     const int varnum = vars.size();
+    const double etol1 = 1 - etol;
     int i;
 
     for (i = 0 ; i < varnum; ++i) {
 	const double xi = x[i];
-	if ( (xi > etol && xi < 1 - etol) || (xi < -etol) || (xi > 1 + etol) )
+	if (xi > etol && xi < etol1)
 	    return(NULL);
     }
 
@@ -399,7 +400,7 @@ BCP_lp_user::test_binary(const BCP_lp_result& lpres,
     BCP_solution_generic* sol = new BCP_solution_generic(false); 
     double obj = 0;
     for (i = 0 ; i < varnum; ++i) {
-	if (x[i] > 1 - etol) {
+	if (x[i] > etol1) {
 	    sol->add_entry(vars[i], 1.0);
 	    obj += vars[i]->obj();
 	}
@@ -423,16 +424,12 @@ BCP_lp_user::test_integral(const BCP_lp_result& lpres,
 
     const double * x = lpres.x();
     const int varnum = vars.size();
+    const double etol1 = 1 - etol;
     int i;
-    register double val;
 
     for (i = 0 ; i < varnum; ++i) {
-	val = x[i];
-	const BCP_var* vari = vars[i];
-	if (val < vari->lb() - etol || val > vari->ub() + etol)
-	    return(NULL);
-	val = val - floor(val);
-	if (val > etol && val < 1 - etol)
+	const double val = x[i] - floor(x[i]);
+	if (val > etol && val < etol1)
 	    return(NULL);
     }
   
@@ -440,8 +437,9 @@ BCP_lp_user::test_integral(const BCP_lp_result& lpres,
     BCP_solution_generic* sol = new BCP_solution_generic(false);
     double obj = 0;
     for (i = 0 ; i < varnum; ++i) {
-	val = floor(x[i] + 0.5);
-	if (val < -etol || val > etol) { // could test != 0.0
+	const double val = floor(x[i] + 0.5);
+	if (val != 0.0) { // it's OK to test the double against 0,
+	                  // since we took the floor()
 	    sol->add_entry(vars[i], val);
 	    obj += val * vars[i]->obj();
 	}
@@ -467,22 +465,22 @@ BCP_lp_user::test_full(const BCP_lp_result& lpres,
     const int varnum = vars.size();
     const double etol1 = 1 - etol;
     int i;
-    register double val;
 
     for (i = 0 ; i < varnum; ++i) {
-	val = x[i];
-	const BCP_var* vari = vars[i];
-	if (val < vari->lb() - etol || val > vari->ub() + etol)
-	    return(NULL);
-	switch (vari->var_type()){
+	switch (vars[i]->var_type()){
 	case BCP_BinaryVar:
-	    if (val > etol && val < etol1)
-		return(NULL);
+	    {
+		const double val = x[i];
+		if (val > etol && val < etol1)
+		    return(NULL);
+	    }
 	    break;
 	case BCP_IntegerVar:
-	    val = val - floor(val);
-	    if (val > etol && val < etol1)
-		return(NULL);
+	    {
+		const double val = x[i] - floor(x[i]);
+		if (val > etol && val < etol1)
+		    return(NULL);
+	    }
 	    break;
 	case BCP_ContinuousVar:
 	    break;
@@ -493,11 +491,9 @@ BCP_lp_user::test_full(const BCP_lp_result& lpres,
     BCP_solution_generic* sol = new BCP_solution_generic(false);
     double obj = 0;
     for (i = 0 ; i < varnum; ++i) {
-	val = x[i];
 	// round the integer vars
-	if (vars[i]->var_type() == BCP_BinaryVar ||
-	    vars[i]->var_type() == BCP_IntegerVar)
-	    val = floor(x[i] + 0.5);
+	const double val = (vars[i]->var_type() == BCP_ContinuousVar) ?
+	    x[i] : floor(x[i] + 0.5);
 	if (val < -etol || val > etol) {
 	    sol->add_entry(vars[i], val);
 	    obj += val * vars[i]->obj();
