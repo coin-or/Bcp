@@ -55,8 +55,8 @@ int BCP_is_mpi_id(const BCP_proc_id* pid, const char* str) {
 
 //#############################################################################
 
-int* BCP_process_array_2_int(const BCP_proc_array& parray,
-			     const char* str) {
+static int* BCP_process_array_2_int(const BCP_proc_array& parray,
+				    const char* str) {
     int *ids = new int[parray.size()];
     BCP_vec<BCP_proc_id*>::const_iterator first = parray.procs().begin();
     BCP_vec<BCP_proc_id*>::const_iterator last = parray.procs().end();
@@ -69,9 +69,9 @@ int* BCP_process_array_2_int(const BCP_proc_array& parray,
     return ids;
 }
 
-int* BCP_process_vec_2_int(BCP_vec<BCP_proc_id*>::const_iterator beg,
-			   BCP_vec<BCP_proc_id*>::const_iterator end,
-			   const char* str) {
+static int* BCP_process_vec_2_int(BCP_vec<BCP_proc_id*>::const_iterator beg,
+				  BCP_vec<BCP_proc_id*>::const_iterator end,
+				  const char* str) {
     const int new_num = end - beg;
     int *ids = new int[new_num];
     while (beg != end) {
@@ -207,6 +207,7 @@ BCP_mpi_environment::multicast(const BCP_proc_array* const target,
 	check_error(MPI_Send(&buf, 0, MPI_CHAR,
 			     pids[i], tag, MPI_COMM_WORLD),"MPI_Send");
     }
+    delete[] pids;
 }
 
 void
