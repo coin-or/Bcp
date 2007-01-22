@@ -105,7 +105,6 @@ New process identity is BCP_ProcessType_TM!\n");
 	}
     }
     delete msg_env;
-    delete user_init;
 
     return 0;
 }
