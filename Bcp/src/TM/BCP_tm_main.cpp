@@ -27,6 +27,7 @@
 
 #include "BCP_message_single.hpp"
 #include "BCP_message_mpi.hpp"
+#include "BCP_message_pvm.hpp"
 
 //#############################################################################
 
@@ -104,7 +105,6 @@ New process identity is BCP_ProcessType_TM!\n");
 	}
     }
     delete msg_env;
-    delete user_init;
 
     return 0;
 }
