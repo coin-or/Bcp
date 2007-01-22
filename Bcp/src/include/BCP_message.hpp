@@ -80,9 +80,10 @@ public:
    /*@{*/
    /** The default constructor creates an empty process array */
    BCP_proc_array() : _procs(), _free_procs() {}
-   /** The destructor deletes all data members (but does not purge the
-       vectors!). */
-   ~BCP_proc_array() {}
+    /** The destructor deletes all data members (purges \c _procs) */
+    ~BCP_proc_array() {
+	purge_ptr_vector(_procs);
+    }
    /*@}*/
 
    /**@name Query methods */
@@ -139,9 +140,12 @@ public:
        the vector of all processes and mark them as free. */
    inline void add_procs(BCP_vec<BCP_proc_id*>::const_iterator first,
 			 BCP_vec<BCP_proc_id*>::const_iterator last) {
-      _procs.insert(_procs.end(), first, last);
       // the new procs are free to begin with
       _free_procs.insert(_free_procs.end(), first, last);
+      while (first != last) {
+	  _procs.insert(_procs.end(), (*first)->clone());
+	  ++first;
+      }
    }
    /** Delete the process indexed by the argument from the vector of
        all processes (and also from the vector of free processes if
@@ -154,6 +158,7 @@ public:
 	    break;
       if (i >= 0)
 	 _free_procs.erase(_free_procs.entry(i));
+      delete _procs[index];
       _procs.erase(_procs.entry(index));
    }
 
