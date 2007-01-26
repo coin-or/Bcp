@@ -3,6 +3,8 @@
 #ifndef _BCP_OS_H
 #define _BCP_OS_H
 
+#include "BcpConfig.h"
+
 //-----------------------------------------------------------------------------
 #if HAVE_SYS_RESOURCE_H
 #  include <sys/resource.h>
@@ -32,7 +34,7 @@ static inline void BCP_sysinfo_mem(long& totalmem, long& freemem) {
     struct sysinfo info;
     sysinfo(&info);
     freemem = info.mem_unit*info.freeram;
-    totalmem = info.totalram;
+    totalmem = info.mem_unit*info.totalram;
 }
 #else
 static inline void BCP_sysinfo_mem(long& totalmem, long& freemem) {

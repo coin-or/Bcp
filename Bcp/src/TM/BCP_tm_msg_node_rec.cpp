@@ -532,8 +532,8 @@ BCP_tm_node* BCP_tm_unpack_node_no_branching_info(BCP_tm_prob& p,
 	long totalram, freemem, totalheap, usedheap;
 	BCP_sysinfo_mem(totalram, freemem);
 	BCP_mallinfo_mem(totalheap, usedheap);
-	printf("TM: sysinfo: %li (total) %li (free)   mallinfo: %li (total) %li (used)\n",
-	       totalram, freemem, totalheap, usedheap);
+	printf("TM: %i:  sysinfo: %li (total) %li (free)   mallinfo: %li (total) %li (used)\n",
+	       cnt, totalram, freemem, totalheap, usedheap);
     }
 
     // Mark the lp/cg/vg processes of the node as free
