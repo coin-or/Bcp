@@ -3,6 +3,7 @@
 #include <cstdlib>
 #include <algorithm>
 
+#include "BCP_os.hpp"
 #include "BCP_USER.hpp"
 #include "BCP_node_change.hpp"
 #include "BCP_warmstart.hpp"
@@ -523,7 +524,17 @@ void BCP_tm_unpack_node_with_branching_info(BCP_tm_prob& p, BCP_buffer& buf)
 BCP_tm_node* BCP_tm_unpack_node_no_branching_info(BCP_tm_prob& p,
 						  BCP_buffer& buf)
 {
+    static int cnt = 0;
     const int index = BCP_tm_unpack_node_description(p, buf);
+    ++cnt;
+
+    if ((cnt % 100) == 0) {
+	long totalram, freemem, totalheap, usedheap;
+	BCP_sysinfo_mem(totalram, freemem);
+	BCP_mallinfo_mem(totalheap, usedheap);
+	printf("TM: sysinfo: %li (total) %li (free)   mallinfo: %li (total) %li (used)\n",
+	       totalram, freemem, totalheap, usedheap);
+    }
 
     // Mark the lp/cg/vg processes of the node as free
     BCP_tm_node* node = p.search_tree[index];
