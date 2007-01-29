@@ -307,6 +307,17 @@ BCP_tm_user::init_new_phase(int phase,
 	printf(" TM: Default init_new_phase() executed.\n");
     }
     colgen = BCP_DoNotGenerateColumns_Fathom;
+    switch (p->param(BCP_tm_par::TreeSearchStrategy)) {
+    case BCP_BestFirstSearch:
+	candidates = new CoinSearchTree<CoinSearchTreeCompareBest>;
+	break;
+    case BCP_BreadthFirstSearch:
+	candidates = new CoinSearchTree<CoinSearchTreeCompareBreadth>;
+	break;
+    case BCP_DepthFirstSearch:
+	candidates = new CoinSearchTree<CoinSearchTreeCompareDepth>;
+	break;
+    }
 }
 
 //--------------------------------------------------------------------------
