@@ -310,13 +310,25 @@ void BCP_check_parameters(BCP_tm_prob& p)
 	char treestat = tmpar.entry(BCP_tm_par::TmVerb_FinalStatistics);
 	char bestsol  = tmpar.entry(BCP_tm_par::TmVerb_BestFeasibleSolution);
 	for (i = BCP_tm_par::TmVerb_First+1; i < BCP_tm_par::TmVerb_Last; ++i){
-	    tmpar.set_entry(static_cast<BCP_tm_par::chr_params>(i), false);
+	    if (tmpar.entry(static_cast<BCP_tm_par::chr_params>(i)) == 2) {
+		tmpar.set_entry(static_cast<BCP_tm_par::chr_params>(i), true);
+	    } else {
+		tmpar.set_entry(static_cast<BCP_tm_par::chr_params>(i), false);
+	    }
 	}
 	for (i = BCP_lp_par::LpVerb_First+1; i < BCP_lp_par::LpVerb_Last; ++i){
-	    lppar.set_entry(static_cast<BCP_lp_par::chr_params>(i), false);
+	    if (lppar.entry(static_cast<BCP_lp_par::chr_params>(i)) == 2) {
+		lppar.set_entry(static_cast<BCP_lp_par::chr_params>(i), true);
+	    } else {
+		lppar.set_entry(static_cast<BCP_lp_par::chr_params>(i), false);
+	    }
 	}
 	for (i = BCP_cg_par::CgVerb_First+1; i < BCP_cg_par::CgVerb_Last; ++i){
-	    cgpar.set_entry(static_cast<BCP_cg_par::chr_params>(i), false);
+	    if (cgpar.entry(static_cast<BCP_cg_par::chr_params>(i)) == 2) {
+		cgpar.set_entry(static_cast<BCP_cg_par::chr_params>(i), true);
+	    } else {
+		cgpar.set_entry(static_cast<BCP_cg_par::chr_params>(i), false);
+	    }
 	}
 	/*
 	  for (i = BCP_vg_par::VgVerb_First+1; i < BCP_vg_par::VgVerb_Last; ++i){
@@ -325,10 +337,26 @@ void BCP_check_parameters(BCP_tm_prob& p)
 	*/
 	tmpar.set_entry(BCP_tm_par::TmVerb_FinalStatistics, treestat);
 	tmpar.set_entry(BCP_tm_par::TmVerb_BestFeasibleSolution, bestsol);
-	tmpar.set_entry(BCP_tm_par::ReportWhenDefaultIsExecuted, false);
-	lppar.set_entry(BCP_lp_par::ReportWhenDefaultIsExecuted, false);
-	cgpar.set_entry(BCP_cg_par::ReportWhenDefaultIsExecuted, false);
-	vgpar.set_entry(BCP_vg_par::ReportWhenDefaultIsExecuted, false);
+	if (tmpar.entry(BCP_tm_par::ReportWhenDefaultIsExecuted) == 2) {
+	    tmpar.set_entry(BCP_tm_par::ReportWhenDefaultIsExecuted, true);
+	} else {
+	    tmpar.set_entry(BCP_tm_par::ReportWhenDefaultIsExecuted, false);
+	}
+	if (lppar.entry(BCP_lp_par::ReportWhenDefaultIsExecuted) == 2) {
+	    lppar.set_entry(BCP_lp_par::ReportWhenDefaultIsExecuted, true);
+	} else {
+	    lppar.set_entry(BCP_lp_par::ReportWhenDefaultIsExecuted, false);
+	}
+	if (cgpar.entry(BCP_cg_par::ReportWhenDefaultIsExecuted) == 2) {
+	    cgpar.set_entry(BCP_cg_par::ReportWhenDefaultIsExecuted, true);
+	} else {
+	    cgpar.set_entry(BCP_cg_par::ReportWhenDefaultIsExecuted, false);
+	}
+	if (vgpar.entry(BCP_vg_par::ReportWhenDefaultIsExecuted) == 2) {
+	    vgpar.set_entry(BCP_vg_par::ReportWhenDefaultIsExecuted, true);
+	} else {
+	    vgpar.set_entry(BCP_vg_par::ReportWhenDefaultIsExecuted, false);
+	}
     }
 }
 
