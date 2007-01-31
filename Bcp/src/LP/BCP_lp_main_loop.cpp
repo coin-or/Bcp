@@ -203,7 +203,9 @@ LP:   Terminating and fathoming due to proven high cost.\n",
 	    BCP_lp_generate_vars(p, cutset_changed, from_repricing);
 
 	if (! fix_vars_while_external_processes_working) {
-	    if (BCP_lp_fix_vars(p) || !p.lp_solver->basisIsAvailable()) {
+	    if (BCP_lp_fix_vars(p) || 
+		(p.lp_solver->canDoSimplexInterface() && 
+		 !p.lp_solver->basisIsAvailable())) {
 		--p.node->iteration_count;
 		continue;
 	    }

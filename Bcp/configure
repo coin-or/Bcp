@@ -20955,6 +20955,48 @@ fi
 fi
 
 
+if test $coin_vpath_config = yes; then
+
+if test examples/Csp = . ; then
+	updir=.
+else
+	t=`echo examples/Csp | sed -e 's=/\./=/=g' -e 's=^\./==' -e 's=/\.$==' -e 's=[^/]*=..=g'`
+	if test $t = "" ; then
+		t=.
+	fi
+	updir=$t
+fi
+
+	if test -e $srcdir/examples/Csp/examplefiles.txt ; then
+		echo Copying example examples/Csp ...
+		fromdir=$updir/$srcdir/`dirname examples/Csp/examplefiles.txt`
+		mkdir -p examples/Csp
+		cd examples/Csp
+		for f in `cat $updir/$srcdir/examples/Csp/examplefiles.txt` ; do
+			if test ! -e $f ; then
+		   		fdir=`dirname $f`
+				mkdir -p $fdir
+
+if test $fdir = . ; then
+	uppath=.
+else
+	t=`echo $fdir | sed -e 's=/\./=/=g' -e 's=^\./==' -e 's=/\.$==' -e 's=[^/]*=..=g'`
+	if test $t = "" ; then
+		t=.
+	fi
+	uppath=$t
+fi
+
+				cd $fdir
+				cp -p $uppath/$fromdir/$f `basename $f`
+				cd $uppath
+			fi
+		done
+		cd $updir
+	fi
+fi
+
+
 
 if test $coin_vpath_config = yes; then
 
@@ -21101,7 +21143,7 @@ fi
 
 # Here list all the files that configure should create (except for the
 # configuration header file)
-                                                                                          ac_config_files="$ac_config_files Makefile src/Makefile test/BAC/Makefile examples/BAC/Makefile examples/MCF-1/Makefile examples/MCF-2/Makefile examples/MCF-3/Makefile examples/MaxCut/Makefile bcp_addlibs.txt"
+                                                                                                    ac_config_files="$ac_config_files Makefile src/Makefile test/BAC/Makefile examples/BAC/Makefile examples/MCF-1/Makefile examples/MCF-2/Makefile examples/MCF-3/Makefile examples/MaxCut/Makefile examples/Csp/Makefile bcp_addlibs.txt"
 
 
 # Here put the location and name of the configuration header file
@@ -21761,6 +21803,7 @@ do
   "examples/MCF-2/Makefile" ) CONFIG_FILES="$CONFIG_FILES examples/MCF-2/Makefile" ;;
   "examples/MCF-3/Makefile" ) CONFIG_FILES="$CONFIG_FILES examples/MCF-3/Makefile" ;;
   "examples/MaxCut/Makefile" ) CONFIG_FILES="$CONFIG_FILES examples/MaxCut/Makefile" ;;
+  "examples/Csp/Makefile" ) CONFIG_FILES="$CONFIG_FILES examples/Csp/Makefile" ;;
   "bcp_addlibs.txt" ) CONFIG_FILES="$CONFIG_FILES bcp_addlibs.txt" ;;
   "depfiles" ) CONFIG_COMMANDS="$CONFIG_COMMANDS depfiles" ;;
   "inc/config_bcp.h" ) CONFIG_HEADERS="$CONFIG_HEADERS inc/config_bcp.h" ;;
