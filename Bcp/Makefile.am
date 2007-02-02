@@ -67,14 +67,14 @@ EXAMPLES = BAC
 
 test: all
 	for t in $(TESTS); do \
-		(cd test/$$t; make test); \
+		(cd test/$$t; $(MAKE) test); \
 	done
 
 unitTest: test
 
 clean-local:
 	for t in $(TESTS); do \
-		(if test -r test/$$t/Makefile; then cd test/$$t; make clean; fi); \
+		(if test -r test/$$t/Makefile; then cd test/$$t; $(MAKE) clean; fi); \
 	done
 	for t in $(EXAMPLES); do \
 		for f in `find examples/$$t -name "*.o"`; do \
@@ -84,7 +84,7 @@ clean-local:
 
 distclean-local:
 	for t in $(TESTS); do \
-		(if test -r test/$$t/Makefile; then cd test/$$t; make distclean; fi); \
+		(if test -r test/$$t/Makefile; then cd test/$$t; $(MAKE) distclean; fi); \
 	done
 	rm -rf examples
 

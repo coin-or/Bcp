@@ -214,12 +214,14 @@ abs_bin_dir = @abs_bin_dir@
 abs_include_dir = @abs_include_dir@
 abs_lib_dir = @abs_lib_dir@
 abs_source_dir = @abs_source_dir@
+ac_c_preproc_warn_flag = @ac_c_preproc_warn_flag@
 ac_ct_AR = @ac_ct_AR@
 ac_ct_CC = @ac_ct_CC@
 ac_ct_CXX = @ac_ct_CXX@
 ac_ct_F77 = @ac_ct_F77@
 ac_ct_RANLIB = @ac_ct_RANLIB@
 ac_ct_STRIP = @ac_ct_STRIP@
+ac_cxx_preproc_warn_flag = @ac_cxx_preproc_warn_flag@
 am__fastdepCC_FALSE = @am__fastdepCC_FALSE@
 am__fastdepCC_TRUE = @am__fastdepCC_TRUE@
 am__fastdepCXX_FALSE = @am__fastdepCXX_FALSE@
@@ -825,14 +827,14 @@ uninstall-info: uninstall-info-recursive
 
 test: all
 	for t in $(TESTS); do \
-		(cd test/$$t; make test); \
+		(cd test/$$t; $(MAKE) test); \
 	done
 
 unitTest: test
 
 clean-local:
 	for t in $(TESTS); do \
-		(if test -r test/$$t/Makefile; then cd test/$$t; make clean; fi); \
+		(if test -r test/$$t/Makefile; then cd test/$$t; $(MAKE) clean; fi); \
 	done
 	for t in $(EXAMPLES); do \
 		for f in `find examples/$$t -name "*.o"`; do \
@@ -842,7 +844,7 @@ clean-local:
 
 distclean-local:
 	for t in $(TESTS); do \
-		(if test -r test/$$t/Makefile; then cd test/$$t; make distclean; fi); \
+		(if test -r test/$$t/Makefile; then cd test/$$t; $(MAKE) distclean; fi); \
 	done
 	rm -rf examples
 
