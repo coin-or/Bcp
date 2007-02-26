@@ -70,6 +70,8 @@ void BCP_tm_send_node(BCP_tm_prob& p, const BCP_tm_node* node,
 
 //-----------------------------------------------------------------------------
 // BCP_tm_msg_node_rec.cpp
+void BCP_print_memusage(BCP_tm_prob& p);
+
 BCP_vec<int>* BCP_tm_unpack_noncore_vars(USER_packing& user,
 					 BCP_buffer& buf,
 					 BCP_var_set_change& var_ch,

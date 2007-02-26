@@ -191,6 +191,7 @@ BCP_tm_start_one_node(BCP_tm_prob& p)
 		printf("TM: Pruning NODE %i LEVEL %i instead of sending it.\n",
 		       next_node->index(), next_node->level());
 	    p.nodes_to_free.push_back(next_node);
+	    BCP_print_memusage(p);
 	    continue;
 	}
 	if (p.current_phase_colgen == BCP_DoNotGenerateColumns_Send) {

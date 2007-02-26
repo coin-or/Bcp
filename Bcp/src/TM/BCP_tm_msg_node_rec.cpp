@@ -3,6 +3,8 @@
 #include <cstdlib>
 #include <algorithm>
 
+#include "CoinTime.hpp"
+
 #include "BCP_os.hpp"
 #include "BCP_USER.hpp"
 #include "BCP_node_change.hpp"
@@ -80,8 +82,7 @@ BCP_tm_print_info_line(BCP_tm_prob& p, BCP_tm_node& node)
 
 //#############################################################################
 
-static int
-BCP_tm_unpack_node_description(BCP_tm_prob& p, BCP_buffer& buf)
+void BCP_print_memusage(BCP_tm_prob& p)
 {
     static int cnt = 0;
     ++cnt;
@@ -89,9 +90,24 @@ BCP_tm_unpack_node_description(BCP_tm_prob& p, BCP_buffer& buf)
 	long totalram, freemem, totalheap, usedheap;
 	BCP_sysinfo_mem(totalram, freemem);
 	BCP_mallinfo_mem(totalheap, usedheap);
-	printf("TM: %i:  sysinfo: %li (total) %li (free)   mallinfo: %li (total) %li (used)\n",
-	       cnt, totalram, freemem, totalheap, usedheap);
+	printf("TM: %.2f:  tree: %i / %i", CoinCpuTime(), 
+	       p.candidate_list.size(), p.candidate_list.numInserted());
+	if (totalram > 0) {
+	    printf("    sysinfo: %li / %li", freemem, totalram);
+	}
+	if (totalheap > 0) {
+	    printf("    mallinfo: %li / %li", usedheap, totalheap);
+	}
+	printf("\n");
     }
+}
+
+//#############################################################################
+
+static int
+BCP_tm_unpack_node_description(BCP_tm_prob& p, BCP_buffer& buf)
+{
+    BCP_print_memusage(p);
 
     // the first thing is the index of the node
     int index;
