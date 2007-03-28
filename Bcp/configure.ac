@@ -126,7 +126,7 @@ fi
 
 AC_DEFUN([COIN_COPY_FROM_FILELIST], 
 [
-if test $coin_vpath_config = yes; then
+if test $coin_vpath_config = yes ; then
 	COIN_UPPATH([$1], updir)
 	if test -e $srcdir/$2 ; then
 		echo Copying example $1 ...
@@ -150,8 +150,6 @@ fi
 
 COIN_LINK_FROM_FILELIST(test/BAC, examples/BAC/testfiles.txt)
 COIN_COPY_FROM_FILELIST(examples/BAC, examples/BAC/examplefiles.txt)
-COIN_COPY_FROM_FILELIST(examples/MaxCut, examples/MaxCut/examplefiles.txt)
-COIN_COPY_FROM_FILELIST(examples/Csp, examples/Csp/examplefiles.txt)
 
 COIN_COPY_FROM_FILELIST(examples/MCF-1, examples/MCF-1/examplefiles.txt)
 COIN_COPY_FROM_FILELIST(examples/MCF-2, examples/MCF-2/examplefiles.txt)
@@ -196,8 +194,6 @@ AC_CONFIG_FILES([Makefile
                  examples/MCF-1/Makefile
                  examples/MCF-2/Makefile
                  examples/MCF-3/Makefile
-                 examples/MaxCut/Makefile
-                 examples/Csp/Makefile
 		 bcp_addlibs.txt])
 
 # Here put the location and name of the configuration header file

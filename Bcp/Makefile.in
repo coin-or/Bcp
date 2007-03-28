@@ -61,11 +61,9 @@ DIST_COMMON = README $(am__configure_deps) \
 	$(srcdir)/Makefile.am $(srcdir)/Makefile.in \
 	$(srcdir)/bcp_addlibs.txt.in $(top_srcdir)/configure \
 	$(top_srcdir)/examples/BAC/Makefile.in \
-	$(top_srcdir)/examples/Csp/Makefile.in \
 	$(top_srcdir)/examples/MCF-1/Makefile.in \
 	$(top_srcdir)/examples/MCF-2/Makefile.in \
 	$(top_srcdir)/examples/MCF-3/Makefile.in \
-	$(top_srcdir)/examples/MaxCut/Makefile.in \
 	$(top_srcdir)/inc/config_bcp.h.in AUTHORS INSTALL TODO
 @HAVE_EXTERNALS_TRUE@am__append_2 = Externals
 @HAVE_EXTERNALS_TRUE@am__append_3 = .Externals-stamp
@@ -81,7 +79,7 @@ mkinstalldirs = $(install_sh) -d
 CONFIG_HEADER = $(top_builddir)/inc/config_bcp.h
 CONFIG_CLEAN_FILES = examples/BAC/Makefile examples/MCF-1/Makefile \
 	examples/MCF-2/Makefile examples/MCF-3/Makefile \
-	examples/MaxCut/Makefile examples/Csp/Makefile bcp_addlibs.txt
+	bcp_addlibs.txt
 SOURCES =
 DIST_SOURCES =
 RECURSIVE_TARGETS = all-recursive check-recursive dvi-recursive \
@@ -363,10 +361,6 @@ examples/MCF-2/Makefile: $(top_builddir)/config.status $(top_srcdir)/examples/MC
 	cd $(top_builddir) && $(SHELL) ./config.status $@
 examples/MCF-3/Makefile: $(top_builddir)/config.status $(top_srcdir)/examples/MCF-3/Makefile.in
 	cd $(top_builddir) && $(SHELL) ./config.status $@
-examples/MaxCut/Makefile: $(top_builddir)/config.status $(top_srcdir)/examples/MaxCut/Makefile.in
-	cd $(top_builddir) && $(SHELL) ./config.status $@
-examples/Csp/Makefile: $(top_builddir)/config.status $(top_srcdir)/examples/Csp/Makefile.in
-	cd $(top_builddir) && $(SHELL) ./config.status $@
 bcp_addlibs.txt: $(top_builddir)/config.status $(srcdir)/bcp_addlibs.txt.in
 	cd $(top_builddir) && $(SHELL) ./config.status $@
 
@@ -588,7 +582,7 @@ check-TESTS: $(TESTS)
 distdir: $(DISTFILES)
 	$(am__remove_distdir)
 	mkdir $(distdir)
-	$(mkdir_p) $(distdir)/. $(distdir)/.. $(distdir)/../BuildTools $(distdir)/doc $(distdir)/examples/BAC $(distdir)/examples/Csp $(distdir)/examples/MCF-1 $(distdir)/examples/MCF-2 $(distdir)/examples/MCF-3 $(distdir)/examples/MaxCut $(distdir)/inc
+	$(mkdir_p) $(distdir)/. $(distdir)/.. $(distdir)/../BuildTools $(distdir)/doc $(distdir)/examples/BAC $(distdir)/examples/MCF-1 $(distdir)/examples/MCF-2 $(distdir)/examples/MCF-3 $(distdir)/inc
 	@srcdirstrip=`echo "$(srcdir)" | sed 's|.|.|g'`; \
 	topsrcdirstrip=`echo "$(top_srcdir)" | sed 's|.|.|g'`; \
 	list='$(DISTFILES)'; for file in $$list; do \
