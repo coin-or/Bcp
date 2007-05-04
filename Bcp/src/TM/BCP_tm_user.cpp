@@ -64,8 +64,8 @@ BCP_tm_user::unpack_feasible_solution(BCP_buffer& buf)
     int bcpind;
     while (--varnum >= 0) {
 	buf.unpack(val);
-	// these vars are stored only in the solution, so noone cares if we flip
-	// negative bcpind's
+	// these vars are stored only in the solution, so noone cares if we
+	// flip negative bcpind's
 	buf.unpack(bcpind);
 	BCP_var* var = p->unpack_var_without_bcpind(buf);
 	var->set_bcpind(bcpind < 0 ? -bcpind : bcpind);
@@ -86,82 +86,8 @@ BCP_tm_user::replace_solution(const BCP_solution* old_sol,
 
 //#############################################################################
 
-void
-BCP_tm_user::pack_warmstart(const BCP_warmstart* ws, BCP_buffer& buf)
-{
-    if (p->param(BCP_tm_par::ReportWhenDefaultIsExecuted)) {
-	printf(" TM: Default BCP_tm_user::pack_warmstart() executed.\n");
-    }
-    BCP_pack_warmstart(ws, buf);
-}
-
-//-----------------------------------------------------------------------------
-
-BCP_warmstart*
-BCP_tm_user::unpack_warmstart(BCP_buffer& buf)
-{
-    if (p->param(BCP_tm_par::ReportWhenDefaultIsExecuted)) {
-	printf(" TM: Default BCP_tm_user::unpack_warmstart() executed.\n");
-    }
-    return BCP_unpack_warmstart(buf);
-}
-
-//#############################################################################
-
-void
-BCP_tm_user::pack_var_algo(const BCP_var_algo* var, BCP_buffer& buf)
-{
-    throw BCP_fatal_error("\
-BCP_tm_user::pack_var_algo() invoked but not overridden!\n");
-}
-
-//-----------------------------------------------------------------------------
-BCP_var_algo*
-BCP_tm_user::unpack_var_algo(BCP_buffer& buf)
-{
-    throw BCP_fatal_error("\
-BCP_tm_user::unpack_var_algo() invoked but not overridden!\n");
-    return 0; // to satisfy aCC on HP-UX
-}
-      
-//-----------------------------------------------------------------------------
-void
-BCP_tm_user::pack_cut_algo(const BCP_cut_algo* cut, BCP_buffer& buf)
-{
-    throw BCP_fatal_error("\
-BCP_tm_user::pack_cut_algo() invoked but not overridden!\n");
-}
-
-//-----------------------------------------------------------------------------
-BCP_cut_algo*
-BCP_tm_user::unpack_cut_algo(BCP_buffer& buf)
-{
-    throw BCP_fatal_error("\
-BCP_tm_user::unpack_cut_algo() invoked but not overridden!\n");
-    return 0; // to satisfy aCC on HP-UX
-}
-
-//-----------------------------------------------------------------------------
-void
-BCP_tm_user::pack_user_data(const BCP_user_data* ud, BCP_buffer& buf)
-{
-    throw BCP_fatal_error("\
-BCP_tm_user::pack_user_data() invoked but not overridden!\n");
-}
-
-//-----------------------------------------------------------------------------
-BCP_user_data*
-BCP_tm_user::unpack_user_data(BCP_buffer& buf)
-{
-    throw BCP_fatal_error("\
-BCP_tm_user::unpack_user_data() invoked but not overridden!\n");
-    return 0; // to satisfy aCC on HP-UX
-}
-
-//#############################################################################
-
 /** What is the process id of the current process */
-const BCP_proc_id*
+int
 BCP_tm_user::process_id() const
 {
     return p->get_process_id();
@@ -169,11 +95,10 @@ BCP_tm_user::process_id() const
 
 /** Send a message to a particular process */
 void
-BCP_tm_user::send_message(const BCP_proc_id* const target,
-			  const BCP_buffer& buf)
+BCP_tm_user::send_message(const int target, const BCP_buffer& buf)
 {
     p->msg_env->send(target, BCP_Msg_User, buf);
-}    
+}
 
 /** Broadcast the message to all processes of the given type */
 void
@@ -182,7 +107,7 @@ BCP_tm_user::broadcast_message(const BCP_process_t proc_type,
 {
     switch (proc_type) {
     case BCP_ProcessType_LP:
-	p->msg_env->multicast(p->slaves.lp, BCP_Msg_User, buf);
+	p->msg_env->multicast(*p->slaves.lp, BCP_Msg_User, buf);
 	break;
     case BCP_ProcessType_CP:
 	throw BCP_fatal_error("\
@@ -193,19 +118,21 @@ BCP_tm_user::broadcast_message: CP not yet implemented\n");
 BCP_tm_user::broadcast_message: VP not yet implemented\n");
 	break;
     case BCP_ProcessType_CG:
-	p->msg_env->multicast(p->slaves.cg, BCP_Msg_User, buf);
+	p->msg_env->multicast(*p->slaves.cg, BCP_Msg_User, buf);
 	break;
     case BCP_ProcessType_VG:
-	p->msg_env->multicast(p->slaves.vg, BCP_Msg_User, buf);
+	p->msg_env->multicast(*p->slaves.vg, BCP_Msg_User, buf);
 	break;
     case BCP_ProcessType_Any:
-	p->msg_env->multicast(p->slaves.lp, BCP_Msg_User, buf);
-	p->msg_env->multicast(p->slaves.cg, BCP_Msg_User, buf);
-	p->msg_env->multicast(p->slaves.vg, BCP_Msg_User, buf);
+	p->msg_env->multicast(*p->slaves.lp, BCP_Msg_User, buf);
+	p->msg_env->multicast(*p->slaves.cg, BCP_Msg_User, buf);
+	p->msg_env->multicast(*p->slaves.vg, BCP_Msg_User, buf);
 	break;
     case BCP_ProcessType_TM:
+    case BCP_ProcessType_TS:
+    case BCP_ProcessType_EndProcess:
 	throw BCP_fatal_error("\
-BCP_tm_user::broadcast_message: broadcast to TM itself?!...\n");
+BCP_tm_user::broadcast_message: broadcast to TM/TS/EndProcess...\n");
     }
 }
 

@@ -52,6 +52,7 @@ libBcp_la_SOURCES = \
 	TM/BCP_tm_main.cpp \
 	TM/BCP_tm_statistics.cpp \
 	TM/BCP_tm.cpp \
+	TM/BCP_tmstorage.cpp \
 	VG/BCP_vg_param.cpp \
 	VG/BCP_vg_user.cpp \
 	VG/BCP_vg_main.cpp \
@@ -148,6 +149,7 @@ libBcp_la_SOURCES = \
 	include/BCP_vector_double.hpp \
 	include/BCP_vector_int.hpp \
 	include/BCP_vector_short.hpp \
+	include/BCP_tmstorage.hpp \
 	Member/BCP_message_single.cpp \
 	include/BCP_message_single.hpp \
 	Member/BCP_message_mpi.cpp \

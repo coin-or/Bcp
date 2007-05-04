@@ -43,7 +43,7 @@ int bcp_main(int argc, char* argv[], USER_initialize* user_init)
 	single_env->set_arguments(argc, argv);
     }
 
-    BCP_proc_id* my_id = msg_env->register_process(user_init);
+    int my_id = msg_env->register_process(user_init);
 
     if (single_env) {
 	// register process did everything. We just return.
@@ -51,9 +51,9 @@ int bcp_main(int argc, char* argv[], USER_initialize* user_init)
 	return 0;
     }
 
-    BCP_proc_id* parent = msg_env->parent_process();
+    int parent = msg_env->parent_process();
 
-    if (! parent) {
+    if (parent == -1) {
 	//We compute the real numeber of arguments because Mpi can change
 	//list of arguments
 	int cnt;
@@ -61,7 +61,7 @@ int bcp_main(int argc, char* argv[], USER_initialize* user_init)
 	    if (argv[cnt] == NULL)
 		break;
 	}
-	BCP_tm_main(msg_env, user_init, my_id, cnt, argv);
+	BCP_tm_main(msg_env, user_init, cnt, argv);
     } else {
 	// In MPI all processes get the argument list, so we must not check
 	// this
@@ -80,28 +80,35 @@ int bcp_main(int argc, char* argv[], USER_initialize* user_init)
 	// got a new identity, act on it
 	BCP_process_t ptype;
 	msg_buf.unpack(ptype);
-	switch (ptype) {
-	case BCP_ProcessType_LP:
-	    BCP_lp_main(msg_env, user_init, my_id, parent);
-	    break;
-	case BCP_ProcessType_CP:
-	    // BCP_cp_main(msg_env, user_init, my_id, parent);
-	    break;
-	case BCP_ProcessType_VP:
-	    // BCP_vp_main(msg_env, user_init, my_id, parent);
-	    break;
-	case BCP_ProcessType_CG:
-	    BCP_cg_main(msg_env, user_init, my_id, parent);
-	    break;
-	case BCP_ProcessType_VG:
-	    BCP_vg_main(msg_env, user_init, my_id, parent);
-	    break;
-	case BCP_ProcessType_Any:
-	    throw BCP_fatal_error("\
+	while (ptype != BCP_ProcessType_EndProcess) {
+	    switch (ptype) {
+	    case BCP_ProcessType_LP:
+		ptype = BCP_lp_main(msg_env, user_init, my_id, parent);
+		break;
+	    case BCP_ProcessType_CP:
+		// BCP_cp_main(msg_env, user_init, my_id, parent);
+		break;
+	    case BCP_ProcessType_VP:
+		// BCP_vp_main(msg_env, user_init, my_id, parent);
+		break;
+	    case BCP_ProcessType_CG:
+		ptype = BCP_cg_main(msg_env, user_init, my_id, parent);
+		break;
+	    case BCP_ProcessType_VG:
+		ptype = BCP_vg_main(msg_env, user_init, my_id, parent);
+		break;
+	    case BCP_ProcessType_TS:
+		ptype = BCP_tmstorage_main(msg_env, user_init, my_id, parent);
+		break;
+	    case BCP_ProcessType_Any:
+		throw BCP_fatal_error("\
 New process identity is BCP_ProcessType_Any!\n");
-	case BCP_ProcessType_TM:
-	    throw BCP_fatal_error("\
+	    case BCP_ProcessType_TM:
+		throw BCP_fatal_error("\
 New process identity is BCP_ProcessType_TM!\n");
+	    case BCP_ProcessType_EndProcess:
+		break;
+	    }
 	}
     }
     delete msg_env;
@@ -114,11 +121,12 @@ New process identity is BCP_ProcessType_TM!\n");
 void
 BCP_tm_main(BCP_message_environment* msg_env,
 	    USER_initialize* user_init,
-	    BCP_proc_id* my_id,
 	    const int argnum, const char* const * arglist)
 {
+    // If we ever get here then the environment is parallel
+    
     // Start to create the universe... (we don't have a user universe yet).
-    BCP_tm_prob p(my_id, NULL);
+    BCP_tm_prob p;
 
     // If we ever get here then the environment is parallel
     p.par.set_entry(BCP_tm_par::MessagePassingIsSerial,false);
@@ -188,35 +196,33 @@ Number of process in parameter file %d > n_proc in mpirun -np %d!\n",
     // BCP_slave_process_stub() function below. 
     p.user = user_init->tm_init(p, argnum, arglist);
     p.user->setTmProblemPointer(&p);
+    p.packer = user_init->packer_init(p.user);
+    p.packer->user_class = p.user;
+
+    // Set the core (variables & cuts)
+    p.core = BCP_tm_create_core(p);
+    p.core_as_change = new BCP_problem_core_change;
+    *p.core_as_change = *p.core;
 
     // Fire up the LP/CG/CP/VG/VP processes
     // Actually, this is firing up enough copies of self.
     BCP_tm_start_processes(p);
 
     // Notify the LP/CG/CP/VG/VP processes about their identity. Also, send out
-    // their parameters.
+    // their parameters, core and user info.
     BCP_tm_notify_processes(p);
 
     // Initialize the number of leaves assigned to CP's and VP's as 0
     if (p.param(BCP_tm_par::CpProcessNum) > 0) {
 	for (int i = p.slaves.cp->size() - 1; i >= 0; --i)
 	    p.leaves_per_cp.
-		push_back(std::make_pair(p.slaves.cp->procs()[i]->clone(), 0));
+		push_back(std::make_pair(p.slaves.cp->procs()[i], 0));
     }
     if (p.param(BCP_tm_par::VpProcessNum) > 0) {
 	for (int i = p.slaves.vp->size() - 1; i >= 0; --i)
 	    p.leaves_per_vp.
-		push_back(std::make_pair(p.slaves.vp->procs()[i]->clone(), 0));
+		push_back(std::make_pair(p.slaves.vp->procs()[i], 0));
     }
-
-    // Set the core (variables & cuts)
-    p.core = BCP_tm_create_core(p);
-    p.core_as_change = new BCP_problem_core_change;
-    *p.core_as_change = *p.core;
-    // Send the core description to every process
-    BCP_tm_distribute_core(p);
-
-    BCP_tm_distribute_user_info(p);
 
     // Initialize the root of the search tree (can't invoke directly
     // p.user->create_root(), b/c the root might contain extra vars/cuts and
@@ -313,7 +319,7 @@ BCP_problem_core* BCP_tm_create_core(BCP_tm_prob& p)
 		var->set_ub(floor(var->ub()+1e-8));
 	    }
 	    var->set_bcpind(i);
-	    p.vars[i] = new BCP_var_core(*var);
+	    p.vars_local[i] = new BCP_var_core(*var);
 	}
 	p.next_var_index_set_start = i;
     }
@@ -324,7 +330,7 @@ BCP_problem_core* BCP_tm_create_core(BCP_tm_prob& p)
 	for (i = 0; i < bcutnum; ++i) {
 	    BCP_cut_core* cut = bcuts[i];
 	    cut->set_bcpind(i);
-	    p.cuts[i] = new BCP_cut_core(*cut);
+	    p.cuts_local[i] = new BCP_cut_core(*cut);
 	}
 	p.next_cut_index_set_start = i;
     }
@@ -351,7 +357,7 @@ BCP_tm_unpack_root_cut(BCP_tm_prob& tm)
 	cut = new BCP_cut_core(lb, ub);
 	break;
     case BCP_AlgoObj:
-	cut = tm.user->unpack_cut_algo(buf);
+	cut = tm.packer->unpack_cut_algo(buf);
 	cut->change_bounds(lb, ub);
 	break;
     default:
@@ -401,49 +407,47 @@ BCP_tm_node* BCP_tm_create_root(BCP_tm_prob& p)
     root_changes->core_change._storage = BCP_Storage_WrtCore;
 
     if (added_vars.size() > 0) {
-	BCP_vec<BCP_var*>::iterator vi = added_vars.begin();
-	const BCP_vec<BCP_var*>::iterator lastvi = added_vars.end();
-	root_changes->var_change._change.reserve(added_vars.size());
-	int i = p.next_var_index_set_start;
-	while (vi != lastvi) {
-	    BCP_var* var = *vi;
-	    p.vars[i] = var;
-	    var->set_bcpind(i++);
-	    // make certain that the bounds of integer vars is integer...
-	    if (var->var_type() != BCP_ContinuousVar) {
-		var->set_lb(floor(var->lb()+1e-8));
-		var->set_ub(ceil(var->ub()-1e-8));
-	    }
-	    root_changes->var_change._change.
-		unchecked_push_back(BCP_obj_change(var->lb(), var->ub(),
-						   var->status()));
-	    ++vi;
+	const int num = added_vars.size();
+	BCP_obj_set_change& vc = root_changes->var_change;
+	vc._change.reserve(num);
+	vc._new_objs.reserve(num);
+	int ind = p.next_var_index_set_start;
+	for (int i = 0; i < num; ++i) {
+	    BCP_var* var = added_vars[i];
+	    vc._new_objs.unchecked_push_back(ind);
+	    p.vars_local[ind] = var;
+	    var->set_bcpind(ind++);
+	    vc._change.unchecked_push_back(BCP_obj_change(var->lb(), var->ub(),
+							  var->status()));
 	}
-	p.next_var_index_set_start = i;
-	root_changes->var_change._new_vars.swap(added_vars);
+	p.next_var_index_set_start = ind;
     }
 
     if (added_cuts.size() > 0) {
-	BCP_vec<BCP_cut*>::iterator ci = added_cuts.begin();
-	const BCP_vec<BCP_cut*>::iterator lastci = added_cuts.end();
-	root_changes->cut_change._change.reserve(added_cuts.size());
-	int i = p.next_cut_index_set_start;
-	while (ci != lastci) {
-	    BCP_cut* cut = *ci;
-	    p.cuts[i] = cut;
-	    cut->set_bcpind(i++);
-	    root_changes->cut_change._change.
-		unchecked_push_back(BCP_obj_change(cut->lb(), cut->ub(),
-						   cut->status()));
-	    ++ci;
+	const int num = added_cuts.size();
+	BCP_obj_set_change& cc = root_changes->cut_change;
+	cc._change.reserve(num);
+	cc._new_objs.reserve(num);
+	int ind = p.next_cut_index_set_start;
+	for (int i = 0; i < num; ++i) {
+	    BCP_cut* cut = added_cuts[i];
+	    cc._new_objs.unchecked_push_back(ind);
+	    p.cuts_local[ind] = cut;
+	    cut->set_bcpind(ind++);
+	    cc._change.unchecked_push_back(BCP_obj_change(cut->lb(), cut->ub(),
+							  cut->status()));
 	}
-	p.next_cut_index_set_start = i;
-	root_changes->cut_change._new_cuts.swap(added_cuts);
+	p.next_cut_index_set_start = ind;
     }
 
     BCP_tm_node* root = new BCP_tm_node(0, root_changes);
 
-    root->_user_data = user_data;
+    root->_data._user = user_data;
+
+    root->_core_storage = root->_data._desc->core_change.storage();
+    root->_var_storage = BCP_Storage_Explicit;
+    root->_cut_storage = BCP_Storage_Explicit;
+    root->_ws_storage = BCP_Storage_NoData;
 
     return root;
 }

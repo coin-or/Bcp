@@ -96,13 +96,13 @@ int BCP_lp_generate_vars(BCP_lp_prob& p,
       //  - at the beginning of a chain (but not in the root in the
       //    first phase)
       //  - or this is the var_pool_check_freq-th iteration.
-      if (p.node->vg || p.node->vp) {
+      if (p.node->vg != -1 || p.node->vp != -1) {
 	 const BCP_message_tag msgtag = BCP_lp_pack_for_vg(p);
-	 if (p.node->vg) {
+	 if (p.node->vg != -1) {
 	    ++p.no_more_vars_cnt;
 	    p.msg_env->send(p.node->vg, msgtag, p.msg_buf);
 	 }
-	 if (p.node->vp) {
+	 if (p.node->vp != -1) {
 	    if (! (p.node->iteration_count %
 		   p.param(BCP_lp_par::VarPoolCheckFrequency))
 		|| cutset_changed) {
@@ -133,13 +133,13 @@ int BCP_lp_generate_vars(BCP_lp_prob& p,
 	    // check that everyone is still alive
 	    if (! p.msg_env->alive(p.get_parent() /*tree_manager*/))
 	       throw BCP_fatal_error("LP:   The TM has died -- LP exiting\n");
-	    if (p.node->cg && ! p.msg_env->alive(p.node->cg))
+	    if (p.node->cg != -1 && ! p.msg_env->alive(p.node->cg))
 	       throw BCP_fatal_error("LP:   The CG has died -- LP exiting\n");
-	    if (p.node->cp && ! p.msg_env->alive(p.node->cp))
+	    if (p.node->cp != -1 && ! p.msg_env->alive(p.node->cp))
 	       throw BCP_fatal_error("LP:   The CP has died -- LP exiting\n");
-	    if (p.node->vg && ! p.msg_env->alive(p.node->vg))
+	    if (p.node->vg != -1 && ! p.msg_env->alive(p.node->vg))
 	       throw BCP_fatal_error("LP:   The VG has died -- LP exiting\n");
-	    if (p.node->vp && ! p.msg_env->alive(p.node->vp))
+	    if (p.node->vp != -1 && ! p.msg_env->alive(p.node->vp))
 	       throw BCP_fatal_error("LP:   The VP has died -- LP exiting\n");
 	    // now the message queue is empty and received_message has
 	    // returned, i.e., we have waited enough

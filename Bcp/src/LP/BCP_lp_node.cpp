@@ -17,10 +17,10 @@ void
 BCP_lp_node::clean()
 {
     delete user_data; user_data = 0;
-    delete cg;        cg = 0;
-    delete cp;        cp = 0;
-    delete vg;        vg = 0;
-    delete vp;        vp = 0;
+    cg = -1;
+    cp = -1;
+    vg = -1;
+    vp = -1;
     delete warmstart; warmstart = 0;
     lb_at_cutgen.clear();
 }
@@ -30,10 +30,6 @@ BCP_lp_node::clean()
 void
 BCP_lp_parent::clean()
 {
-    added_vars_index.clear();
-    added_vars_desc.clear();
-    added_cuts_index.clear();
-    added_cuts_desc.clear();
     delete warmstart;
     warmstart = 0;
 }

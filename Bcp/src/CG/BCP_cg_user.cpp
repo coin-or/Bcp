@@ -1,5 +1,7 @@
 // Copyright (C) 2000, International Business Machines
 // Corporation and others.  All Rights Reserved.
+
+#include <cassert>
 #include "BCP_message_tag.hpp"
 #include "BCP_buffer.hpp"
 #include "BCP_var.hpp"
@@ -56,15 +58,8 @@ BCP_cg_user::send_cut(const BCP_cut& cut)
   const double lb = cut.lb();
   const double ub = cut.ub();
   buf.pack(bcpind).pack(obj_t).pack(stat).pack(lb).pack(ub);
-  switch (obj_t) {
-  case BCP_CoreObj:
-    break;
-  case BCP_AlgoObj:
-    pack_cut_algo(&dynamic_cast<const BCP_cut_algo&>(cut), buf);
-    break;
-  default:
-    throw BCP_fatal_error("BCP_cg_prob::_pack_cut(): unexpected obj_t.\n");
-  }
+  assert(obj_t == BCP_AlgoObj);
+  p->packer->pack_cut_algo(&dynamic_cast<const BCP_cut_algo&>(cut), buf);
   p->msg_env->send(p->sender, BCP_Msg_CutDescription, buf);
 }
 
@@ -120,23 +115,3 @@ BCP_cg_user::generate_cuts(BCP_vec<BCP_var*>& vars, BCP_vec<double>& x)
     printf(" CG: Default generate_cuts() executed.\n");
   }
 }
-
-//#############################################################################
-
-BCP_var_algo*
-BCP_cg_user::unpack_var_algo(BCP_buffer& buf)
-{
-  throw BCP_fatal_error("\
-BCP_cg_user::unpack_var_algo() invoked but not overridden!\n");
-  return 0; // to satisfy aCC on HP-UX
-}
-
-void
-BCP_cg_user::pack_cut_algo(const BCP_cut_algo* cut, BCP_buffer& buf)
-{
-  throw BCP_fatal_error("\
-BCP_cg_user::pack_cut_algo() invoked but not overridden!\n");
-}
-
-//#############################################################################
-

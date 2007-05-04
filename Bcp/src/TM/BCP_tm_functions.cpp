@@ -11,14 +11,13 @@ static inline BCP_node_start_result BCP_tm_start_one_node(BCP_tm_prob& p);
 
 //#############################################################################
 
-BCP_vec< std::pair<BCP_proc_id*,int> >::iterator
-BCP_tm_identify_process(BCP_vec< std::pair<BCP_proc_id*,int> >& proclist,
-			BCP_proc_id* proc)
+BCP_vec< std::pair<int,int> >::iterator
+BCP_tm_identify_process(BCP_vec< std::pair<int,int> >& proclist, int proc)
 {
-    BCP_vec<std::pair<BCP_proc_id*,int> >::iterator proci = proclist.begin();
-    BCP_vec<std::pair<BCP_proc_id*,int> >::iterator lastproci = proclist.end();
+    BCP_vec< std::pair<int,int> >::iterator proci = proclist.begin();
+    BCP_vec< std::pair<int,int> >::iterator lastproci = proclist.end();
     while (proci != lastproci) {
-	if (proci->first->is_same_process(proc))
+	if (proci->first == proc)
 	    break;
 	++proci;
     }
@@ -30,16 +29,16 @@ BCP_tm_identify_process(BCP_vec< std::pair<BCP_proc_id*,int> >& proclist,
 bool
 BCP_tm_assign_processes(BCP_tm_prob& p, BCP_tm_node* node)
 {
-    BCP_proc_id* lp = 0;
-    BCP_proc_id* cg = 0;
-    BCP_proc_id* vg = 0;
-    BCP_proc_id* cp = 0;
-    BCP_proc_id* vp = 0;
+    int lp = -1;
+    int cg = -1;
+    int vg = -1;
+    int cp = -1;
+    int vp = -1;
     bool so_far_so_good = true;
 
     if (so_far_so_good) {
 	lp = p.slaves.lp->get_free_proc();
-	if (lp == 0)
+	if (lp == -1)
 	    return false;
 	if (! p.msg_env->alive(lp)) {
 	    BCP_tm_remove_lp(p, p.slaves.lp->index_of_proc(lp));
@@ -49,7 +48,7 @@ BCP_tm_assign_processes(BCP_tm_prob& p, BCP_tm_node* node)
 
     if (so_far_so_good && p.slaves.cg) {
 	cg = p.slaves.cg->get_free_proc();
-	if (cg == 0)
+	if (cg == -1)
 	    return false;
 	if (! p.msg_env->alive(cg)) {
 	    BCP_tm_remove_cg(p, p.slaves.cg->index_of_proc(cg));
@@ -59,7 +58,7 @@ BCP_tm_assign_processes(BCP_tm_prob& p, BCP_tm_node* node)
 
     if (so_far_so_good && p.slaves.vg) {
 	vg = p.slaves.vg->get_free_proc();
-	if (vg == 0)
+	if (vg == -1)
 	    return false;
 	if (! p.msg_env->alive(vg)) {
 	    BCP_tm_remove_vg(p, p.slaves.vg->index_of_proc(vg));
@@ -70,21 +69,21 @@ BCP_tm_assign_processes(BCP_tm_prob& p, BCP_tm_node* node)
     if (so_far_so_good && p.slaves.cp) {
 	while (true) {
 	    cp = p.slaves.cp->get_free_proc();
-	    if (cp == 0)
+	    if (cp == -1)
 		break;
 	    if (p.msg_env->alive(cp))
 		break;
 	    // *FIXME*
 	    throw BCP_fatal_error("TM: A CP has died. Aborting...\n");
 	}
-	if (cp == 0) {
+	if (cp == -1) {
 	    // if there is no free CP, just keep the old one
-	    if (node->cp && ! p.msg_env->alive(node->cp)) {
+	    if (node->cp != -1 && ! p.msg_env->alive(node->cp)) {
 		// *FIXME*
 		throw BCP_fatal_error("TM: A CP has died. Aborting...\n");
 	    }
 	} else {
-	    if (node->cp && ! p.msg_env->alive(node->cp)) {
+	    if (node->cp != -1 && ! p.msg_env->alive(node->cp)) {
 		// *FIXME*
 		throw BCP_fatal_error("TM: A CP has died. Aborting...\n");
 	    }
@@ -94,21 +93,21 @@ BCP_tm_assign_processes(BCP_tm_prob& p, BCP_tm_node* node)
     if (so_far_so_good && p.slaves.vp) {
 	while (true) {
 	    vp = p.slaves.vp->get_free_proc();
-	    if (vp == 0)
+	    if (vp == -1)
 		break;
 	    if (p.msg_env->alive(vp))
 		break;
 	    // *FIXME*
 	    throw BCP_fatal_error("TM: A VP has died. Aborting...\n");
 	}
-	if (vp == 0) {
+	if (vp == -1) {
 	    // if there is no free VP, just keep the old one
-	    if (node->vp && ! p.msg_env->alive(node->vp)) {
+	    if (node->vp != -1 && ! p.msg_env->alive(node->vp)) {
 		// *FIXME*
 		throw BCP_fatal_error("TM: A VP has died. Aborting...\n");
 	    }
 	} else {
-	    if (node->vp && ! p.msg_env->alive(node->vp)) {
+	    if (node->vp != -1 && ! p.msg_env->alive(node->vp)) {
 		// *FIXME*
 		throw BCP_fatal_error("TM: A VP has died. Aborting...\n");
 	    }
@@ -121,12 +120,12 @@ BCP_tm_assign_processes(BCP_tm_prob& p, BCP_tm_node* node)
     node->lp = lp;
     node->cg = cg;
     node->vg = vg;
-    if (cp) {
+    if (cp != -1) {
 	// *LATER* : copy the old CP over to the free one and let node have
 	// this new CP.
 	node->cp = cp;
     }
-    if (vp) {
+    if (vp != -1) {
 	// *LATER* : copy the old VP over to the free one and let node have
 	// this new VP.
 	node->vp = vp;
@@ -152,7 +151,6 @@ static inline BCP_node_start_result
 BCP_tm_start_one_node(BCP_tm_prob& p)
 {
     BCP_tm_node* next_node;
-    BCP_node_change* desc;
 
     while (true){
 	if (p.candidate_list.empty()) {
@@ -161,7 +159,6 @@ BCP_tm_start_one_node(BCP_tm_prob& p)
 	}
 	next_node = dynamic_cast<BCP_tm_node*>(p.candidate_list.top());
 	p.candidate_list.pop();
-	desc = next_node->_desc;
 
 	// if no UB yet or lb is lower than UB then go ahead
 	if (! p.has_ub())
@@ -169,12 +166,12 @@ BCP_tm_start_one_node(BCP_tm_prob& p)
 
 	bool process_this = true;
 
-	if (next_node->true_lower_bound() > p.ub() - p.granularity())
+	if (next_node->getTrueLB() > p.ub() - p.granularity())
 	    process_this = false;
-	if (next_node->true_lower_bound() >
+	if (next_node->getTrueLB() >
 	    p.ub() - p.param(BCP_tm_par::TerminationGap_Absolute))
 	    process_this = false;
-	if (next_node->true_lower_bound() >
+	if (next_node->getTrueLB() >
 	    p.ub() * (1 - p.param(BCP_tm_par::TerminationGap_Relative)))
 	    process_this = false;
 
@@ -189,7 +186,7 @@ BCP_tm_start_one_node(BCP_tm_prob& p)
 	    next_node->status = BCP_PrunedNode_OverUB;
 	    if (p.param(BCP_tm_par::TmVerb_PrunedNodeInfo))
 		printf("TM: Pruning NODE %i LEVEL %i instead of sending it.\n",
-		       next_node->index(), next_node->level());
+		       next_node->index(), next_node->getDepth());
 	    p.nodes_to_free.push_back(next_node);
 	    BCP_print_memusage(p);
 	    continue;
@@ -203,7 +200,7 @@ BCP_tm_start_one_node(BCP_tm_prob& p)
 		printf("\
 TM: Moving NODE %i LEVEL %i into the next phase list \n\
     instead of sending it.\n",
-		       next_node->index(), next_node->level());
+		       next_node->index(), next_node->getDepth());
 	    continue;
 	} else { // must be BCP_GenerateColumns
 	    // all right, we want to send it out anyway for pricing
@@ -224,7 +221,9 @@ TM: Moving NODE %i LEVEL %i into the next phase list \n\
     if (p.param(BCP_tm_par::MessagePassingIsSerial)) {
 	BCP_tm_free_nodes(p);
     }
-    BCP_tm_send_node(p, next_node, BCP_Msg_ActiveNodeData);
+    BCP_tm_node_to_send* node_to_send =
+	new BCP_tm_node_to_send(p, next_node, BCP_Msg_ActiveNodeData);
+    node_to_send->send();
 
 #ifdef BCP__DUMP_PROCINFO
 #if (BCP__DUMP_PROCINFO == 1)
@@ -284,10 +283,10 @@ TM: couldn't start new node but there's a free LP ?!\n");
 
 void BCP_tm_list_candidates(BCP_tm_prob& p)
 {
-    CoinSearchTreeBase& candidates = *p.candidate_list.getTree();
-    const int n = candidates.size();
     /* FIXME: must walk through the siblings... */
 #if 0
+    CoinSearchTreeBase& candidates = *p.candidate_list.getTree();
+    const int n = candidates.size();
     const std::vector<CoinTreeNode*>& nodes = candidates.getNodes();
     for (int i = 0; i < n; ++i) {
 	printf("%5i", dynamic_cast<BCP_tm_node*>(nodes[i])->index());
@@ -366,7 +365,7 @@ void BCP_check_parameters(BCP_tm_prob& p)
 
 void BCP_sanity_checks(BCP_tm_prob& p)
 {
-    BCP_node_change* root_desc = p.search_tree.root()->_desc;
+    BCP_node_change* root_desc = p.search_tree.root()->_data._desc;
 
     if (p.core->varnum() == 0 &&
 	root_desc->var_change.added_num() == 0) {

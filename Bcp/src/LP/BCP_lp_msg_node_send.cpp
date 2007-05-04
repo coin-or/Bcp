@@ -89,31 +89,116 @@ BCP_lp_pack_core(BCP_lp_prob& p)
 static inline void
 BCP_lp_pack_noncore_vars(BCP_lp_prob& p, BCP_vec<int>& deleted_pos)
 {
-   // create the BCP_var_set_change describing the current node.
-   // must create a WrtParent listing as well as an Explicit listing since the
-   // set pf deleted vars will be needed when the warmstart info is put
-   // together.
-   deleted_pos.clear();
-   BCP_var_set_change desc(p.node->vars.entry(p.core->varnum()),
-			   p.node->vars.end());
+    // No matter whether we'll use an explicit description or WrtParent, all
+    // vars with negative bcpind will have to be sent to the TM. These vars
+    // will be collected in this vector.
+    BCP_vec<BCP_var*> vars_to_tm;
+    
+    // First create an explicit description
+    BCP_obj_set_change expl;
+    
+    BCP_var** vars = &p.node->vars[p.core->varnum()];
+    const int new_added_num = p.node->vars.size() - p.core->varnum();
+    if (new_added_num > 0) {
+	expl._new_objs.reserve(new_added_num);
+	expl._change.reserve(new_added_num);
+	for (int i = 0; i < new_added_num; ++i) {
+	    BCP_var* v = vars[i];
+	    const int bcpind = v->bcpind();
+	    // while we make the explicit description make sure that all extra
+	    // vars have positive bcpind. After all, they are being sent to
+	    // the TM right now.
+	    if (bcpind < 0) {
+		vars_to_tm.push_back(v);
+		expl._new_objs.unchecked_push_back(-bcpind);
+	    } else {
+		expl._new_objs.unchecked_push_back(bcpind);
+	    }
+	    expl._change.unchecked_push_back(BCP_obj_change(v->lb(), v->ub(),
+							    v->status()));
+	}
+    }
+    
+    // Now create a WrtParent description and see which one is shorter. Also,
+    // we'll need the list of deleted variable positions when we set of the
+    // warmstart information to be sent.
+    BCP_obj_set_change wrtp;
+    wrtp._storage = BCP_Storage_WrtParent;
 
-   if (p.node->tm_storage.var_change == BCP_Storage_WrtParent) {
-      BCP_var_set_change change(p.node->vars.entry(p.core->varnum()),
-				p.node->vars.end(),
-				p.parent->added_vars_index,
-				p.parent->added_vars_desc);
+    const BCP_vec<int>& old_added_bcpind = p.parent->var_set._new_objs;
+    const BCP_vec<BCP_obj_change>& old_added_desc = p.parent->var_set._change;
+    const int old_added_num = old_added_bcpind.size();
+    wrtp._del_change_pos.reserve(old_added_num);
 
-      deleted_pos.append(change._del_change_pos.begin(),
-			 change._del_change_pos.entry(change.deleted_num()));
+    BCP_vec<int> chpos;
+    chpos.reserve(new_added_num);
 
-      // if the TM storage is WrtParent then pack the shorter
-      if (desc.pack_size() > change.pack_size())
-	 desc.swap(change);
-   }
+    int i, j;
 
-   // Now desc holds the right description (Explicit or WrtParent, who knows?)
-   // Pack it.
-   p.pack_var_set_change(desc);
+    // first check how many entry has been deleted from oldvars
+    for (i = 0, j = 0; i < new_added_num && j < old_added_num; ++j) {
+	const BCP_var* const v = vars[i];
+	const BCP_obj_change& old = old_added_desc[j];
+	if (v->bcpind() == old_added_bcpind[j]) {
+	    // added_bcpind ALWAYS has real indices, so this really separates
+	    if (v->lb()!=old.lb || v->ub()!=old.ub || v->status()!=old.stat)
+		chpos.unchecked_push_back(i);
+	    ++i;
+	} else {
+	    wrtp._del_change_pos.unchecked_push_back(j);
+	}
+    }
+    // append the remains of old_added to _del_change_pos
+    for ( ; j < old_added_num; ++j) {
+	wrtp._del_change_pos.unchecked_push_back(j);
+    }
+    // _deleted_num is the current length of _del_change_pos
+    wrtp._deleted_num = wrtp._del_change_pos.size();
+
+    // the rest are the set of really new vars, and also the position of those
+    // vars must be appended to chpos.
+    wrtp._new_objs.reserve(new_added_num - i);
+    for ( ; i < new_added_num; ++i){
+	wrtp._new_objs.unchecked_push_back(vars[i]->bcpind());
+	chpos.unchecked_push_back(i);
+    }
+    // append chpos to _del_change_pos to get the final list
+    wrtp._del_change_pos.append(chpos);
+    
+    // finally, create _change: just pick up things based on chpos
+    const int chnum = chpos.size();
+    wrtp._change.reserve(chnum);
+    for (i = 0; i < chnum; ++i) {
+	const BCP_var* const var = vars[chpos[i]];
+	wrtp._change.unchecked_push_back(BCP_obj_change(var->lb(), var->ub(),
+							var->status()));
+    }
+   
+    deleted_pos.clear();
+    deleted_pos.append(wrtp._del_change_pos.begin(),
+		       wrtp._del_change_pos.entry(wrtp.deleted_num()));
+
+    // Whether we'll pack the Explicit or the WrtParent description, the new
+    // vars need to be packed. Pack them first, so by the time the positive
+    // bcpind in expl (or wrtp) arrives to the TM, the var already exists in
+    // the TM.
+    int num = vars_to_tm.size();
+    p.msg_buf.pack(num);
+    for (i = 0; i < num; ++i) {
+	p.pack_var(*vars_to_tm[i]);
+	vars_to_tm[i]->set_bcpind_flip();
+    }
+
+    // if the TM storage is WrtParent then pack the shorter
+    // FIXME: why only if TM storage is WrtParent ???
+    if ((p.node->tm_storage.var_change == BCP_Storage_WrtParent) &&
+	(expl.pack_size() > wrtp.pack_size())) {
+	wrtp.pack(p.msg_buf);
+    } else {
+	expl.pack(p.msg_buf);
+    }
+
+    // and in eiher case, pack the vars that had negative bcpind
 }
 
 //#############################################################################
@@ -121,31 +206,114 @@ BCP_lp_pack_noncore_vars(BCP_lp_prob& p, BCP_vec<int>& deleted_pos)
 static inline void
 BCP_lp_pack_noncore_cuts(BCP_lp_prob& p, BCP_vec<int>& deleted_pos)
 {
-   // create the BCP_cut_set_change describing the current node.
-   // must create a WrtParent listing as well as an Explicit listing since the
-   // set pf deleted cuts will be needed when the warmstart info is put
-   // together.
-   deleted_pos.clear();
-   BCP_cut_set_change desc(p.node->cuts.entry(p.core->cutnum()),
-			   p.node->cuts.end());
+    // No matter whether we'll use an explicit description or WrtParent, all
+    // cuts with negative bcpind will have to be sent to the TM. These cuts
+    // will be collected in this vector.
+    BCP_vec<BCP_cut*> cuts_to_tm;
+    
+    // First create an explicit description
+    BCP_obj_set_change expl;
+    
+    BCP_cut** cuts = &p.node->cuts[p.core->cutnum()];
+    const int new_added_num = p.node->cuts.size() - p.core->cutnum();
+    if (new_added_num > 0) {
+	expl._new_objs.reserve(new_added_num);
+	expl._change.reserve(new_added_num);
+	for (int i = 0; i < new_added_num; ++i) {
+	    BCP_cut* c = cuts[i];
+	    const int bcpind = c->bcpind();
+	    // while we make the explicit description make sure that all extra
+	    // cuts have positive bcpind. After all, they are being sent to
+	    // the TM right now.
+	    if (bcpind < 0) {
+		cuts_to_tm.push_back(c);
+		expl._new_objs.unchecked_push_back(-bcpind);
+	    } else {
+		expl._new_objs.unchecked_push_back(bcpind);
+	    }
+	    expl._change.unchecked_push_back(BCP_obj_change(c->lb(), c->ub(),
+							    c->status()));
+	}
+    }
+    
+    // Now create a WrtParent description and see which one is shorter. Also,
+    // we'll need the list of deleted cutiable positions when we set of the
+    // warmstart information to be sent.
+    BCP_obj_set_change wrtp;
+    wrtp._storage = BCP_Storage_WrtParent;
+
+    const BCP_vec<int>& old_added_bcpind = p.parent->cut_set._new_objs;
+    const BCP_vec<BCP_obj_change>& old_added_desc = p.parent->cut_set._change;
+    const int old_added_num = old_added_bcpind.size();
+    wrtp._del_change_pos.reserve(old_added_num);
+
+    BCP_vec<int> chpos;
+    chpos.reserve(new_added_num);
+
+    int i, j;
+
+    // first check how many entry has been deleted from oldcuts
+    for (i = 0, j = 0; i < new_added_num && j < old_added_num; ++j) {
+	const BCP_cut* const c = cuts[i];
+	const BCP_obj_change& old = old_added_desc[j];
+	if (c->bcpind() == old_added_bcpind[j]) {
+	    // added_bcpind ALWAYS has real indices, so this really separates
+	    if (c->lb()!=old.lb || c->ub()!=old.ub || c->status()!=old.stat)
+		chpos.unchecked_push_back(i);
+	    ++i;
+	} else {
+	    wrtp._del_change_pos.unchecked_push_back(j);
+	}
+    }
+    // append the remains of old_added to _del_change_pos
+    for ( ; j < old_added_num; ++j) {
+	wrtp._del_change_pos.unchecked_push_back(j);
+    }
+    // _deleted_num is the current length of _del_change_pos
+    wrtp._deleted_num = wrtp._del_change_pos.size();
+
+    // the rest are the set of really new cuts, and also the position of those
+    // cuts must be appended to chpos.
+    wrtp._new_objs.reserve(new_added_num - i);
+    for ( ; i < new_added_num; ++i){
+	wrtp._new_objs.unchecked_push_back(cuts[i]->bcpind());
+	chpos.unchecked_push_back(i);
+    }
+    // append chpos to _del_change_pos to get the final list
+    wrtp._del_change_pos.append(chpos);
+    
+    // finally, create _change: just pick up things based on chpos
+    const int chnum = chpos.size();
+    wrtp._change.reserve(chnum);
+    for (i = 0; i < chnum; ++i) {
+	const BCP_cut* const cut = cuts[chpos[i]];
+	wrtp._change.unchecked_push_back(BCP_obj_change(cut->lb(), cut->ub(),
+							cut->status()));
+    }
    
-   if (p.node->tm_storage.cut_change == BCP_Storage_WrtParent) {
-      BCP_cut_set_change change(p.node->cuts.entry(p.core->cutnum()),
-				p.node->cuts.end(),
-				p.parent->added_cuts_index,
-				p.parent->added_cuts_desc);
+    deleted_pos.clear();
+    deleted_pos.append(wrtp._del_change_pos.begin(),
+		       wrtp._del_change_pos.entry(wrtp.deleted_num()));
 
-      deleted_pos.append(change._del_change_pos.begin(),
-			 change._del_change_pos.entry(change.deleted_num()));
+    // Whether we'll pack the Explicit or the WrtParent description, the new
+    // cuts need to be packed. Pack them first, so by the time the positive
+    // bcpind in expl (or wrtp) arrives to the TM, the cut already exists in
+    // the TM.
+    int num = cuts_to_tm.size();
+    p.msg_buf.pack(num);
+    for (i = 0; i < num; ++i) {
+	p.pack_cut(*cuts_to_tm[i]);
+	cuts_to_tm[i]->set_bcpind_flip();
+    }
 
-      // if the TM storage is WrtParent then pack the shorter
-      if (desc.pack_size() > change.pack_size())
-	 desc.swap(change);
-   }
-
-   // Now desc holds the right description (Explicit or WrtParent, who knows?)
-   // Pack it.
-   p.pack_cut_set_change(desc);
+    // if the TM storage is WrtParent then pack the shorter
+    // FIXME: why only if TM storage is WrtParent ???
+    if ((p.node->tm_storage.cut_change == BCP_Storage_WrtParent) &&
+	(expl.pack_size() > wrtp.pack_size())) {
+	wrtp.pack(p.msg_buf);
+    } else {
+	expl.pack(p.msg_buf);
+    }
 }
 
 //#############################################################################
@@ -158,20 +326,21 @@ BCP_lp_pack_warmstart(BCP_lp_prob& p,
    p.msg_buf.pack(has_data);
 
    if (has_data) {
+      const bool def = p.param(BCP_lp_par::ReportWhenDefaultIsExecuted);
       if (p.node->tm_storage.warmstart != BCP_Storage_WrtParent) {
-	p.user->pack_warmstart(p.node->warmstart, p.msg_buf);
+	  p.packer->pack_warmstart(p.node->warmstart, p.msg_buf, def);
       } else {
-	double petol = 0.0;
-	double detol = 0.0;
-	p.lp_solver->getDblParam(OsiPrimalTolerance, petol);
-	p.lp_solver->getDblParam(OsiDualTolerance, detol);
-	// this return an explicit storage if that's shorter!
-	BCP_warmstart* ws_change =
-	  p.node->warmstart->as_change(p.parent->warmstart,
-				       del_vars, del_cuts, petol, detol);
-	p.user->pack_warmstart(ws_change, p.msg_buf);
-	delete ws_change;
-	ws_change = 0;
+	  double petol = 0.0;
+	  double detol = 0.0;
+	  p.lp_solver->getDblParam(OsiPrimalTolerance, petol);
+	  p.lp_solver->getDblParam(OsiDualTolerance, detol);
+	  // this return an explicit storage if that's shorter!
+	  BCP_warmstart* ws_change =
+	      p.node->warmstart->as_change(p.parent->warmstart,
+					   del_vars, del_cuts, petol, detol);
+	  p.packer->pack_warmstart(ws_change, p.msg_buf, def);
+	  delete ws_change;
+	  ws_change = 0;
       }
    }      
 }
@@ -184,7 +353,7 @@ static inline void BCP_lp_pack_user_data(BCP_lp_prob& p)
    p.msg_buf.pack(has_data);
 
    if (has_data) {
-      p.user->pack_user_data(p.node->user_data, p.msg_buf);
+      p.packer->pack_user_data(p.node->user_data, p.msg_buf);
    }
 }
 
@@ -216,7 +385,7 @@ BCP_lp_pack_branching_info(BCP_lp_prob& p, BCP_presolved_lp_brobj* lp_brobj)
       const int has_user_data = user_data[i] == 0 ? 0 : 1;
       buf.pack(has_user_data);
       if (has_user_data == 1) {
-	 p.user->pack_user_data(user_data[i], buf);
+	 p.packer->pack_user_data(user_data[i], buf);
       }
    }
 
@@ -251,12 +420,10 @@ int BCP_lp_send_node_description(BCP_lp_prob& p,
    buf.clear();
    buf.pack(node.index).pack(node.quality).pack(node.true_lower_bound);
 
-   const bool send_desc = brobj || p.param(BCP_lp_par::SendFathomedNodeDesc);
-
-   buf.pack(send_desc);
-
    // Send the node description only if this node is branched on (i.e., brobj
-   // is non-null) or we got to send the description of fathomed nodes, too.
+   // is non-null) or if we got to send the description of fathomed nodes, too.
+   const bool send_desc = brobj || p.param(BCP_lp_par::SendFathomedNodeDesc);
+   buf.pack(send_desc);
    if (send_desc) {
       // Pack the core (WrtCore, WrtParent or Explicit)
       BCP_lp_pack_core(p);  // BCP_problem_core_change

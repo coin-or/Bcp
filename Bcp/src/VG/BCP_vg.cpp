@@ -9,7 +9,7 @@
 #include "BCP_vg.hpp"
 #include "BCP_vg_user.hpp"
 
-BCP_vg_prob::BCP_vg_prob(BCP_proc_id* my_id, BCP_proc_id* parent) :
+BCP_vg_prob::BCP_vg_prob(int my_id, int parent) :
    BCP_process(my_id, parent),
    user(0), msg_env(0), core(new BCP_problem_core),
    upper_bound(BCP_DBL_MAX), phase(0) {}
@@ -20,7 +20,6 @@ BCP_vg_prob::~BCP_vg_prob()
    delete user;   user = 0;
    delete core;   core = 0;
    purge_ptr_vector(cuts);
-   delete sender;
 }
 
 bool
@@ -62,7 +61,7 @@ BCP_vg_prob::unpack_cut()
     cut = new BCP_cut_core(lb, ub);
     break;
   case BCP_AlgoObj:
-    cut = user->unpack_cut_algo(msg_buf);
+    cut = packer->unpack_cut_algo(msg_buf);
     cut->change_bounds(lb, ub);
     break;
   default:

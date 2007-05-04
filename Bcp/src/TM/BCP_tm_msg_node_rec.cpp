@@ -123,37 +123,77 @@ BCP_tm_unpack_node_description: received node is different from processed.\n");
     }
 
     // get the quality and new lb for this node
-    buf.unpack(node->_quality).unpack(node->_true_lower_bound);
+    double q, tlb;
+    buf.unpack(q).unpack(tlb);
+    node->setQuality(q);
+    node->setTrueLB(tlb);
 
     // wipe out any previous description of this node and create a new one if
     // the description is sent over
-    delete node->_desc;   node->_desc = 0;
+    if (node->_locally_stored) {
+	delete node->_data._desc;   node->_data._desc = 0;
+	delete node->_data._user;   node->_data._user = 0;
+    } else {
+	BCP_buffer b;
+	BCP_vec<int> indices(1, index);
+	b.pack(indices);
+	p.msg_env->send(node->_data_location, BCP_Msg_NodeListDelete, b);
+    }
+
     bool desc_sent = false;
     buf.unpack(desc_sent);
 
     if (desc_sent) {
 	BCP_node_change* desc = new BCP_node_change;
-	node->_desc = desc;
 
 	// unpack core_change
 	if (p.core->varnum() + p.core->cutnum() > 0)
 	    desc->core_change.unpack(buf);
 
-	// get the variables and cuts. unpack takes care of checking
-	// explicitness, and returns how many algo objects are there in ..._set
-	// that do not yet have internal index.
-	p.unpack_var_set_change(desc->var_change);
-	p.unpack_cut_set_change(desc->cut_change);
+	int cnt;
+	// get the variables. first unpack the new vars. those with negative
+	// bcpind has not yet been sent to the TM from this LP process, but
+	// they may have been sent here by another (if CP is used). those with
+	// positive bcpind have already been sent to the TM, receiving such
+	// var again is an error.
+	buf.unpack(cnt);
+	while (--cnt >= 0) {
+	    p.unpack_var();
+	}
+	// Now unpack the change data.
+	desc->var_change.unpack(buf);
 
+	// same for cuts
+	buf.unpack(cnt);
+	while (--cnt >= 0) {
+	    p.unpack_cut();
+	}
+	desc->cut_change.unpack(buf);
+	    
 	// warmstart info
 	bool has_data;
 	buf.unpack(has_data);
-	if (has_data)
-	    desc->warmstart = p.user->unpack_warmstart(buf);
+	if (has_data) {
+	    const bool def = p.param(BCP_tm_par::ReportWhenDefaultIsExecuted);
+	    desc->warmstart = p.packer->unpack_warmstart(buf, def);
+	}
 	// user data
-	delete node->_user_data;
 	buf.unpack(has_data);
-	node->_user_data = has_data ? p.user->unpack_user_data(buf) : 0;
+	BCP_user_data* udata = has_data ? p.packer->unpack_user_data(buf) : 0;
+
+	node->_locally_stored = true;
+	node->_data._desc = desc;
+	node->_data._user = udata;
+	node->_core_storage = desc->core_change.storage();
+	node->_var_storage = desc->var_change.storage();
+	node->_cut_storage = desc->cut_change.storage();
+	node->_ws_storage =
+	    desc->warmstart ? desc->warmstart->storage() : BCP_Storage_NoData;
+    } else {
+	node->_core_storage = BCP_Storage_NoData;
+	node->_var_storage = BCP_Storage_NoData;
+	node->_cut_storage = BCP_Storage_NoData;
+	node->_ws_storage = BCP_Storage_NoData;
     }
 
     p.active_nodes[p.slaves.lp->index_of_proc(node->lp)] = 0;
@@ -388,7 +428,7 @@ BCP_tm_unpack_branching_info(BCP_tm_prob& p, BCP_buffer& buf,
 	int has_user_data = 0;
 	buf.unpack(has_user_data);
 	if (has_user_data == 1) {
-	    user_data[i] = p.user->unpack_user_data(buf);
+	    user_data[i] = p.packer->unpack_user_data(buf);
 	}
     }
 
@@ -402,24 +442,26 @@ BCP_tm_unpack_branching_info(BCP_tm_prob& p, BCP_buffer& buf,
     int keep = -1;
     BCP_tm_node* child = 0;
     BCP_node_change* desc;
-    BCP_node_change* nodedesc = node->_desc;
+    // nodedesc exists, because when we unpack the barnching info we just
+    // received back the description of the node
+    BCP_node_change* nodedesc = node->_data._desc;
     int i;
 
     // fix the number of leaves assigned to the CP/VP
-    if (node->cp) {
-	BCP_vec< std::pair<BCP_proc_id*, int> >::iterator proc =
+    if (node->cp != -1) {
+	BCP_vec< std::pair<int, int> >::iterator proc =
 	    BCP_tm_identify_process(p.leaves_per_cp, node->cp);
 	if (proc == p.leaves_per_cp.end()) {
-	    node->cp = 0; 
+	    node->cp = -1; 
 	} else {
 	    proc->second += node->child_num() - 1;
 	}
     }
-    if (node->vp) {
-	BCP_vec< std::pair<BCP_proc_id*, int> >::iterator proc =
+    if (node->vp != -1) {
+	BCP_vec< std::pair<int, int> >::iterator proc =
 	    BCP_tm_identify_process(p.leaves_per_vp, node->vp);
 	if (proc == p.leaves_per_vp.end()) {
-	    node->vp = 0; 
+	    node->vp = -1; 
 	} else {
 	    proc->second += node->child_num() - 1;
 	}
@@ -429,24 +471,28 @@ BCP_tm_unpack_branching_info(BCP_tm_prob& p, BCP_buffer& buf,
     int numChildrenAdded = 0;
     for (i = 0; i < child_num; ++i){
 	desc = new BCP_node_change;
-	BCP_tm_create_core_change(desc, bvarnum, bcutnum,	brobj, i);
+	BCP_tm_create_core_change(desc, bvarnum, bcutnum, brobj, i);
 	BCP_tm_create_var_change(desc, nodedesc, bvarnum, brobj, i);
 	BCP_tm_create_cut_change(desc, nodedesc, bcutnum, brobj, i);
 	if (nodedesc->warmstart)
 	    // If the parent has warmstart info then 
 	    desc->warmstart = nodedesc->warmstart->empty_wrt_this();
 
-	child = new BCP_tm_node(node->level() + 1, desc);
+	child = new BCP_tm_node(node->getDepth() + 1, desc);
+	child->_core_storage = desc->core_change.storage();
+	child->_var_storage = desc->var_change.storage();
+	child->_cut_storage = desc->cut_change.storage();
+	child->_ws_storage =
+	    desc->warmstart ? desc->warmstart->storage() : BCP_Storage_NoData;
+
 	p.search_tree.insert(child); // this sets _index
-	child->_quality = qualities[i];
-	child->_true_lower_bound = true_lb[i];
-	child->_user_data = user_data[i];
+	child->_data._user = user_data[i];
 	child->_parent = node;
 	child->_birth_index = node->child_num();
 	/* Fill out the fields in CoinTreeNode */
-	child->depth_ = node->level() + 1;
-	child->quality_ = qualities[i];
-	child->true_lower_bound_ = true_lb[i];
+	child->setDepth(node->getDepth() + 1);
+	child->setQuality(qualities[i]);
+	child->setTrueLB(true_lb[i]);
 	/* Add the child to the list of children in the parent */
 	node->new_child(child);
 	// _children  initialized to be empty -- OK
@@ -465,9 +511,9 @@ BCP_tm_unpack_branching_info(BCP_tm_prob& p, BCP_buffer& buf,
 	    break;
 	}
 	// inherit var/cut pools
-	child->vp = node->vp ? node->vp->clone() : 0;
-	child->cp = node->cp ? node->cp->clone() : 0;
-	// lp, cg, vg  initialized to 0 -- OK, none assigned yet
+	child->vp = node->vp;
+	child->cp = node->cp;
+	// lp, cg, vg  initialized to -1 -- OK, none assigned yet
     }
 
     CoinTreeSiblings siblings(numChildrenAdded, children);
@@ -480,7 +526,7 @@ BCP_tm_unpack_branching_info(BCP_tm_prob& p, BCP_buffer& buf,
 	    // we've got to answer
 	    buf.clear();
 	    if (dive == BCP_TestBeforeDive)
-		dive = BCP_tm_shall_we_dive(p, child->quality());
+		dive = BCP_tm_shall_we_dive(p, child->getQuality());
 	    buf.pack(dive);
 	    if (dive != BCP_DoNotDive){
 		p.user->display_node_information(p.search_tree, *child);
@@ -512,7 +558,7 @@ BCP_tm_unpack_branching_info(BCP_tm_prob& p, BCP_buffer& buf,
 	    throw BCP_fatal_error("\
 BCP_tm_unpack_branching_info: the value of child is messed up!\n");
 	}
-	if (! node->lp) {
+	if (node->lp != -1) {
 	    throw BCP_fatal_error("\
 BCP_tm_unpack_branching_info: the (old) node has no LP associated with!\n");
 	}
@@ -520,7 +566,7 @@ BCP_tm_unpack_branching_info: the (old) node has no LP associated with!\n");
 	child->cg = node->cg;
 	child->vg = node->vg;
 	p.active_nodes[p.slaves.lp->index_of_proc(node->lp)] = child;
-	node->lp = node->cg = node->vg = 0;
+	node->lp = node->cg = node->vg = -1;
     }
 
     // and the node is done

@@ -10,9 +10,8 @@
 //#############################################################################
 
 BCP_tm_node::~BCP_tm_node() {
-    delete _user_data;
-    delete _desc;
-    delete lp; delete cg; delete vg; delete cp; delete vp;
+    delete _data._user;
+    delete _data._desc;
 }
 
 //#############################################################################
@@ -72,7 +71,7 @@ BCP_tree::enumerate_leaves(BCP_tm_node* node, const double obj_limit)
 				     st == BCP_NextPhaseNode_Infeas );
 	node->_tobepriced_leaf_num =
 	    ( ((st & (BCP_ProcessedNode|BCP_ActiveNode|BCP_CandidateNode)) &&
-	       node->true_lower_bound() > obj_limit) ||
+	       node->getTrueLB() > obj_limit) ||
 	      is_next_phase ) ? 1 : 0;
     } else {
 	node->_leaf_num = 0;
@@ -101,7 +100,7 @@ BCP_tree::true_lower_bound(const BCP_tm_node* node) const
     if (node->child_num() == 0) {
 	const BCP_tm_node_status st = node->status;
 	if (st == BCP_ActiveNode || st == BCP_CandidateNode)
-	    worstlb = node->true_lower_bound();
+	    worstlb = node->getTrueLB();
     } else {
 	BCP_vec<BCP_tm_node*>::const_iterator child;
 	BCP_vec<BCP_tm_node*>::const_iterator lastchild = node->_children.end();
@@ -113,5 +112,3 @@ BCP_tree::true_lower_bound(const BCP_tm_node* node) const
     }
     return worstlb;
 }
-
-//#############################################################################

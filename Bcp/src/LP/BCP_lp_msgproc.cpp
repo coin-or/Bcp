@@ -30,9 +30,8 @@ BCP_lp_prob::process_message()
 {
    BCP_cut* cut;
    BCP_var* var;
-   const BCP_proc_id * cpid = node->cp;
-   const BCP_proc_id * vpid = node->vp;
-   bool dont_send_to_pool;
+   const int cpid = node->cp;
+   const int vpid = node->vp;
 
    int node_index;
    int node_itcnt;
@@ -71,23 +70,23 @@ LP: BCP_Msg_InitialUserInfo arrived in BCP_lp_prob::process_message().\n");
 	 }
       }
 
-      dont_send_to_pool =
-	 (! cpid || (cpid && cpid->is_same_process(msg_buf.sender())));
       if (no_more_cuts_cnt >= 0){ // we are waiting for cuts
+	 const bool from_pool = (cpid == msg_buf.sender());
 	 BCP_lp_cut_pool& cp = *local_cut_pool;
 	 const int old_cp_size = cp.size();
 	 BCP_vec<BCP_row*> rows;
 	 rows.reserve(1);
 	 BCP_vec<BCP_cut*> cuts(1, cut);
 	 user->cuts_to_rows(node->vars, cuts, rows, *lp_result,
-			    cpid && cpid->is_same_process(msg_buf.sender()) ?
+			    cpid == msg_buf.sender() ?
 			    BCP_Object_FromPool : BCP_Object_FromGenerator,
 			    true);
 	 const int cutnum = cuts.size();
 	 for (int i = 0; i < cutnum; ++i) {
 	    cut = cuts[i];
-	    cut->set_bcpind(-BCP_lp_next_cut_index(*this));
-	    cut->dont_send_to_pool(dont_send_to_pool);
+	    if (! from_pool) 
+		cut->set_bcpind(-BCP_lp_next_cut_index(*this));
+	    cut->dont_send_to_pool(cpid == -1 || from_pool);
 	    cp.push_back(new BCP_lp_waiting_row(cut, rows[i]));
 	 }
 	 // compute the violation(s)
@@ -129,23 +128,23 @@ LP: BCP_Msg_InitialUserInfo arrived in BCP_lp_prob::process_message().\n");
 	 }
       }
 
-      dont_send_to_pool =
-	 (! vpid || (vpid && vpid->is_same_process(msg_buf.sender())));
       if (no_more_vars_cnt >= 0){ // we are waiting for vars
+	 const bool from_pool = (vpid == msg_buf.sender());
 	 BCP_lp_var_pool& vp = *local_var_pool;
 	 const int old_vp_size = vp.size();
 	 BCP_vec<BCP_col*> cols;
 	 cols.reserve(1);
 	 BCP_vec<BCP_var*> vars(1, var);
 	 user->vars_to_cols(node->cuts, vars, cols, *lp_result,
-			    vpid && vpid->is_same_process(msg_buf.sender()) ?
+			    vpid == msg_buf.sender() ?
 			    BCP_Object_FromPool : BCP_Object_FromGenerator,
 			    true);
 	 const int varnum = vars.size();
 	 for (int i = 0; i < varnum; ++i) {
 	    var = vars[i];
-	    var->set_bcpind(-BCP_lp_next_var_index(*this));
-	    var->dont_send_to_pool(dont_send_to_pool);
+	    if (! from_pool) 
+		var->set_bcpind(-BCP_lp_next_var_index(*this));
+	    var->dont_send_to_pool(vpid == -1 || from_pool);
 	    vp.push_back(new BCP_lp_waiting_col(var, cols[i]));
 	 }
 	 // compute the reduced_cost(s)
@@ -297,7 +296,7 @@ void BCP_lp_process_ub_message(BCP_lp_prob& p, BCP_buffer& buf)
 
 void BCP_lp_send_cuts_to_cp(BCP_lp_prob& p, const int eff_cnt_limit)
 {
-  if (! p.node->cp) // go back if no cut pool exists
+  if (p.node->cp != -1) // go back if no cut pool exists
     return;
 
   BCP_cut_set& cuts = p.node->cuts;
@@ -326,7 +325,7 @@ void BCP_lp_send_cuts_to_cp(BCP_lp_prob& p, const int eff_cnt_limit)
       cut = *cuti;
       if (cut->effective_count() >= eff_cnt_limit &&
 	  ! cut->dont_send_to_pool())
-	p.pack_cut(BCP_ProcessType_CP, *cut);
+	p.pack_cut(*cut);
       cut->dont_send_to_pool(true);
     }
 

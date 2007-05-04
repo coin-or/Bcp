@@ -17,63 +17,16 @@
 
 //#############################################################################
 
-int BCP_is_pvm_id(const BCP_proc_id* pid, const char* str) {
-    const BCP_pvm_id* id = dynamic_cast<const BCP_pvm_id*>(pid);
-    if (id == 0){
-	printf("Trying to use a non-pvm proc id in %s.\n", str);
-	throw BCP_fatal_error(" ERROR in PVM -- exiting.\n");
-    }
-    return id->pid();
-}
-
-//#############################################################################
-
-int* BCP_process_array_2_int(const BCP_proc_array& parray,
-			     const char* str) {
-    int *ids = new int[parray.size()];
-    BCP_vec<BCP_proc_id*>::const_iterator first = parray.procs().begin();
-    BCP_vec<BCP_proc_id*>::const_iterator last = parray.procs().end();
-    while (first != last) {
-	*ids = BCP_is_pvm_id(*first, str);
-	++ids;
-	++first;
-    }
-    ids -= parray.size();
-    return ids;
-}
-
-int* BCP_process_vec_2_int(BCP_vec<BCP_proc_id*>::const_iterator beg,
-			   BCP_vec<BCP_proc_id*>::const_iterator end,
-			   const char* str) {
-    const int new_num = end - beg;
-    int *ids = new int[new_num];
-    while (beg != end) {
-	*ids = BCP_is_pvm_id(*beg, str);
-	++ids;
-	++beg;
-    }
-    ids -= new_num;
-    return ids;
-}
-
-
-//#############################################################################
-
-bool
-BCP_pvm_id::is_same_process(const BCP_proc_id* other_process) const {
-    return pid() == BCP_is_pvm_id(other_process, "is_same_process()");
-}
-
-//#############################################################################
-
-BCP_pvm_environment::~BCP_pvm_environment() {
+BCP_pvm_environment::~BCP_pvm_environment()
+{
     check_error( pvm_exit(), "~BCP_pvm_environment()");
 }
 
 //-----------------------------------------------------------------------------
 
 void
-BCP_pvm_environment::check_error(const int code, const char* str) const {
+BCP_pvm_environment::check_error(const int code, const char* str) const
+{
     if (code < 0){
 	printf("%s returned error code %i.\n", str, code);
 	throw BCP_fatal_error(" ERROR in PVM -- exiting.\n");
@@ -82,94 +35,95 @@ BCP_pvm_environment::check_error(const int code, const char* str) const {
 
 //-----------------------------------------------------------------------------
 
-BCP_proc_id*
-BCP_pvm_environment::register_process(USER_initialize* user_init) {
+int
+BCP_pvm_environment::register_process(USER_initialize* user_init)
+{
     int pid = pvm_mytid();
     check_error(pid, "pvm_mytid()");
-    BCP_proc_id* parent = parent_process();
-    if (! parent)
-	check_error( pvm_catchout(stdout), "register_process -- pvm_catchout\n");
-    delete parent;
+    int parent = parent_process();
+    if (parent < 0)
+	check_error(pvm_catchout(stdout),"register_process -- pvm_catchout\n");
     /* set stdout to be line buffered so that pvm_catchout will work faster */
     setvbuf(stdout, (char *)NULL, _IOLBF, 0);
-    return new BCP_pvm_id(pid);
+    return pid;
 }
 
-BCP_proc_id*
-BCP_pvm_environment::parent_process() {
+int
+BCP_pvm_environment::parent_process()
+{
     int pid = pvm_parent();
     if (pid == PvmNoParent)
-	return 0;
+	return -1;
     check_error(pid, "pvm_parent()");
-    return new BCP_pvm_id(pid);
+    return pid;
 }
 
 bool
-BCP_pvm_environment::alive(const BCP_proc_id* pid)
+BCP_pvm_environment::alive(const int pid)
 {
-    return pvm_pstat(BCP_is_pvm_id(pid, "alive()")) == PvmOk;
+    return pvm_pstat(pid) == PvmOk;
 }
 
-BCP_vec<BCP_proc_id*>::iterator
+BCP_vec<int>::const_iterator
 BCP_pvm_environment::alive(const BCP_proc_array& parray)
 {
-    BCP_vec<BCP_proc_id*>::const_iterator first = parray.procs().begin();
-    BCP_vec<BCP_proc_id*>::const_iterator last = parray.procs().end();
+    BCP_vec<int>::const_iterator first = parray.procs().begin();
+    BCP_vec<int>::const_iterator last = parray.procs().end();
     while (first != last) {
 	if (! alive(*first))
 	    break;
 	++first;
     }
-    return const_cast<BCP_vec<BCP_proc_id*>::iterator>(first);
+    return BCP_vec<int>::const_iterator>(first);
 }
 
 //-----------------------------------------------------------------------------
 
 void
-BCP_pvm_environment::send(const BCP_proc_id* const target,
-			  const BCP_message_tag tag) {
+BCP_pvm_environment::send(const int target,
+			  const BCP_message_tag tag)
+{
     // create an empty buffer and send it with the tag
-    int pid = BCP_is_pvm_id(target, "send()");
     check_error( pvm_initsend(PvmDataInPlace), "send() - initsend");
-    check_error( pvm_send(pid, tag), "send() - send");
+    check_error( pvm_send(target, tag), "send() - send");
 }
 
 void
-BCP_pvm_environment::send(const BCP_proc_id* const target,
-			  const BCP_message_tag tag, const BCP_buffer& buf) {
-    int pid = BCP_is_pvm_id(target, "send()");
+BCP_pvm_environment::send(const int target,
+			  const BCP_message_tag tag, const BCP_buffer& buf)
+{
     check_error( pvm_initsend(PvmDataInPlace), "send() - initsend");
     check_error( pvm_pkbyte(const_cast<char*>(buf.data()), buf.size(), 1),
 		 "send() - pkbyte");
-    check_error( pvm_send(pid, tag), "send() - send");
+    check_error( pvm_send(target, tag), "send() - send");
 }
    
 //-----------------------------------------------------------------------------
 
 void
 BCP_pvm_environment::multicast(const BCP_proc_array* const target,
-			       const BCP_message_tag tag) {
-    int* pids = BCP_process_array_2_int(*target, "multicast() - parray_2_int");
+			       const BCP_message_tag tag)
+{
     check_error( pvm_initsend(PvmDataInPlace), "multicast() - initsend");
-    check_error( pvm_mcast(pids, target->size(), tag), "multicast() - send");
-    delete[] pids;
+    check_error( pvm_mcast(&target->procs()[0], target->size(), tag),
+		 "multicast() - send");
 }
 
 void
 BCP_pvm_environment::multicast(const BCP_proc_array* const target,
 			       const BCP_message_tag tag,
-			       const BCP_buffer& buf) {
-    int* pids = BCP_process_array_2_int(*target, "multicast() - parray_2_int");
+			       const BCP_buffer& buf)
+{
     check_error( pvm_initsend(PvmDataInPlace), "multicast() - initsend");
     check_error( pvm_pkbyte(const_cast<char*>(buf.data()), buf.size(), 1),
 		 "multicast() - pkbyte");
-    check_error( pvm_mcast(pids, target->size(), tag), "multicast() - send");
-    delete[] pids;
+    check_error( pvm_mcast(&target->procs()[0], target->size(), tag),
+		 "multicast() - send");
 }
 
 void
-BCP_pvm_environment::multicast(BCP_vec<BCP_proc_id*>::const_iterator beg,
-			       BCP_vec<BCP_proc_id*>::const_iterator end,
+BCP_pvm_environment::multicast(BCP_vec<int>::const_iterator beg,
+			       BCP_vec<int>::const_iterator end,
 			       const BCP_message_tag tag) {
     int* pids = BCP_process_vec_2_int(beg, end, "multicast() - parray_2_int");
     check_error( pvm_initsend(PvmDataInPlace), "multicast() - initsend");
@@ -178,8 +132,8 @@ BCP_pvm_environment::multicast(BCP_vec<BCP_proc_id*>::const_iterator beg,
 }
 
 void
-BCP_pvm_environment::multicast(BCP_vec<BCP_proc_id*>::const_iterator beg,
-			       BCP_vec<BCP_proc_id*>::const_iterator end,
+BCP_pvm_environment::multicast(BCP_vec<int>::const_iterator beg,
+			       BCP_vec<int>::const_iterator end,
 			       const BCP_message_tag tag,
 			       const BCP_buffer& buf) {
     int* pids = BCP_process_vec_2_int(beg, end, "multicast() - parray_2_int");
@@ -193,7 +147,7 @@ BCP_pvm_environment::multicast(BCP_vec<BCP_proc_id*>::const_iterator beg,
 //-----------------------------------------------------------------------------
 
 void
-BCP_pvm_environment::receive(const BCP_proc_id* const source,
+BCP_pvm_environment::receive(const int const source,
 			     const BCP_message_tag tag, BCP_buffer& buf,
 			     const double timeout) {
     buf.clear();
@@ -242,7 +196,7 @@ BCP_pvm_environment::receive(const BCP_proc_id* const source,
 //-----------------------------------------------------------------------------
 
 bool
-BCP_pvm_environment::probe(const BCP_proc_id* const source,
+BCP_pvm_environment::probe(const int const source,
 			   const BCP_message_tag tag) {
     int pid = source == BCP_AnyProcess? -1 : BCP_is_pvm_id(source, "probe()");
     if (source != BCP_AnyProcess) {
@@ -261,7 +215,7 @@ BCP_pvm_environment::probe(const BCP_proc_id* const source,
 
 //-----------------------------------------------------------------------------
 
-BCP_proc_id*
+int
 BCP_pvm_environment::unpack_proc_id(BCP_buffer& buf) {
     int pid;
     buf.unpack(pid);
@@ -269,7 +223,7 @@ BCP_pvm_environment::unpack_proc_id(BCP_buffer& buf) {
 }
 
 void
-BCP_pvm_environment::pack_proc_id(BCP_buffer& buf, const BCP_proc_id* pid) {
+BCP_pvm_environment::pack_proc_id(BCP_buffer& buf, const int pid) {
     buf.pack(BCP_is_pvm_id(pid, "pack_proc_id()"));
 }
 	    
@@ -311,7 +265,7 @@ BCP_pvm_split_exe(const BCP_string& exe, char*& exe_name, char**& exe_args)
     }
 }
 
-BCP_proc_id*
+int
 BCP_pvm_environment::start_process(const BCP_string& exe, const bool debug) {
     int flag = debug ? PvmTaskDebug : 0;
     int pid;
@@ -331,7 +285,7 @@ BCP_pvm_environment::start_process(const BCP_string& exe, const bool debug) {
     return new BCP_pvm_id(pid);
 }
 
-BCP_proc_id*
+int
 BCP_pvm_environment::start_process(const BCP_string& exe,
 				   const BCP_string& machine,
 				   const bool debug) {
@@ -358,7 +312,7 @@ BCP_proc_array*
 BCP_pvm_environment::start_processes(const BCP_string& exe,
 				     const int proc_num,
 				     const bool debug) {
-    BCP_vec<BCP_proc_id*> procs;
+    BCP_vec<int> procs;
     procs.reserve(proc_num);
 
     int flag = debug ? PvmTaskDebug : 0;
@@ -390,7 +344,7 @@ BCP_pvm_environment::start_processes(const BCP_string& exe,
 				     const int proc_num,
 				     const BCP_vec<BCP_string>& machines,
 				     const bool debug){
-    BCP_vec<BCP_proc_id*> procs;
+    BCP_vec<int> procs;
     procs.reserve(proc_num);
     // spawn the jobs one-by-one on the specified machines
     for (int i = 0; i != proc_num; ++i)
@@ -402,17 +356,15 @@ BCP_pvm_environment::start_processes(const BCP_string& exe,
 
 //-----------------------------------------------------------------------------
 
-// void BCP_pvm_environment::stop_process(const BCP_proc_id* process) {
-//    check_error( pvm_kill(BCP_is_pvm_id(process, "stop_process()")),
-// 		"stop_process()");
+// void BCP_pvm_environment::stop_process(const int process) {
+//    check_error( pvm_kill(process, "stop_process()"), "stop_process()");
 // }
 
 // void BCP_pvm_environment::stop_processes(const BCP_proc_array* processes){
-//    BCP_vec<BCP_proc_id*>::const_iterator first = processes.procs.begin();
-//    BCP_vec<BCP_proc_id*>::const_iterator last = pprocesses.procs.end();
+//    BCP_vec<int>::const_iterator first = processes.procs.begin();
+//    BCP_vec<int>::const_iterator last = pprocesses.procs.end();
 //    while (first != last) {
-//       check_error( pvm_kill(BCP_is_pvm_id(*first, "stop_processes()")),
-// 		   "stop_processes()");
+//       check_error( pvm_kill(*first, "stop_processes()"),"stop_processes()");
 //       ++first;
 //    }
 // }

@@ -3,41 +3,39 @@
 #ifndef _BCP_MAIN_FUN_H
 #define _BCP_MAIN_FUN_H
 
+#include "BCP_enum_process_t.hpp"
+
 class BCP_message_environment;
 class USER_initialize;
-class BCP_proc_id;
 
-void
-BCP_tm_main(BCP_message_environment* msg_env,
-	    USER_initialize* user_init,
-	    BCP_proc_id* my_id,
-	    const int argnum, const char* const * arglist);
-
-void BCP_lp_main(BCP_message_environment* msg_env,
+void BCP_tm_main(BCP_message_environment* msg_env,
 		 USER_initialize* user_init,
-		 BCP_proc_id* my_id,
-		 BCP_proc_id* parent);
+		 const int argnum, const char* const * arglist);
+
+BCP_process_t BCP_tmstorage_main(BCP_message_environment* msg_env,
+				 USER_initialize* user_init,
+				 int my_id, int parent);
+
+BCP_process_t BCP_lp_main(BCP_message_environment* msg_env,
+			  USER_initialize* user_init,
+			  int my_id, int parent);
 
 #if 0
-void BCP_cp_main(BCP_message_environment* msg_env,
-		 USER_initialize* user_init,
-		 BCP_proc_id* my_id,
-		 BCP_proc_id* parent);
+BCP_process_t BCP_cp_main(BCP_message_environment* msg_env,
+			  USER_initialize* user_init,
+			  int my_id, int parent);
 
-void BCP_vp_main(BCP_message_environment* msg_env,
-		 USER_initialize* user_init,
-		 BCP_proc_id* my_id,
-		 BCP_proc_id* parent);
+BCP_process_t BCP_vp_main(BCP_message_environment* msg_env,
+			  USER_initialize* user_init,
+			  int my_id, int parent);
 #endif
 
-void BCP_cg_main(BCP_message_environment* msg_env,
-		 USER_initialize* user_init,
-		 BCP_proc_id* my_id,
-		 BCP_proc_id* parent);
+BCP_process_t BCP_cg_main(BCP_message_environment* msg_env,
+			  USER_initialize* user_init,
+			  int my_id, int parent);
 
-void BCP_vg_main(BCP_message_environment* msg_env,
-		 USER_initialize* user_init,
-		 BCP_proc_id* my_id,
-		 BCP_proc_id* parent);
+BCP_process_t BCP_vg_main(BCP_message_environment* msg_env,
+			  USER_initialize* user_init,
+			  int my_id, int parent);
 
 #endif

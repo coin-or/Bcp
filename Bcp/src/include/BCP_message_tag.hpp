@@ -47,6 +47,29 @@ enum BCP_message_tag{
    BCP_Msg_User,
    /*@}*/
 
+   /**@name Messages from the TM to TMS and back */
+   /*@{*/
+   BCP_Msg_NodeList,
+   BCP_Msg_NodeListRequest,
+   BCP_Msg_NodeListDelete,
+   BCP_Msg_VarList,
+   BCP_Msg_VarListRequest,
+   BCP_Msg_VarListDelete,
+   BCP_Msg_CutList,
+   BCP_Msg_CutListRequest,
+   BCP_Msg_CutListDelete,
+   BCP_Msg_NodeListReply,
+   BCP_Msg_NodeListRequestReply,
+   BCP_Msg_NodeListDeleteReply,
+   BCP_Msg_VarListReply,
+   BCP_Msg_VarListRequestReply,
+   BCP_Msg_VarListDeleteReply,
+   BCP_Msg_CutListReply,
+   BCP_Msg_CutListRequestReply,
+   BCP_Msg_CutListDeleteReply,
+   
+   /*@}*/
+
    /**@name Messages between any process and the Tree Manager */
    /*@{*/
    /** Any process to TM: a process has died. */

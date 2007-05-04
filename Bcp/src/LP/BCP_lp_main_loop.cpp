@@ -149,13 +149,13 @@ LP:   Terminating and fathoming due to proven high cost.\n",
 	    //    pool at the top of the root, too, which is unnecessary, but
 	    //    it doesn't hurt and no big time is lost.)
 	    //  - or this is the cut_pool_check_freq-th iteration.
-	    if (p.node->cg || p.node->cp) {
+	    if (p.node->cg != -1 || p.node->cp != -1) {
 		const BCP_message_tag msgtag = BCP_lp_pack_for_cg(p);
-		if (p.node->cg) {
+		if (p.node->cg != -1) {
 		    ++p.no_more_cuts_cnt;
 		    p.msg_env->send(p.node->cg, msgtag, p.msg_buf);
 		}
-		if (p.node->cp) {
+		if (p.node->cp != -1) {
 		    if (! (p.node->iteration_count %
 			   p.param(BCP_lp_par::CutPoolCheckFrequency))
 			|| varset_changed) {
@@ -165,13 +165,13 @@ LP:   Terminating and fathoming due to proven high cost.\n",
 		}
 	    }
 	    // Similarly, send stuff to the VG/VP
-	    if (p.node->vg || p.node->vp) {
+	    if (p.node->vg != -1 || p.node->vp != -1) {
 		const BCP_message_tag msgtag = BCP_lp_pack_for_vg(p);
-		if (p.node->vg) {
+		if (p.node->vg != -1) {
 		    ++p.no_more_vars_cnt;
 		    p.msg_env->send(p.node->vg, msgtag, p.msg_buf);
 		}
-		if (p.node->vp) {
+		if (p.node->vp != -1) {
 		    if (! (p.node->iteration_count %
 			   p.param(BCP_lp_par::VarPoolCheckFrequency))
 			|| cutset_changed) {

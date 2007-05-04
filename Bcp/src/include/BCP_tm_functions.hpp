@@ -13,7 +13,6 @@
 
 #define BCP__DUMP_PROCINFO 0
 
-class BCP_proc_id;
 class BCP_buffer;
 class BCP_tm_prob;
 class BCP_lp_prob;
@@ -58,8 +57,6 @@ void BCP_tm_remove_cg(BCP_tm_prob& p, const int index);
 void BCP_tm_remove_vg(BCP_tm_prob& p, const int index);
 void BCP_tm_notify_about_new_phase(BCP_tm_prob& p);
 void BCP_tm_notify_processes(BCP_tm_prob& p);
-void BCP_tm_distribute_core(BCP_tm_prob& p);
-void BCP_tm_distribute_user_info(BCP_tm_prob& p);
 void BCP_tm_unpack_priced_root(BCP_tm_prob& p, BCP_buffer& buf);
 void BCP_tm_free_procs_of_node(BCP_tm_prob& p, BCP_tm_node* node);
 
@@ -86,9 +83,8 @@ BCP_tm_node* BCP_tm_unpack_node_no_branching_info(BCP_tm_prob& p,
 						  BCP_buffer& buf);
 //-----------------------------------------------------------------------------
 // BCP_tm_functions.cpp
-BCP_vec< std::pair<BCP_proc_id*, int> >::iterator
-BCP_tm_identify_process(BCP_vec< std::pair<BCP_proc_id*, int> >& proclist,
-			BCP_proc_id* proc);
+BCP_vec< std::pair<int, int> >::iterator
+BCP_tm_identify_process(BCP_vec< std::pair<int, int> >& proclist, int proc);
 bool BCP_tm_assign_processes(BCP_tm_prob& p, BCP_tm_node* node);
 BCP_node_start_result BCP_tm_start_new_nodes(BCP_tm_prob& p);
 void BCP_tm_list_candidates(BCP_tm_prob& p);

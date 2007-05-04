@@ -69,7 +69,7 @@ public:
    BCP_message_tag _msgtag;
    /** The process id of the sender of the last <em>received</em> message.
        This member has no meaning if the buffer holds an outgoing message. */ 
-   BCP_proc_id*    _sender;
+   int    _sender;
    /** The next read/write position in the buffer. */
    size_t _pos;
    /** The amount of memory allocated for the buffer. */
@@ -89,11 +89,11 @@ public:
    inline BCP_message_tag msgtag() const { return _msgtag; }
    /** Return a const pointer to the process id of the sender of the message
        in the buffer. */
-   inline const BCP_proc_id* sender() const { return _sender; }
+   inline int         sender() const { return _sender; }
    /** Return the size of the current message in the buffer. */
-   inline int                size() const { return _size; }
+   inline int         size() const { return _size; }
    /** Return a const pointer to the data stored in the buffer. */
-   inline const char*        data() const { return _data; }
+   inline const char* data() const { return _data; }
    /*@}*/
    //=========================================================================
 
@@ -111,7 +111,7 @@ public:
 
   /** Set the buffer to be a copy of the given data. Use this with care! */
   void set_content(const char* data, const size_t size,
-		   BCP_proc_id* sender, BCP_message_tag msgtag) {
+		   int sender, BCP_message_tag msgtag) {
     _sender = sender;
     _msgtag = msgtag;
     if (_max_size < size) {
@@ -129,7 +129,7 @@ public:
    /** Make an exact replica of the other buffer. */
    BCP_buffer& operator=(const BCP_buffer& buf) {
       _msgtag = buf._msgtag;
-      _sender = buf._sender ? buf._sender->clone() : 0;
+      _sender = buf._sender;
       _pos = buf._pos;
       if (_max_size < buf._max_size) {
 	 delete[] _data;
@@ -160,7 +160,7 @@ public:
       _msgtag = BCP_Msg_NoMessage;
       _size = 0;
       _pos = 0;
-      delete _sender; _sender = 0;
+      _sender = -1;
    }
 
    /** Pack a single object of type <code>T</code>. Copies
@@ -369,18 +369,17 @@ public:
    /*@{*/
    /** The default constructor creates a buffer of size 16 Kbytes with no
        message in it. */
-   BCP_buffer() : _msgtag(BCP_Msg_NoMessage), _sender(0), _pos(0),
+   BCP_buffer() : _msgtag(BCP_Msg_NoMessage), _sender(-1), _pos(0),
       _max_size(0x4000/*16K*/), _size(0), _data(new char[_max_size]) {}
    /** The copy constructor makes an exact replica of the other buffer. */
    BCP_buffer(const BCP_buffer& buf) :
-      _msgtag(BCP_Msg_NoMessage), _sender(0), _pos(0),
+      _msgtag(BCP_Msg_NoMessage), _sender(-1), _pos(0),
       _max_size(0), _size(0), _data(0){
 	 operator=(buf);
    }
    /** The desctructor deletes all data members (including freeing the
        buffer). */
    ~BCP_buffer() {
-      delete _sender;   _sender = 0;
       delete[] _data;
    }
    /*@}*/

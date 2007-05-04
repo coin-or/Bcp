@@ -12,7 +12,7 @@
 
 #include "BCP_warmstart.hpp"
 
-BCP_cg_prob::BCP_cg_prob(BCP_proc_id* my_id, BCP_proc_id* parent) :
+BCP_cg_prob::BCP_cg_prob(int my_id, int parent) :
     BCP_process(my_id, parent),
     user(0), msg_env(0), core(new BCP_problem_core),
     upper_bound(BCP_DBL_MAX), phase(0) {}
@@ -23,7 +23,6 @@ BCP_cg_prob::~BCP_cg_prob()
    delete user;   user = 0;
    delete core;   core = 0;
    purge_ptr_vector(vars);
-   delete sender;
 }
 
 bool
@@ -69,7 +68,7 @@ BCP_cg_prob::unpack_var()
     var = new BCP_var_core(var_t, obj, lb, ub);
     break;
   case BCP_AlgoObj:
-    var = user->unpack_var_algo(msg_buf);
+    var = packer->unpack_var_algo(msg_buf);
     var->set_var_type(var_t);
     var->change_bounds(lb, ub);
     var->set_obj(obj);

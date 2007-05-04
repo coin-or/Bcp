@@ -51,10 +51,11 @@ BCP_lp_process_core(BCP_lp_prob& p, BCP_buffer& buf)
 
 //#############################################################################
 
-void BCP_lp_main(BCP_message_environment* msg_env, USER_initialize* user_init,
-		 BCP_proc_id* my_id, BCP_proc_id* parent)
+BCP_process_t BCP_lp_main(BCP_message_environment* msg_env,
+			  USER_initialize* user_init,
+			  int my_id, int parent)
 {
-    BCP_lp_prob p(my_id, parent);
+   BCP_lp_prob p(my_id, parent);
    p.msg_env = msg_env;
 
    // wait for the message with the parameters and unpack it
@@ -94,6 +95,8 @@ void BCP_lp_main(BCP_message_environment* msg_env, USER_initialize* user_init,
    // now create the user universe
    p.user = user_init->lp_init(p);
    p.user->setLpProblemPointer(&p);
+   p.packer = user_init->packer_init(p.user);
+   p.packer->user_class = p.user;
 
    // wait for the core description and process it
    p.msg_buf.clear();
@@ -113,11 +116,16 @@ void BCP_lp_main(BCP_message_environment* msg_env, USER_initialize* user_init,
    // ok, we're all geared up to process search tree nodes
    // wait for messages and process them...
    BCP_message_tag msgtag;
+   BCP_process_t ptype = BCP_ProcessType_EndProcess;
    while (true) {
       p.msg_buf.clear();
       msg_env->receive(parent /*tree_manager*/,
 		       BCP_Msg_AnyMessage, p.msg_buf, -1);
       msgtag = p.msg_buf.msgtag();
+      if (msgtag == BCP_Msg_ProcessType) {
+	  p.msg_buf.unpack(ptype);
+	  break;
+      }
       p.no_more_cuts_cnt = -1; // not waiting for cuts
       p.process_message();
       if (msgtag == BCP_Msg_FinishedBCP)
@@ -126,4 +134,6 @@ void BCP_lp_main(BCP_message_environment* msg_env, USER_initialize* user_init,
 
    if (logfile)
       fclose(logfile);
+
+   return ptype;
 }

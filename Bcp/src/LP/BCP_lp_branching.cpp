@@ -533,33 +533,35 @@ BCP_lp_make_parent_from_node(BCP_lp_prob& p)
 
     const BCP_var_set& vars = node.vars;
     const int varnum = vars.size();
-    BCP_vec<int>& added_vindex = parent.added_vars_index;
-    BCP_vec<BCP_obj_change>& added_vdesc = parent.added_vars_desc;
-    added_vindex.clear();
-    added_vdesc.clear();
-    added_vindex.reserve(varnum - bvarnum);
-    added_vdesc.reserve(varnum - bvarnum);
+    BCP_obj_set_change var_set = parent.var_set;
+    BCP_vec<int>& var_ind = var_set._new_objs;
+    BCP_vec<BCP_obj_change>& var_ch = var_set._change;
+    var_ind.clear();
+    var_ch.clear();
+    var_ind.reserve(varnum - bvarnum);
+    var_ch.reserve(varnum - bvarnum);
     for (i = bvarnum; i < varnum; ++i) {
 	const BCP_var* var = vars[i];
-	added_vindex.unchecked_push_back(var->bcpind());
-	added_vdesc.unchecked_push_back(BCP_obj_change(var->lb(), var->ub(),
-						       var->status()));
+	var_ind.unchecked_push_back(var->bcpind());
+	var_ch.unchecked_push_back(BCP_obj_change(var->lb(), var->ub(),
+						  var->status()));
     }
     node.tm_storage.var_change = BCP_Storage_WrtParent;
 
     const BCP_cut_set& cuts = node.cuts;
     const int cutnum = cuts.size();
-    BCP_vec<int>& added_cindex = parent.added_cuts_index;
-    BCP_vec<BCP_obj_change>& added_cdesc = parent.added_cuts_desc;
-    added_cindex.clear();
-    added_cdesc.clear();
-    added_cindex.reserve(cutnum - bcutnum);
-    added_cdesc.reserve(cutnum - bcutnum);
+    BCP_obj_set_change cut_set = parent.cut_set;
+    BCP_vec<int>& cut_ind = cut_set._new_objs;
+    BCP_vec<BCP_obj_change>& cut_ch = cut_set._change;
+    cut_ind.clear();
+    cut_ch.clear();
+    cut_ind.reserve(cutnum - bcutnum);
+    cut_ch.reserve(cutnum - bcutnum);
     for (i = bcutnum; i < cutnum; ++i) {
 	const BCP_cut* cut = cuts[i];
-	added_cindex.unchecked_push_back(cut->bcpind());
-	added_cdesc.unchecked_push_back(BCP_obj_change(cut->lb(), cut->ub(),
-						       cut->status()));
+	cut_ind.unchecked_push_back(cut->bcpind());
+	cut_ch.unchecked_push_back(BCP_obj_change(cut->lb(), cut->ub(),
+						  cut->status()));
     }
     node.tm_storage.cut_change = BCP_Storage_WrtParent;
 

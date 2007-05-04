@@ -142,82 +142,8 @@ BCP_lp_user::unpack_module_data(BCP_buffer & buf)
 
 //#############################################################################
 
-void
-BCP_lp_user::pack_warmstart(const BCP_warmstart* ws, BCP_buffer& buf)
-{
-    if (p->param(BCP_lp_par::ReportWhenDefaultIsExecuted)) {
-	printf(" LP: Default BCP_lp_user::pack_warmstart() executed.\n");
-    }
-    BCP_pack_warmstart(ws, buf);
-}
-
-//-----------------------------------------------------------------------------
-
-BCP_warmstart*
-BCP_lp_user::unpack_warmstart(BCP_buffer& buf)
-{
-    if (p->param(BCP_lp_par::ReportWhenDefaultIsExecuted)) {
-	printf(" LP: Default BCP_lp_user::unpack_warmstart() executed.\n");
-    }
-    return BCP_unpack_warmstart(buf);
-}
-
-//#############################################################################
-
-void
-BCP_lp_user::pack_var_algo(const BCP_var_algo* var, BCP_buffer& buf)
-{
-    throw BCP_fatal_error("\
-BCP_lp_user::pack_var_algo() invoked but not overridden!\n");
-}
-
-//-----------------------------------------------------------------------------
-BCP_var_algo*
-BCP_lp_user::unpack_var_algo(BCP_buffer& buf)
-{
-    throw BCP_fatal_error("\
-BCP_lp_user::unpack_var_algo() invoked but not overridden!\n");
-    return 0; // to satisfy aCC on HP-UX
-}
-      
-//-----------------------------------------------------------------------------
-void
-BCP_lp_user::pack_cut_algo(const BCP_cut_algo* cut, BCP_buffer& buf)
-{
-    throw BCP_fatal_error("\
-BCP_lp_user::pack_cut_algo() invoked but not overridden!\n");
-}
-
-//-----------------------------------------------------------------------------
-BCP_cut_algo*
-BCP_lp_user::unpack_cut_algo(BCP_buffer& buf)
-{
-    throw BCP_fatal_error("\
-BCP_lp_user::unpack_cut_algo() invoked but not overridden!\n");
-    return 0; // to satisfy aCC on HP-UX
-}
-
-//-----------------------------------------------------------------------------
-void
-BCP_lp_user::pack_user_data(const BCP_user_data* ud, BCP_buffer& buf)
-{
-    throw BCP_fatal_error("\
-BCP_lp_user::pack_user_data() invoked but not overridden!\n");
-}
-
-//-----------------------------------------------------------------------------
-BCP_user_data*
-BCP_lp_user::unpack_user_data(BCP_buffer& buf)
-{
-    throw BCP_fatal_error("\
-BCP_lp_user::unpack_user_data() invoked but not overridden!\n");
-    return 0; // to satisfy aCC on HP-UX
-}
-
-//#############################################################################
-
 /** What is the process id of the current process */
-const BCP_proc_id*
+int
 BCP_lp_user::process_id() const
 {
     return p->get_process_id();
@@ -225,8 +151,7 @@ BCP_lp_user::process_id() const
 
 /** Send a message to a particular process */
 void
-BCP_lp_user::send_message(const BCP_proc_id* const target,
-			  const BCP_buffer& buf)
+BCP_lp_user::send_message(const int target, const BCP_buffer& buf)
 {
     p->msg_env->send(target, BCP_Msg_User, buf);
 }    
@@ -532,7 +457,7 @@ BCP_lp_user::pack_feasible_solution(BCP_buffer& buf, const BCP_solution* sol)
     buf.pack(size);
     for (int i = 0; i < size; ++i) {
 	buf.pack(values[i]);
-	p->pack_var(BCP_ProcessType_Any, *solvars[i]);
+	p->pack_var(*solvars[i]);
     }
 }
 
@@ -582,7 +507,7 @@ BCP_lp_user::pack_primal_solution(BCP_buffer& buf,
 	const BCP_vec<int>::const_iterator last_pos = coll.end();
 	while (++pos != last_pos) {
 	    buf.pack(x[*pos]);
-	    p->pack_var(BCP_ProcessType_Any, *vars[*pos]);
+	    p->pack_var(*vars[*pos]);
 	}
     }
 }
@@ -629,7 +554,7 @@ BCP_lp_user::pack_dual_solution(BCP_buffer& buf,
 	const BCP_vec<int>::const_iterator last_pos = coll.end();
 	while (++pos != last_pos) {
 	    buf.pack(pi[*pos]);
-	    p->pack_cut(BCP_ProcessType_Any, *cuts[*pos]);
+	    p->pack_cut(*cuts[*pos]);
 	}
     }
 }

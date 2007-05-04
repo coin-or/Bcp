@@ -20,6 +20,7 @@
 class OsiObject;
 
 class BCP_lp_user;
+class BCP_user_pack;
 class OsiSolverInterface;
 class BCP_message_environment;
 
@@ -35,9 +36,6 @@ class BCP_col;
 class BCP_row;
 
 class BCP_solution;
-
-class BCP_var_set_change;
-class BCP_cut_set_change;
 
 class BCP_lp_var_pool;
 class BCP_lp_cut_pool;
@@ -114,7 +112,7 @@ public:
     /**@name Constructor and destructor */
     /*@{*/
     /** */
-    BCP_lp_prob(BCP_proc_id* my_id, BCP_proc_id* parent);
+    BCP_lp_prob(int my_id, int parent);
     /** */
     virtual ~BCP_lp_prob();
     /*@}*/
@@ -130,6 +128,8 @@ public:
     /*@{*/
     /** */
     BCP_lp_user* user;
+    /** A class that holds the methods about how to pack things. */
+    BCP_user_pack* packer;
     /** */
     OsiSolverInterface* master_lp;
     /** */
@@ -227,7 +227,7 @@ public:
     /**@name Message passing related fields */
     /*@{*/
     /** */
-    //    BCP_proc_id* tree_manager;
+    //    int tree_manager;
     /** */
     BCP_buffer  msg_buf;
     /*@}*/
@@ -249,21 +249,13 @@ public:
     /**@name Methods to pack/unpack objects */
     /*@{*/
     /** */
-    void pack_var(BCP_process_t target_proc, const BCP_var& var);
+    void pack_var(const BCP_var& var);
     /** */
     BCP_var* unpack_var();
     /** */
-    void pack_cut(BCP_process_t target_proc, const BCP_cut& cut);
+    void pack_cut(const BCP_cut& cut);
     /** */
     BCP_cut* unpack_cut();
-    /** */
-    void pack_var_set_change(const BCP_var_set_change& ch);
-    /** */
-    void unpack_var_set_change(BCP_var_set_change& ch);
-    /** */
-    void pack_cut_set_change(const BCP_cut_set_change& ch);
-    /** */
-    void unpack_cut_set_change(BCP_cut_set_change& ch);
     /*@}*/
     //-------------------------------------------------------------------------
     /**@name Query methods */

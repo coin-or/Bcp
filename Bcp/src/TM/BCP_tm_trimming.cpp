@@ -68,12 +68,12 @@ TM: before starting the new phase, \n\
 	if (node->index() == -1) {
 	    // The search tree node is in a subtree that is trimmed
 #ifdef BCP_DEBUG
-	    if (node->lp != 0 || node->cg != 0 || node->vg != 0)
+	    if (node->lp != -1 || node->cg != -1 || node->vg != -1)
 		throw BCP_fatal_error("\
 TM: At least on of lp/cg/vg of a trimmed node is non-0.\n");
 #endif
-	    if (node->cp && node->child_num() == 0) {
-		BCP_vec< std::pair<BCP_proc_id*, int> >::iterator proc =
+	    if (node->cp != -1 && node->child_num() == 0) {
+		BCP_vec< std::pair<int, int> >::iterator proc =
 		    BCP_tm_identify_process(p.leaves_per_cp, node->cp);
 #ifdef BCP_DEBUG
 		if (proc == p.leaves_per_cp.end())
@@ -82,8 +82,8 @@ TM: non-existing CP is assigned to a leaf.\n");
 #endif
 		--proc->second;
 	    }
-	    if (node->vp && node->child_num() == 0) {
-		BCP_vec< std::pair<BCP_proc_id*, int> >::iterator proc =
+	    if (node->vp != -1 && node->child_num() == 0) {
+		BCP_vec< std::pair<int, int> >::iterator proc =
 		    BCP_tm_identify_process(p.leaves_per_vp, node->vp);
 #ifdef BCP_DEBUG
 		if (proc == p.leaves_per_vp.end())
@@ -99,18 +99,18 @@ TM: non-existing VP is assigned to a leaf.\n");
     }
 
     // scan through the CP and VP list to mark the free ones
-    BCP_vec< std::pair<BCP_proc_id*, int> >::iterator proc;
-    BCP_vec< std::pair<BCP_proc_id*, int> >::iterator lastproc;
+    BCP_vec< std::pair<int, int> >::iterator proc;
+    BCP_vec< std::pair<int, int> >::iterator lastproc;
 
     lastproc = p.leaves_per_cp.end();
     for (proc = p.leaves_per_cp.begin(); proc != lastproc; ++proc)
 	if (proc->second == 0)
-	    p.slaves.cp->set_proc_free(proc->first->clone());
+	    p.slaves.cp->set_proc_free(proc->first);
 
     lastproc = p.leaves_per_vp.end();
     for (proc = p.leaves_per_vp.begin(); proc != lastproc; ++proc)
 	if (proc->second == 0)
-	    p.slaves.vp->set_proc_free(proc->first->clone());
+	    p.slaves.vp->set_proc_free(proc->first);
 }
 
 //#############################################################################
@@ -133,15 +133,15 @@ int BCP_tm_trim_tree(BCP_tm_prob& p, BCP_tm_node* node,
 	// if there are no more than 2 nodes further down that have to be taken
 	// care of then don't trim
 	trim = false;
-    } else if (node->true_lower_bound() < p.ub() - p.granularity()) {
+    } else if (node->getTrueLB() < p.ub() - p.granularity()) {
 	// don't trim if the gap at this node is not below the granularity
 	trim = false;
     }
 
     if (trim) {
 	trimmed = node->mark_descendants_for_deletion();
-	if (node->cp) {
-	    BCP_vec< std::pair<BCP_proc_id*, int> >::iterator proc =
+	if (node->cp != -1) {
+	    BCP_vec< std::pair<int, int> >::iterator proc =
 		BCP_tm_identify_process(p.leaves_per_cp, node->cp);
 #ifdef BCP_DEBUG
 	    if (proc == p.leaves_per_cp.end())
@@ -150,8 +150,8 @@ TM: An internal node is assigned to a non-existing CP.\n");
 #endif
 	    ++proc->second;
 	}
-	if (node->vp) {
-	    BCP_vec< std::pair<BCP_proc_id*, int> >::iterator proc =
+	if (node->vp != -1) {
+	    BCP_vec< std::pair<int, int> >::iterator proc =
 		BCP_tm_identify_process(p.leaves_per_vp, node->vp);
 #ifdef BCP_DEBUG
 	    if (proc == p.leaves_per_vp.end())

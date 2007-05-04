@@ -14,8 +14,8 @@
 
 #include "BCP_warmstart.hpp"
 
-BCP_tm_prob::BCP_tm_prob(BCP_proc_id* my_id, BCP_proc_id* parent) :
-   BCP_process(my_id, parent),
+BCP_tm_prob::BCP_tm_prob() :
+   BCP_process(0, -1),
    user(0),
    msg_env(0),
    lp_stat(0),
@@ -36,12 +36,12 @@ BCP_tm_prob::~BCP_tm_prob()
    
    delete feas_sol;
 
-   std::map<int, BCP_var*>::iterator vari = vars.begin();
-   while (vari != vars.end()) {
+   std::map<int, BCP_var*>::iterator vari = vars_local.begin();
+   while (vari != vars_local.end()) {
       delete (vari++)->second;
    }
-   std::map<int, BCP_cut*>::iterator cuti = cuts.begin();
-   while (cuti != cuts.end()) {
+   std::map<int, BCP_cut*>::iterator cuti = cuts_local.begin();
+   while (cuti != cuts_local.end()) {
       delete (cuti++)->second;
    }
 
@@ -52,7 +52,7 @@ BCP_tm_prob::~BCP_tm_prob()
 //#############################################################################
 
 void
-BCP_tm_prob::pack_var(BCP_process_t target_proc, const BCP_var& var)
+BCP_tm_prob::pack_var(const BCP_var& var)
 {
   const int bcpind = var.bcpind();
   const BCP_object_t obj_t = var.obj_type();
@@ -67,7 +67,7 @@ BCP_tm_prob::pack_var(BCP_process_t target_proc, const BCP_var& var)
   case BCP_CoreObj:
     break;
   case BCP_AlgoObj:
-    user->pack_var_algo(&dynamic_cast<const BCP_var_algo&>(var), msg_buf);
+    packer->pack_var_algo(&dynamic_cast<const BCP_var_algo&>(var), msg_buf);
     break;
   default:
     throw BCP_fatal_error("BCP_tm_prob::_pack_var(): unexpected obj_t.\n");
@@ -91,7 +91,7 @@ BCP_tm_prob::unpack_var_without_bcpind(BCP_buffer& buf)
      var = new BCP_var_core(var_t, obj, lb, ub);
      break;
    case BCP_AlgoObj:
-     var = user->unpack_var_algo(buf);
+     var = packer->unpack_var_algo(buf);
      var->set_var_type(var_t);
      var->change_bounds(lb, ub);
      var->set_obj(obj);
@@ -105,36 +105,40 @@ BCP_tm_prob::unpack_var_without_bcpind(BCP_buffer& buf)
 
 //-----------------------------------------------------------------------------
 
-BCP_var* 
+int
 BCP_tm_prob::unpack_var()
 {
-  int bcpind;
-  BCP_var* var = 0;
-  msg_buf.unpack(bcpind);
-  if (bcpind == 0) {
-    throw BCP_fatal_error("BCP_tm_prob::unpack_var(): 0 bcpind arrived.\n");
-  }
-  if (bcpind < 0) {
-     var = unpack_var_without_bcpind(msg_buf);
-     var->set_bcpind(bcpind);
-     bcpind = -bcpind;
-     if (vars.find(bcpind) == vars.end()) {
-	var->set_bcpind(bcpind);
-	vars[bcpind] = var;
-     } else {
-	delete var;
-	var = vars[bcpind];
-     }
-  } else {
-     var = vars[bcpind];
-  }
-  return var;
+    int bcpind;
+    BCP_var* var = 0;
+    msg_buf.unpack(bcpind);
+    if (bcpind == 0) {
+	throw BCP_fatal_error("BCP_tm_prob::unpack_var(): 0 bcpind.\n");
+    }
+    if (bcpind > 0) {
+	if (vars_local.find(bcpind) != vars_local.end() ||
+	    vars_remote.find(bcpind) != vars_remote.end() ) {
+	    throw BCP_fatal_error("\
+BCP_tm_prob::unpack_var(): received a var with positive bcpind, \n\
+                           but the var already exists.\n");
+	}
+    } else {
+	var = unpack_var_without_bcpind(msg_buf);
+	if (vars_local.find(-bcpind) != vars_local.end() ||
+	    vars_remote.find(-bcpind) != vars_remote.end() ) {
+	    // It's OK, we got it from some other place. Nothing to do.
+	    delete var;
+	} else {
+	    var->set_bcpind(-bcpind);
+	    vars_local[-bcpind] = var;
+	}
+    }
+    return bcpind;
 }
 
 //#############################################################################
 
 void
-BCP_tm_prob::pack_cut(BCP_process_t target_proc, const BCP_cut& cut)
+BCP_tm_prob::pack_cut(const BCP_cut& cut)
 {
   const int bcpind = cut.bcpind();
   const BCP_object_t obj_t = cut.obj_type();
@@ -147,7 +151,7 @@ BCP_tm_prob::pack_cut(BCP_process_t target_proc, const BCP_cut& cut)
   case BCP_CoreObj:
     break;
   case BCP_AlgoObj:
-    user->pack_cut_algo(&dynamic_cast<const BCP_cut_algo&>(cut), msg_buf);
+      packer->pack_cut_algo(&dynamic_cast<const BCP_cut_algo&>(cut), msg_buf);
     break;
   default:
     throw BCP_fatal_error("BCP_tm_prob::_pack_cut(): unexpected obj_t.\n");
@@ -157,165 +161,56 @@ BCP_tm_prob::pack_cut(BCP_process_t target_proc, const BCP_cut& cut)
 //-----------------------------------------------------------------------------
 
 BCP_cut* 
-BCP_tm_prob::unpack_cut()
+BCP_tm_prob::unpack_cut_without_bcpind(BCP_buffer& buf)
 {
-  int bcpind;
   BCP_cut* cut = 0;
-  msg_buf.unpack(bcpind);
-  if (bcpind == 0) {
-    throw BCP_fatal_error("BCP_tm_prob::unpack_cut(): 0 bcpind arrived.\n");
+  BCP_object_t obj_t;
+  double lb, ub;
+  BCP_obj_status stat;
+  buf.unpack(obj_t).unpack(stat).unpack(lb).unpack(ub);
+  switch (obj_t) {
+   case BCP_CoreObj:
+     cut = new BCP_cut_core(lb, ub);
+     break;
+   case BCP_AlgoObj:
+     cut = packer->unpack_cut_algo(buf);
+     cut->change_bounds(lb, ub);
+     break;
+   default:
+     throw BCP_fatal_error("BCP_tm_prob::_unpack_cut(): unexpected obj_t.\n");
   }
-  if (bcpind < 0) {
-    BCP_object_t obj_t;
-    double lb, ub;
-    BCP_obj_status stat;
-    msg_buf.unpack(obj_t).unpack(stat).unpack(lb).unpack(ub);
-    switch (obj_t) {
-    case BCP_CoreObj:
-      cut = new BCP_cut_core(lb, ub);
-      break;
-    case BCP_AlgoObj:
-      cut = user->unpack_cut_algo(msg_buf);
-      cut->change_bounds(lb, ub);
-      break;
-    default:
-      throw BCP_fatal_error("BCP_tm_prob::_unpack_cut(): unexpected obj_t.\n");
-    }
-    cut->set_bcpind(bcpind);
-    cut->set_status(stat);
-
-    bcpind = -bcpind;
-    if (cuts.find(bcpind) == cuts.end()) {
-      cut->set_bcpind(bcpind);
-      cuts[bcpind] = cut;
-    } else {
-      delete cut;
-      cut = cuts[bcpind];
-    }
-  } else {
-    cut = cuts[bcpind];
-  }
+  cut->set_status(stat);
   return cut;
 }
 
-//#############################################################################
-
-void
-BCP_tm_prob::pack_var_set_change(const BCP_var_set_change& ch)
-{
-  msg_buf.pack(ch._storage);
-  switch (ch._storage){
-  case BCP_Storage_WrtParent:
-  case BCP_Storage_Explicit:
-    msg_buf.pack(ch._deleted_num).pack(ch._del_change_pos)
-           .pack(ch._change).pack(ch.added_num());
-    if (ch.added_num() > 0) {
-      BCP_vec<BCP_var*>::const_iterator vari = ch._new_vars.begin();
-      BCP_vec<BCP_var*>::const_iterator lastvari = ch._new_vars.end();
-      while (vari != lastvari) {
-	pack_var(BCP_ProcessType_LP, **vari);
-	++vari;
-      }
-    }
-    break;
-
-  case BCP_Storage_NoData:
-    break;
-
-  case BCP_Storage_WrtCore:
-  default:
-    throw BCP_fatal_error("\
-BCP_tm_prob::pack_var_set_change() : Bad storage.\n");
-  }
-}
-
 //-----------------------------------------------------------------------------
 
-void
-BCP_tm_prob::unpack_var_set_change(BCP_var_set_change& ch)
+int
+BCP_tm_prob::unpack_cut()
 {
-  msg_buf.unpack(ch._storage);
-  switch (ch._storage) {
-  case BCP_Storage_WrtParent:
-  case BCP_Storage_Explicit:
-    int num;
-    msg_buf.unpack(ch._deleted_num)
-           .unpack(ch._del_change_pos)
-	   .unpack(ch._change)
-	   .unpack(num);
-    purge_ptr_vector(ch._new_vars);
-    ch._new_vars.reserve(num);
-    for ( ; num > 0; --num)
-      ch._new_vars.unchecked_push_back(unpack_var());
-    break;
-
-  case BCP_Storage_NoData:
-    break;
-
-  case BCP_Storage_WrtCore:
-  default:
-    throw BCP_fatal_error("\
-BCP_tm_prob::unpack_var_set_change() : Bad storage.\n");
-  }
-}
-
-//#############################################################################
-
-void
-BCP_tm_prob::pack_cut_set_change(const BCP_cut_set_change& ch)
-{
-  msg_buf.pack(ch._storage);
-  switch (ch._storage){
-  case BCP_Storage_WrtParent:
-  case BCP_Storage_Explicit:
-    msg_buf.pack(ch._deleted_num).pack(ch._del_change_pos)
-           .pack(ch._change).pack(ch.added_num());
-    if (ch.added_num() > 0) {
-      BCP_vec<BCP_cut*>::const_iterator cuti = ch._new_cuts.begin();
-      BCP_vec<BCP_cut*>::const_iterator lastcuti = ch._new_cuts.end();
-      while (cuti != lastcuti) {
-	pack_cut(BCP_ProcessType_LP, **cuti);
-	++cuti;
-      }
+    int bcpind;
+    BCP_cut* cut = 0;
+    msg_buf.unpack(bcpind);
+    if (bcpind == 0) {
+	throw BCP_fatal_error("BCP_tm_prob::unpack_cut(): 0 bcpind.\n");
     }
-    break;
-
-  case BCP_Storage_NoData:
-    break;
-
-  case BCP_Storage_WrtCore:
-  default:
-    throw BCP_fatal_error("\
-BCP_tm_prob::pack_cut_set_change() : Bad storage.\n");
-  }
-}
-
-//-----------------------------------------------------------------------------
-
-void
-BCP_tm_prob::unpack_cut_set_change(BCP_cut_set_change& ch)
-{
-  msg_buf.unpack(ch._storage);
-  switch (ch._storage) {
-  case BCP_Storage_WrtParent:
-  case BCP_Storage_Explicit:
-    int num;
-    msg_buf.unpack(ch._deleted_num)
-           .unpack(ch._del_change_pos)
-	   .unpack(ch._change)
-	   .unpack(num);
-    purge_ptr_vector(ch._new_cuts);
-    ch._new_cuts.reserve(num);
-    for ( ; num > 0; --num)
-      ch._new_cuts.unchecked_push_back(unpack_cut());
-    break;
-
-  case BCP_Storage_NoData:
-    break;
-
-  case BCP_Storage_WrtCore:
-  default:
-    throw BCP_fatal_error("\
-BCP_tm_prob::unpack_cut_set_change() : Bad storage.\n");
-  }
+    if (bcpind > 0) {
+	if (cuts_local.find(bcpind) != cuts_local.end() ||
+	    cuts_remote.find(bcpind) != cuts_remote.end() ) {
+	    throw BCP_fatal_error("\
+BCP_tm_prob::unpack_cut(): received a cut with positive bcpind, \n\
+                           but the cut already exists.\n");
+	}
+    } else {
+	cut = unpack_cut_without_bcpind(msg_buf);
+	if (cuts_local.find(-bcpind) != cuts_local.end() ||
+	    cuts_remote.find(-bcpind) != cuts_remote.end() ) {
+	    // It's OK, we got it from some other place. Nothing to do.
+	    delete cut;
+	} else {
+	    cut->set_bcpind(-bcpind);
+	    cuts_local[-bcpind] = cut;
+	}
+    }
+    return bcpind;
 }

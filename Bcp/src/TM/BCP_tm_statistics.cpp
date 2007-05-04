@@ -14,21 +14,21 @@
 static inline void
 BCP_tm_pack_root_cut(BCP_tm_prob* tm, const BCP_cut& cut)
 {
-  BCP_buffer& buf = tm->msg_buf;
-  const BCP_object_t obj_t = cut.obj_type();
-  const BCP_obj_status stat = cut.status();
-  const double lb = cut.lb();
-  const double ub = cut.ub();
-  buf.pack(obj_t).pack(stat).pack(lb).pack(ub);
-  switch (obj_t) {
-  case BCP_CoreObj:
-    break;
-  case BCP_AlgoObj:
-    tm->user->pack_cut_algo(&dynamic_cast<const BCP_cut_algo&>(cut), buf);
-    break;
-  default:
-    throw BCP_fatal_error("BCP_tm_pack_root_cut: unexpected obj_t.\n");
-  }
+    BCP_buffer& buf = tm->msg_buf;
+    const BCP_object_t obj_t = cut.obj_type();
+    const BCP_obj_status stat = cut.status();
+    const double lb = cut.lb();
+    const double ub = cut.ub();
+    buf.pack(obj_t).pack(stat).pack(lb).pack(ub);
+    switch (obj_t) {
+    case BCP_CoreObj:
+	break;
+    case BCP_AlgoObj:
+	tm->packer->pack_cut_algo(&dynamic_cast<const BCP_cut_algo&>(cut), buf);
+	break;
+    default:
+	throw BCP_fatal_error("BCP_tm_pack_root_cut: unexpected obj_t.\n");
+    }
 }
 
 //#############################################################################
@@ -36,27 +36,33 @@ BCP_tm_pack_root_cut(BCP_tm_prob* tm, const BCP_cut& cut)
 void
 BCP_tm_save_root_cuts(BCP_tm_prob* tm)
 {
-  const BCP_string& cutfile = tm->param(BCP_tm_par::SaveRootCutsTo);
-  if (cutfile.length() > 0 &&
-      tm->phase == 0) {
-    BCP_buffer& buf = tm->msg_buf;
-    buf.clear();
-    const BCP_cut_set_change& ch = tm->search_tree.root()->_desc->cut_change;
-    if (ch.storage() != BCP_Storage_Explicit)
-      throw BCP_fatal_error("Non-explicit cut storage in root!\n");
-    const int num = ch._new_cuts.size();
-    buf.pack(num);
-    for (int i = 0; i < num; ++i) {
-      BCP_tm_pack_root_cut(tm, *ch._new_cuts[i]);
+    if (! tm->cuts_remote.empty()) {
+	throw BCP_fatal_error("\
+BCP: saving root cuts does not work at the moment. Must collect cuts from \n\
+the TMS processes before the root cuts could be saved. \n");
     }
-    FILE* f = fopen(cutfile.c_str(), "w");
-    size_t size = buf.size();
-    if (fwrite(&size, 1, sizeof(size), f) != sizeof(size))
-      throw BCP_fatal_error("SaveRootCutsTo write error.\n");
-    if (fwrite(buf.data(), 1, size, f) != size)
-      throw BCP_fatal_error("SaveRootCutsTo write error.\n");
-    fclose(f);
-  }
+    const BCP_string& cutfile = tm->param(BCP_tm_par::SaveRootCutsTo);
+    if (cutfile.length() > 0 &&
+	tm->phase == 0) {
+	BCP_buffer& buf = tm->msg_buf;
+	buf.clear();
+	const BCP_obj_set_change& ch =
+	    tm->search_tree.root()->_data._desc->cut_change;
+	if (ch.storage() != BCP_Storage_Explicit)
+	    throw BCP_fatal_error("Non-explicit cut storage in root!\n");
+	const int num = ch._new_objs.size();
+	buf.pack(num);
+	for (int i = 0; i < num; ++i) {
+	    BCP_tm_pack_root_cut(tm, *tm->cuts_local[i]);
+	}
+	FILE* f = fopen(cutfile.c_str(), "w");
+	size_t size = buf.size();
+	if (fwrite(&size, 1, sizeof(size), f) != sizeof(size))
+	    throw BCP_fatal_error("SaveRootCutsTo write error.\n");
+	if (fwrite(buf.data(), 1, size, f) != size)
+	    throw BCP_fatal_error("SaveRootCutsTo write error.\n");
+	fclose(f);
+    }
 }
 
 //#############################################################################
@@ -65,36 +71,36 @@ void
 BCP_tm_wrapup(BCP_tm_prob* tm, BCP_lp_prob* lp,
 	      BCP_cg_prob* cg, BCP_vg_prob* vg, bool final_stat)
 {
-   BCP_tm_save_root_cuts(tm);
+    BCP_tm_save_root_cuts(tm);
 
-   // Collect the statistics and print it out
-   if (!tm->lp_stat)
-      tm->lp_stat = new BCP_lp_statistics;
+    // Collect the statistics and print it out
+    if (!tm->lp_stat)
+	tm->lp_stat = new BCP_lp_statistics;
 
-   if (! lp) {
-      // Now ask every process
-      const int num_lp = tm->slaves.lp->size();
-      BCP_lp_statistics this_lp_stat;
+    if (! lp) {
+	// Now ask every process
+	const int num_lp = tm->slaves.lp->size();
+	BCP_lp_statistics this_lp_stat;
    
-      int i;
-      for (i = 0; i < num_lp; ++i) {
-	 while (true) {
-	    tm->msg_env->receive(tm->slaves.lp->process(i),
-				 BCP_Msg_LpStatistics,
-				 tm->msg_buf, 10);
-	    BCP_message_tag msgtag = tm->msg_buf.msgtag();
-	    if (msgtag == BCP_Msg_NoMessage) {
-	       // test if the LP is still alive
-	       if (! tm->msg_env->alive(tm->slaves.lp->process(i)))
-		  break;
-	    } else {
-	       break;
+	int i;
+	for (i = 0; i < num_lp; ++i) {
+	    while (true) {
+		tm->msg_env->receive(tm->slaves.lp->process(i),
+				     BCP_Msg_LpStatistics,
+				     tm->msg_buf, 10);
+		BCP_message_tag msgtag = tm->msg_buf.msgtag();
+		if (msgtag == BCP_Msg_NoMessage) {
+		    // test if the LP is still alive
+		    if (! tm->msg_env->alive(tm->slaves.lp->process(i)))
+			break;
+		} else {
+		    break;
+		}
 	    }
-	 }
-	 this_lp_stat.unpack(tm->msg_buf);
-	 tm->lp_stat->add(this_lp_stat);
-      }
-   }
+	    this_lp_stat.unpack(tm->msg_buf);
+	    tm->lp_stat->add(this_lp_stat);
+	}
+    }
 
-   tm->user->display_final_information(lp ? lp->stat : *tm->lp_stat);
+    tm->user->display_final_information(lp ? lp->stat : *tm->lp_stat);
 }

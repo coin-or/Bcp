@@ -11,245 +11,385 @@
 #include "BCP_tm.hpp"
 #include "BCP_tm_user.hpp"
 #include "BCP_USER.hpp"
+#include "BCP_message_tag.hpp"
 
 //XXX
 #include "BCP_tm_functions.hpp"
 
-static inline void
-BCP_tm_pack_core_objects(BCP_tm_prob& p, const BCP_tm_node* node,
-			 const BCP_tm_node* const * root_path,
-			 const int* const child_index);
-static inline void
-BCP_tm_pack_added_vars(BCP_tm_prob& p, const BCP_tm_node* node,
-		       const BCP_tm_node* const * root_path,
-		       const int* const child_index);
-static inline void
-BCP_tm_pack_added_cuts(BCP_tm_prob& p, const BCP_tm_node* node,
-		       const BCP_tm_node* const * root_path,
-		       const int* const child_index);
-static inline void
-BCP_tm_pack_warmstart(BCP_tm_prob& p, const BCP_tm_node* node,
-		      const BCP_tm_node* const * root_path);
-static inline void
-BCP_tm_pack_parent(BCP_tm_prob& p, const BCP_tm_node* node);
+//#############################################################################
 
-static inline void
-BCP_tm_pack_procid(BCP_message_environment* msg_env,
-		   BCP_buffer& buf, const BCP_proc_id* pid);
+std::map<int, BCP_tm_node_to_send*> BCP_tm_node_to_send::waiting;
 
 //#############################################################################
 
-static inline void
-BCP_tm_pack_core_objects(BCP_tm_prob& p, const BCP_tm_node* node,
-			 const BCP_tm_node* const * root_path,
-			 const int* const child_index)
+BCP_tm_node_to_send::BCP_tm_node_to_send(BCP_tm_prob& prob,
+					 const BCP_tm_node* node_to_send,
+					 const BCP_message_tag tag) :
+    p(prob),
+    msgtag(tag),
+    ID(node_to_send->_index),
+    node(node_to_send),
+    root_path(NULL),
+    child_index(NULL),
+    node_data_on_root_path(NULL),
+    explicit_core_level(-1),
+    explicit_var_level(-1),
+    explicit_cut_level(-1),
+    explicit_ws_level(-1),
+    explicit_all_level(-1),
+    missing_desc_num(-1),
+    missing_var_num(-1),
+    missing_cut_num(-1)
 {
-   // Go up in the tree to find where do we store the core objects
-   // explicitely or wrt core for the first time. (root at the latest)
-   BCP_tm_node* n = const_cast<BCP_tm_node*>(node);
-   for ( ;
-	 n->_desc->core_change.storage() == BCP_Storage_WrtParent;
-	 n = n->parent());
+    level = node->getDepth();
+    const BCP_tm_node* n = node;
 
-   BCP_problem_core_change core;
-   const int level = node->level();
-   int i;
-   for (i = n->level(); i < level; ++i)
-      core.update(*p.core_as_change, root_path[i]->_desc->core_change);
-   core.make_wrtcore_if_shorter(*p.core_as_change);
-   core.pack(p.msg_buf);
-}
-
-//-----------------------------------------------------------------------------
-
-static inline void
-BCP_tm_pack_added_vars(BCP_tm_prob& p, const BCP_tm_node* node,
-		       const BCP_tm_node* const * root_path,
-		       const int* const child_index)
-{
-   // Go up in the tree to find where do we store the added variables
-   // explicitely for the first time. (root at the latest) At the same time,
-   // compute an upper bound on the number of variables.
-   BCP_tm_node* n = const_cast<BCP_tm_node*>(node);
-   int vars_num = 0; // upper bound on the explicit size (there might be
-		     // deleted vars, too...
-   for ( ; n->_desc->var_change.storage() == BCP_Storage_WrtParent;
-	vars_num += n->_desc->var_change.added_num(), n = n->parent());
-   vars_num += n->_desc->var_change.added_num();
-
-   // var_set will hold the set of variables as an explicit var_set_change
-   // the reason for this is that we'll have only pointers to the vars, not
-   // copies of them, so we want to store the current lb/ub/st in a vector of
-   // obj_changes. But then it's easier to use a var_set_change object.
-   BCP_var_set_change var_set;
-   const int level = node->level();
-   for (int i = n->level(); i < level; ++i) {
-      var_set.update(root_path[i]->_desc->var_change);
-   }
-   p.pack_var_set_change(var_set);
-}
-
-//-----------------------------------------------------------------------------
-
-static inline void
-BCP_tm_pack_added_cuts(BCP_tm_prob& p, const BCP_tm_node* node,
-		       const BCP_tm_node* const * root_path,
-		       const int* const child_index)
-{
-   // Go up in the tree to find where do we store the added cuts explicitely
-   // for the first time. (root at the latest) At the same time, compute an
-   // upper bound on the number of cuts.
-   BCP_tm_node* n = const_cast<BCP_tm_node*>(node);
-   int cuts_num = 0;
-   for ( ; n->_desc->cut_change.storage() == BCP_Storage_WrtParent;
-	cuts_num += n->_desc->cut_change.added_num(), n = n->parent());
-   cuts_num += n->_desc->cut_change.added_num(); // the explicit size
-
-   // cut_set will hold the set of cuts as an explicit cut_set_change
-   // the reason for this is that we'll have only pointers to the cuts, not
-   // copies of them, so we want to store the current lb/ub/st in a vector of
-   // obj_changes. But then it's easier to use a cut_set_change object.
-   BCP_cut_set_change cut_set;
-   const int level = node->level();
-   for (int i = n->level(); i < level; ++i) {
-      cut_set.update(root_path[i]->_desc->cut_change);
-   }
-   p.pack_cut_set_change(cut_set);
-}
-
-//-----------------------------------------------------------------------------
-
-static inline void
-BCP_tm_pack_warmstart(BCP_tm_prob& p, const BCP_tm_node* node,
-		      const BCP_tm_node* const * root_path)
-{
-   // Go up in the tree to find where do we store the warmstart info
-   // explicitely for the first time (root at the latest). 
-   BCP_tm_node* n = const_cast<BCP_tm_node*>(node);
-   for ( ;
-	 n->_desc->warmstart->storage() == BCP_Storage_WrtParent;
-	 n = n->parent());
-
-   BCP_warmstart* warmstart = n->_desc->warmstart->clone();
-   const int level = node->level();
-   for (int i = n->level() + 1; i < level; ++i)
-      warmstart->update(root_path[i]->_desc->warmstart);
-   p.user->pack_warmstart(warmstart, p.msg_buf);
-   delete warmstart;   warmstart = 0;
-}
-
-//-----------------------------------------------------------------------------
-
-static inline void
-BCP_tm_pack_parent(BCP_tm_prob& p, const BCP_tm_node* node)
-{
-   const int level = node->level();
-   BCP_node_change* desc = node->_desc;
-   BCP_tm_node* n = const_cast<BCP_tm_node*>(node);
-   int i;
-
-   int parentind = (node->parent() == NULL) ? -1 : node->parent()->_index ;
-   p.msg_buf.pack(parentind);
-
-   // the path to the root
-   BCP_tm_node** root_path = new BCP_tm_node*[level + 1];
-   for (i = level + 1; n; root_path[--i] = n, n = n->parent());
-
-   // the child indices when tracing back from root to node
-   int* child_index = new int[level];
-   for (i = 1; i <= level; i++)
-      child_index[i-1] = root_path[i]->birth_index();
-
-   if (desc->core_change.storage() == BCP_Storage_WrtParent)
-      BCP_tm_pack_core_objects(p, node, root_path, child_index);
-   if (desc->var_change.storage() == BCP_Storage_WrtParent)
-      BCP_tm_pack_added_vars(p, node, root_path, child_index);
-   if (desc->cut_change.storage() == BCP_Storage_WrtParent)
-      BCP_tm_pack_added_cuts(p, node, root_path, child_index);
-   if (desc->warmstart && desc->warmstart->storage() == BCP_Storage_WrtParent)
-      BCP_tm_pack_warmstart(p, node, root_path);
-
-   delete[] child_index;
-   delete[] root_path;
+    root_path = new const BCP_tm_node*[level + 1];
+    child_index = new int[level];;
+    node_data_on_root_path = new BCP_tm_node_data[level+1];
+    
+    // the path to the root
+    int i = level;
+    while (explicit_core_level < 0 || explicit_var_level < 0 ||
+	   explicit_cut_level < 0 || explicit_ws_level < 0) {
+	assert(i >= 0);
+	root_path[i] = n;
+	// some stuff is on other processes
+	if (n->_locally_stored) {
+	    node_data_on_root_path[i]._desc = n->_data._desc->clone();
+	    node_data_on_root_path[i]._user =
+		n->_data._user ? n->_data._user->clone() : NULL;
+	} else {
+	    node_data_on_root_path[i]._desc = NULL;
+	    node_data_on_root_path[i]._user = NULL;
+	}
+	if (n->_core_storage!=BCP_Storage_WrtParent && explicit_core_level<0) {
+	    explicit_core_level = i;
+	    explicit_all_level = i;
+	}
+	if (n->_var_storage!=BCP_Storage_WrtParent && explicit_cut_level<0) {
+	    explicit_var_level = i;
+	    explicit_all_level = i;
+	}
+	if (n->_cut_storage!=BCP_Storage_WrtParent && explicit_cut_level<0) {
+	    explicit_cut_level = i;
+	    explicit_all_level = i;
+	}
+	if (n->_ws_storage!=BCP_Storage_WrtParent && explicit_ws_level<0) {
+	    explicit_ws_level = i;
+	    explicit_all_level = i;
+	}
+	--i;
+	n = n->parent();
+    }
+    for (i = explicit_all_level + 1; i <= level; i++) {
+	child_index[i-1] = root_path[i]->birth_index();
+    }
+    BCP_tm_node_to_send::waiting[ID] = this;
 }
 
 //#############################################################################
 
-static inline void
-BCP_tm_pack_procid(BCP_message_environment* msg_env,
-		   BCP_buffer& buf, const BCP_proc_id* pid)
+bool
+BCP_tm_node_to_send::receive_node_desc(BCP_buffer& buf)
 {
-   bool has_id = pid != 0;
-   buf.pack(has_id);
-   if (has_id)
-      msg_env->pack_proc_id(buf, pid);
+    const bool def = p.param(BCP_tm_par::ReportWhenDefaultIsExecuted);
+    int cnt, level, index;
+    buf.unpack(cnt);
+    missing_desc_num -= cnt;
+    while (--cnt >= 0) {
+	buf.unpack(level).unpack(index);
+	assert(root_path[level]->_index == index);
+	node_data_on_root_path[level]._desc = new BCP_node_change;
+	node_data_on_root_path[level]._desc->unpack(p.packer, def, buf);
+	node_data_on_root_path[level]._user = p.packer->unpack_user_data(buf);
+    }
+    assert(missing_desc_num >= 0);
+    if (missing_desc_num == 0) {
+	return send();
+    }
+    return false;
 }
 
 //#############################################################################
 
-//-----------------------------------------------------------------------------
-// the data are store like this:
-// exp, wrt, wrt, wrt, ...., wrt, wrt
-// |-------- this is 'parent'-------|     : "P"
-// pack_parent() packs only "P" and send_node() packs the last wrt.
-// core objects are handled separately from the added ones, because they can
-// only change (can't be deleted/added).
-
-void BCP_tm_send_node(BCP_tm_prob& p, const BCP_tm_node* node,
-		      const BCP_message_tag msgtag)
+bool
+BCP_tm_node_to_send::receive_vars(BCP_buffer& buf)
 {
-   p.user->display_node_information(p.search_tree, *node);
-   BCP_buffer& buf = p.msg_buf;
-   BCP_node_change* desc = node->_desc;
-   BCP_diving_status dive =
-      (rand() < p.param(BCP_tm_par::UnconditionalDiveProbability) * RAND_MAX) ?
-      BCP_DoDive : BCP_TestBeforeDive;
+    int cnt, pos, index;
+    buf.unpack(cnt);
+    missing_var_num -= cnt;
+    while (--cnt >= 0) {
+	buf.unpack(pos).unpack(index);
+	vars[pos] = p.packer->unpack_var_algo(buf);
+	assert(var_set._new_objs[pos] == vars[pos]->bcpind());
+    }
+    assert(missing_var_num >= 0);
+    if (missing_var_num == 0 && missing_cut_num == 0) {
+	return send();
+    }
+    return false;
+}
 
-   // start with book-keeping data
-   buf.clear();
-   buf.pack(p.current_phase_colgen).pack(node->index()).pack(node->level())
-      .pack(node->quality()).pack(node->true_lower_bound())
-      .pack(dive);
+//#############################################################################
 
-   // pack the process information
-   BCP_tm_pack_procid(p.msg_env, buf, node->cg);
-   BCP_tm_pack_procid(p.msg_env, buf, node->cp);
-   BCP_tm_pack_procid(p.msg_env, buf, node->vg);
-   BCP_tm_pack_procid(p.msg_env, buf, node->vp);
+bool
+BCP_tm_node_to_send::receive_cuts(BCP_buffer& buf)
+{
+    int cnt, pos, index;
+    buf.unpack(cnt);
+    missing_cut_num -= cnt;
+    while (--cnt >= 0) {
+	buf.unpack(pos).unpack(index);
+	cuts[pos] = p.packer->unpack_cut_algo(buf);
+	assert(cut_set._new_objs[pos] == cuts[pos]->bcpind());
+    }
+    assert(missing_cut_num >= 0);
+    if (missing_var_num == 0 && missing_cut_num == 0) {
+	return send();
+    }
+    return false;
+}
 
-   // pack how things are stored in node. this will influence what do we pack
-   // in the parent, too.
-   BCP_storage_t ws_storage =
-      desc->warmstart ? desc->warmstart->storage() : BCP_Storage_NoData;
-   buf.pack(desc->core_change.storage())
-      .pack(desc->var_change.storage())
-      .pack(desc->cut_change.storage())
-      .pack(ws_storage);
+//#############################################################################
 
-   // Now pack the parent if there's one
-   if (node->level() > 0)
-      BCP_tm_pack_parent(p, node);
+bool
+BCP_tm_node_to_send::send()
+{
+    int i;
 
-   // finally pack the changes in this node
-   desc->core_change.pack(buf);
-   p.pack_var_set_change(desc->var_change);
-   p.pack_cut_set_change(desc->cut_change);
-   
-   bool has_data = desc->warmstart != 0;
-   buf.pack(has_data);
-   if (has_data)
-      p.user->pack_warmstart(desc->warmstart, buf);
+    if (missing_desc_num < 0) {
+	missing_desc_num = 0;
+	// collect what needs od be asked for
+	std::map< int, BCP_vec<int> > tms_nodelevel;
+	for (i = explicit_all_level; i <= level; i++) {
+	    if (node_data_on_root_path[i]._desc == NULL) {
+		tms_nodelevel[root_path[i]->_data_location].push_back(i);
+		++missing_desc_num;
+	    }
+	}
+	BCP_buffer& buf = p.msg_buf;
+	std::map< int, BCP_vec<int> >::const_iterator tms;
+	BCP_vec<int> indices;
+	for (tms = tms_nodelevel.begin(); tms != tms_nodelevel.end(); ++tms) {
+	    buf.clear();
+	    buf.pack(ID);
+	    const BCP_vec<int>& nodelevel = tms->second;
+	    indices.clear();
+	    indices.reserve(nodelevel.size());
+	    for (i = nodelevel.size()-1; i >= 0; --i) {
+		indices.unchecked_push_back(root_path[nodelevel[i]]->_index);
+	    }
+	    buf.pack(nodelevel);
+	    buf.pack(indices);
+	    p.msg_env->send(tms->first, BCP_Msg_NodeListRequest, buf);
+	}
+    }
 
-   has_data = node->_user_data != 0;
-   buf.pack(has_data);
-   if (has_data)
-      p.user->pack_user_data(node->_user_data, buf);
+    if (missing_desc_num > 0) {
+	return false;
+    }
 
-   p.msg_env->send(node->lp, msgtag, buf);
+    // OK, we have all the descriptions. Now if we haven't done so yet (which
+    // is indicated by missing_var_num (and missing_cut_num) being negative)
+    // we need to create the explicit parent description and the current node
+    // description (vars/cuts will be present only with their bcpind). Also,
+    // we need to create the full list of variables for the node itself (and
+    // not for the parent).
+    if (missing_var_num < 0) {
+	missing_var_num = 0;
+	missing_cut_num = 0;
+	std::map< int, BCP_vec<int> > tms_pos;
+	std::map< int, BCP_vec<int> >::const_iterator tms;
+	std::map<int, int>::iterator remote;
+	std::map<int, BCP_var*>::iterator localvar;
+	std::map<int, BCP_cut*>::iterator localcut;
+	BCP_buffer& buf = p.msg_buf;
+	BCP_vec<int> indices;
+
+	if (node->_var_storage == BCP_Storage_WrtParent) {
+	    for (i = explicit_var_level; i < level; ++i) {
+		var_set.update(node_data_on_root_path[i]._desc->var_change);
+	    }
+	    // FIXME: can it be BCP_Storage_NoData ???
+	    assert (var_set._storage == BCP_Storage_Explicit);
+	}
+	BCP_obj_set_change node_var_set = var_set;
+	node_var_set.update(node->_data._desc->var_change);
+	BCP_vec<int>& var_inds = node_var_set._new_objs;
+	const int varnum = var_inds.size();
+	vars.reserve(varnum);
+	// check whether we have all the vars
+	for (i = 0; i < varnum; ++i) {
+	    remote = p.vars_remote.find(var_inds[i]);
+	    if (remote != p.vars_remote.end()) {
+		tms_pos[remote->second].push_back(i);
+		vars.unchecked_push_back(NULL);
+		++missing_var_num;
+		continue;
+	    }
+	    localvar = p.vars_local.find(var_inds[i]);
+	    if (localvar != p.vars_local.end()) {
+		// FIXME: cloning could be avoided by using smart pointers
+		vars.unchecked_push_back(localvar->second->clone());
+		continue;
+	    }
+	    throw BCP_fatal_error("\
+TM: var in node description is neither local nor remote.\n");
+	}
+	for (tms = tms_pos.begin(); tms != tms_pos.end(); ++tms) {
+	    buf.clear();
+	    buf.pack(ID);
+	    const BCP_vec<int>& pos = tms->second;
+	    const int num = pos.size();
+	    indices.clear();
+	    indices.reserve(num);
+	    for (i = 0; i < num; ++i) {
+		indices.unchecked_push_back(var_inds[pos[i]]);
+	    }
+	    buf.pack(pos);
+	    buf.pack(indices);
+	    p.msg_env->send(tms->first, BCP_Msg_VarListRequest, buf);
+	}
+
+	if (node->_cut_storage == BCP_Storage_WrtParent) {
+	    for (i = explicit_cut_level; i < level; ++i) {
+		cut_set.update(node_data_on_root_path[i]._desc->cut_change);
+	    }
+	    // FIXME: can it be BCP_Storage_NoData ???
+	    assert (cut_set._storage == BCP_Storage_Explicit);
+	}
+	BCP_obj_set_change node_cut_set = cut_set;
+	node_cut_set.update(node->_data._desc->cut_change);
+	BCP_vec<int>& cut_inds = node_cut_set._new_objs;
+	const int cutnum = cut_inds.size();
+	cuts.reserve(cutnum);
+	// check whether we have all the cuts
+	tms_pos.clear();
+	for (i = 0; i < cutnum; ++i) {
+	    remote =p.cuts_remote.find(cut_inds[i]);
+	    if (remote != p.cuts_remote.end()) {
+		tms_pos[remote->second].push_back(i);
+		cuts.unchecked_push_back(NULL);
+		++missing_cut_num;
+		continue;
+	    }
+	    localcut = p.cuts_local.find(cut_inds[i]);
+	    if (localcut != p.cuts_local.end()) {
+		// FIXME: cloning could be avoided by using smart pointers
+		cuts.unchecked_push_back(localcut->second->clone());
+		continue;
+	    }
+	    throw BCP_fatal_error("\
+TM: cut in node description is neither local nor remote.\n");
+	}
+	for (tms = tms_pos.begin(); tms != tms_pos.end(); ++tms) {
+	    buf.clear();
+	    buf.pack(ID);
+	    const BCP_vec<int>& pos = tms->second;
+	    const int num = pos.size();
+	    indices.clear();
+	    indices.reserve(num);
+	    for (i = 0; i < num; ++i) {
+		indices.unchecked_push_back(cut_inds[pos[i]]);
+	    }
+	    buf.pack(pos);
+	    buf.pack(indices);
+	    p.msg_env->send(tms->first, BCP_Msg_CutListRequest, buf);
+	}
+    }
+
+    if (missing_var_num > 0 || missing_cut_num > 0) {
+	return false;
+    }
+
+    //=========================================================================
+    // Great! Now we have everything. Start to pack it up.
+    const bool def = p.param(BCP_tm_par::ReportWhenDefaultIsExecuted);
+    p.user->display_node_information(p.search_tree, *node);
+
+    const BCP_node_change* desc = node_data_on_root_path[level]._desc;
+    BCP_diving_status dive =
+	(rand() < p.param(BCP_tm_par::UnconditionalDiveProbability)*RAND_MAX) ?
+	BCP_DoDive : BCP_TestBeforeDive;
+
+    // start with book-keeping data
+    BCP_buffer& buf = p.msg_buf;
+    buf.clear();
+    buf.pack(p.current_phase_colgen).pack(node->index()).pack(level).
+	pack(node->getQuality()).pack(node->getTrueLB()).pack(dive);
+
+    // pack the process information
+    buf.pack(node->cg).pack(node->cp).pack(node->vg).pack(node->vp);
+
+    // pack how things are stored in node. this will influence what do we pack
+    // in the parent, too.
+    buf.pack(node->_core_storage).
+	pack(node->_var_storage).
+	pack(node->_cut_storage).
+	pack(node->_ws_storage);
+    
+    // Now pack the parent if there's one
+    if (level > 0) {
+	p.msg_buf.pack(node->parent()->index());
+	// start with the core
+	if (node->_core_storage == BCP_Storage_WrtParent) {
+	    BCP_problem_core_change core;
+	    for (i = explicit_core_level; i < level; ++i) {
+		core.update(*p.core_as_change,
+			    node_data_on_root_path[i]._desc->core_change);
+	    }
+	    core.make_wrtcore_if_shorter(*p.core_as_change);
+	    core.pack(p.msg_buf);
+	}
+
+	// next the variabless
+	if (node->_var_storage == BCP_Storage_WrtParent) {
+	    var_set.pack(buf);
+	}
+
+	// now the cuts
+	if (node->_cut_storage == BCP_Storage_WrtParent) {
+	    cut_set.pack(buf);
+	}
+
+	// finally warmstart
+	if (node->_ws_storage == BCP_Storage_WrtParent) {
+	    BCP_warmstart* warmstart =
+		node_data_on_root_path[explicit_ws_level]._desc->warmstart->clone();
+	    for (i = explicit_ws_level + 1; i < level; ++i) {
+		warmstart->update(node_data_on_root_path[i]._desc->warmstart);
+	    }
+	    p.packer->pack_warmstart(warmstart, p.msg_buf, def);
+	}
+    }
+
+    // finally pack the changes in this node
+    desc->pack(p.packer, def, buf);
+    
+    // Now pack the full list of vars/cuts of the node
+    int cnt = vars.size();
+    buf.pack(cnt);
+    for (i = 0; i < cnt; ++i) {
+	p.pack_var(*vars[i]);
+    }
+    cnt = cuts.size();
+    buf.pack(cnt);
+    for (i = 0; i < cnt; ++i) {
+	p.pack_cut(*cuts[i]);
+    }
+
+    const bool has_data = node->_data._user != 0;
+    buf.pack(has_data);
+    if (has_data)
+	p.packer->pack_user_data(node->_data._user, buf);
+
+    p.msg_env->send(node->lp, msgtag, buf);
 
 #ifdef BCP__DUMP_PROCINFO
 #if (BCP__DUMP_PROCINFO == 1)
-   dump_procinfo(p, "BCP_tm_send_node()");
+    dump_procinfo(p, "BCP_tm_send_node()");
 #endif
 #endif
+    return true;
 }

@@ -122,9 +122,6 @@ private:
     /** The copy constructor is disabled by declaring it private and not
         defining it. */
     BCP_problem_core_change(const BCP_problem_core_change&); // disabled
-    /** The assignment operator is disabled by declaring it private and not
-        defining it. */
-    BCP_problem_core_change& operator=(const BCP_problem_core_change& x);
   /*@}*/
    
 public:
@@ -190,6 +187,16 @@ public:
 
     /** The destructor deletes all data members. */
     ~BCP_problem_core_change() {}
+    
+#if 0
+    /** The assignment operator is disabled by declaring it private and not
+        defining it. */
+    BCP_problem_core_change& operator=(const BCP_problem_core_change& x);
+#else
+    /* Default assignment operator is OK.
+       FIXME: can be disabled when BCP_node_change does not need a clone()
+       method. */
+#endif
   /*@}*/
 
   /**@name Query methods */

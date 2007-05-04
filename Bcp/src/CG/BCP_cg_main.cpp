@@ -17,8 +17,9 @@
 
 //#############################################################################
 
-void BCP_cg_main(BCP_message_environment* msg_env, USER_initialize* user_init,
-		 BCP_proc_id* my_id, BCP_proc_id* parent)
+BCP_process_t BCP_cg_main(BCP_message_environment* msg_env,
+			  USER_initialize* user_init,
+			  int my_id, int parent)
 {
    BCP_cg_prob p(my_id, parent);
    p.msg_env = msg_env;
@@ -58,6 +59,8 @@ void BCP_cg_main(BCP_message_environment* msg_env, USER_initialize* user_init,
    // now create the user universe
    p.user = user_init->cg_init(p);
    p.user->setCgProblemPointer(&p);
+   p.packer = user_init->packer_init(p.user);
+   p.packer->user_class = p.user;
 
    // wait for the core description and process it
    p.msg_buf.clear();
@@ -72,6 +75,7 @@ void BCP_cg_main(BCP_message_environment* msg_env, USER_initialize* user_init,
    // ok, we're all geared up to generate cuts
    // wait for messages and process them...
    BCP_message_tag msgtag;
+   BCP_process_t ptype = BCP_ProcessType_EndProcess;
    while (true) {
       p.msg_buf.clear();
       msg_env->receive(BCP_AnyProcess, BCP_Msg_AnyMessage, p.msg_buf, 15);
@@ -80,6 +84,9 @@ void BCP_cg_main(BCP_message_environment* msg_env, USER_initialize* user_init,
 	 // test if the TM is still alive
 	 if (! p.msg_env->alive(parent))
 	    throw BCP_fatal_error("CG:   The TM has died -- CG exiting\n");
+      } if (msgtag == BCP_Msg_ProcessType) {
+	  p.msg_buf.unpack(ptype);
+	  break;
       } else {
 	 if (BCP_cg_process_message(p, p.msg_buf)) {
 	    // BCP_Msg_FinishedBCP arrived
@@ -89,6 +96,8 @@ void BCP_cg_main(BCP_message_environment* msg_env, USER_initialize* user_init,
    }
    if (logfile)
       fclose(logfile);
+
+   return ptype;
 }
 
 //#############################################################################
@@ -111,7 +120,7 @@ BCP_cg_prob::process_message()
        case BCP_Msg_ForCG_PrimalFull:
        case BCP_Msg_ForCG_User:
 	 msg_buf.unpack(node_level).unpack(node_index).unpack(node_iteration);
-	 sender = msg_buf.sender()->clone();
+	 sender = msg_buf.sender();
 	 user->unpack_primal_solution(msg_buf);
 	 break;
 

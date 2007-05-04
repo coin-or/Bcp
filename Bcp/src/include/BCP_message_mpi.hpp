@@ -13,28 +13,13 @@
 
 //#############################################################################
 
-class BCP_mpi_id : public BCP_proc_id {
-public:
-   int _pid;
-public:
-   BCP_mpi_id(int id = 0) : _pid(id) {}
-
-   ~BCP_mpi_id() {}
-
-   bool is_same_process(const BCP_proc_id* other_process) const;
-   inline int pid() const { return _pid; }
-   inline BCP_proc_id* clone() const { return new BCP_mpi_id(_pid); }
-};
-
-//#############################################################################
-
 class BCP_mpi_environment : public BCP_message_environment {
 private:
-    int seqproc;
+    static int num_proc;
     static bool mpi_init_called;
    
 private:
-   void check_error(const int code, const char* str) const;
+    void check_error(const int code, const char* str) const;
 
 public:
     /** Function that determines whether we are running in an mpi environment.
@@ -43,67 +28,55 @@ public:
     static int is_mpi(int argc, char *argv[]);
 
     /** Constructor will initialize the MPI environment */
-   BCP_mpi_environment(int argc,char *argv[]);
-   ~BCP_mpi_environment();
+    BCP_mpi_environment(int argc,char *argv[]);
+    ~BCP_mpi_environment();
 
-   int num_procs();
+    int num_procs();
 
-   BCP_proc_id* register_process(USER_initialize* user_init);
-   BCP_proc_id* parent_process();
+    int register_process(USER_initialize* user_init);
+    int parent_process();
 
-   bool alive(const BCP_proc_id* pid);
-   BCP_vec<BCP_proc_id*>::iterator alive(const BCP_proc_array& parray);
+    bool alive(const int pid);
+    BCP_vec<int>::const_iterator alive(const BCP_proc_array& parray);
 
-   void send(const BCP_proc_id* const target, const BCP_message_tag tag);
-   void send(const BCP_proc_id* const target,
-	     const BCP_message_tag tag, const BCP_buffer& buf);
+    void send(const int target, const BCP_message_tag tag);
+    void send(const int target,
+	      const BCP_message_tag tag, const BCP_buffer& buf);
 
-   void multicast(const BCP_proc_array* const target,
-		  const BCP_message_tag tag);
-   void multicast(const BCP_proc_array* const target,
-		  const BCP_message_tag tag, const BCP_buffer& buf);
-   void multicast(BCP_vec<BCP_proc_id*>::const_iterator beg,
-   		  BCP_vec<BCP_proc_id*>::const_iterator end,
-   		  const BCP_message_tag tag);
-   void multicast(BCP_vec<BCP_proc_id*>::const_iterator beg,
-		  BCP_vec<BCP_proc_id*>::const_iterator end,
-		  const BCP_message_tag tag,
-		  const BCP_buffer& buf);
+    void multicast(const BCP_proc_array* const target,
+		   const BCP_message_tag tag);
+    void multicast(const BCP_proc_array* const target,
+		   const BCP_message_tag tag, const BCP_buffer& buf);
+    void multicast(BCP_vec<int>::const_iterator beg,
+		   BCP_vec<int>::const_iterator end,
+		   const BCP_message_tag tag);
+    void multicast(BCP_vec<int>::const_iterator beg,
+		   BCP_vec<int>::const_iterator end,
+		   const BCP_message_tag tag,
+		   const BCP_buffer& buf);
 
-   void receive(const BCP_proc_id* const source,
-		const BCP_message_tag tag, BCP_buffer& buf,
-		const double timeout);
-   bool probe(const BCP_proc_id* const source,
-	      const BCP_message_tag tag);
+    void receive(const int source,
+		 const BCP_message_tag tag, BCP_buffer& buf,
+		 const double timeout);
+    bool probe(const int source,
+	       const BCP_message_tag tag);
 
-   BCP_proc_id* unpack_proc_id(BCP_buffer& buf);
-   void pack_proc_id(BCP_buffer& buf, const BCP_proc_id* pid);
-
-   BCP_proc_id* start_process(const BCP_string& exe,
-			      const bool debug);
-   BCP_proc_id* start_process(const BCP_string& exe,
-			      const BCP_string& machine,
-			      const bool debug);
-   BCP_proc_array* start_processes(const BCP_string& exe,
-				   const int proc_num,
-				   const bool debug);
-   BCP_proc_array* start_processes(const BCP_string& exe,
-				   const int proc_num,
-				   const BCP_vec<BCP_string>& machines,
-				   const bool debug);
-   //int pid(const BCP_proc_id* pid);
-//    void stop_process(const BCP_proc_id* process);
+    int start_process(const BCP_string& exe,
+		      const bool debug);
+    int start_process(const BCP_string& exe,
+		      const BCP_string& machine,
+		      const bool debug);
+    BCP_proc_array* start_processes(const BCP_string& exe,
+				    const int proc_num,
+				    const bool debug);
+    BCP_proc_array* start_processes(const BCP_string& exe,
+				    const int proc_num,
+				    const BCP_vec<BCP_string>& machines,
+				    const bool debug);
+   //int pid(const int pid);
+//    void stop_process(const int process);
 //    void stop_processes(const BCP_proc_array* processes);
 };
-
-//#############################################################################
-
-int BCP_is_mpi_id(const BCP_proc_id* pid, const char* str);
-
-//#############################################################################
-
-int* BCP_process_array_2_int(const BCP_proc_array* const target,
-			     const char* str);
 
 #endif /* COIN_HAS_MPI */
 

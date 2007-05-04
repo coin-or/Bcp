@@ -24,7 +24,7 @@
    No object of type BCP_var can exist (having purely virtual
    members in the class enforces this restriction). */
 
-class BCP_var{
+class BCP_var {
 private:
   /**@name Disabled methods */
   /*@{*/
@@ -74,6 +74,8 @@ public:
     /** The destructor is virtual so that the appropriate destructor is invoked
         for every variable. */
     virtual ~BCP_var() {}
+
+    virtual BCP_var* clone() const = 0;
   /*@}*/
 
   /**@name Query methods */
@@ -167,6 +169,8 @@ public:
     }
     /** Set the internal index of the variable. */
     inline void set_bcpind(const int bcpind)  { _bcpind = bcpind; }
+    /** Flip the internal index of the variable to its negative */
+    inline void set_bcpind_flip()  { _bcpind = -_bcpind; }
 
     /**@name Status modifying methods */
     /*@{*/
@@ -244,6 +248,8 @@ public:
       BCP_var(var_type, obj, lb, ub) {}
    /** The destructor deletes the object. */
    ~BCP_var_core() {}
+
+    BCP_var_core* clone() const { return new BCP_var_core(*this); }
    /*@}*/
 
    /**@name Query methods */

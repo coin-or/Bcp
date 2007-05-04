@@ -9,6 +9,7 @@
 #include "BCP_vector.hpp"
 #include "BCP_vg_param.hpp"
 #include "BCP_string.hpp"
+#include "BCP_USER.hpp"
 
 class BCP_vg_prob;
 class BCP_buffer;
@@ -47,7 +48,7 @@ class BCP_var_algo;
    </ul>
 */
 
-class BCP_vg_user {
+class BCP_vg_user : public BCP_user_class {
 private:
   BCP_vg_prob * p;
 public:
@@ -146,21 +147,6 @@ public:
       the generated variable back to the LP process. */
   virtual void
   generate_vars(BCP_vec<BCP_cut*>& cuts, BCP_vec<double>& pi);
-
-  //---------------------------------------------------------------------------
-  /** Pack an algorithmic variable into the buffer. When the user generates a
-      variable in generate_vars() and invokes send_var() to send it off, this
-      method will be invoked to pack the variable into the buffer if the
-      variable is algorithmic. BCP knows how to pack indexed variables. */
-  virtual void
-  pack_var_algo(const BCP_var_algo* var, BCP_buffer& buf);
-
-  //---------------------------------------------------------------------------
-  /** Unpack an algorithmic cut from the buffer. This method is invoked
-      when the user does use algorithmic cuts and she did not override
-      the unpack_dual_solution() method. */
-  virtual BCP_cut_algo*
-  unpack_cut_algo(BCP_buffer& buf);
 };
 
 //#############################################################################

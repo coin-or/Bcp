@@ -19,6 +19,8 @@
 #include "BCP_tm_param.hpp"
 #include "BCP_tm_node.hpp"
 #include "BCP_enum_tm.hpp"
+#include "BCP_enum_process_t.hpp"
+#include "BCP_USER.hpp"
 
 class BCP_lp_statistics;
 
@@ -53,7 +55,7 @@ class BCP_lp_statistics;
    </ul>
 */
 
-class BCP_tm_user {
+class BCP_tm_user : public BCP_user_class {
 private:
   BCP_tm_prob * p;
 public:
@@ -141,51 +143,14 @@ public:
     virtual bool
     replace_solution(const BCP_solution* old_sol, const BCP_solution* new_sol);
 
-    /**@name Methods that pack/unpack warmstart, var_algo and cut_algo objects.
-
-       The packing methods take an object and a buffer as
-       an argument and the user is supposed to pack the object into the buffer.
-
-       The argument of the unpacking methods is just the buffer. The user
-       is supposed to return a pointer to the unpacked object.
-    */
-    /*@{*/
-      /** Pack warmstarting information */
-      virtual void
-      pack_warmstart(const BCP_warmstart* ws, BCP_buffer& buf);
-      /** Unpack warmstarting information */
-      virtual BCP_warmstart*
-      unpack_warmstart(BCP_buffer& buf);
-      
-      /** Pack an algorithmic variable */
-      virtual void
-      pack_var_algo(const BCP_var_algo* var, BCP_buffer& buf);
-      /** Unpack an algorithmic variable */
-      virtual BCP_var_algo*
-      unpack_var_algo(BCP_buffer& buf);
-      
-      /** Pack an algorithmic cut */
-      virtual void
-      pack_cut_algo(const BCP_cut_algo* cut, BCP_buffer& buf);
-      /** Unpack an algorithmic cut */
-      virtual BCP_cut_algo*
-      unpack_cut_algo(BCP_buffer& buf);
-
-      /** Pack an user data */
-      virtual void
-      pack_user_data(const BCP_user_data* ud, BCP_buffer& buf);
-      /** Unpack an user data */
-      virtual BCP_user_data*
-      unpack_user_data(BCP_buffer& buf);
-    /*@}*/
   /*@}*/
 
   //--------------------------------------------------------------------------
   /** What is the process id of the current process */
-  const BCP_proc_id* process_id() const;
+  int process_id() const;
   /** Send a message to a particular process */
   void
-  send_message(const BCP_proc_id* const target, const BCP_buffer& buf);
+  send_message(const int target, const BCP_buffer& buf);
   /** Broadcast the message to all processes of the given type */
   void
   broadcast_message(const BCP_process_t proc_type, const BCP_buffer& buf);

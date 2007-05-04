@@ -21,6 +21,7 @@
 //#include "BCP_cp_param.hpp"
 //#include "BCP_vp_param.hpp"
 #include "BCP_parameters.hpp"
+#include "BCP_tmstorage.hpp"
 
 #include "BCP_buffer.hpp"
 #include "BCP_message.hpp"
@@ -31,12 +32,12 @@ class BCP_warmstart;
 class BCP_solution;
 
 class BCP_tm_user;
+class BCP_user_pack;
 
 class BCP_var;
 class BCP_cut;
 
-class BCP_var_set_change;
-class BCP_cut_set_change;
+class BCP_obj_set_change;
 
 class BCP_problem_core;
 class BCP_problem_core_change;
@@ -96,6 +97,8 @@ public:
 
 struct BCP_slave_params {
     /** */
+    BCP_parameter_set<BCP_ts_par> ts;
+    /** */
     BCP_parameter_set<BCP_lp_par> lp;
     //   BCP_parameter_set<BCP_cp_par> cp;
     //   BCP_parameter_set<BCP_vp_par> vp;
@@ -138,6 +141,9 @@ public: // Data members
     /*@{*/
     /** */
     BCP_tm_user* user;
+    /** A class that holds the methods about how to pack things. */
+    BCP_user_pack* packer;
+
     /** */
     BCP_message_environment* msg_env;
     /*@}*/
@@ -191,9 +197,13 @@ public: // Data members
     BCP_column_generation current_phase_colgen;
 
     /** */
-    std::map<int, BCP_var*> vars; // *FIXME*: maybe hash_map better ?
+    std::map<int, BCP_var*> vars_local; // *FIXME*: maybe hash_map better ?
     /** */
-    std::map<int, BCP_cut*> cuts; // *FIXME*: maybe hash_map better ?
+    std::map<int, int>      vars_remote; // *FIXME*: maybe hash_map better ?
+    /** */
+    std::map<int, BCP_cut*> cuts_local; // *FIXME*: maybe hash_map better ?
+    /** */
+    std::map<int, int>      cuts_remote; // *FIXME*: maybe hash_map better ?
     /** */
     int next_cut_index_set_start;
     /** */
@@ -206,6 +216,10 @@ public: // Data members
     BCP_vec<BCP_tm_node*> active_nodes;
     /** */
     CoinSearchTreeManager candidate_list;
+
+    /** */
+    std::map<int, BCP_tm_node_to_send*> nodes_to_send;
+    
     // BCP_node_queue candidates;
     /** a vector of nodes to be processed in the next phase */
     BCP_vec<BCP_tm_node*> next_phase_nodes;
@@ -217,9 +231,9 @@ public: // Data members
      */ 
     /*@{*/
     /** */
-    BCP_vec< std::pair<BCP_proc_id*, int> > leaves_per_cp;
+    BCP_vec< std::pair<int, int> > leaves_per_cp;
     /** */
-    BCP_vec< std::pair<BCP_proc_id*, int> > leaves_per_vp;
+    BCP_vec< std::pair<int, int> > leaves_per_vp;
     /*@}*/
 
     //-------------------------------------------------------------------------
@@ -228,7 +242,7 @@ public:
     /**@name Constructor and destructor */
     /*@{*/
     /** */
-    BCP_tm_prob(BCP_proc_id* my_id, BCP_proc_id* parent);
+    BCP_tm_prob();
     /** */
     virtual ~BCP_tm_prob();
     /*@}*/
@@ -237,23 +251,17 @@ public:
     /**@name Methods to pack/unpack objects */
     /*@{*/
     /** */
-    void pack_var(BCP_process_t target_proc, const BCP_var& var);
+    void pack_var(const BCP_var& var);
     /** */
     BCP_var* unpack_var_without_bcpind(BCP_buffer& buf);
     /** */
-    BCP_var* unpack_var();
+    int unpack_var();
     /** */
-    void pack_cut(BCP_process_t target_proc, const BCP_cut& cut);
+    void pack_cut(const BCP_cut& cut);
     /** */
-    BCP_cut* unpack_cut();
+    BCP_cut* unpack_cut_without_bcpind(BCP_buffer& buf);
     /** */
-    void pack_var_set_change(const BCP_var_set_change& ch);
-    /** */
-    void unpack_var_set_change(BCP_var_set_change& ch);
-    /** */
-    void pack_cut_set_change(const BCP_cut_set_change& ch);
-    /** */
-    void unpack_cut_set_change(BCP_cut_set_change& ch);
+    int unpack_cut();
     /*@}*/
     //-------------------------------------------------------------------------
 

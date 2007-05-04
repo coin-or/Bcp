@@ -69,6 +69,8 @@ public:
     /** The destructor is virtual so that the appropriate destructor is invoked
         for every cut. */
     virtual ~BCP_cut() {}
+
+    virtual BCP_cut* clone() const = 0;
   /*@}*/
    
   /**@name Query methods */
@@ -146,6 +148,8 @@ public:
     }
     /** Set the internal index of the cut. */
     inline void set_bcpind(const int bcpind)  { _bcpind = bcpind; }
+    /** Flip the internal index of the variable to its negative */
+    inline void set_bcpind_flip()  { _bcpind = -_bcpind; }
 
     /* *@name Status modifying methods */
     /* @{*/
@@ -214,6 +218,8 @@ public:
    BCP_cut_core(const double lb, const double ub) : BCP_cut(lb, ub) {}
    /** The destructor deletes the object. */
    ~BCP_cut_core() {}
+
+    BCP_cut_core* clone() const { return new BCP_cut_core(*this); }
    /*@}*/
 
    /**@name Query methods */
