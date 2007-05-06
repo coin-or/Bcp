@@ -28,7 +28,7 @@
 #include "BCP_buffer.hpp"
 
 /** This enumerative constant describes the possible parameter types. */
-enum BCP_parameter_t{
+enum BCP_parameter_t {
   /** The type is not yet specified. Used only in the default constructor of
       a BCP parameter. */
   BCP_NoPar,

@@ -90,6 +90,24 @@ BCP_tm_node_to_send::BCP_tm_node_to_send(BCP_tm_prob& prob,
 
 //#############################################################################
 
+BCP_tm_node_to_send::~BCP_tm_node_to_send()
+{
+    delete[] root_path;
+    delete[] child_index;
+
+    int i;
+    for (i = explicit_all_level; i <= level; ++i) {
+	delete node_data_on_root_path[i]._desc;
+	delete node_data_on_root_path[i]._user;
+    }
+    delete[] node_data_on_root_path;
+
+    purge_ptr_vector(vars);
+    purge_ptr_vector(cuts);
+}
+
+//#############################################################################
+
 bool
 BCP_tm_node_to_send::receive_node_desc(BCP_buffer& buf)
 {

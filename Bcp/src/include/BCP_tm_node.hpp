@@ -321,6 +321,7 @@ public:
 
     BCP_tm_node_to_send(BCP_tm_prob& p, const BCP_tm_node* node,
 			const BCP_message_tag tag);
+    ~BCP_tm_node_to_send();
 
     /** return true or false depending on whether the node was really sent out
 	or it's still waiting for some data */

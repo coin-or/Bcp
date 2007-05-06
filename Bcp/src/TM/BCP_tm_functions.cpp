@@ -223,7 +223,9 @@ TM: Moving NODE %i LEVEL %i into the next phase list \n\
     }
     BCP_tm_node_to_send* node_to_send =
 	new BCP_tm_node_to_send(p, next_node, BCP_Msg_ActiveNodeData);
-    node_to_send->send();
+    if (node_to_send->send()) {
+	delete node_to_send;
+    }
 
 #ifdef BCP__DUMP_PROCINFO
 #if (BCP__DUMP_PROCINFO == 1)
