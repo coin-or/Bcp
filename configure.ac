@@ -97,8 +97,8 @@ COIN_COPY_FROM_FILELIST(Applications/MaxCut,
                         Applications/MaxCut/examplefiles.txt)
 COIN_COPY_FROM_FILELIST(Applications/Csp, 
                         Applications/Csp/examplefiles.txt)
-#COIN_COPY_FROM_FILELIST(Applications/Mkc, 
-#                        Applications/Mkc/examplefiles.txt)
+COIN_COPY_FROM_FILELIST(Applications/Mkc, 
+                        Applications/Mkc/examplefiles.txt)
 
 
 ##############################################################################
@@ -109,8 +109,8 @@ COIN_COPY_FROM_FILELIST(Applications/Csp,
 # configuration header file)
 AC_CONFIG_FILES([Makefile
                  Applications/MaxCut/Makefile
-                 Applications/Csp/Makefile])
-#                 Applications/Mkc/Makefile])
+                 Applications/Csp/Makefile
+                 Applications/Mkc/Makefile])
 
 # Finally, we let configure write all the output...
 AC_COIN_FINALIZE

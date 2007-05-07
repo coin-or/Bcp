@@ -49,12 +49,14 @@ PRE_UNINSTALL = :
 POST_UNINSTALL = :
 build_triplet = @build@
 host_triplet = @host@
-DIST_COMMON = $(am__configure_deps) $(srcdir)/BuildTools/Makemain.inc \
-	$(srcdir)/Makefile.am $(srcdir)/Makefile.in \
+DIST_COMMON = README $(am__configure_deps) \
+	$(srcdir)/BuildTools/Makemain.inc $(srcdir)/Makefile.am \
+	$(srcdir)/Makefile.in \
 	$(top_srcdir)/Applications/Csp/Makefile.in \
 	$(top_srcdir)/Applications/MaxCut/Makefile.in \
-	$(top_srcdir)/configure config.guess config.sub depcomp \
-	install-sh ltmain.sh missing
+	$(top_srcdir)/Applications/Mkc/Makefile.in \
+	$(top_srcdir)/configure AUTHORS INSTALL config.guess \
+	config.sub depcomp install-sh ltmain.sh missing
 @HAVE_EXTERNALS_TRUE@am__append_1 = Externals
 @HAVE_EXTERNALS_TRUE@am__append_2 = .Externals-stamp
 subdir = .
@@ -67,7 +69,7 @@ am__CONFIG_DISTCLEAN_FILES = config.status config.cache config.log \
  configure.lineno configure.status.lineno
 mkinstalldirs = $(install_sh) -d
 CONFIG_CLEAN_FILES = Applications/MaxCut/Makefile \
-	Applications/Csp/Makefile
+	Applications/Csp/Makefile Applications/Mkc/Makefile
 SOURCES =
 DIST_SOURCES =
 RECURSIVE_TARGETS = all-recursive check-recursive dvi-recursive \
@@ -280,6 +282,8 @@ Applications/MaxCut/Makefile: $(top_builddir)/config.status $(top_srcdir)/Applic
 	cd $(top_builddir) && $(SHELL) ./config.status $@
 Applications/Csp/Makefile: $(top_builddir)/config.status $(top_srcdir)/Applications/Csp/Makefile.in
 	cd $(top_builddir) && $(SHELL) ./config.status $@
+Applications/Mkc/Makefile: $(top_builddir)/config.status $(top_srcdir)/Applications/Mkc/Makefile.in
+	cd $(top_builddir) && $(SHELL) ./config.status $@
 
 mostlyclean-libtool:
 	-rm -f *.lo
@@ -426,7 +430,7 @@ distclean-tags:
 distdir: $(DISTFILES)
 	$(am__remove_distdir)
 	mkdir $(distdir)
-	$(mkdir_p) $(distdir)/Applications/Csp $(distdir)/Applications/MaxCut $(distdir)/BuildTools $(distdir)/doxydoc
+	$(mkdir_p) $(distdir)/Applications/Csp $(distdir)/Applications/MaxCut $(distdir)/Applications/Mkc $(distdir)/BuildTools $(distdir)/doxydoc
 	@srcdirstrip=`echo "$(srcdir)" | sed 's|.|.|g'`; \
 	topsrcdirstrip=`echo "$(top_srcdir)" | sed 's|.|.|g'`; \
 	list='$(DISTFILES)'; for file in $$list; do \
