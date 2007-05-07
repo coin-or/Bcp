@@ -1,0 +1,98 @@
+These instructions are for UNIX-like systems (including Linux, Cygwin
+and MSys) only.  If Microsoft Developer Studio projects are
+maintained for this package, you can find instructions at
+
+  https://projects.coin-or.org/MSDevStudio
+
+**********************************************************************
+***                         DOWNLOAD                               ***
+**********************************************************************
+
+You can obtain the source code for the Bcp package in two ways:
+
+1. Obtain the source directly from the COIN-OR subversion repository
+   (recommended).  For this you needs the program 'svn' installed on
+   your machine, and output of "svn --version" must contain 
+   "handles 'https' scheme".
+
+   Assuming that you want to download the code into a subdirectory
+   "COIN-Bcp", you type
+
+   svn co https://projects.coin-or.org/svn/Bcp/trunk Coin-Bcp
+
+2. Download the tarball from http://www.coin-or.org/Tarballs/Bcp and
+   extract it, for example, with
+
+   gunzip Bcp_1.1.0.tgz
+   tar xvf Bcp_1.1.0.tgz
+
+   More detailed download instructions can be found at
+
+   https://projects.coin-or.org/BuildTools/wiki/user-download
+
+**********************************************************************
+***                        CONFIGURATION                           ***
+**********************************************************************
+
+Create a build directory along the source you just downloaded or
+extracted (e.g., Coin-Bcp), and go into that directory:
+
+   mkdir Coin-Bcp-build
+   cd Coin-Bcp-build
+
+Then you type
+
+   ../Coin-Bcp/configure
+
+Note that you might have to specify additional options, in case you
+don't want to use the default choices that configure makes (e.g.,
+compilers).  Please visit
+
+   https://projects.coin-or.org/BuildTools/wiki/user-configure
+
+and the Bcp Trac page
+
+   https://projects.coin-or.org/Bcp
+
+for more information.
+
+If everything went fine, you will see at the end of the output
+
+   "Main configuration of Bcp successful"
+
+**********************************************************************
+***                COMPILATION AND INSTALLATION                    ***
+**********************************************************************
+
+In the directory where you ran the configure script:
+
+1. Compile the code by typing
+
+   make
+
+2. To test if the code works, you can type
+
+   make test
+
+3. To install the code, you type
+
+   make install
+
+   After this, you will find the executables, libraries and header
+   files in the "bin", "lib" and "include" subdirectory, respectively.
+
+More information on the compilation and installation can be found at
+
+   https://projects.coin-or.org/BuildTools/wiki/user-compile
+
+**********************************************************************
+***                     USING THE LIBRARIES                        ***
+**********************************************************************
+
+Now you can link your own code with the installed libraries. There are
+a few very easy to understand examples in Bcp/examples/ and a few more
+complex applications in the Applications subdirectory.
+
+See also the information at
+
+   https://projects.coin-or.org/BuildTools/wiki/user-examples
