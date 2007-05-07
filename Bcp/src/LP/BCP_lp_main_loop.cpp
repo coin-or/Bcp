@@ -37,10 +37,6 @@ void BCP_lp_main_loop(BCP_lp_prob& p)
     // let the user do whatever she wants before the new node starts
     BCP_lp_prepare_for_new_node(p);
 
-    const bool fix_vars_while_external_processes_working =
-	(p.node->colgen == BCP_DoNotGenerateColumns_Fathom) ||
-	(p.node->colgen == BCP_DoNotGenerateColumns_Send);
-
     while (true){
 	++p.node->iteration_count;
 
@@ -134,9 +130,22 @@ LP:   Terminating and fathoming due to proven high cost.\n",
 	}
 
 	// We came here, therefore termcode must have been optimal and the
-	// cost cannot be too high. Also, (at least so far) we haven't
-	// generated any new variables.
+	// cost cannot be too high.
+
+	// So far we haven't generated any new variables.
 	varset_changed = false;
+
+	if (BCP_lp_fix_vars(p) ||
+	    (p.lp_solver->canDoSimplexInterface() &&
+	     !p.lp_solver->basisIsAvailable())) {
+	    // during variable fixing primal feasibility is lost (must be due
+	    // to logical fixing by the user) OR we can do simplex, but for
+	    // some reason the basis is lost (generally when the LP solver
+	    // discards the basis if bounds are changed). Go back and resolve,
+	    // but keep the same iteration number
+	    --p.node->iteration_count;
+	    continue;
+	}
 
 	p.no_more_cuts_cnt = 0;
 	p.no_more_vars_cnt = 0;
@@ -182,17 +191,6 @@ LP:   Terminating and fathoming due to proven high cost.\n",
 	    }
 	}
 
-	if (fix_vars_while_external_processes_working) {
-	    if (BCP_lp_fix_vars(p) ||
-		(p.lp_solver->canDoSimplexInterface() &&
-		 !p.lp_solver->basisIsAvailable())) {
-		// during variable fixing primal feasibility is lost (must be
-		// due to logical fixing by the user). Go back and resolve,
-		// but keep the same iteration number
-		--p.node->iteration_count;
-		continue;
-	    }
-	}
 	BCP_lp_adjust_row_effectiveness(p);
 
 	// Generate and receive the cuts
@@ -201,15 +199,6 @@ LP:   Terminating and fathoming due to proven high cost.\n",
 	// Generate and receive the vars
 	const int vars_to_add_cnt =
 	    BCP_lp_generate_vars(p, cutset_changed, from_repricing);
-
-	if (! fix_vars_while_external_processes_working) {
-	    if (BCP_lp_fix_vars(p) || 
-		(p.lp_solver->canDoSimplexInterface() && 
-		 !p.lp_solver->basisIsAvailable())) {
-		--p.node->iteration_count;
-		continue;
-	    }
-	}
 
 	time0 = CoinCpuTime();
 	BCP_solution* sol =
