@@ -87,28 +87,38 @@ bool BCP_lp_fix_vars(BCP_lp_prob& p)
 
    const int change_num = changed_pos.size();
    if (change_num > 0){
-      int bd_changes = change_num;
+      int bd_changes = 0;
       const double * x = lpres.x();
       const double petol = lpres.primalTolerance();
-      BCP_vec<double>::iterator newbd = new_bd.begin();
       for (i = 0; i < change_num; ++i) {
-	 // check that the new bounds are actually tighter than the old ones.
+	 // check that the new bounds are not looser than the old ones.
 	 // throw an exception if not.
-	 // otherwise change the bounds and in the meantime check if primal
-	 // feasibility is violated (dual feas can't be hurt: bound changes
-	 // can hurt dual feasibility).
-	 const double new_lb = *newbd;
-	 ++newbd;
-	 const double new_ub = *newbd;
-	 ++newbd;
 	 const int pos = changed_pos[i];
-	 if (vars[pos]->lb() > new_lb + petol ||
-	     vars[pos]->ub() < new_ub - petol) {
+	 const double old_lb = vars[pos]->lb();
+	 const double old_ub = vars[pos]->ub();
+	 const double new_lb = new_bd[2*i];
+	 const double new_ub = new_bd[2*i+1];
+	 if (old_lb > new_lb + petol || old_ub < new_ub - petol) {
 	    throw BCP_fatal_error("logical fixing enlarged feas region!\n");
 	 }
+	 // check that the new bounds are actually tighter than the old
+	 // ones. Print a warning if not.
+	 if (new_lb < old_lb + petol  && new_ub > old_ub - petol) {
+	     printf("LP: BCP_lp_fix_vars(): WARNING: no change in bounds.\n");
+	     continue;
+	 }
+	 // otherwise register the bounds for change and check if primal
+	 // feasibility is violated (dual feas can't be hurt: bound changes
+	 // can hurt dual feasibility).
+	 new_bd[2*bd_changes] = new_lb;
+	 new_bd[2*bd_changes+1] = new_ub;
+	 changed_pos[bd_changes] = pos;
+	 ++bd_changes;
 	 if ((x[pos] < new_lb - petol) || (x[pos] > new_ub + petol))
 	    lost_primal_feasibility = true;
       }
+      changed_pos.erase(changed_pos.entry(bd_changes), changed_pos.end());
+      new_bd.erase(new_bd.entry(2*bd_changes), new_bd.end());
 
       p.var_bound_changes_since_logical_fixing = 0;
 
