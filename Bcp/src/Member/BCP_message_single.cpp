@@ -342,19 +342,26 @@ BCP_single_environment::register_process(USER_initialize* user_init)
     BCP_tm_wrapup(_tm_prob, _lp_prob, _cg_prob, _vg_prob, true);
     // sleep(7200);
 
+    delete _lp_prob->msg_env;
     delete _lp_prob;
 
     if (_cg_prob) {
+	delete _cg_prob->msg_env;
 	delete _cg_prob;
     }
     if (_vg_prob) {
+	delete _vg_prob->msg_env;
 	delete _vg_prob;
     }
       
-    //    if (_cp_prob)
-    //       delete _cp_prob;
-    //    if (_vp_prob)
-    //       delete _vp_prob;
+//     if (_cp_prob) {
+// 	delete _cp_prob->msg_env;
+// 	delete _cp_prob;
+//     }
+//     if (_vp_prob) {
+// 	delete _vp_prob->msg_env;
+// 	delete _vp_prob;
+//     }
       
     delete _tm_prob;
 
