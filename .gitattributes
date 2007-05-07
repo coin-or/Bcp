@@ -1,4 +1,5 @@
 * text=auto !eol
+/AUTHORS -text
 Applications/Csp/AUTHORS -text
 Applications/Csp/CG/CSP_colgen.cpp -text
 Applications/Csp/CSP.par -text
@@ -156,8 +157,10 @@ Bcp/src/include/BcpConfig.h -text
 Bcp/test/BAC/Makefile.am -text
 Bcp/test/BAC/Makefile.in -text
 /Externals -text
+/INSTALL -text
 /Makefile.am -text
 /Makefile.in -text
+/README -text
 /config.guess -text
 /config.sub -text
 /configure -text
