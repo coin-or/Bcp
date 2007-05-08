@@ -5,6 +5,7 @@
 
 // This file is prepared for doxygen.
 
+#include "CoinSmartPtr.hpp"
 #include "BCP_error.hpp"
 #include "BCP_message_single.hpp"
 #include "BCP_functions.hpp"
@@ -15,10 +16,9 @@ class BCP_warmstart;
 
 //#############################################################################
 
-class BCP_user_data {
+class BCP_user_data : public Coin::ReferencedObject {
 public:
     virtual ~BCP_user_data() {}
-    virtual BCP_user_data* clone() const = 0;
 };
 
 //#############################################################################

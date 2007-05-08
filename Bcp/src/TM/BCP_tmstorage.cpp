@@ -10,7 +10,6 @@
 #include "BCP_main_fun.hpp"
 #include "BCP_var.hpp"
 #include "BCP_cut.hpp"
-#include "BCP_tm_node.hpp"
 #include "BCP_tmstorage.hpp"
 #include "BCP_problem_core.hpp"
 #include "BCP_node_change.hpp"
@@ -148,7 +147,7 @@ BCP_process_t BCP_tmstorage_main(BCP_message_environment* msg_env,
 
 BCP_ts_prob::~BCP_ts_prob()
 {
-    std::map<int, BCP_tm_node_data*>::iterator n;
+    std::map<int, BCP_ts_node_data*>::iterator n;
     for (n = nodes.begin(); n != nodes.end(); ++n) {
 	delete n->second;
     }
@@ -177,7 +176,7 @@ static void process_Msg_NodeList(BCP_ts_prob& p, BCP_buffer& buf)
 	    break;
 	}
 	// OK, receive a description
-	BCP_tm_node_data* data = new BCP_tm_node_data;
+	BCP_ts_node_data* data = new BCP_ts_node_data;
 	buf.unpack(index);
 	data->_desc = new BCP_node_change;
 
@@ -208,12 +207,12 @@ static void process_Msg_NodeListRequest(BCP_ts_prob& p, BCP_buffer& buf)
     buf.pack(id);
     buf.pack(num);
     for (int i = 0; i < num; ++i) {
-	std::map<int, BCP_tm_node_data*>::iterator n = p.nodes.find(inds[i]);
+	std::map<int, BCP_ts_node_data*>::iterator n = p.nodes.find(inds[i]);
 	if (n == p.nodes.end()) {
 	    throw BCP_fatal_error("TS: Requested node (%i) is not here\n",
 				  inds[i]);
 	}
-	BCP_tm_node_data* data = n->second;
+	BCP_ts_node_data* data = n->second;
 	buf.pack(nodelevels[i]);
 	buf.pack(inds[i]);
 
@@ -232,7 +231,7 @@ static void process_Msg_NodeListDelete(BCP_ts_prob& p, BCP_buffer& buf)
     buf.unpack(inds);
     const int num = inds.size();
     for (int i = 0; i < num; ++i) {
-	std::map<int, BCP_tm_node_data*>::iterator n = p.nodes.find(inds[i]);
+	std::map<int, BCP_ts_node_data*>::iterator n = p.nodes.find(inds[i]);
 	if (n == p.nodes.end()) {
 	    throw BCP_fatal_error("TS: Node to be deleted (%i) is not here\n",
 				  inds[i]);

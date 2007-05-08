@@ -3,6 +3,7 @@
 #ifndef _BCP_NODE_H
 #define _BCP_NODE_H
 
+#include "CoinSmartPtr.hpp"
 #include "BCP_problem_core.hpp"
 #include "BCP_obj_change.hpp"
 #include "BCP_indexed_pricing.hpp"
@@ -15,7 +16,7 @@ class BCP_user_pack;
 
 //#############################################################################
 
-class BCP_node_change {
+class BCP_node_change : public Coin::ReferencedObject {
 private:
     BCP_node_change(const BCP_node_change&);
     BCP_node_change& operator=(const BCP_node_change&);
@@ -26,10 +27,9 @@ public:
     BCP_warmstart* warmstart;
 public:
     BCP_node_change();
+    BCP_node_change(BCP_user_pack* packer, const bool def, BCP_buffer& buf);
     ~BCP_node_change();
 
-    // FIXME: would not need clone (and would be faster) with smart pointers
-    BCP_node_change* clone() const;
     void pack(BCP_user_pack* packer, const bool def, BCP_buffer& buf) const;
     void unpack(BCP_user_pack* packer, const bool def, BCP_buffer& buf);
 };

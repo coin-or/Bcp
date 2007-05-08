@@ -10,6 +10,13 @@
 BCP_node_change::BCP_node_change() : 
     core_change(), var_change(), cut_change(), warmstart(0) {}
 
+BCP_node_change::BCP_node_change(BCP_user_pack* packer,
+				 const bool def, BCP_buffer& buf) :
+    core_change(), var_change(), cut_change(), warmstart(0)
+{
+    unpack(packer, def, buf);
+}
+
 BCP_node_change::~BCP_node_change() {
     delete warmstart;
 }
@@ -44,19 +51,4 @@ BCP_node_change::unpack(BCP_user_pack* packer, const bool report_default,
     if (has_ws) {
 	warmstart = packer->unpack_warmstart(buf, report_default);
     }
-}
-
-//#############################################################################
-
-BCP_node_change*
-BCP_node_change::clone() const
-{
-    BCP_node_change* cl = new BCP_node_change;
-    cl->core_change = core_change;
-    cl->var_change = var_change;
-    cl->cut_change = cut_change;
-    if (warmstart) {
-	cl->warmstart = warmstart->clone();
-    }
-    return cl;
 }

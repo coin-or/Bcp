@@ -13,10 +13,13 @@
 #include "BCP_USER.hpp"
 
 //#############################################################################
-class BCP_tm_node_data;
+
 class BCP_var_algo;
 class BCP_cut_algo;
 class BCP_problem_core;
+
+class BCP_node_change;
+class BCP_User_data;
 
 //#############################################################################
 
@@ -54,6 +57,15 @@ struct BCP_ts_par {
     
 //#############################################################################
 
+/** Same as BCP_tm_node_data, just there's no need to use smart pointers in
+    this process */
+struct BCP_ts_node_data {
+    BCP_node_change* _desc;
+    BCP_user_data*   _user;
+};
+
+//#############################################################################
+
 class BCP_ts_prob : public BCP_process {
 private:
     /**@name Disabled methods */
@@ -82,7 +94,7 @@ public:
     /** positions in the TM of requested nodes/vars/cuts */
     BCP_vec<int> positions;
     /** */
-    std::map<int, BCP_tm_node_data*> nodes; // *FIXME*: maybe hash_map better ?
+    std::map<int, BCP_ts_node_data*> nodes; // *FIXME*: maybe hash_map better ?
     /** */
     std::map<int, BCP_var_algo*> vars; // *FIXME*: maybe hash_map better ?
     /** */

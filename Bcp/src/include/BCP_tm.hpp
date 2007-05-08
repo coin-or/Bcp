@@ -7,6 +7,7 @@
 #include <map>
 
 #include "CoinSearchTree.hpp"
+#include "CoinSmartPtr.hpp"
 
 #include "BCP_math.hpp"
 #include "BCP_buffer.hpp"
@@ -196,14 +197,16 @@ public: // Data members
     /** */
     BCP_column_generation current_phase_colgen;
 
+    // *FIXME*: maybe hash_map better for the next four?
     /** */
-    std::map<int, BCP_var*> vars_local; // *FIXME*: maybe hash_map better ?
+    std::map<int, Coin::SmartPtr<BCP_var> > vars_local; 
     /** */
-    std::map<int, int>      vars_remote; // *FIXME*: maybe hash_map better ?
+    std::map<int, int>      vars_remote;
     /** */
-    std::map<int, BCP_cut*> cuts_local; // *FIXME*: maybe hash_map better ?
+    std::map<int, Coin::SmartPtr<BCP_cut> > cuts_local;
     /** */
-    std::map<int, int>      cuts_remote; // *FIXME*: maybe hash_map better ?
+    std::map<int, int>      cuts_remote;
+
     /** */
     int next_cut_index_set_start;
     /** */

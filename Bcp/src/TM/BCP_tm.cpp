@@ -36,15 +36,6 @@ BCP_tm_prob::~BCP_tm_prob()
    
    delete feas_sol;
 
-   std::map<int, BCP_var*>::iterator vari = vars_local.begin();
-   while (vari != vars_local.end()) {
-      delete (vari++)->second;
-   }
-   std::map<int, BCP_cut*>::iterator cuti = cuts_local.begin();
-   while (cuti != cuts_local.end()) {
-      delete (cuti++)->second;
-   }
-
    delete core;
    delete core_as_change;
 }

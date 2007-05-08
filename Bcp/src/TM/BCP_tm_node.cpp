@@ -9,13 +9,6 @@
 
 //#############################################################################
 
-BCP_tm_node::~BCP_tm_node() {
-    delete _data._user;
-    delete _data._desc;
-}
-
-//#############################################################################
-
 int
 BCP_tm_node::mark_descendants_for_deletion() {
     int del_num = child_num();

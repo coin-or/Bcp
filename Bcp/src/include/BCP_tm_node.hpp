@@ -8,12 +8,15 @@
 #include <map>
 
 #include "CoinSearchTree.hpp"
+#include "CoinSmartPtr.hpp"
 
 #include "BCP_math.hpp"
 #include "BCP_vector.hpp"
 
 #include "BCP_message_tag.hpp"
 #include "BCP_obj_change.hpp"
+#include "BCP_node_change.hpp"
+#include "BCP_USER.hpp"
 
 /** Node status in the Tree Manager. */
 
@@ -40,17 +43,17 @@ enum BCP_tm_node_status{
 
 //#############################################################################
 
-class BCP_node_change;
-class BCP_user_data;
-
 class BCP_tm_node;
 class BCP_tm_prob;
 
 //#############################################################################
 
-struct BCP_tm_node_data {
-    BCP_node_change* _desc;
-    BCP_user_data*   _user;
+class BCP_tm_node_data {
+public:
+    Coin::SmartPtr<BCP_node_change> _desc;
+    Coin::SmartPtr<BCP_user_data>   _user;
+    BCP_tm_node_data(BCP_node_change* d = NULL, BCP_user_data* u = NULL) :
+	_desc(d), _user(u) {}
 };
 
 //=============================================================================
@@ -77,10 +80,8 @@ public:
     /** */
     BCP_tm_node* _parent;
 
-    int _locally_stored:1;
-    
     /** */
-    int _birth_index:31;
+    int _birth_index;
     /** */
     BCP_vec<BCP_tm_node*> _children;
     /** */
@@ -98,10 +99,11 @@ public:
     int _var_storage:4;
     int _cut_storage:4;
     int _ws_storage:4;
-    union {
-	BCP_tm_node_data _data;
-	int _data_location;
-    };
+
+    int _locally_stored:1;
+    // Exactly one of the next two is always irrelevant */
+    int _data_location:31;
+    BCP_tm_node_data _data;
 	
     /*@}*/
 
@@ -114,7 +116,6 @@ public:
 	status(BCP_DefaultNode),
 	_index(0),
 	_parent(0),
-	_locally_stored(1),
 	_birth_index(-1),
 	_children(),
 	lp(-1), cg(-1), cp(-1), vg(-1), vp(-1),
@@ -125,11 +126,10 @@ public:
 	_core_storage(-1),
 	_var_storage(-1),
 	_cut_storage(-1),
-	_ws_storage(-1)
-    {
-	_data._desc = desc;
-	_data._user = NULL;
-    }
+	_ws_storage(-1),
+	_locally_stored(1),
+	_data_location(-1),
+	_data(desc, NULL) {}
 
     /** */
     BCP_tm_node(int level, BCP_node_change* desc,
@@ -138,21 +138,19 @@ public:
 	status(BCP_DefaultNode),
 	_index(0),
 	_parent(0),
-	_locally_stored(1),
 	_birth_index(-1),
 	_children(),
 	lp(-1), cg(-1), cp(-1), vg(-1), vp(-1),
 	_processed_leaf_num(0),
 	_pruned_leaf_num(0),
 	_tobepriced_leaf_num(0),
-	_leaf_num(0)
-    {
-	_data._desc = desc;
-	_data._user = NULL;
-    }
+	_leaf_num(0),
+	_locally_stored(1),
+	_data_location(-1),
+	_data(desc, NULL) {}
 
     /** */
-    ~BCP_tm_node();
+    ~BCP_tm_node() {}
     /*@}*/
 
     /**@name Query methods */
@@ -314,8 +312,8 @@ private:
     BCP_obj_set_change cut_set;
     /** The list of vars/cuts of the node when the changes of the node are
 	applied to \c var_set and \c cut_set */
-    BCP_vec<BCP_var*> vars;
-    BCP_vec<BCP_cut*> cuts;
+    BCP_vec<Coin::SmartPtr<BCP_var> > vars;
+    BCP_vec<Coin::SmartPtr<BCP_cut> > cuts;
 
 public:
 

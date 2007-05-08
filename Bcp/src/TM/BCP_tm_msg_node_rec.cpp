@@ -131,8 +131,8 @@ BCP_tm_unpack_node_description: received node is different from processed.\n");
     // wipe out any previous description of this node and create a new one if
     // the description is sent over
     if (node->_locally_stored) {
-	delete node->_data._desc;   node->_data._desc = 0;
-	delete node->_data._user;   node->_data._user = 0;
+	node->_data._desc = NULL;
+	node->_data._user = NULL;
     } else {
 	BCP_buffer b;
 	BCP_vec<int> indices(1, index);
@@ -444,7 +444,7 @@ BCP_tm_unpack_branching_info(BCP_tm_prob& p, BCP_buffer& buf,
     BCP_node_change* desc;
     // nodedesc exists, because when we unpack the barnching info we just
     // received back the description of the node
-    BCP_node_change* nodedesc = node->_data._desc;
+    const BCP_node_change* nodedesc = node->_data._desc.GetRawPtr();
     int i;
 
     // fix the number of leaves assigned to the CP/VP

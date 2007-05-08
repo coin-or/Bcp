@@ -7,6 +7,7 @@
 
 //#############################################################################
 
+#include "CoinSmartPtr.hpp"
 #include "BCP_math.hpp"
 #include "BCP_error.hpp"
 #include "BCP_enum.hpp"
@@ -25,7 +26,7 @@
    restriction).  
  */
 
-class BCP_cut{
+class BCP_cut : public Coin::ReferencedObject {
 private:
   /**@name Disabled methods */
   /*@{*/
@@ -69,8 +70,6 @@ public:
     /** The destructor is virtual so that the appropriate destructor is invoked
         for every cut. */
     virtual ~BCP_cut() {}
-
-    virtual BCP_cut* clone() const = 0;
   /*@}*/
    
   /**@name Query methods */
@@ -218,8 +217,6 @@ public:
    BCP_cut_core(const double lb, const double ub) : BCP_cut(lb, ub) {}
    /** The destructor deletes the object. */
    ~BCP_cut_core() {}
-
-    BCP_cut_core* clone() const { return new BCP_cut_core(*this); }
    /*@}*/
 
    /**@name Query methods */

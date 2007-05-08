@@ -367,7 +367,8 @@ void BCP_check_parameters(BCP_tm_prob& p)
 
 void BCP_sanity_checks(BCP_tm_prob& p)
 {
-    BCP_node_change* root_desc = p.search_tree.root()->_data._desc;
+    const BCP_node_change* root_desc =
+	p.search_tree.root()->_data._desc.GetRawPtr();
 
     if (p.core->varnum() == 0 &&
 	root_desc->var_change.added_num() == 0) {

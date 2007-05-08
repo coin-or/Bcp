@@ -56,12 +56,7 @@ BCP_tm_node_to_send::BCP_tm_node_to_send(BCP_tm_prob& prob,
 	root_path[i] = n;
 	// some stuff is on other processes
 	if (n->_locally_stored) {
-	    node_data_on_root_path[i]._desc = n->_data._desc->clone();
-	    node_data_on_root_path[i]._user =
-		n->_data._user ? n->_data._user->clone() : NULL;
-	} else {
-	    node_data_on_root_path[i]._desc = NULL;
-	    node_data_on_root_path[i]._user = NULL;
+	    node_data_on_root_path[i] = n->_data;
 	}
 	if (n->_core_storage!=BCP_Storage_WrtParent && explicit_core_level<0) {
 	    explicit_core_level = i;
@@ -94,16 +89,7 @@ BCP_tm_node_to_send::~BCP_tm_node_to_send()
 {
     delete[] root_path;
     delete[] child_index;
-
-    int i;
-    for (i = explicit_all_level; i <= level; ++i) {
-	delete node_data_on_root_path[i]._desc;
-	delete node_data_on_root_path[i]._user;
-    }
     delete[] node_data_on_root_path;
-
-    purge_ptr_vector(vars);
-    purge_ptr_vector(cuts);
 }
 
 //#############################################################################
@@ -118,8 +104,8 @@ BCP_tm_node_to_send::receive_node_desc(BCP_buffer& buf)
     while (--cnt >= 0) {
 	buf.unpack(level).unpack(index);
 	assert(root_path[level]->_index == index);
-	node_data_on_root_path[level]._desc = new BCP_node_change;
-	node_data_on_root_path[level]._desc->unpack(p.packer, def, buf);
+	node_data_on_root_path[level]._desc =
+	    new BCP_node_change(p.packer, def, buf);
 	node_data_on_root_path[level]._user = p.packer->unpack_user_data(buf);
     }
     assert(missing_desc_num >= 0);
@@ -181,7 +167,7 @@ BCP_tm_node_to_send::send()
 	// collect what needs od be asked for
 	std::map< int, BCP_vec<int> > tms_nodelevel;
 	for (i = explicit_all_level; i <= level; i++) {
-	    if (node_data_on_root_path[i]._desc == NULL) {
+	    if (node_data_on_root_path[i]._desc.IsNull()) {
 		tms_nodelevel[root_path[i]->_data_location].push_back(i);
 		++missing_desc_num;
 	    }
@@ -220,8 +206,8 @@ BCP_tm_node_to_send::send()
 	std::map< int, BCP_vec<int> > tms_pos;
 	std::map< int, BCP_vec<int> >::const_iterator tms;
 	std::map<int, int>::iterator remote;
-	std::map<int, BCP_var*>::iterator localvar;
-	std::map<int, BCP_cut*>::iterator localcut;
+	std::map<int, Coin::SmartPtr<BCP_var> >::iterator localvar;
+	std::map<int, Coin::SmartPtr<BCP_cut> >::iterator localcut;
 	BCP_buffer& buf = p.msg_buf;
 	BCP_vec<int> indices;
 
@@ -249,7 +235,7 @@ BCP_tm_node_to_send::send()
 	    localvar = p.vars_local.find(var_inds[i]);
 	    if (localvar != p.vars_local.end()) {
 		// FIXME: cloning could be avoided by using smart pointers
-		vars.unchecked_push_back(localvar->second->clone());
+		vars.unchecked_push_back(localvar->second);
 		continue;
 	    }
 	    throw BCP_fatal_error("\
@@ -295,7 +281,7 @@ TM: var in node description is neither local nor remote.\n");
 	    localcut = p.cuts_local.find(cut_inds[i]);
 	    if (localcut != p.cuts_local.end()) {
 		// FIXME: cloning could be avoided by using smart pointers
-		cuts.unchecked_push_back(localcut->second->clone());
+		cuts.unchecked_push_back(localcut->second);
 		continue;
 	    }
 	    throw BCP_fatal_error("\
@@ -326,7 +312,6 @@ TM: cut in node description is neither local nor remote.\n");
     const bool def = p.param(BCP_tm_par::ReportWhenDefaultIsExecuted);
     p.user->display_node_information(p.search_tree, *node);
 
-    const BCP_node_change* desc = node_data_on_root_path[level]._desc;
     BCP_diving_status dive =
 	(rand() < p.param(BCP_tm_par::UnconditionalDiveProbability)*RAND_MAX) ?
 	BCP_DoDive : BCP_TestBeforeDive;
@@ -379,11 +364,12 @@ TM: cut in node description is neither local nor remote.\n");
 		warmstart->update(node_data_on_root_path[i]._desc->warmstart);
 	    }
 	    p.packer->pack_warmstart(warmstart, p.msg_buf, def);
+	    delete warmstart;
 	}
     }
 
     // finally pack the changes in this node
-    desc->pack(p.packer, def, buf);
+    node_data_on_root_path[level]._desc->pack(p.packer, def, buf);
     
     // Now pack the full list of vars/cuts of the node
     int cnt = vars.size();
@@ -397,10 +383,10 @@ TM: cut in node description is neither local nor remote.\n");
 	p.pack_cut(*cuts[i]);
     }
 
-    const bool has_data = node->_data._user != 0;
+    const bool has_data = node->_data._user.IsValid();
     buf.pack(has_data);
     if (has_data)
-	p.packer->pack_user_data(node->_data._user, buf);
+	p.packer->pack_user_data(node->_data._user.GetRawPtr(), buf);
 
     p.msg_env->send(node->lp, msgtag, buf);
 

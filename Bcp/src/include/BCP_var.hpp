@@ -7,6 +7,7 @@
 
 //#############################################################################
 
+#include "CoinSmartPtr.hpp"
 #include "BCP_error.hpp"
 #include "BCP_enum.hpp"
 #include "BCP_vector.hpp"
@@ -24,7 +25,7 @@
    No object of type BCP_var can exist (having purely virtual
    members in the class enforces this restriction). */
 
-class BCP_var {
+class BCP_var : public Coin::ReferencedObject {
 private:
   /**@name Disabled methods */
   /*@{*/
@@ -74,8 +75,6 @@ public:
     /** The destructor is virtual so that the appropriate destructor is invoked
         for every variable. */
     virtual ~BCP_var() {}
-
-    virtual BCP_var* clone() const = 0;
   /*@}*/
 
   /**@name Query methods */
@@ -248,8 +247,6 @@ public:
       BCP_var(var_type, obj, lb, ub) {}
    /** The destructor deletes the object. */
    ~BCP_var_core() {}
-
-    BCP_var_core* clone() const { return new BCP_var_core(*this); }
    /*@}*/
 
    /**@name Query methods */
