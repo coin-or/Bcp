@@ -40,26 +40,9 @@ public:
   /// Read input and set up data in class BB_prob
   void readInput(const char* filename);
 
-
-  /**@name Packing and unpacking methods */
-  //@{
   /// Pack data into a buffer; will not work in parallel environment
   /// as it uses pointer 
   virtual void pack_module_data(BCP_buffer& buf, BCP_process_t ptype);
-
-  /// Packing of algorithmic cuts
-  virtual void pack_cut_algo(const BCP_cut_algo* cut, BCP_buffer& buf);
-
-  /// Unpacking of algorithmic cuts
-  virtual BCP_cut_algo* unpack_cut_algo(BCP_buffer& buf);
-
-  /// Packing of user data
-  virtual void pack_user_data(const BCP_user_data* ud, BCP_buffer& buf);
-
-  /// Unpacking of user_data
-  virtual BCP_user_data* unpack_user_data(BCP_buffer& buf);
-
-  //@}
 
   /// Pass the core constraints and core variables to bcp
   virtual void initialize_core(BCP_vec<BCP_var_core*>& vars,

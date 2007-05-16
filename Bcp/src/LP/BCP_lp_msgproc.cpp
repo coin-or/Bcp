@@ -329,9 +329,11 @@ void BCP_lp_send_cuts_to_cp(BCP_lp_prob& p, const int eff_cnt_limit)
       cut->dont_send_to_pool(true);
     }
 
-    p.msg_env->send(p.node->cp, BCP_Msg_CutsToCutPool, buf);
-    if (p.param(BCP_lp_par::LpVerb_CutsToCutPoolCount))
-      printf("LP:   %i cuts sent to cutpool\n", cnt);
+    if (p.node->cp != -1) {
+      p.msg_env->send(p.node->cp, BCP_Msg_CutsToCutPool, buf);
+      if (p.param(BCP_lp_par::LpVerb_CutsToCutPoolCount))
+	printf("LP:   %i cuts sent to cutpool\n", cnt);
+    }
   }
 }
 

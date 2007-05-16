@@ -943,6 +943,7 @@ select_branching_candidates(const BCP_lp_result& lpres,
     */
     int brResult =
 	try_to_branch(brInfo, lp, choose, brObj, allowVarFix);
+    const int bestWhichWay = choose->bestWhichWay();
 
 #if 0
     /* FIXME:before doing anything check if we have found a new solution */
@@ -959,10 +960,13 @@ select_branching_candidates(const BCP_lp_result& lpres,
     }
 #endif
 
+    delete choose;
+
     switch (brResult) {
     case -2:
 	// when doing strong branching a candidate has proved that the
 	// problem is infeasible
+	delete brObj;
 	return BCP_DoNotBranch_Fathomed;
     case -1:
 	// OsiChooseVariable::chooseVariable() returned 2, 3, or 4
@@ -1001,7 +1005,7 @@ BCP: BCP_lp_user::try_to_branch returned with unknown return code.\n");
     
     // all possibilities are 2-way branches
     int order[2] = {0, 1};
-    if (choose->bestWhichWay() == 1) {
+    if (bestWhichWay == 1) {
 	order[0] = 1;
 	order[1] = 0;
     }
@@ -1019,6 +1023,8 @@ BCP: BCP_lp_user::try_to_branch returned with unknown return code.\n");
 	BCP_lp_sos_branching_object o(sosBrObj);
 	cands.push_back(new BCP_lp_branching_object(lp, o, order));
     }
+
+    delete brObj;
     
     if (cands.size() == 0) {
 	throw BCP_fatal_error("\

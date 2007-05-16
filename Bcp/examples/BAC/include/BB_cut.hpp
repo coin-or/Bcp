@@ -92,45 +92,5 @@ public:
     ~BB_cut() {}
 };
 
-/****************************************************************************/
-static inline void
-BB_pack_cut(const BCP_cut_algo* cut, BCP_buffer& buf)
-{
-    int typ;
-    const BB_indexed_cut* bb_icut = dynamic_cast<const BB_indexed_cut*>(cut);
-    if (bb_icut) {
-	typ = 0;
-	buf.pack(typ);
-	bb_icut->pack(buf);
-	return;
-    }
-    const BB_cut* bb_cut = dynamic_cast<const BB_cut*>(cut);
-    if (bb_cut) {
-	typ = 1;
-	buf.pack(typ);
-	bb_cut->pack(buf);
-	return;
-    }
-    throw BCP_fatal_error("BB_pack_cut(): unknown cut type.");
-}
-
-/****************************************************************************/
-static inline BCP_cut_algo*
-BB_unpack_cut(BCP_buffer& buf)
-{
-    int typ;
-    buf.unpack(typ);
-    switch (typ) {
-    case 0:
-	return new BB_indexed_cut(buf);
-    case 1:
-	return new BB_cut(buf);
-    default:
-	throw BCP_fatal_error("BB_unpack_cut(): unknown cut type.");
-	break;
-    }
-    return NULL; // fake return
-}
-
 #endif
 

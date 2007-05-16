@@ -558,7 +558,7 @@ BCP_tm_unpack_branching_info(BCP_tm_prob& p, BCP_buffer& buf,
 	    throw BCP_fatal_error("\
 BCP_tm_unpack_branching_info: the value of child is messed up!\n");
 	}
-	if (node->lp != -1) {
+	if (node->lp == -1) {
 	    throw BCP_fatal_error("\
 BCP_tm_unpack_branching_info: the (old) node has no LP associated with!\n");
 	}

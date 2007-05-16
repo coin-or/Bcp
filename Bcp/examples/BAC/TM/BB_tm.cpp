@@ -271,20 +271,6 @@ BB_tm::pack_module_data(BCP_buffer& buf, BCP_process_t ptype)
 
 /*************************************************************************/
 void
-BB_tm::pack_cut_algo(const BCP_cut_algo* cut, BCP_buffer& buf)
-{
-  BB_pack_cut(cut, buf);
-}
-
-/*************************************************************************/
-BCP_cut_algo*
-BB_tm::unpack_cut_algo(BCP_buffer& buf)
-{
-  return BB_unpack_cut(buf);
-}
-
-/*************************************************************************/
-void
 BB_tm::initialize_core(BCP_vec<BCP_var_core*>& vars,
 		       BCP_vec<BCP_cut_core*>& cuts,
 		       BCP_lp_relax*& matrix)
@@ -372,40 +358,3 @@ BB_tm::display_feasible_solution(const BCP_solution *soln)
   
   delete[] sol;
 }
-
-/***************************************************************************/
-void
-BB_tm::pack_user_data(const BCP_user_data* ud, BCP_buffer& buf)
-{
-  // Normally, no modifications required.
-  
-  const MY_user_data *mud = dynamic_cast<const MY_user_data*> (ud);
-  if(!mud)
-    throw BCP_fatal_error("BB_lp::pack_user_data() : unknown data type!\n");
-  
-  printf("BB_tm::pack_user_data:\n");
-  mud->print();
-  mud->pack(buf);
-} /* pack_user_data */
-
-/***************************************************************************/
-BCP_user_data*
-BB_tm::unpack_user_data(BCP_buffer& buf)
-{
-  // Normally, no modifications required.
-  
-  MY_user_data *p_ud = new MY_user_data(buf);
-  
-  printf("BB_tm::unpack_user_data:\n");
-  p_ud->print();
-  
-  if(p_ud->is_processed) {
-    p_ud->p_rud = NULL;
-    delete(p_ud);
-    p_ud = NULL;
-    printf("user_data deleted\n");
-  }
-  
-  return(p_ud);
-} /* unpack_user_data */
-

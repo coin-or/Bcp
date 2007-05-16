@@ -31,20 +31,6 @@ BB_lp::unpack_module_data(BCP_buffer& buf)
 }
 
 /************************************************************************/
-void
-BB_lp::pack_cut_algo(const BCP_cut_algo* cut, BCP_buffer& buf)
-{
-  BB_pack_cut(cut, buf);
-}
-
-/************************************************************************/
-BCP_cut_algo*
-BB_lp::unpack_cut_algo(BCP_buffer& buf)
-{
-  return BB_unpack_cut(buf);
-}
-
-/************************************************************************/
 OsiSolverInterface *
 BB_lp::initialize_solver_interface()
 
@@ -456,35 +442,6 @@ BB_lp::select_branching_candidates(const BCP_lp_result& lpres,
 						  local_cut_pool, cands));
 #endif
 }
-
-/**************************************************************************/
-void
-BB_lp::pack_user_data(const BCP_user_data* ud, BCP_buffer& buf)
-
-  // Normally, no modifications required.
-{
-  const MY_user_data *mud = dynamic_cast<const MY_user_data*> (ud);
-  if(!mud)
-    throw BCP_fatal_error("BB_lp::pack_user_data() : unknown data type!\n");
-
-  printf("BB_lp::pack_user_data:\n");
-  mud->print();
-  mud->pack(buf);
-
-} /* pack_user_data */
-    
-/**************************************************************************/
-MY_user_data*
-BB_lp::unpack_user_data(BCP_buffer& buf)
-
-  // Normally, no modifications required.
-{
-  p_ud = new MY_user_data(buf);
-  printf("BB_lp::unpack_user_data:\n");
-  p_ud->print();
-  return(p_ud); 
-
-} /* unpack_user_data */
 
 /**************************************************************************/
 void

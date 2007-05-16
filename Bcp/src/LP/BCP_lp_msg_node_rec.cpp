@@ -296,16 +296,12 @@ BCP_lp_unpack_active_node: parent's or node's warmstart is non-0.\n");
 	node.cuts.unchecked_push_back(p.packer->unpack_cut_algo(buf));
     }
 
-    bool has_data;
-    buf.unpack(has_data);
-    node_change.warmstart = has_data ? p.packer->unpack_warmstart(buf,def) : 0;
-
     // Create the active node from the parent and from the last changes
     BCP_lp_create_node(p, node_change);
 
     // Delete the old user data
     delete p.node->user_data;
-
+    bool has_data;
     buf.unpack(has_data);
     p.node->user_data = has_data ? p.packer->unpack_user_data(buf) : 0;
 }
