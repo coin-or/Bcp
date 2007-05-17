@@ -287,13 +287,13 @@ BCP_lp_unpack_active_node: parent's or node's warmstart is non-0.\n");
     assert(node.vars.size() == p.core->vars.size());
     node.vars.reserve(cnt);
     for (i = 0; i < cnt; ++i) {
-	node.vars.unchecked_push_back(p.packer->unpack_var_algo(buf));
+	node.vars.unchecked_push_back(p.unpack_var());
     }
     buf.unpack(cnt);
     assert(node.cuts.size() == p.core->cuts.size());
     node.cuts.reserve(cnt);
     for (i = 0; i < cnt; ++i) {
-	node.cuts.unchecked_push_back(p.packer->unpack_cut_algo(buf));
+	node.cuts.unchecked_push_back(p.unpack_cut());
     }
 
     // Create the active node from the parent and from the last changes
