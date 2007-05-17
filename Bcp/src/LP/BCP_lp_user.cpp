@@ -913,7 +913,9 @@ select_branching_candidates(const BCP_lp_result& lpres,
 
     OsiSolverInterface* lp = p->lp_solver;
 
-    OsiBranchingInformation brInfo(lp, true);
+    /* The last true: make a copy in brInfo of the sol of solver
+       instead of just pointing into the solver's copy */
+    OsiBranchingInformation brInfo(lp, true, true);
     lp->getDblParam(OsiDualObjectiveLimit, brInfo.cutoff_);
     brInfo.integerTolerance_ = p->param(BCP_lp_par::IntegerTolerance);
     brInfo.timeRemaining_ = get_param(BCP_lp_par::MaxRunTime) - CoinCpuTime();
