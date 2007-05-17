@@ -52,11 +52,6 @@ void BCP_lp_unpack_parent(BCP_lp_prob& p, BCP_buffer& buf, BCP_lp_node& node)
 	if (p.parent->var_set.storage() != BCP_Storage_Explicit)
 	    throw BCP_fatal_error("BCP_lp_unpack_parent(): oops 1\n");
 #endif
-	const int num = p.parent->var_set.added_num();
-	node.vars.reserve(num);
-	for (i = 0; i < num; ++i) {
-	    node.vars.unchecked_push_back(p.unpack_var());
-	}
     } else {
 	assert(p.parent->var_set._change.empty());
 	assert(p.parent->var_set._new_objs.empty());
@@ -70,11 +65,6 @@ void BCP_lp_unpack_parent(BCP_lp_prob& p, BCP_buffer& buf, BCP_lp_node& node)
 	if (p.parent->cut_set.storage() != BCP_Storage_Explicit)
 	    throw BCP_fatal_error("BCP_lp_unpack_parent(): oops 1\n");
 #endif
-	const int num = p.parent->cut_set.added_num();
-	node.cuts.reserve(num);
-	for (i = 0; i < num; ++i) {
-	    node.cuts.unchecked_push_back(p.unpack_cut());
-	}
     } else {
 	assert(p.parent->cut_set._change.empty());
 	assert(p.parent->cut_set._new_objs.empty());
