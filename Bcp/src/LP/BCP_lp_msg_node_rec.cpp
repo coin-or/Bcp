@@ -55,7 +55,7 @@ void BCP_lp_unpack_parent(BCP_lp_prob& p, BCP_buffer& buf, BCP_lp_node& node)
 	const int num = p.parent->var_set.added_num();
 	node.vars.reserve(num);
 	for (i = 0; i < num; ++i) {
-	    node.vars.unchecked_push_back(p.packer->unpack_var_algo(buf));
+	    node.vars.unchecked_push_back(p.unpack_var());
 	}
     } else {
 	assert(p.parent->var_set._change.empty());
@@ -73,7 +73,7 @@ void BCP_lp_unpack_parent(BCP_lp_prob& p, BCP_buffer& buf, BCP_lp_node& node)
 	const int num = p.parent->cut_set.added_num();
 	node.cuts.reserve(num);
 	for (i = 0; i < num; ++i) {
-	    node.cuts.unchecked_push_back(p.packer->unpack_cut_algo(buf));
+	    node.cuts.unchecked_push_back(p.unpack_cut());
 	}
     } else {
 	assert(p.parent->cut_set._change.empty());
