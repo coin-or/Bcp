@@ -1,4 +1,4 @@
-// Last edit: 1/6/07
+// Last edit: 5/19/07
 //
 // Name:     BB_tm.cpp
 // Author:   Francois Margot
@@ -65,6 +65,7 @@ BB_tm::readInput(const char* filename)
      }
      if (found_file) {
        solver.readLp("bac.lp");
+       printf("Problem read from file bac.lp\n");
      }
    }
 
@@ -81,7 +82,8 @@ BB_tm::readInput(const char* filename)
        found_file = false;
      }
      if (found_file) {
-	   solver.readMps("bac.mps");
+       solver.readMps("bac.mps");
+       printf("Problem read from file bac.mps\n");
      }
    }
    **********/
@@ -163,7 +165,8 @@ BB_tm::readInput(const char* filename)
      
    } else {
      // create the problem from scratch 
-     
+     printf("Problem created in memory\n");
+
      desc.colnum = 10;
      int colnum = desc.colnum;
      desc.rownum = 16;
