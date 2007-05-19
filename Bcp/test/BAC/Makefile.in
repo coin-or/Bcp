@@ -53,8 +53,8 @@ CONFIG_HEADER = $(top_builddir)/inc/config_bcp.h
 CONFIG_CLEAN_FILES =
 PROGRAMS = $(noinst_PROGRAMS)
 nodist_unitTest_OBJECTS = BB_lp.$(OBJEXT) BB_tm.$(OBJEXT) \
-	BB_user_data.$(OBJEXT) BB_init.$(OBJEXT) BB.$(OBJEXT) \
-	BB_cut.$(OBJEXT)
+	BB_user_data.$(OBJEXT) BB_packer.$(OBJEXT) BB_init.$(OBJEXT) \
+	BB.$(OBJEXT) BB_cut.$(OBJEXT)
 unitTest_OBJECTS = $(nodist_unitTest_OBJECTS)
 unitTest_DEPENDENCIES = ../../src/libBcp.la $(CGLOBJDIR)/src/libCgl.la \
 	$(OSIOBJDIR)/src/OsiClp/libOsiClp.la \
@@ -250,10 +250,11 @@ sysconfdir = @sysconfdir@
 target_alias = @target_alias@
 AUTOMAKE_OPTIONS = foreign
 nodist_unitTest_SOURCES = LP/BB_lp.cpp TM/BB_tm.cpp \
-	Member/BB_user_data.cpp Member/BB_init.cpp Member/BB.cpp \
-	Member/BB_cut.cpp include/BB_user_data.hpp include/BB_lp.hpp \
-	include/BB_init.hpp include/BB_tm.hpp include/BB.hpp \
-	include/BB_cut.hpp
+	Member/BB_user_data.cpp Member/BB_packer.cpp \
+	Member/BB_init.cpp Member/BB.cpp Member/BB_cut.cpp \
+	include/BB_user_data.hpp include/BB_packer.hpp \
+	include/BB_lp.hpp include/BB_init.hpp include/BB_tm.hpp \
+	include/BB.hpp include/BB_cut.hpp
 
 # List libraries of COIN projects
 unitTest_LDADD = ../../src/libBcp.la $(CGLOBJDIR)/src/libCgl.la \
@@ -340,6 +341,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/BB_cut.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/BB_init.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/BB_lp.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/BB_packer.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/BB_tm.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/BB_user_data.Po@am__quote@
 
@@ -405,6 +407,20 @@ BB_user_data.obj: Member/BB_user_data.cpp
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='Member/BB_user_data.cpp' object='BB_user_data.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o BB_user_data.obj `if test -f 'Member/BB_user_data.cpp'; then $(CYGPATH_W) 'Member/BB_user_data.cpp'; else $(CYGPATH_W) '$(srcdir)/Member/BB_user_data.cpp'; fi`
+
+BB_packer.o: Member/BB_packer.cpp
+@am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT BB_packer.o -MD -MP -MF "$(DEPDIR)/BB_packer.Tpo" -c -o BB_packer.o `test -f 'Member/BB_packer.cpp' || echo '$(srcdir)/'`Member/BB_packer.cpp; \
+@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/BB_packer.Tpo" "$(DEPDIR)/BB_packer.Po"; else rm -f "$(DEPDIR)/BB_packer.Tpo"; exit 1; fi
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='Member/BB_packer.cpp' object='BB_packer.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o BB_packer.o `test -f 'Member/BB_packer.cpp' || echo '$(srcdir)/'`Member/BB_packer.cpp
+
+BB_packer.obj: Member/BB_packer.cpp
+@am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT BB_packer.obj -MD -MP -MF "$(DEPDIR)/BB_packer.Tpo" -c -o BB_packer.obj `if test -f 'Member/BB_packer.cpp'; then $(CYGPATH_W) 'Member/BB_packer.cpp'; else $(CYGPATH_W) '$(srcdir)/Member/BB_packer.cpp'; fi`; \
+@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/BB_packer.Tpo" "$(DEPDIR)/BB_packer.Po"; else rm -f "$(DEPDIR)/BB_packer.Tpo"; exit 1; fi
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='Member/BB_packer.cpp' object='BB_packer.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o BB_packer.obj `if test -f 'Member/BB_packer.cpp'; then $(CYGPATH_W) 'Member/BB_packer.cpp'; else $(CYGPATH_W) '$(srcdir)/Member/BB_packer.cpp'; fi`
 
 BB_init.o: Member/BB_init.cpp
 @am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT BB_init.o -MD -MP -MF "$(DEPDIR)/BB_init.Tpo" -c -o BB_init.o `test -f 'Member/BB_init.cpp' || echo '$(srcdir)/'`Member/BB_init.cpp; \
