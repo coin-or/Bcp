@@ -31,6 +31,7 @@ OBJS = \
 	./LP/BB_lp.@OBJEXT@ \
 	./TM/BB_tm.@OBJEXT@ \
 	./Member/BB_user_data.@OBJEXT@ \
+	./Member/BB_packer.@OBJEXT@ \
 	./Member/BB_init.@OBJEXT@ \
 	./Member/BB.@OBJEXT@ \
 	./Member/BB_cut.@OBJEXT@
@@ -59,7 +60,7 @@ USER_INCDIRS = include $(CPLEX_H) @MPIINCDIR@
 ##########################################################################
 #  Usually, you don't have to change anything below.  Note that if you   #
 #  change certain compiler options, you might have to recompile the      #
-#  Bcp package.                                                          #
+#  BCP package.                                                          #
 ##########################################################################
 
 # C++ Compiler command

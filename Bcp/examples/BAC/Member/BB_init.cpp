@@ -1,6 +1,6 @@
-// Last edit: 12/26/05
+// Last edit: 5/19/07
 //
-// Name:     BB_tm.cpp
+// Name:     BB_init.cpp
 // Author:   Francois Margot
 //           Tepper School of Business
 //           Carnegie Mellon University, Pittsburgh, PA 15213
@@ -13,6 +13,7 @@
 #include "BB_init.hpp"
 #include "BB_lp.hpp"
 #include "BB_tm.hpp"
+#include "BB_packer.hpp"
 
 using namespace std;
 
@@ -28,7 +29,6 @@ BCP_tm_user *
 BB_init::tm_init(BCP_tm_prob& p,
 		 const int argnum, const char * const * arglist)
 {
-  
   cout << "Compilation flags: ";
   
 #ifdef HEUR_SOL
@@ -44,7 +44,6 @@ BB_init::tm_init(BCP_tm_prob& p,
 #endif
 
   cout << endl << endl;
-  
   
   BB_tm* tm = new BB_tm;
 
@@ -63,3 +62,4 @@ BB_init::packer_init(BCP_user_class* p)
 {
     return new BB_packer;
 }
+
