@@ -167,8 +167,11 @@ void BCP_lp_create_added_vars(BCP_lp_prob& p, BCP_node_change& node_change)
     // so this is still OK!!
     BCP_obj_set_change var_set = p.parent->var_set;
     var_set.update(node_change.var_change);
+    assert(p.node->vars.size() == p.core->varnum() + var_set._change.size());
+    assert(var_set._change.size() == var_set._new_objs.size());
+    BCP_var** added_vars = &p.node->vars[0] + p.core->varnum();
     for (int i = var_set._change.size() - 1; i >= 0; --i) {
-	p.node->vars[i]->change_lb_ub_st(var_set._change[i]);
+	added_vars[i]->change_lb_ub_st(var_set._change[i]);
     }
 }
 
@@ -193,8 +196,11 @@ void BCP_lp_create_added_cuts(BCP_lp_prob& p, BCP_node_change& node_change)
     // so this is still OK!!
     BCP_obj_set_change cut_set = p.parent->cut_set;
     cut_set.update(node_change.cut_change);
+    assert(p.node->cuts.size() == p.core->cutnum() + cut_set._change.size());
+    assert(cut_set._change.size() == cut_set._new_objs.size());
+    BCP_cut** added_cuts = &p.node->cuts[0] + p.core->cutnum();
     for (int i = cut_set._change.size() - 1; i >= 0; --i) {
-	p.node->cuts[i]->change_lb_ub_st(cut_set._change[i]);
+	added_cuts[i]->change_lb_ub_st(cut_set._change[i]);
     }
 }
 
@@ -275,13 +281,13 @@ BCP_lp_unpack_active_node: parent's or node's warmstart is non-0.\n");
     int i, cnt;
     buf.unpack(cnt);
     assert(node.vars.size() == p.core->vars.size());
-    node.vars.reserve(cnt);
+    node.vars.reserve(cnt+node.vars.size());
     for (i = 0; i < cnt; ++i) {
 	node.vars.unchecked_push_back(p.unpack_var());
     }
     buf.unpack(cnt);
     assert(node.cuts.size() == p.core->cuts.size());
-    node.cuts.reserve(cnt);
+    node.cuts.reserve(cnt+node.cuts.size());
     for (i = 0; i < cnt; ++i) {
 	node.cuts.unchecked_push_back(p.unpack_cut());
     }
