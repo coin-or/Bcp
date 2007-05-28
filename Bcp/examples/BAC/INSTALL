@@ -51,7 +51,7 @@ to exclude directories (using the EXCLUDE variable, for example).
 
 If Doxygen is not available, the html documentation is available at:
 
-   http://www.coin-or.org/Doxygen/
+   http://www.coin-or.org/download/source/Bcp/
 
 
 RUNNING BAC
@@ -133,7 +133,3 @@ Default BCP display of the feasible solution:
  TM: Default BCP_tm_user::display_feasible_solution() executed.
   Core  var (internal index:      1                    ) at 1.0000
   Core  var (internal index:      6                    ) at 1.0000
-
-
-
-
