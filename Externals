@@ -2,5 +2,5 @@ BuildTools    https://projects.coin-or.org/svn/BuildTools/trunk
 CoinUtils     https://projects.coin-or.org/svn/CoinUtils/trunk/CoinUtils
 Vol           https://projects.coin-or.org/svn/Vol/trunk/Vol
 Clp           https://projects.coin-or.org/svn/Clp/branches/devel/Clp
-Osi           https://projects.coin-or.org/svn/Osi/branches/devel/Osi
-Cgl           https://projects.coin-or.org/svn/Cgl/branches/devel/Cgl
+Osi           https://projects.coin-or.org/svn/Osi/trunk/Osi
+Cgl           https://projects.coin-or.org/svn/Cgl/trunk/Cgl
