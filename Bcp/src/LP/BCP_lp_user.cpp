@@ -853,6 +853,18 @@ BCP_lp_user::try_to_branch(OsiBranchingInformation& branchInfo,
 	} else {
 	    // Do the strong branching
 	    int ret = choose->chooseVariable(solver, &branchInfo, allowVarFix);
+	    /* Check if SB has fixed anything, and if so, apply the same
+	       changes to the vars */
+	    const double * clb = solver->getColLower();
+	    const double * cub = solver->getColUpper();
+	    BCP_vec<BCP_var*>& vars = p->node->vars;
+	    for (int i = numUnsatisfied - 1; i >= 0; --i) {
+		const int ind = choose->candidates()[i];
+		assert(vars[ind]->lb() <= clb[ind]);
+		assert(vars[ind]->ub() >= cub[ind]);
+		vars[ind]->set_lb_ub(clb[ind], cub[ind]);
+	    }
+		
 	    /* update number of strong iterations etc
 	    model->incrementStrongInfo(choose->numberStrongDone(),
 				       choose->numberStrongIterations(),

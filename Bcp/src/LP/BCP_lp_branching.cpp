@@ -424,6 +424,25 @@ BCP_lp_select_branching_object(BCP_lp_prob& p,
 	return BCP_DoNotBranch_Fathomed;
     case BCP_DoNotBranch:
 	if (p.local_var_pool->size() == 0 && p.local_cut_pool->size() == 0) {
+	    /* Hmmm... check whether some magic was done and the former sol is
+	       now infeasible, so resolving is perfectly normal.
+	       NOTE: We only check whether the former primal sol and lhs
+	       values are within the bounds! */
+	    const double petol = p.lp_result->primalTolerance();
+	    const double * x = p.lp_result->x();
+	    for (int i = vars.size() - 1; i >= 0; --i) {
+		const BCP_var* v = vars[i];
+		if (x[i] + petol < v->lb() || x[i] - petol > v->ub()) {
+		    return BCP_DoNotBranch; // YES...
+		}
+	    }
+	    const double * lhs = p.lp_result->lhs();
+	    for (int i = cuts.size() - 1; i >= 0; --i) {
+		const BCP_cut* c = cuts[i];
+		if (lhs[i] + petol < c->lb() || lhs[i] - petol > c->ub()) {
+		    return BCP_DoNotBranch; // YES...
+		}
+	    }
 	    printf("\
 LP: ***WARNING*** : BCP_DoNotBranch, but nothing can be added! ***WARNING***\n");
 	    //throw BCP_fatal_error("BCP_DoNotBranch, but nothing can be added!\n");

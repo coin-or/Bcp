@@ -151,6 +151,12 @@ public:
       _ub = ub;
       test_inactive();
     }
+    /** Set both lower and upper bounds. */
+    inline void set_lb_ub(const double lb, const double ub) {
+      _lb = lb;
+      _ub = ub;
+      test_inactive();
+    }
     /** Set the lower/upper bounds and the status of the variable
         simultaneously to the values given in the data members of the argument.
     */ 
