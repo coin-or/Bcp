@@ -23,8 +23,8 @@ You can obtain the source code for the Bcp package in two ways:
 2. Download the tarball from http://www.coin-or.org/Tarballs/Bcp and
    extract it, for example, with
 
-   gunzip Bcp_1.1.0.tgz
-   tar xvf Bcp_1.1.0.tgz
+   gunzip Bcp-1.1.0.tgz
+   tar xvf Bcp-1.1.0.tgz
 
    More detailed download instructions can be found at
 

@@ -51,7 +51,7 @@ to exclude directories (using the EXCLUDE variable, for example).
 
 If Doxygen is not available, the html documentation is available at:
 
-   http://www.coin-or.org/Doxygen/
+   http://www.coin-or.org/download/source/Bcp/
 
 
 RUNNING BAC
