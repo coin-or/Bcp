@@ -1,3 +1,3 @@
-Since BCP is a framework, there's no way to install it standalone. The best way to see how the installation goes and to see how to use BCP is to look at the example codes that use BCP. The best maintained example is COIN/Examples/BAC.
+Since BCP is a framework, there's no way to install it standalone. The best way to see how the installation goes and to see how to use BCP is to look at the example codes that use BCP. The best maintained example is in Bcp/examples/BAC.
 
 Also see the manual at Doc/Manual/man.pdf. It may be out of date :-(.

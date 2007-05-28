@@ -57,15 +57,16 @@ If Doxygen is not available, the html documentation is available at:
 RUNNING BAC
 ===========
 
-1. In BACdir, use './bac' to run the example code . The output should 
-   start with:
+1. In BACdir, use './bac' to run the example code . The output should be
+   similar to:
 
-Compilation flags:
+Compilation flags: 
 
+Problem read from file bac.lp
 readInput(): core size: 10   indexed size: 6
-############################################################
+##########################################################
 TM: Starting phase 0
-############################################################
+##########################################################
  TM: Default init_new_phase() executed.
 
 LP: **** Processing NODE 0 on LEVEL 0 (from TM) ****
@@ -89,14 +90,102 @@ generate_cuts_in_lp(): found 4 indexed cuts
 generate_cuts_in_lp(): found 5 algorithmic cuts
 LP:   Number of cuts generated in the LP process: 9
 LP:   Non-violated (hence removed): 0
+LP:   Number of cuts received from CG: 0
+LP:   Total number of cuts in local pool: 9
+LP:   Number of leftover vars: 0
+ LP: Default generate_vars_in_lp() executed.
+LP:   Number of vars received from VG: 0
+LP:   Total number of vars in local pool: 0
+LP:   In iteration 1 BCP generated 9 cuts and 0 vars before calling branch()
+ LP: Default select_branching_candidates() executed.
+LP:   In iteration 1 BCP added 9 cuts and 0 vars.
+ LP: Default purge_slack_pool() executed.
 
-...
+LP: *** Starting iteration 2 ***
+LP node written in file lpnode.lp
+LP:   Matrix size: 10 vars x 19 cuts
+LP:   Solution value: -5.0000 / 2 , 3 
+ LP: Default display_lp_solution() executed.
+  LP : Displaying LP solution (RelaxedSolution) :
+  LP : Displaying solution :
+  Core  var (internal index:      0                    ) at 1.0000
+  Core  var (internal index:      2                    ) at 1.0000
+  Core  var (internal index:      4                    ) at 1.0000
+  Core  var (internal index:      6                    ) at 1.0000
+  Core  var (internal index:      8                    ) at 1.0000
+LP:   Row effectiveness: rownum: 19 ineffective: 9
+LP:   Number of leftover cuts: 0
+generate_cuts_in_lp(): found 2 indexed cuts
+generate_cuts_in_lp(): found 5 algorithmic cuts
+LP:   Number of cuts generated in the LP process: 7
+LP:   Non-violated (hence removed): 0
+LP:   Number of cuts received from CG: 0
+LP:   Total number of cuts in local pool: 7
+LP:   Number of leftover vars: 0
+ LP: Default generate_vars_in_lp() executed.
+LP:   Number of vars received from VG: 0
+LP:   Total number of vars in local pool: 0
+LP:   In iteration 2 BCP generated 7 cuts and 0 vars before calling branch()
+ LP: Default select_branching_candidates() executed.
+LP:   In iteration 2 BCP added 7 cuts and 0 vars.
+ LP: Default purge_slack_pool() executed.
 
+LP: *** Starting iteration 3 ***
+LP node written in file lpnode.lp
+LP:   Matrix size: 10 vars x 26 cuts
+LP:   Solution value: -2.6667 / 2 , 8 
+ LP: Default display_lp_solution() executed.
+  LP : Displaying LP solution (RelaxedSolution) :
+  LP : Displaying solution :
+  Core  var (internal index:      0                    ) at 0.3333
+  Core  var (internal index:      1                    ) at 0.6667
+  Core  var (internal index:      3                    ) at 0.3333
+  Core  var (internal index:      5                    ) at 0.3333
+  Core  var (internal index:      6                    ) at 0.3333
+  Core  var (internal index:      7                    ) at 0.3333
+  Core  var (internal index:      8                    ) at 0.3333
+ LP: Default test_feasibility() executed.
+ LP: Default test_full() executed.
+LP:   Row effectiveness: rownum: 26 ineffective: 9
+LP:   Number of leftover cuts: 0
+generate_cuts_in_lp(): found 0 indexed cuts
+generate_cuts_in_lp(): found 0 algorithmic cuts
+LP:   Number of cuts received from CG: 0
+LP:   Total number of cuts in local pool: 0
+LP:   Number of leftover vars: 0
+ LP: Default generate_vars_in_lp() executed.
+LP:   Number of vars received from VG: 0
+LP:   Total number of vars in local pool: 0
+LP:   In iteration 3 BCP generated 0 cuts and 0 vars before calling branch()
+ LP: Default display_lp_solution() executed.
+  LP : Displaying LP solution (FinalRelaxedSolution) :
+  LP : Displaying solution :
+  Core  var (internal index:      0                    ) at 0.3333
+  Core  var (internal index:      1                    ) at 0.6667
+  Core  var (internal index:      3                    ) at 0.3333
+  Core  var (internal index:      5                    ) at 0.3333
+  Core  var (internal index:      6                    ) at 0.3333
+  Core  var (internal index:      7                    ) at 0.3333
+  Core  var (internal index:      8                    ) at 0.3333
+ LP: Default select_branching_candidates() executed.
 
-   The end of the output should be (slight variation might occur due to
-   machine precision):
+LP: Starting strong branching:
 
-...
+LP node written in file lpnode.lp
+LP node written in file lpnode.lp
+LP:   Presolving: (0,0.3333,-1.0000 /  ) [-2.0000,2,2] [-2.0000,2,2]
+ LP: Default compare_presolved_branching_objects() executed.
+LP:   Deleting 8 rows from the matrix.
+ LP: Default set_actions_for_children() executed.
+
+LP:   SB selected candidate 0 out of 1.
+
+LP:   The selected object is: (0,0.3333,-1.0000 /  ) [-2.0000,2,2] [-2.0000,2,2]
+LP node written in file lpnode.lp
+
+LP: **** Processing NODE 1 on LEVEL 1 (dived) ****
+ LP: Default purge_slack_pool() executed.
+
 LP: *** Starting iteration 1 ***
 LP node written in file lpnode.lp
 LP:   Matrix size: 10 vars x 18 cuts
@@ -104,36 +193,32 @@ LP:   Solution value: -2.0000 / 2 , 2
  LP: Default display_lp_solution() executed.
   LP : Displaying LP solution (RelaxedSolution) :
   LP : Displaying solution :
-  Core  var (internal index:      1                    ) at 1.0000
-  Core  var (internal index:      6                    ) at 1.0000
+  Core  var (internal index:      0                    ) at 1.0000
+  Core  var (internal index:      5                    ) at 1.0000
  LP: Default test_feasibility() executed.
  LP: Default test_full() executed.
  LP: Default pack_feasible_solution() executed.
  TM: Default unpack_feasible_solution() executed.
-TM: Solution found at 0.004 sec.
+TM: Solution found at 0.008 sec.
 TM: Solution value: -2.000000 (best solution value so far: infinity)
 LP:   Terminating and fathoming due to proven high cost.
 TM: Pruning NODE 2 LEVEL 1 instead of sending it.
-TM: Running time: 0.004
-TM: search tree size: 3   max depth: 1
+TM: Running time: 0.009
+TM: search tree size: 3   ( processed 2 )   max depth: 1
 LP statistics:
    time in cut generation  :        0.000 sec
    time in var generation  :        0.000 sec
    time in heuristics      :        0.000 sec
-   time in solving LPs     :        0.000 sec
-   time in strong branching:        0.004 sec
+   time in solving LPs     :        0.003 sec
+   time in strong branching:        0.001 sec
 
 TM: The best solution found has value -2.000000
 Customized display of the feasible solution:
 
-0.00 1.00 0.00 0.00 0.00 0.00 1.00 0.00 0.00 0.00 
+1.00 0.00 0.00 0.00 0.00 1.00 0.00 0.00 0.00 0.00 
 
 Default BCP display of the feasible solution:
 
  TM: Default BCP_tm_user::display_feasible_solution() executed.
-  Core  var (internal index:      1                    ) at 1.0000
-  Core  var (internal index:      6                    ) at 1.0000
-
-
-
-
+  Core  var (internal index:      0                    ) at 1.0000
+  Core  var (internal index:      5                    ) at 1.0000
