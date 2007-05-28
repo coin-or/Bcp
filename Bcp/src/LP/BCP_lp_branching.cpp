@@ -542,6 +542,7 @@ BCP_lp_make_parent_from_node(BCP_lp_prob& p)
     var_ch.reserve(varnum - bvarnum);
     for (i = bvarnum; i < varnum; ++i) {
 	const BCP_var* var = vars[i];
+	assert(var->bcpind() > 0);
 	var_ind.unchecked_push_back(var->bcpind());
 	var_ch.unchecked_push_back(BCP_obj_change(var->lb(), var->ub(),
 						  var->status()));
@@ -559,6 +560,7 @@ BCP_lp_make_parent_from_node(BCP_lp_prob& p)
     cut_ch.reserve(cutnum - bcutnum);
     for (i = bcutnum; i < cutnum; ++i) {
 	const BCP_cut* cut = cuts[i];
+	assert(cut->bcpind() > 0);
 	cut_ind.unchecked_push_back(cut->bcpind());
 	cut_ch.unchecked_push_back(BCP_obj_change(cut->lb(), cut->ub(),
 						  cut->status()));

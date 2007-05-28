@@ -730,14 +730,18 @@ public:
 	@param local_cut_pool the local pool that holds violated cuts. In case
 	of continuing with the node the best so many cuts will be added
 	to the formulation (the most violated ones).
-	@param cands the generated branching candidates. */
+	@param cands the generated branching candidates.
+	@param force_branch indicate whether to force branching regardless
+	       of the size of the local cut/var pools 
+    */
     virtual BCP_branching_decision
     select_branching_candidates(const BCP_lp_result& lpres,
 				const BCP_vec<BCP_var*>& vars,
 				const BCP_vec<BCP_cut*>& cuts,
 				const BCP_lp_var_pool& local_var_pool,
 				const BCP_lp_cut_pool& local_cut_pool,
-				BCP_vec<BCP_lp_branching_object*>& cands);
+				BCP_vec<BCP_lp_branching_object*>& cands,
+				bool force_branch = false);
     /**@name Helper functions for select_branching_candidates() */
     /*@{*/
     virtual int

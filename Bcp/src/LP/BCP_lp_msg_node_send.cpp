@@ -159,7 +159,8 @@ BCP_lp_pack_noncore_vars(BCP_lp_prob& p, BCP_vec<int>& deleted_pos)
     // vars must be appended to chpos.
     wrtp._new_objs.reserve(new_added_num - i);
     for ( ; i < new_added_num; ++i){
-	wrtp._new_objs.unchecked_push_back(vars[i]->bcpind());
+	const int bcpind = vars[i]->bcpind();
+	wrtp._new_objs.unchecked_push_back(bcpind > 0 ? bcpind : -bcpind);
 	chpos.unchecked_push_back(i);
     }
     // append chpos to _del_change_pos to get the final list
@@ -185,6 +186,7 @@ BCP_lp_pack_noncore_vars(BCP_lp_prob& p, BCP_vec<int>& deleted_pos)
     int num = vars_to_tm.size();
     p.msg_buf.pack(num);
     for (i = 0; i < num; ++i) {
+	assert(vars_to_tm[i]->bcpind() < 0);
 	p.pack_var(*vars_to_tm[i]);
 	vars_to_tm[i]->set_bcpind_flip();
     }
@@ -197,8 +199,6 @@ BCP_lp_pack_noncore_vars(BCP_lp_prob& p, BCP_vec<int>& deleted_pos)
     } else {
 	expl.pack(p.msg_buf);
     }
-
-    // and in eiher case, pack the vars that had negative bcpind
 }
 
 //#############################################################################
@@ -276,7 +276,8 @@ BCP_lp_pack_noncore_cuts(BCP_lp_prob& p, BCP_vec<int>& deleted_pos)
     // cuts must be appended to chpos.
     wrtp._new_objs.reserve(new_added_num - i);
     for ( ; i < new_added_num; ++i){
-	wrtp._new_objs.unchecked_push_back(cuts[i]->bcpind());
+	const int bcpind = cuts[i]->bcpind();
+	wrtp._new_objs.unchecked_push_back(bcpind > 0 ? bcpind : -bcpind);
 	chpos.unchecked_push_back(i);
     }
     // append chpos to _del_change_pos to get the final list
@@ -302,6 +303,7 @@ BCP_lp_pack_noncore_cuts(BCP_lp_prob& p, BCP_vec<int>& deleted_pos)
     int num = cuts_to_tm.size();
     p.msg_buf.pack(num);
     for (i = 0; i < num; ++i) {
+	assert(cuts_to_tm[i]->bcpind() < 0);
 	p.pack_cut(*cuts_to_tm[i]);
 	cuts_to_tm[i]->set_bcpind_flip();
     }

@@ -900,7 +900,8 @@ select_branching_candidates(const BCP_lp_result& lpres,
 			    const BCP_vec<BCP_cut*>& cuts,
 			    const BCP_lp_var_pool& local_var_pool,
 			    const BCP_lp_cut_pool& local_cut_pool,
-			    BCP_vec<BCP_lp_branching_object*>& cands)
+			    BCP_vec<BCP_lp_branching_object*>& cands,
+			    bool force_branch)
 {
     if (p->param(BCP_lp_par::ReportWhenDefaultIsExecuted)) {
 	printf(" LP: Default select_branching_candidates() executed.\n");
@@ -908,7 +909,8 @@ select_branching_candidates(const BCP_lp_result& lpres,
 
     // *THINK* : this branching object selection is very primitive
     // *THINK* : should check for tail-off, could check for branching cuts, etc
-    if (local_var_pool.size() > 0 || local_cut_pool.size() > 0)
+    if (! force_branch &&
+	(local_var_pool.size() > 0 || local_cut_pool.size() > 0))
 	return BCP_DoNotBranch;
 
     OsiSolverInterface* lp = p->lp_solver;
