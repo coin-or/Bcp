@@ -6,21 +6,25 @@
 #include "BcpConfig.h"
 
 //-----------------------------------------------------------------------------
-#if HAVE_SYS_RESOURCE_H
+#ifdef HAVE_SYS_RESOURCE_H
 #  include <sys/resource.h>
 #else
 #  define setpriority(x,y,z)
 #endif
 //-----------------------------------------------------------------------------
-#if HAVE_UNISTD_H
+#ifdef HAVE_UNISTD_H
 #  include <unistd.h>
+#endif
+
+#ifdef HAVE_PROCESS_H
+#  include <process.h>
 #endif
 
 #ifndef HAVE_GETHOSTNAME
 #  define gethostname(x,y)
 #endif
 
-#if HAVE_GETPID
+#ifdef HAVE_GETPID
 #  define GETPID (getpid())
 #else
 #  define GETPID (0)

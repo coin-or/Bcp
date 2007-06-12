@@ -81,6 +81,7 @@ AC_COIN_HAS_USER_LIBRARY([Mpi], [MPI], [mpi.h], [MPI_Irecv])
 
 AC_COIN_CHECK_HEADER(sys/resource.h)
 AC_COIN_CHECK_HEADER(unistd.h)
+AC_COIN_CHECK_HEADER(process.h)
 AC_CHECK_FUNCS(gethostname getpid sysinfo mallinfo)
 
 ##############################################################################

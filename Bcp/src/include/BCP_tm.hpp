@@ -28,6 +28,9 @@
 #include "BCP_message.hpp"
 #include "BCP_process.hpp"
 
+#include "BCP_var.hpp"
+#include "BCP_cut.hpp"
+
 //#############################################################################
 class BCP_warmstart;
 class BCP_solution;
@@ -35,8 +38,8 @@ class BCP_solution;
 class BCP_tm_user;
 class BCP_user_pack;
 
-class BCP_var;
-class BCP_cut;
+//class BCP_var;
+//class BCP_cut;
 
 class BCP_obj_set_change;
 
