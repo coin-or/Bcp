@@ -122,6 +122,7 @@ Bcp/examples/MaxCut/junger1.par -text
 Bcp/inc/config_bcp.h.in -text
 Bcp/src/Makefile.am -text
 Bcp/src/Makefile.in -text
+Bcp/src/TM/BCP_tm_nodes_to_storage.cpp -text
 Bcp/src/TM/BCP_tmstorage.cpp -text
 Bcp/src/include/BCP_math.hpp -text
 Bcp/src/include/BCP_tmstorage.hpp -text
