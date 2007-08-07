@@ -353,7 +353,6 @@ static inline void BCP_lp_pack_user_data(BCP_lp_prob& p)
 {
    bool has_data = p.node->user_data != 0;
    p.msg_buf.pack(has_data);
-
    if (has_data) {
       p.packer->pack_user_data(p.node->user_data, p.msg_buf);
    }
@@ -384,11 +383,11 @@ BCP_lp_pack_branching_info(BCP_lp_prob& p, BCP_presolved_lp_brobj* lp_brobj)
    buf.pack(p.node->dive).pack(action).pack(qualities).pack(lpobj);
 
    for (int i = 0; i < child_num; ++i) {
-      const int has_user_data = user_data[i] == 0 ? 0 : 1;
-      buf.pack(has_user_data);
-      if (has_user_data == 1) {
-	 p.packer->pack_user_data(user_data[i], buf);
-      }
+     bool has_user_data = user_data[i] != 0;
+     buf.pack(has_user_data);
+     if (has_user_data) {
+       p.packer->pack_user_data(user_data[i], buf);
+     }
    }
 
    BCP_internal_brobj int_brobj(*lp_brobj->candidate());

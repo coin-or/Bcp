@@ -11,10 +11,13 @@
 
 #include "BCP_message.hpp"
 
+class BCP_proc_array;
+
 //#############################################################################
 
 class BCP_mpi_environment : public BCP_message_environment {
 private:
+    static int seqproc;
     static int num_proc;
     static bool mpi_init_called;
    
@@ -43,9 +46,9 @@ public:
     void send(const int target,
 	      const BCP_message_tag tag, const BCP_buffer& buf);
 
-    void multicast(const BCP_proc_array* const target,
+    void multicast(const BCP_proc_array& target,
 		   const BCP_message_tag tag);
-    void multicast(const BCP_proc_array* const target,
+    void multicast(const BCP_proc_array& target,
 		   const BCP_message_tag tag, const BCP_buffer& buf);
     void multicast(BCP_vec<int>::const_iterator beg,
 		   BCP_vec<int>::const_iterator end,

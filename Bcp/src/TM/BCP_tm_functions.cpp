@@ -1,6 +1,7 @@
 // Copyright (C) 2000, International Business Machines
 // Corporation and others.  All Rights Reserved.
 #include <cstdio>
+#include "BCP_os.hpp"
 #include "BCP_error.hpp"
 #include "BCP_node_change.hpp"
 #include "BCP_enum_tm.hpp"
@@ -41,11 +42,12 @@ BCP_tm_assign_processes(BCP_tm_prob& p, BCP_tm_node* node)
 	if (lp == -1)
 	    return false;
 	if (! p.msg_env->alive(lp)) {
-	    BCP_tm_remove_lp(p, p.slaves.lp->index_of_proc(lp));
+	    BCP_tm_remove_lp(p, lp);
 	    so_far_so_good = false;
 	}
     }
 
+#if ! defined(BCP_CG_VG_PROCESS_HANDLING_BROKEN)
     if (so_far_so_good && p.slaves.cg) {
 	cg = p.slaves.cg->get_free_proc();
 	if (cg == -1)
@@ -65,6 +67,7 @@ BCP_tm_assign_processes(BCP_tm_prob& p, BCP_tm_node* node)
 	    so_far_so_good = false;
 	}
     }
+#endif
 
     if (so_far_so_good && p.slaves.cp) {
 	while (true) {
@@ -216,7 +219,7 @@ TM: Moving NODE %i LEVEL %i into the next phase list \n\
 	return BCP_NodeStart_Error;
     }
 
-    p.active_nodes[p.slaves.lp->index_of_proc(next_node->lp)] = next_node;
+    p.active_nodes[next_node->lp] = next_node;
     next_node->status = BCP_ActiveNode;
     if (p.param(BCP_tm_par::MessagePassingIsSerial)) {
 	BCP_tm_free_nodes(p);
@@ -359,6 +362,12 @@ void BCP_check_parameters(BCP_tm_prob& p)
 	} else {
 	    vgpar.set_entry(BCP_vg_par::ReportWhenDefaultIsExecuted, false);
 	}
+    }
+    if (p.param(BCP_tm_par::MaxHeapSize) == 0) {
+        long fm = BCP_free_mem();
+	fm = fm == -1 ? 192 * (1<<20) /* 192M */ : fm;
+	p.par.set_entry(BCP_tm_par::MaxHeapSize, fm);
+	p.slave_pars.ts.set_entry(BCP_ts_par::MaxHeapSize, fm);
     }
 }
 

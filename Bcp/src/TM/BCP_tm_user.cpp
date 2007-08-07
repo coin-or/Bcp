@@ -117,22 +117,29 @@ BCP_tm_user::broadcast_message: CP not yet implemented\n");
 	throw BCP_fatal_error("\
 BCP_tm_user::broadcast_message: VP not yet implemented\n");
 	break;
+#if ! defined(BCP_CG_VG_PROCESS_HANDLING_BROKEN)
     case BCP_ProcessType_CG:
 	p->msg_env->multicast(*p->slaves.cg, BCP_Msg_User, buf);
 	break;
     case BCP_ProcessType_VG:
 	p->msg_env->multicast(*p->slaves.vg, BCP_Msg_User, buf);
 	break;
+#endif
     case BCP_ProcessType_Any:
 	p->msg_env->multicast(*p->slaves.lp, BCP_Msg_User, buf);
+#if ! defined(BCP_CG_VG_PROCESS_HANDLING_BROKEN)
 	p->msg_env->multicast(*p->slaves.cg, BCP_Msg_User, buf);
 	p->msg_env->multicast(*p->slaves.vg, BCP_Msg_User, buf);
+#endif
 	break;
     case BCP_ProcessType_TM:
     case BCP_ProcessType_TS:
     case BCP_ProcessType_EndProcess:
 	throw BCP_fatal_error("\
 BCP_tm_user::broadcast_message: broadcast to TM/TS/EndProcess...\n");
+    default:
+      throw BCP_fatal_error("BCP_tm_user::Unknown process type (%i)\n",
+			    proc_type);
     }
 }
 

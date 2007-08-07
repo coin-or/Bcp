@@ -14,28 +14,28 @@ void BCP_tm_main(BCP_message_environment* msg_env,
 
 BCP_process_t BCP_tmstorage_main(BCP_message_environment* msg_env,
 				 USER_initialize* user_init,
-				 int my_id, int parent);
+				 int my_id, int parent, double ub);
 
 BCP_process_t BCP_lp_main(BCP_message_environment* msg_env,
 			  USER_initialize* user_init,
-			  int my_id, int parent);
+			  int my_id, int parent, double ub);
 
 #if 0
 BCP_process_t BCP_cp_main(BCP_message_environment* msg_env,
 			  USER_initialize* user_init,
-			  int my_id, int parent);
+			  int my_id, int parent, double ub);
 
 BCP_process_t BCP_vp_main(BCP_message_environment* msg_env,
 			  USER_initialize* user_init,
-			  int my_id, int parent);
+			  int my_id, int parent, double ub);
 #endif
 
 BCP_process_t BCP_cg_main(BCP_message_environment* msg_env,
 			  USER_initialize* user_init,
-			  int my_id, int parent);
+			  int my_id, int parent, double ub);
 
 BCP_process_t BCP_vg_main(BCP_message_environment* msg_env,
 			  USER_initialize* user_init,
-			  int my_id, int parent);
+			  int my_id, int parent, double ub);
 
 #endif

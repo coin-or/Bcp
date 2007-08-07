@@ -563,11 +563,11 @@ BCP_parameters::write_to_stream   ERROR: Unrecognized parameter type!\n");
 	set. */
     BCP_parameter_set() :
       keys(),
-      cpar(new char[static_cast<int>(Par::end_of_chr_params)]),
-      ipar(new int[static_cast<int>(Par::end_of_int_params)]),
-      dpar(new double[static_cast<int>(Par::end_of_dbl_params)]),
-      spar(new BCP_string[static_cast<int>(Par::end_of_str_params)]),
-      sapar(new BCP_vec<BCP_string>[static_cast<int>(Par::end_of_str_array_params)])
+      cpar(new char[static_cast<int>(Par::end_of_chr_params)+1]),
+      ipar(new int[static_cast<int>(Par::end_of_int_params)+1]),
+      dpar(new double[static_cast<int>(Par::end_of_dbl_params)+1]),
+      spar(new BCP_string[static_cast<int>(Par::end_of_str_params)+1]),
+      sapar(new BCP_vec<BCP_string>[static_cast<int>(Par::end_of_str_array_params)+1])
     {
       create_keyword_list();
       set_default_entries();

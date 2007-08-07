@@ -79,35 +79,37 @@ int bcp_main(int argc, char* argv[], USER_initialize* user_init)
 	}
 	// got a new identity, act on it
 	BCP_process_t ptype;
+	double ub;
 	msg_buf.unpack(ptype);
+	msg_buf.unpack(ub);
 	while (ptype != BCP_ProcessType_EndProcess) {
 	    switch (ptype) {
 	    case BCP_ProcessType_LP:
-		ptype = BCP_lp_main(msg_env, user_init, my_id, parent);
-		break;
+	      ptype = BCP_lp_main(msg_env, user_init, my_id, parent, ub);
+	      break;
 	    case BCP_ProcessType_CP:
-		// BCP_cp_main(msg_env, user_init, my_id, parent);
-		break;
+	      // BCP_cp_main(msg_env, user_init, my_id, parent, ub);
+	      break;
 	    case BCP_ProcessType_VP:
-		// BCP_vp_main(msg_env, user_init, my_id, parent);
-		break;
+	      // BCP_vp_main(msg_env, user_init, my_id, parent, ub);
+	      break;
 	    case BCP_ProcessType_CG:
-		ptype = BCP_cg_main(msg_env, user_init, my_id, parent);
-		break;
+	      ptype = BCP_cg_main(msg_env, user_init, my_id, parent, ub);
+	      break;
 	    case BCP_ProcessType_VG:
-		ptype = BCP_vg_main(msg_env, user_init, my_id, parent);
-		break;
+	      ptype = BCP_vg_main(msg_env, user_init, my_id, parent, ub);
+	      break;
 	    case BCP_ProcessType_TS:
-		ptype = BCP_tmstorage_main(msg_env, user_init, my_id, parent);
-		break;
+	      ptype = BCP_tmstorage_main(msg_env, user_init, my_id, parent, ub);
+	      break;
 	    case BCP_ProcessType_Any:
-		throw BCP_fatal_error("\
+	      throw BCP_fatal_error("\
 New process identity is BCP_ProcessType_Any!\n");
 	    case BCP_ProcessType_TM:
-		throw BCP_fatal_error("\
+	      throw BCP_fatal_error("\
 New process identity is BCP_ProcessType_TM!\n");
 	    case BCP_ProcessType_EndProcess:
-		break;
+	      break;
 	    }
 	}
     }
@@ -214,14 +216,12 @@ Number of process in parameter file %d > n_proc in mpirun -np %d!\n",
 
     // Initialize the number of leaves assigned to CP's and VP's as 0
     if (p.param(BCP_tm_par::CpProcessNum) > 0) {
-	for (int i = p.slaves.cp->size() - 1; i >= 0; --i)
-	    p.leaves_per_cp.
-		push_back(std::make_pair(p.slaves.cp->procs()[i], 0));
+      for (int i = p.slaves.cp->procs().size() - 1; i >= 0; --i)
+	p.leaves_per_cp.push_back(std::make_pair(p.slaves.cp->procs()[i], 0));
     }
     if (p.param(BCP_tm_par::VpProcessNum) > 0) {
-	for (int i = p.slaves.vp->size() - 1; i >= 0; --i)
-	    p.leaves_per_vp.
-		push_back(std::make_pair(p.slaves.vp->procs()[i], 0));
+      for (int i = p.slaves.vp->procs().size() - 1; i >= 0; --i)
+	p.leaves_per_vp.push_back(std::make_pair(p.slaves.vp->procs()[i], 0));
     }
 
     // Initialize the root of the search tree (can't invoke directly
@@ -281,9 +281,13 @@ bool BCP_tm_do_one_phase(BCP_tm_prob& p)
 	if (BCP_tm_start_new_nodes(p) == BCP_NodeStart_Error)
 	    // Error indicates that something has died
 	    return true;
+	buf.clear();
+	// Check if need to balance data
+	p.need_a_TS = ! BCP_tm_is_data_balanced(p);
+	p.need_a_TS = BCP_tm_balance_data(p);
+
 	// Process incoming messages. If there are no active nodes left then
 	// timeout is set to 0, so we just check the queue, but not wait.
-	buf.clear();
 	p.msg_env->receive(BCP_AnyProcess, BCP_Msg_AnyMessage, buf,
 			   p.slaves.lp->busy_num() == 0 ?
 			   0 : p.param(BCP_tm_par::TmTimeout));

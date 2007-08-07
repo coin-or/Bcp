@@ -53,9 +53,10 @@ BCP_lp_process_core(BCP_lp_prob& p, BCP_buffer& buf)
 
 BCP_process_t BCP_lp_main(BCP_message_environment* msg_env,
 			  USER_initialize* user_init,
-			  int my_id, int parent)
+			  int my_id, int parent, double ub)
 {
    BCP_lp_prob p(my_id, parent);
+   p.upper_bound = ub;
    p.msg_env = msg_env;
 
    // wait for the message with the parameters and unpack it
@@ -63,7 +64,6 @@ BCP_process_t BCP_lp_main(BCP_message_environment* msg_env,
    msg_env->receive(parent /*tree_manager*/,
 		    BCP_Msg_ProcessParameters, p.msg_buf, -1);
    p.par.unpack(p.msg_buf);
-   p.msg_buf.unpack(p.upper_bound);
 
    // Let us be nice
    setpriority(PRIO_PROCESS, 0, p.par.entry(BCP_lp_par::NiceLevel));

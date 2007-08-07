@@ -52,8 +52,7 @@ class BCP_tm_node_data {
 public:
     Coin::SmartPtr<BCP_node_change> _desc;
     Coin::SmartPtr<BCP_user_data>   _user;
-    BCP_tm_node_data(BCP_node_change* d = NULL, BCP_user_data* u = NULL) :
-	_desc(d), _user(u) {}
+    BCP_tm_node_data(BCP_node_change* d = NULL) : _desc(d), _user(0) {}
 };
 
 //=============================================================================
@@ -71,6 +70,8 @@ private:
     // NOTE: deleting a tree_node deletes the whole subtree below!
 public:
     /**@name Data members */
+    static int num_local_nodes;
+    static int num_remote_nodes;
     // *FIXME* break into groups 
     /*@{*/
     /** */
@@ -100,9 +101,9 @@ public:
     int _cut_storage:4;
     int _ws_storage:4;
 
-    int _locally_stored:1;
+    int _locally_stored:2;
     // Exactly one of the next two is always irrelevant */
-    int _data_location:31;
+    int _data_location:30;
     BCP_tm_node_data _data;
 	
     /*@}*/
@@ -111,46 +112,20 @@ public:
     /**@name Constructors and destructor */
     /*@{*/
     /** */
-    BCP_tm_node(int level, BCP_node_change* desc) :
-	CoinTreeNode(level),
-	status(BCP_DefaultNode),
-	_index(0),
-	_parent(0),
-	_birth_index(-1),
-	_children(),
-	lp(-1), cg(-1), cp(-1), vg(-1), vp(-1),
-	_processed_leaf_num(0),
-	_pruned_leaf_num(0),
-	_tobepriced_leaf_num(0),
-	_leaf_num(0),
-	_core_storage(-1),
-	_var_storage(-1),
-	_cut_storage(-1),
-	_ws_storage(-1),
-	_locally_stored(1),
-	_data_location(-1),
-	_data(desc, NULL) {}
+    BCP_tm_node(int level, BCP_node_change* desc);
 
     /** */
-    BCP_tm_node(int level, BCP_node_change* desc,
-		BCP_tm_node* parent, int index) :
-	CoinTreeNode(level),
-	status(BCP_DefaultNode),
-	_index(0),
-	_parent(0),
-	_birth_index(-1),
-	_children(),
-	lp(-1), cg(-1), cp(-1), vg(-1), vp(-1),
-	_processed_leaf_num(0),
-	_pruned_leaf_num(0),
-	_tobepriced_leaf_num(0),
-	_leaf_num(0),
-	_locally_stored(1),
-	_data_location(-1),
-	_data(desc, NULL) {}
-
+//     BCP_tm_node(int level, BCP_node_change* desc,
+// 		BCP_tm_node* parent, int index);
     /** */
-    ~BCP_tm_node() {}
+    ~BCP_tm_node()
+    {
+      if (_locally_stored) {
+	--num_local_nodes;
+      } else {
+	--num_remote_nodes;
+      }
+    }
     /*@}*/
 
     /**@name Query methods */

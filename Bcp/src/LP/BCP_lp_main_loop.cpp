@@ -30,10 +30,10 @@ void BCP_lp_main_loop(BCP_lp_prob& p)
 
     double nodeStart = CoinCpuTime();
 
-    if (p.param(BCP_lp_par::LpVerb_ProcessedNodeIndex)) {
-	printf("\nLP: **** Processing NODE %i on LEVEL %i (from TM) ****\n",
-	       p.node->index, p.node->level);
-    }
+    p.user->print(p.param(BCP_lp_par::LpVerb_ProcessedNodeIndex), "\n");
+    p.user->print(p.param(BCP_lp_par::LpVerb_ProcessedNodeIndex),
+		  "LP: **** Processing NODE %i on LEVEL %i (from TM) ****\n",
+		  p.node->index, p.node->level);
     // let the user do whatever she wants before the new node starts
     BCP_lp_prepare_for_new_node(p);
 
@@ -42,9 +42,10 @@ void BCP_lp_main_loop(BCP_lp_prob& p)
 
 	BCP_lp_purge_slack_pool(p);
 
-	if (p.param(BCP_lp_par::LpVerb_IterationCount))
-	    printf("\nLP: *** Starting iteration %i ***\n",
-		   p.node->iteration_count);
+	p.user->print(p.param(BCP_lp_par::LpVerb_IterationCount), "\n");
+	p.user->print(p.param(BCP_lp_par::LpVerb_IterationCount),
+		      "LP: *** Starting iteration %i ***\n",
+		      p.node->iteration_count);
 
 	// Solve the lp relaxation and get the results
 	time0 = CoinCpuTime();
@@ -69,11 +70,11 @@ void BCP_lp_main_loop(BCP_lp_prob& p)
 
 	// Display the matrix solution value
 	if (p.param(BCP_lp_par::LpVerb_LpSolutionValue)) {
-	    printf("LP:   Matrix size: %i vars x %i cuts\n",
-		   static_cast<int>(p.node->vars.size()),
-		   static_cast<int>(p.node->cuts.size()));
-	    printf("LP:   Solution value: %.4f / %i , %i \n",
-		   lpres.objval(), tc, lpres.iternum());
+	    p.user->print(true, "LP:   Matrix size: %i vars x %i cuts\n",
+			  static_cast<int>(p.node->vars.size()),
+			  static_cast<int>(p.node->cuts.size()));
+	    p.user->print(true, "LP:   Solution value: %.4f / %i , %i \n",
+			  lpres.objval(), tc, lpres.iternum());
 	}
 
 	// Display the relaxed solution if needed
@@ -109,8 +110,8 @@ LP:   Terminating and fathoming due to proven high cost.\n",
 	// - generate columns
 
 	if (tc & BCP_ProvenPrimalInf) {
-	    if (p.param(BCP_lp_par::LpVerb_FathomInfo))
-		printf("LP:   Primal feasibility lost.\n");
+	    p.user->print(p.param(BCP_lp_par::LpVerb_FathomInfo),
+			  "LP:   Primal feasibility lost.\n");
 	    if (BCP_lp_fathom(p, from_repricing)) {
 		return;
 	    }
@@ -120,7 +121,8 @@ LP:   Terminating and fathoming due to proven high cost.\n",
 
 	if (tc & (BCP_ProvenDualInf | BCP_PrimalObjLimReached | BCP_TimeLimit)) {
 	    // *FIXME* : for now just throw an exception, but *THINK*
-	    printf("LP: ############ Unexpected termcode: %i\n",lpres.termcode());
+	    p.user->print(true, "LP: ############ Unexpected termcode: %i\n",
+			  lpres. termcode());
 	    throw BCP_fatal_error("Unexpected termcode in BCP_lp_main_loop!\n");
 	}
 
@@ -232,18 +234,20 @@ LP:   Terminating and fathoming due to proven high cost (good heur soln!).\n",
 	const bool verb_var = p.param(BCP_lp_par::LpVerb_GeneratedVarCount);
 	// Report how many have been generated
 	if (verb_cut && ! verb_var) {
-	    printf("LP:   In iteration %i BCP generated",
-		   p.node->iteration_count);
-	    printf(" %i cuts before calling branch()\n", cuts_to_add_cnt);
+	    p.user->print(true, "LP:   In iteration %i BCP generated",
+			  p.node->iteration_count);
+	    p.user->print(true, " %i cuts before calling branch()\n",
+			  cuts_to_add_cnt);
 	} else if (! verb_cut && verb_var) {
-	    printf("LP:   In iteration %i BCP generated",
-		   p.node->iteration_count);
-	    printf(" %i vars before calling branch()\n", vars_to_add_cnt);
+	    p.user->print(true, "LP:   In iteration %i BCP generated",
+			  p.node->iteration_count);
+	    p.user->print(true, " %i vars before calling branch()\n",
+			  vars_to_add_cnt);
 	} else if (verb_cut && verb_var) {
-	    printf("LP:   In iteration %i BCP generated",
-		   p.node->iteration_count);
-	    printf(" %i cuts and %i vars before calling branch()\n",
-		   cuts_to_add_cnt, vars_to_add_cnt);
+	    p.user->print(true, "LP:   In iteration %i BCP generated",
+			  p.node->iteration_count);
+	    p.user->print(true," %i cuts , %i vars before calling branch()\n",
+			  cuts_to_add_cnt, vars_to_add_cnt);
 	}
 
 	if (cuts_to_add_cnt == 0 && vars_to_add_cnt == 0 &&
@@ -256,25 +260,22 @@ LP:   Terminating and fathoming due to proven high cost (good heur soln!).\n",
 	// Try to branch
 	switch (BCP_lp_branch(p)){
 	case BCP_BranchingFathomedThisNode:
-	    if (p.param(BCP_lp_par::LpVerb_NodeTime)) {
-		printf("BCP_lp: Time spent in this node: %15.4f seconds\n",
-		       CoinCpuTime() - nodeStart);
-	    }
+	    p.user->print(p.param(BCP_lp_par::LpVerb_NodeTime),
+			  "BCP_lp: Time spent in this node: %15.4f seconds\n",
+			  CoinCpuTime() - nodeStart);
 	    // Note that BCP_lp_branch() has already sent the node description
 	    // to the TM, info is printed, node is cleaned up, so just return
 	    return;
 
 	case BCP_BranchingDivedIntoNewNode:
-	    if (p.param(BCP_lp_par::LpVerb_NodeTime)) {
-		printf("BCP_lp: Time spent in this node: %15.4f seconds\n",
-		       CoinCpuTime() - nodeStart);
-	    }
+	    p.user->print(p.param(BCP_lp_par::LpVerb_NodeTime),
+			  "BCP_lp: Time spent in this node: %15.4f seconds\n",
+			  CoinCpuTime() - nodeStart);
 	    nodeStart = CoinCpuTime();
-	    if (p.param(BCP_lp_par::LpVerb_ProcessedNodeIndex)) {
-		printf("\n\
-LP: **** Processing NODE %i on LEVEL %i (dived) ****\n",
-		       p.node->index, p.node->level);
-	    }
+	    p.user->print(p.param(BCP_lp_par::LpVerb_ProcessedNodeIndex),"\n");
+	    p.user->print(p.param(BCP_lp_par::LpVerb_ProcessedNodeIndex),
+			  "LP: **** Processing NODE %i on LEVEL %i (dived) ****\n",
+			  p.node->index, p.node->level);
 	    // let the user do whatever she wants before the new node starts
 	    BCP_lp_prepare_for_new_node(p);
 	    // here we don't have to delete cols and rows, it's done as part of
@@ -287,22 +288,17 @@ LP: **** Processing NODE %i on LEVEL %i (dived) ****\n",
 	    // got to add things from the local pools
 	    const int added_cuts = BCP_lp_add_from_local_cut_pool(p);
 	    const int added_vars = BCP_lp_add_from_local_var_pool(p);
-	    if (p.param(BCP_lp_par::LpVerb_AddedCutCount) &&
-		! p.param(BCP_lp_par::LpVerb_AddedVarCount)) {
-		printf("\
-LP:   In iteration %i BCP added %i cuts.\n",
-		       p.node->iteration_count, added_cuts);
-	    } else if (! p.param(BCP_lp_par::LpVerb_AddedCutCount) &&
-		       p.param(BCP_lp_par::LpVerb_AddedVarCount)) {
-		printf("\
-LP:   In iteration %i BCP added %i vars.\n",
-		       p.node->iteration_count, added_vars);
-	    } else if (p.param(BCP_lp_par::LpVerb_AddedCutCount) &&
-		       p.param(BCP_lp_par::LpVerb_AddedVarCount)) {
-		printf("\
-LP:   In iteration %i BCP added %i cuts and %i vars.\n",
-		       p.node->iteration_count, added_cuts, added_vars);
-	    }
+	    const bool added_cut = p.param(BCP_lp_par::LpVerb_AddedCutCount);
+	    const bool added_var = p.param(BCP_lp_par::LpVerb_AddedVarCount);
+	    p.user->print(added_cut && ! added_var,
+			  "LP:  In iteration %i BCP added %i cuts.\n",
+			  p.node->iteration_count, added_cuts);
+	    p.user->print(! added_cut && added_var,
+			  "LP:  In iteration %i BCP added %i vars.\n",
+			  p.node->iteration_count, added_vars);
+	    p.user->print(added_cut && added_var,
+			  "LP:  In iteration %i BCP added %i cuts, %i vars.\n",
+			  p.node->iteration_count, added_cuts, added_vars);
 	    varset_changed = (added_vars > 0);
 	    cutset_changed = (added_cuts > 0);
 	    // the args are: (p, col_indices, row_indices, force_delete).

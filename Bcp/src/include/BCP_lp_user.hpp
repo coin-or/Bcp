@@ -113,6 +113,8 @@ public:
 	stored in this node */
     BCP_user_data* get_user_data();
     /*@}*/
+    /** A method to print a message with the process id */
+    void print(const bool ifprint, const char * format, ...) const;
 
     /**@name Methods to get/set BCP parameters on the fly */
     /*@{*/

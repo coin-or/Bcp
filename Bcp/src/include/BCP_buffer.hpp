@@ -145,8 +145,11 @@ public:
        <code>add_size</code> number of additional bytes will fit into the
        buffer. */
    inline void make_fit(const int add_size){
-      if (_max_size < _size + add_size){
-	 _max_size = 2 * (_size + add_size + 0x1000/*4K*/);
+      if (_max_size < _size + add_size) {
+	 _max_size = _size + add_size;
+	 /* If > 1M then have spare space of 1/16th (~6%) of used space,
+	    if <= 1M then have 64K spare space */
+	 _max_size += (_max_size > 1<<20) ? (_max_size >> 4) : (1 << 16) ;
 	 char *new_data = new char[_max_size];
 	 if (_size)
 	    memcpy(new_data, _data, _size);
@@ -370,7 +373,8 @@ public:
    /** The default constructor creates a buffer of size 16 Kbytes with no
        message in it. */
    BCP_buffer() : _msgtag(BCP_Msg_NoMessage), _sender(-1), _pos(0),
-      _max_size(0x4000/*16K*/), _size(0), _data(new char[_max_size]) {}
+		  _max_size(1<<16/*64K*/), _size(0),
+		  _data(new char[_max_size]) {}
    /** The copy constructor makes an exact replica of the other buffer. */
    BCP_buffer(const BCP_buffer& buf) :
       _msgtag(BCP_Msg_NoMessage), _sender(-1), _pos(0),

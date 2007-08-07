@@ -71,8 +71,10 @@ BCP_single_environment::register_process(USER_initialize* user_init)
     // We start as it is in tm_main.cpp
     int _tm_id(0);
     int _lp_id(1);
+#if ! defined(BCP_CG_VG_PROCESS_HANDLING_BROKEN)
     int _cg_id(2);
     int _vg_id(3);
+#endif
     //     int _cp_id(4);
     //     int _vp_id(5);
     BCP_tm_prob* _tm_prob = new BCP_tm_prob();
@@ -105,14 +107,14 @@ BCP_single_environment::register_process(USER_initialize* user_init)
 
     // Initialize the number of leaves assigned to CP's and VP's as 0
     if (_tm_prob->param(BCP_tm_par::CpProcessNum) > 0) {
-	_tm_prob->leaves_per_cp.reserve(_tm_prob->slaves.cp->size());
-	for (int i = _tm_prob->slaves.cp->size() - 1; i >= 0; --i)
+       _tm_prob->leaves_per_cp.reserve(_tm_prob->slaves.cp->procs().size());
+       for (int i = _tm_prob->slaves.cp->procs().size() - 1; i >= 0; --i)
 	    _tm_prob->leaves_per_cp.unchecked_push_back
 		(std::make_pair(_tm_prob->slaves.cp->procs()[i], 0));
     }
     if (_tm_prob->param(BCP_tm_par::VpProcessNum) > 0) {
-	_tm_prob->leaves_per_vp.reserve(_tm_prob->slaves.vp->size());
-	for (int i = _tm_prob->slaves.vp->size() - 1; i >= 0; --i)
+        _tm_prob->leaves_per_vp.reserve(_tm_prob->slaves.vp->procs().size());
+	for (int i = _tm_prob->slaves.vp->procs().size() - 1; i >= 0; --i)
 	    _tm_prob->leaves_per_vp.unchecked_push_back
 		(std::make_pair(_tm_prob->slaves.vp->procs()[i], 0));
     }
@@ -149,10 +151,10 @@ BCP_single_environment::register_process(USER_initialize* user_init)
     _tm_prob->slaves.lp = new BCP_proc_array;
     _tm_prob->slaves.lp->add_proc(_lp_id);
     _tm_prob->slaves.all->add_proc(_lp_id);
-    _tm_prob->active_nodes.insert(_tm_prob->active_nodes.end(), 1, 0);
     //-------------------------------------------------------------------------
     // CG
     BCP_cg_prob* _cg_prob = 0;
+#if ! defined(BCP_CG_VG_PROCESS_HANDLING_BROKEN)
     if (_tm_prob->param(BCP_tm_par::CgProcessNum) > 0) {
 	_cg_prob = new BCP_cg_prob(_cg_id, _tm_id);
 	processes[_cg_id] = _cg_prob;
@@ -161,9 +163,11 @@ BCP_single_environment::register_process(USER_initialize* user_init)
 	_tm_prob->slaves.cg->add_proc(_cg_id);
 	_tm_prob->slaves.all->add_proc(_cg_id);
     }
+#endif
     //-------------------------------------------------------------------------
     // VG
     BCP_vg_prob* _vg_prob = 0;
+#if ! defined(BCP_CG_VG_PROCESS_HANDLING_BROKEN)
     if (_tm_prob->param(BCP_tm_par::VgProcessNum) > 0) {
 	_vg_prob = new BCP_vg_prob(_vg_id, _tm_id);
 	processes[_vg_id] = _vg_prob;
@@ -172,6 +176,7 @@ BCP_single_environment::register_process(USER_initialize* user_init)
 	_tm_prob->slaves.vg->add_proc(_vg_id);
 	_tm_prob->slaves.all->add_proc(_vg_id);
     }
+#endif
     //-------------------------------------------------------------------------
     // CP
 //     BCP_cp_prob* _cp_prob = 0;

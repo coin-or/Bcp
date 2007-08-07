@@ -101,6 +101,12 @@ struct BCP_tm_par{
    
   /** Integer parameters. */
   enum int_params{
+    /** The maximum size of the memory heap the TM can use. If the TM reaches
+	this limit then it converts an LP process into a TS (storage)
+	process). If positive, it's the number of megabytes. 0 indicates the
+	TM should attempt to find this out. -1 indicates that no TS process
+	should be created. Default: -1. */
+    MaxHeapSize,
     /** At every this many search tree node provide a single line info on the
 	progress of the search tree. If <= 0 then never. Default: 0. */
     TmVerb_SingleLineInfoFrequency,

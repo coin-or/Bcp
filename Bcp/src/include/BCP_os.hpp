@@ -29,40 +29,36 @@
 #else
 #  define GETPID (0)
 #endif
+//-----------------------------------------------------------------------------
 
-/** Return the amount of memory left in kilobytes. Note that this works only
-    if sysinfo() is available, otherwise returns -1. */
 #ifdef HAVE_SYSINFO
 #include <sys/sysinfo.h>
-static inline void BCP_sysinfo_mem(long& totalmem, long& freemem) {
-    struct sysinfo info;
-    sysinfo(&info);
-    freemem = info.mem_unit*info.freeram;
-    totalmem = info.mem_unit*info.totalram;
-}
-#else
-static inline void BCP_sysinfo_mem(long& totalmem, long& freemem) {
-    totalmem = -1;
-    freemem = -1;
-}
 #endif
+static inline long BCP_free_mem()
+{
+#ifdef HAVE_SYSINFO
+  struct sysinfo info;
+  sysinfo(&info);
+  return info.mem_unit*info.freeram;
+#else
+  return -1;
+#endif
+}
+//-----------------------------------------------------------------------------
 
 #ifdef HAVE_MALLINFO
 #include <malloc.h>
-/** Returns the total amount of memory in the heap and the amount of memory
-    used (both in bytes) */
-static inline void BCP_mallinfo_mem(long& total, long& used)
-{
-    struct mallinfo info = mallinfo();
-    used = info.smblks + info.uordblks;
-    total = info.arena;
-}
-#else
-static inline void BCP_mallinfo_mem(long& total, long& used)
-{
-    total = -1;
-    used = -1;
-}
 #endif
+
+static inline long BCP_used_heap()
+{
+#ifdef HAVE_MALLINFO
+  struct mallinfo info = mallinfo();
+  return info.usmblks + info.uordblks;;
+#else
+  return -1;
+#endif
+}
+//-----------------------------------------------------------------------------
 
 #endif

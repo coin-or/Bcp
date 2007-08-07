@@ -19,9 +19,10 @@
 
 BCP_process_t BCP_cg_main(BCP_message_environment* msg_env,
 			  USER_initialize* user_init,
-			  int my_id, int parent)
+			  int my_id, int parent, double ub)
 {
    BCP_cg_prob p(my_id, parent);
+   p.upper_bound = ub;
    p.msg_env = msg_env;
 
    // wait for the message with the parameters and unpack it

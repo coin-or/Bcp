@@ -18,6 +18,8 @@
 #include "BCP_message_mpi.hpp"
 
 bool BCP_mpi_environment::mpi_init_called = false;
+int BCP_mpi_environment::num_proc = 0;
+int BCP_mpi_environment::seqproc = 0;
 
 //#############################################################################
 
@@ -126,24 +128,24 @@ BCP_mpi_environment::send(const int target,
 //-----------------------------------------------------------------------------
 
 void
-BCP_mpi_environment::multicast(const BCP_proc_array* const target,
+BCP_mpi_environment::multicast(const BCP_proc_array& target,
 			       const BCP_message_tag tag)
 {
-    const BCP_vec<int>& pids = target->procs();
+    const BCP_vec<int>& pids = target.procs();
     void * buf = NULL;
-    for (int i=target->size()-1; i>=0; --i) {
+    for (int i=target.procs().size()-1; i>=0; --i) {
 	check_error(MPI_Send(&buf, 0, MPI_CHAR,
 			     pids[i], tag, MPI_COMM_WORLD),"MPI_Send");
     }
 }
 
 void
-BCP_mpi_environment::multicast(const BCP_proc_array* const target,
+BCP_mpi_environment::multicast(const BCP_proc_array& target,
 			       const BCP_message_tag tag,
 			       const BCP_buffer& buf)
 {
-    const BCP_vec<int>& pids = target->procs();
-    for (int i=target->size()-1; i>=0; --i) {
+    const BCP_vec<int>& pids = target.procs();
+    for (int i=target.procs().size()-1; i>=0; --i) {
 	check_error(MPI_Send(const_cast<char*>(buf.data()), buf.size(),
 			     MPI_CHAR, pids[i], tag, MPI_COMM_WORLD),
 		    "MPI_Send");
@@ -182,7 +184,7 @@ BCP_mpi_environment::receive(const int source,
 			     const double timeout)
 {
     buf.clear();
-    delete buf._sender;   buf._sender = 0;
+    buf._sender = -1;
     int pid = (source == BCP_AnyProcess ? MPI_ANY_SOURCE : source);
     int msgtag = (tag == BCP_Msg_AnyMessage ? MPI_ANY_TAG : tag);
     int flag = 0;
@@ -207,7 +209,6 @@ BCP_mpi_environment::receive(const int source,
     check_error(MPI_Get_count( &status, MPI_CHAR, &bytes ),"MPI_Get_Count");
     buf.make_fit(bytes);
     buf._msgtag = static_cast<BCP_message_tag>(status.MPI_TAG);
-    delete buf._sender;
     buf._sender = status.MPI_SOURCE;
     buf._size = bytes;
 
@@ -239,11 +240,12 @@ int
 BCP_mpi_environment::start_process(const BCP_string& exe, const bool debug)
 {
 #ifdef COIN_HAS_MPI2
+    // FIXME: implement MPI2 proces spawning
     printf("Sorry, MPI2 process spawning is not supported yet...\n");
     abort();
 #else
-    printf("Sorry, MPI1 does not support process spawning...\n");
-    abort();
+    // Fake it...
+    return ++seqproc;
 #endif
 }
 
@@ -253,11 +255,12 @@ BCP_mpi_environment::start_process(const BCP_string& exe,
 				   const bool debug)
 {
 #ifdef COIN_HAS_MPI2
+    // FIXME: implement MPI2 proces spawning
     printf("Sorry, MPI2 process spawning is not supported yet...\n");
     abort();
 #else
-    printf("Sorry, MPI1 does not support process spawning...\n");
-    abort();
+    // Fake it...
+    return ++seqproc;
 #endif
 }
 
@@ -267,11 +270,19 @@ BCP_mpi_environment::start_processes(const BCP_string& exe,
 				     const bool debug)
 {
 #ifdef COIN_HAS_MPI2
+    // FIXME: implement MPI2 proces spawning
     printf("Sorry, MPI2 process spawning is not supported yet...\n");
     abort();
 #else
-    printf("Sorry, MPI1 does not support process spawning...\n");
-    abort();
+    // Fake it...
+    int* pids = new int[proc_num];
+    for (int i = 0; i < proc_num; ++i) {
+	pids[i] = ++seqproc;
+    }
+    BCP_proc_array* pa = new BCP_proc_array;
+    pa->add_procs(pids, pids+proc_num);
+    delete[] pids;
+    return pa;
 #endif
 }
 
@@ -282,12 +293,24 @@ BCP_mpi_environment::start_processes(const BCP_string& exe,
 				     const bool debug)
 {
 #ifdef COIN_HAS_MPI2
+    // FIXME: implement MPI2 proces spawning
     printf("Sorry, MPI2 process spawning is not supported yet...\n");
     abort();
 #else
-    printf("Sorry, MPI1 does not support process spawning...\n");
-    abort();
+    // Fake it...
+    int* pids = new int[proc_num];
+    for (int i = 0; i < proc_num; ++i) {
+	pids[i] = ++seqproc;
+    }
+    BCP_proc_array* pa = new BCP_proc_array;
+    pa->add_procs(pids, pids+proc_num);
+    delete[] pids;
+    return pa;
 #endif
+}
+
+int BCP_mpi_environment::num_procs() {
+    return num_proc;
 }
 
 #endif /* COIN_HAS_MPI */

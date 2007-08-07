@@ -10,6 +10,7 @@
 #include "BCP_message_tag.hpp"
 #include "BCP_parameters.hpp"
 #include "BCP_enum_tm.hpp"
+#include "BCP_enum_process_t.hpp"
 
 #define BCP__DUMP_PROCINFO 0
 
@@ -46,6 +47,11 @@ void BCP_tm_trim_tree_wrapper(BCP_tm_prob& p, const bool between_phases);
 void BCP_tm_remove_explored(BCP_tm_prob& p, BCP_tm_node* node);
 
 //-----------------------------------------------------------------------------
+// BCP_tm_nodes_to_storage.cpp
+bool BCP_tm_is_data_balanced(BCP_tm_prob& p);
+bool BCP_tm_balance_data(BCP_tm_prob& p);
+
+//-----------------------------------------------------------------------------
 // BCP_tm_msgproc.cpp
 void BCP_tm_idle_processes(BCP_tm_prob& p);
 void BCP_tm_stop_processes(BCP_tm_prob& p);
@@ -56,6 +62,8 @@ void BCP_tm_remove_lp(BCP_tm_prob& p, const int index);
 void BCP_tm_remove_cg(BCP_tm_prob& p, const int index);
 void BCP_tm_remove_vg(BCP_tm_prob& p, const int index);
 void BCP_tm_notify_about_new_phase(BCP_tm_prob& p);
+void BCP_tm_notify_process_type(BCP_tm_prob& p, BCP_process_t ptype,
+				const BCP_vec<int>* procs);
 void BCP_tm_notify_processes(BCP_tm_prob& p);
 void BCP_tm_unpack_priced_root(BCP_tm_prob& p, BCP_buffer& buf);
 void BCP_tm_free_procs_of_node(BCP_tm_prob& p, BCP_tm_node* node);

@@ -79,19 +79,20 @@ BCP_tm_wrapup(BCP_tm_prob* tm, BCP_lp_prob* lp,
 
     if (! lp) {
 	// Now ask every process
-	const int num_lp = tm->slaves.lp->size();
+        const BCP_vec<int>& lps = tm->slaves.lp->procs();
+        const int num_lp = lps.size();
 	BCP_lp_statistics this_lp_stat;
    
 	int i;
 	for (i = 0; i < num_lp; ++i) {
 	    while (true) {
-		tm->msg_env->receive(tm->slaves.lp->process(i),
+		tm->msg_env->receive(lps[i],
 				     BCP_Msg_LpStatistics,
 				     tm->msg_buf, 10);
 		BCP_message_tag msgtag = tm->msg_buf.msgtag();
 		if (msgtag == BCP_Msg_NoMessage) {
 		    // test if the LP is still alive
-		    if (! tm->msg_env->alive(tm->slaves.lp->process(i)))
+		    if (! tm->msg_env->alive(lps[i]))
 			break;
 		} else {
 		    break;

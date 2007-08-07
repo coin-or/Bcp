@@ -47,6 +47,7 @@ libBcp_la_SOURCES = \
 	TM/BCP_tm_user.cpp \
 	TM/BCP_tm_commandline.cpp \
 	TM/BCP_tm_node.cpp \
+	TM/BCP_tm_nodes_to_storage.cpp \
 	TM/BCP_tm_msgproc.cpp \
 	TM/BCP_tm_functions.cpp \
 	TM/BCP_tm_main.cpp \

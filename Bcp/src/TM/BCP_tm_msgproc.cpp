@@ -47,9 +47,9 @@ void BCP_tm_start_processes(BCP_tm_prob& p)
 	}
 	p.slaves.all->add_procs(p.slaves.lp->procs().begin(),
 				p.slaves.lp->procs().end());
-	p.active_nodes.insert(p.active_nodes.end(), num, 0);
     }
 
+#if ! defined(BCP_CG_VG_PROCESS_HANDLING_BROKEN)
     if (p.param(BCP_tm_par::CgProcessNum) > 0) {
 	const bool debug = p.param(BCP_tm_par::DebugCgProcesses) != 0;
 	const int  num = p.param(BCP_tm_par::CgProcessNum);
@@ -75,6 +75,7 @@ void BCP_tm_start_processes(BCP_tm_prob& p)
 	p.slaves.all->add_procs(p.slaves.vg->procs().begin(),
 				p.slaves.vg->procs().end());
     }
+#endif
 
     if (p.param(BCP_tm_par::CpProcessNum) > 0) {
 	const bool debug = p.param(BCP_tm_par::DebugCpProcesses) != 0;
@@ -162,6 +163,7 @@ BCP_tm_notify_process_type(BCP_tm_prob& p, BCP_process_t ptype,
 // 	BCP_tm_initialize_process_type(p, BCP_ProcessType_VP, p.slave_pars.vp,
 // 				       procs ? *procs : p.slaves.vp->procs());
 	break;
+#if ! defined(BCP_CG_VG_PROCESS_HANDLING_BROKEN)
     case BCP_ProcessType_CG:
 	BCP_tm_initialize_process_type(p, BCP_ProcessType_CG, p.slave_pars.cg,
 				       procs ? *procs : p.slaves.cg->procs());
@@ -170,7 +172,7 @@ BCP_tm_notify_process_type(BCP_tm_prob& p, BCP_process_t ptype,
 	BCP_tm_initialize_process_type(p, BCP_ProcessType_VG, p.slave_pars.vg,
 				       procs ? *procs : p.slaves.vg->procs());
 	break;
-
+#endif
     default:
 	throw BCP_fatal_error("Trying to notify bad process type\n");
     }
@@ -181,8 +183,10 @@ BCP_tm_notify_process_type(BCP_tm_prob& p, BCP_process_t ptype,
 void BCP_tm_notify_processes(BCP_tm_prob& p)
 {
     BCP_tm_notify_process_type(p, BCP_ProcessType_LP, &p.slaves.lp->procs());
+#if ! defined(BCP_CG_VG_PROCESS_HANDLING_BROKEN)
     BCP_tm_notify_process_type(p, BCP_ProcessType_CG, &p.slaves.cg->procs());
     BCP_tm_notify_process_type(p, BCP_ProcessType_VG, &p.slaves.vg->procs());
+#endif
     BCP_tm_notify_process_type(p, BCP_ProcessType_CP, &p.slaves.cp->procs());
     BCP_tm_notify_process_type(p, BCP_ProcessType_VP, &p.slaves.vp->procs());
 }
@@ -196,6 +200,9 @@ BCP_tm_prob::process_message()
 {
     BCP_tm_node* node;
     int sender;
+    int id;
+    std::map<int, BCP_tm_node_to_send*>::iterator index__node;
+    BCP_tm_node_to_send* node_to_send;
 
     // msg_counter counts the number of incoming messages. Every so often
     // (always when there's no message in the buffer) we check that every
@@ -325,59 +332,52 @@ TM: Solution value: %f (best solution value so far: %f)\n",
 	break;
 
     case BCP_Msg_NodeListRequestReply:
-	{
-	    int id;
-	    msg_buf.unpack(id);
-	    std::map<int, BCP_tm_node_to_send*>::iterator index__node =
-		BCP_tm_node_to_send::waiting.find(id);
-	    if (index__node == BCP_tm_node_to_send::waiting.end()) {
-		throw BCP_fatal_error("\
-TM: Got node data from TMS for node not waiting.\n");
-	    }
-	    BCP_tm_node_to_send* node = index__node->second;
-	    if (node->receive_node_desc(msg_buf)) {
-		delete node;
-		BCP_tm_node_to_send::waiting.erase(index__node);
-	    }
-	}
-	break;
+      msg_buf.unpack(id);
+      index__node = BCP_tm_node_to_send::waiting.find(id);
+      if (index__node == BCP_tm_node_to_send::waiting.end()) {
+	throw BCP_fatal_error("TM: node data from TMS for node not waiting.\n");
+      }
+      node_to_send = index__node->second;
+      if (node_to_send->receive_node_desc(msg_buf)) {
+	delete node_to_send;
+	BCP_tm_node_to_send::waiting.erase(index__node);
+      }
+      break;
 
     case BCP_Msg_VarListRequestReply:
-	{
-	    int id;
-	    msg_buf.unpack(id);
-	    std::map<int, BCP_tm_node_to_send*>::iterator index__node =
-		BCP_tm_node_to_send::waiting.find(id);
-	    if (index__node == BCP_tm_node_to_send::waiting.end()) {
-		throw BCP_fatal_error("\
-TM: Got var list from TMS for node not waiting.\n");
-	    }
-	    BCP_tm_node_to_send* node = index__node->second;
-	    if (node->receive_vars(msg_buf)) {
-		delete node;
-		BCP_tm_node_to_send::waiting.erase(index__node);
-	    }
-	}
-	break;
+      msg_buf.unpack(id);
+      index__node = BCP_tm_node_to_send::waiting.find(id);
+      if (index__node == BCP_tm_node_to_send::waiting.end()) {
+	throw BCP_fatal_error("TM: var list from TMS for node not waiting.\n");
+      }
+      node_to_send = index__node->second;
+      if (node_to_send->receive_vars(msg_buf)) {
+	delete node_to_send;
+	BCP_tm_node_to_send::waiting.erase(index__node);
+      }
+      break;
 
     case BCP_Msg_CutListRequestReply:
-	{
-	    int id;
-	    msg_buf.unpack(id);
-	    std::map<int, BCP_tm_node_to_send*>::iterator index__node =
-		BCP_tm_node_to_send::waiting.find(id);
-	    if (index__node == BCP_tm_node_to_send::waiting.end()) {
-		throw BCP_fatal_error("\
-TM: Got cut list from TMS for node not waiting.\n");
-	    }
-	    BCP_tm_node_to_send* node = index__node->second;
-	    if (node->receive_cuts(msg_buf)) {
-		delete node;
-		BCP_tm_node_to_send::waiting.erase(index__node);
-	    }
-	}
-	break;
+      msg_buf.unpack(id);
+      index__node = BCP_tm_node_to_send::waiting.find(id);
+      if (index__node == BCP_tm_node_to_send::waiting.end()) {
+	throw BCP_fatal_error("TM: cut list from TMS for node not waiting.\n");
+      }
+      node_to_send = index__node->second;
+      if (node_to_send->receive_cuts(msg_buf)) {
+	delete node_to_send;
+	BCP_tm_node_to_send::waiting.erase(index__node);
+      }
+      break;
 
+    case BCP_Msg_NodeListDeleteReply:
+    case BCP_Msg_VarListDeleteReply:
+    case BCP_Msg_CutListDeleteReply:
+	sender = msg_buf.sender();
+        msg_buf.unpack(id); // just reuse an int variable...
+	ts_space[msg_buf.sender()] = id;
+	break;
+	
     case BCP_Msg_LpStatistics:
 	throw BCP_fatal_error("\
 Unexpected BCP_Msg_LpStatistics message in BCP_tm_prob::process_message.\n");
@@ -408,7 +408,7 @@ Unknown message in BCP_tm_prob::process_message.\n");
 	// run the machine testing while it returns false (i.e., it did not
 	// check out, it had to delete something)
 	while (! BCP_tm_test_machine(*this));
-	if (slaves.lp->size() == 0)
+	if (slaves.lp->procs().size() == 0)
 	    throw BCP_fatal_error("TM: No LP process left to compute with.\n");
     }
 
@@ -433,20 +433,18 @@ BCP_tm_test_machine(BCP_tm_prob& p)
 	// everything is fine
 	return true;
 
-    int dead_process = *dead_process_i;
-    int i;
+    int dead_pid = *dead_process_i;
     bool continue_testing = true;
     // Oops, something has died, must write it off.
 
     if (continue_testing) {
-	i = p.slaves.lp->index_of_proc(dead_process);
-	if (i >= 0) {
-	    printf("TM: LP #%i is dead. Removing the LP/CG/VG/triplet.\n", i);
-	    BCP_tm_remove_lp(p, i);
-	    continue_testing = false;
-	}
+      printf("TM: Removing dead LP (pid: %i).\n", dead_pid);
+      BCP_tm_remove_lp(p, dead_pid);
+      continue_testing = false;
     }
 
+#if ! defined(BCP_CG_VG_PROCESS_HANDLING_BROKEN)
+    int i;
     if (continue_testing && p.slaves.cg) {
 	i = p.slaves.cg->index_of_proc(dead_process);
 	if (i >= 0) {
@@ -464,8 +462,9 @@ BCP_tm_test_machine(BCP_tm_prob& p)
 	    continue_testing = false;
 	}
     }
+#endif
 
-    p.slaves.all->delete_proc(p.slaves.all->index_of_proc(dead_process));
+    p.slaves.all->delete_proc(dead_pid);
 
     return false;
 }
@@ -501,11 +500,11 @@ TM: non-existing VP was assigned to a just pruned node.\n");
 //#############################################################################
 
 void
-BCP_tm_remove_lp(BCP_tm_prob& p, const int index)
+BCP_tm_remove_lp(BCP_tm_prob& p, const int dead_pid)
 {
-    BCP_tm_node* node = p.active_nodes[index];
+    BCP_tm_node* node = p.active_nodes[dead_pid];
     if (node) {
-	if (node->lp != p.slaves.lp->procs()[index])
+	if (node->lp != dead_pid)
 	    throw BCP_fatal_error("TM: messed up active nodes... :-(.\n");
 	// Got to put back the search tree node onto the candidate list.
 	// fix the CP/VP fields
@@ -523,13 +522,14 @@ BCP_tm_remove_lp(BCP_tm_prob& p, const int index)
 		node->vp = -1; 
 	    }
 	}
-	p.active_nodes.erase(p.active_nodes.entry(index));
+	p.active_nodes.erase(dead_pid);
 
 	node->lp = node->cg = node->vg = -1;
 	node->status = BCP_CandidateNode;
 	p.candidate_list.push(node, false);
     }
 
+#if ! defined(BCP_CG_VG_PROCESS_HANDLING_BROKEN)
     int proc;
     if (p.slaves.cg) {
 	proc = p.slaves.cg->procs()[index];
@@ -541,12 +541,13 @@ BCP_tm_remove_lp(BCP_tm_prob& p, const int index)
 	p.slaves.vg->delete_proc(index);
 	p.slaves.all->delete_proc(p.slaves.all->index_of_proc(proc));
     }
+#endif
 
-    proc = p.slaves.lp->procs()[index];
-    p.slaves.lp->delete_proc(index);
-    p.slaves.all->delete_proc(p.slaves.all->index_of_proc(proc));
+    p.slaves.lp->delete_proc(dead_pid);
+    p.slaves.all->delete_proc(dead_pid);
 }
 
+#if ! defined(BCP_CG_VG_PROCESS_HANDLING_BROKEN)
 void
 BCP_tm_remove_cg(BCP_tm_prob& p, const int index)
 {
@@ -560,7 +561,7 @@ BCP_tm_remove_vg(BCP_tm_prob& p, const int index)
     // for now this just removes the lp
     BCP_tm_remove_lp(p, index);
 }
-
+#endif
 
 //#############################################################################
 
@@ -574,7 +575,7 @@ BCP_tm_unpack_priced_root(BCP_tm_prob& p, BCP_buffer& buf)
     p.flags.root_pricing_unpacked = true;
 
     BCP_tm_free_procs_of_node(p, root);
-    p.active_nodes[p.slaves.lp->index_of_proc(root->lp)] = 0;
+    p.active_nodes.erase(root->lp);
 }
 
 //#############################################################################
@@ -583,10 +584,12 @@ void
 BCP_tm_free_procs_of_node(BCP_tm_prob& p, BCP_tm_node* node)
 {
     p.slaves.lp->set_proc_free(node->lp);
+#if ! defined(BCP_CG_VG_PROCESS_HANDLING_BROKEN)
     if (node->cg != -1)
 	p.slaves.cg->set_proc_free(node->cg);
     if (node->vg != -1)
 	p.slaves.vg->set_proc_free(node->vg);
+#endif
     // node's pointers are 0'd out (not deleted!)
     node->lp = node->cg = node->vg = -1;
 }
@@ -631,6 +634,7 @@ BCP_tm_change_config(BCP_tm_prob& p, BCP_buffer& buf)
 
     // Check that everything works out fine
 
+#if ! defined(BCP_CG_VG_PROCESS_HANDLING_BROKEN)
     // At least for now cg_num/vg_num must be the same as lp_num or must be 0
     if (p.slaves.cg->size() > 0) {
 	if (cg_num != lp_num) {
@@ -666,6 +670,7 @@ BCP: config change: VG's are not running thus no new VG's can be started.\
 	    return;
 	}
     }
+#endif
 
     // Spawn the jobs
     const BCP_string& exe = p.param(BCP_tm_par::ExecutableName);
@@ -676,8 +681,8 @@ BCP: config change: VG's are not running thus no new VG's can be started.\
 	p.slaves.lp->add_procs(new_lps->procs().begin(),
 			       new_lps->procs().end());
 	BCP_tm_notify_process_type(p, BCP_ProcessType_LP, &new_lps->procs());
-	p.active_nodes.insert(p.active_nodes.end(), lp_num, 0);
     }
+#if ! defined(BCP_CG_VG_PROCESS_HANDLING_BROKEN)
     if (cg_num > 0) {
 	const bool debug = p.param(BCP_tm_par::DebugCgProcesses) != 0;
 	BCP_proc_array* new_cgs =
@@ -694,6 +699,7 @@ BCP: config change: VG's are not running thus no new VG's can be started.\
 			       new_vgs->procs().end());
 	BCP_tm_notify_process_type(p, BCP_ProcessType_VG, &new_vgs->procs());
     }
+#endif
     if (cp_num > 0) {
 	const bool debug = p.param(BCP_tm_par::DebugCpProcesses) != 0;
 	BCP_proc_array* new_cps =

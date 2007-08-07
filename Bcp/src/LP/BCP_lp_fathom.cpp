@@ -18,8 +18,7 @@
 void
 BCP_lp_perform_fathom(BCP_lp_prob& p, const char* msg, BCP_message_tag msgtag)
 {
-    if (p.param(BCP_lp_par::LpVerb_FathomInfo))
-	printf("%s", msg);
+    p.user->print(p.param(BCP_lp_par::LpVerb_FathomInfo), "%s", msg);
     // Here we don't have col/row_indices to compress, we are from fathom and
     // we do want to force deletion.
     if (p.param(BCP_lp_par::SendFathomedNodeDesc)) {

@@ -50,6 +50,8 @@ class BCP_lp_statistics;
 
 //#############################################################################
 
+#define BCP_CG_VG_PROCESS_HANDLING_BROKEN
+
 /** NO OLD DOC */
 
 class BCP_slave_processes {
@@ -69,29 +71,49 @@ public:
     BCP_proc_array* all;
     /** */
     BCP_proc_array* lp;
+#if ! defined(BCP_CG_VG_PROCESS_HANDLING_BROKEN)
     /** */
     BCP_proc_array* cg;
+#endif
     /** */
     BCP_proc_array* cp;
+#if ! defined(BCP_CG_VG_PROCESS_HANDLING_BROKEN)
     /** */
     BCP_proc_array* vg;
+#endif
     /** */
     BCP_proc_array* vp;
+    /** */
+    BCP_proc_array* ts;
     /*@}*/
 
 public:
     /**@name Constructor and destructor */
     /*@{*/
     /** */
-    BCP_slave_processes() : all(0), lp(0), cg(0), cp(0), vg(0), vp(0) {}
+    BCP_slave_processes() :
+      all(0),
+      lp(0),
+#if ! defined(BCP_CG_VG_PROCESS_HANDLING_BROKEN)
+      cg(0),
+#endif
+      cp(0),
+#if ! defined(BCP_CG_VG_PROCESS_HANDLING_BROKEN)
+      vg(0),
+#endif
+      vp(0),
+      ts(0) {}
     /** */
     ~BCP_slave_processes() {
 	delete all;   all = 0;
 	delete lp;   lp = 0; 
 	delete cp;   cp = 0; 
 	delete vp;   vp = 0; 
+#if ! defined(BCP_CG_VG_PROCESS_HANDLING_BROKEN)
 	delete cg;   cg = 0; 
 	delete vg;   vg = 0; 
+#endif
+	delete ts;   ts = 0; 
     }
     /*@}*/
 };
@@ -216,10 +238,14 @@ public: // Data members
     int next_var_index_set_start;
 
     //-------------------------------------------------------------------------
+    bool need_a_TS;
+    std::map<int, int> ts_space;
+  
+    //-------------------------------------------------------------------------
     /** */
     BCP_tree search_tree;
-    /** */
-    BCP_vec<BCP_tm_node*> active_nodes;
+    /** A map from the process ids to the nodes (what they work on) */
+    std::map<int, BCP_tm_node*> active_nodes;
     /** */
     CoinSearchTreeManager candidate_list;
 

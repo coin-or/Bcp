@@ -42,8 +42,6 @@ void BCP_lp_unpack_parent(BCP_lp_prob& p, BCP_buffer& buf, BCP_lp_node& node)
 	p.parent->core_as_change.ensure_explicit(*p.core_as_change);
     }
 
-    int i;
-
     assert(node.vars.size() == p.core->vars.size());
     if (node.tm_storage.var_change == BCP_Storage_WrtParent){
 	// these are the vars present in the parent

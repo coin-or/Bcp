@@ -7,6 +7,54 @@
 #include "BCP_tm_node.hpp"
 #include "BCP_node_change.hpp"
 
+
+int BCP_tm_node::num_local_nodes = 0;
+int BCP_tm_node::num_remote_nodes = 0;
+
+//#############################################################################
+
+BCP_tm_node::BCP_tm_node(int level, BCP_node_change* desc) :
+  CoinTreeNode(level),
+  status(BCP_DefaultNode),
+  _index(0),
+  _parent(0),
+  _birth_index(-1),
+  _children(),
+  lp(-1), cg(-1), cp(-1), vg(-1), vp(-1),
+  _processed_leaf_num(0),
+  _pruned_leaf_num(0),
+  _tobepriced_leaf_num(0),
+  _leaf_num(0),
+  _core_storage(-1),
+  _var_storage(-1),
+  _cut_storage(-1),
+  _ws_storage(-1),
+  _locally_stored(true),
+  _data_location(-1),
+  _data(desc)
+{
+  ++num_local_nodes;
+}
+
+//#############################################################################
+
+// BCP_tm_node::BCP_tm_node(int level, BCP_node_change* desc,
+// 			 BCP_tm_node* parent, int index) :
+//   CoinTreeNode(level),
+//   status(BCP_DefaultNode),
+//   _index(0),
+//   _parent(0),
+//   _birth_index(-1),
+//   _children(),
+//   lp(-1), cg(-1), cp(-1), vg(-1), vp(-1),
+//   _processed_leaf_num(0),
+//   _pruned_leaf_num(0),
+//   _tobepriced_leaf_num(0),
+//   _leaf_num(0),
+//   _locally_stored(1),
+//   _data_location(-1),
+//   _data(desc) {}
+
 //#############################################################################
 
 int

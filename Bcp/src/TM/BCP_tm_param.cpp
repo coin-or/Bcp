@@ -86,6 +86,9 @@ void BCP_parameter_set<BCP_tm_par>::create_keyword_list() {
 
     //-------------------------------------------------------------------------
     // IntPar
+    keys.push_back(make_pair(BCP_string("BCP_MaxHeapSize"),
+			     BCP_parameter(BCP_IntPar,
+					   MaxHeapSize)));
     keys.push_back(make_pair(BCP_string("BCP_TmVerb_SingleLineInfoFrequency"),
 			     BCP_parameter(BCP_IntPar,
 					   TmVerb_SingleLineInfoFrequency)));
@@ -218,6 +221,7 @@ void BCP_parameter_set<BCP_tm_par>::set_default_entries(){
     set_entry(TmVerb_ReportDefault, true);
     //-------------------------------------------------------------------------
     // IntPar
+    set_entry(MaxHeapSize, 0);
     set_entry(TmVerb_SingleLineInfoFrequency, 0);
     set_entry(TreeSearchStrategy, BCP_BestFirstSearch);
     set_entry(NiceLevel, 0);

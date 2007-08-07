@@ -57,7 +57,11 @@ BCP_tm_node_to_send::BCP_tm_node_to_send(BCP_tm_prob& prob,
 	// some stuff is on other processes
 	if (n->_locally_stored) {
 	    node_data_on_root_path[i] = n->_data;
+	} else {
+	    node_data_on_root_path[i]._desc = NULL;
+	    node_data_on_root_path[i]._user = NULL;
 	}
+	  
 	if (n->_core_storage!=BCP_Storage_WrtParent && explicit_core_level<0) {
 	    explicit_core_level = i;
 	    explicit_all_level = i;
@@ -101,12 +105,15 @@ BCP_tm_node_to_send::receive_node_desc(BCP_buffer& buf)
     int cnt, level, index;
     buf.unpack(cnt);
     missing_desc_num -= cnt;
+    bool has_user_data = false;
     while (--cnt >= 0) {
 	buf.unpack(level).unpack(index);
 	assert(root_path[level]->_index == index);
 	node_data_on_root_path[level]._desc =
 	    new BCP_node_change(p.packer, def, buf);
-	node_data_on_root_path[level]._user = p.packer->unpack_user_data(buf);
+	buf.unpack(has_user_data);
+	node_data_on_root_path[level]._user =
+	  has_user_data ? p.packer->unpack_user_data(buf) : 0;
     }
     assert(missing_desc_num >= 0);
     if (missing_desc_num == 0) {
@@ -180,8 +187,9 @@ BCP_tm_node_to_send::send()
 	    buf.pack(ID);
 	    const BCP_vec<int>& nodelevel = tms->second;
 	    indices.clear();
-	    indices.reserve(nodelevel.size());
-	    for (i = nodelevel.size()-1; i >= 0; --i) {
+	    const int size = nodelevel.size();
+	    indices.reserve(size);
+	    for (i = 0; i < size; ++i) {
 		indices.unchecked_push_back(root_path[nodelevel[i]]->_index);
 	    }
 	    buf.pack(nodelevel);
@@ -192,6 +200,12 @@ BCP_tm_node_to_send::send()
 
     if (missing_desc_num > 0) {
 	return false;
+    }
+
+    // FIXME--DELETE
+    for (i = 0; i <= level; ++i) {
+      assert(node_data_on_root_path[level]._desc.IsValid());
+      assert(node_data_on_root_path[level]._user.IsValid());
     }
 
     // OK, we have all the descriptions. Now if we haven't done so yet (which
@@ -219,7 +233,7 @@ BCP_tm_node_to_send::send()
 	    assert (var_set._storage == BCP_Storage_Explicit);
 	}
 	BCP_obj_set_change node_var_set = var_set;
-	node_var_set.update(node->_data._desc->var_change);
+	node_var_set.update(node_data_on_root_path[level]._desc->var_change);
 	BCP_vec<int>& var_inds = node_var_set._new_objs;
 	const int varnum = var_inds.size();
 	vars.reserve(varnum);
@@ -264,7 +278,7 @@ TM: var in node description is neither local nor remote.\n");
 	    assert (cut_set._storage == BCP_Storage_Explicit);
 	}
 	BCP_obj_set_change node_cut_set = cut_set;
-	node_cut_set.update(node->_data._desc->cut_change);
+	node_cut_set.update(node_data_on_root_path[level]._desc->cut_change);
 	BCP_vec<int>& cut_inds = node_cut_set._new_objs;
 	const int cutnum = cut_inds.size();
 	cuts.reserve(cutnum);
@@ -383,10 +397,12 @@ TM: cut in node description is neither local nor remote.\n");
 	p.pack_cut(*cuts[i]);
     }
 
-    const bool has_data = node->_data._user.IsValid();
-    buf.pack(has_data);
-    if (has_data)
-	p.packer->pack_user_data(node->_data._user.GetRawPtr(), buf);
+    const BCP_user_data* ud = node_data_on_root_path[level]._user.GetRawPtr();
+    bool has_user_data = ud != 0;
+    buf.pack(has_user_data);
+    if (has_user_data) {
+	p.packer->pack_user_data(ud, buf);
+    }
 
     p.msg_env->send(node->lp, msgtag, buf);
 

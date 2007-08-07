@@ -47,9 +47,9 @@ BCP_print_brobj_stat(BCP_lp_prob& p,
     const BCP_lp_branching_object* can = best_presolved->candidate();
 
     if (p.param(BCP_lp_par::LpVerb_StrongBranchResult)) {
-	printf("\nLP:   SB selected candidate %i out of %i.\n\n",
-	       selected, candidate_num);
-	printf("LP:   The selected object is:");
+	p.user->print(true, "\nLP:   SB selected candidate %i out of %i.\n\n",
+		      selected, candidate_num);
+	p.user->print(true, "LP:   The selected object is:");
 	if (p.param(BCP_lp_par::LpVerb_StrongBranchPositions)) {
 	    can->print_branching_info(orig_varnum,
 				      p.lp_result->x(),
@@ -58,10 +58,11 @@ BCP_print_brobj_stat(BCP_lp_prob& p,
 	for (int i = 0; i < can->child_num; ++i) {
 	    const BCP_lp_result& res = best_presolved->lpres(i);
 	    const double lb = res.objval();
-	    printf((lb > BCP_DBL_MAX/10 ? " [%e,%i,%i]" : " [%.4f,%i,%i]"),
-		   lb, res.termcode(), res.iternum());
+	    p.user->print(true,
+			  (lb>BCP_DBL_MAX/10 ? " [%e,%i,%i]":" [%.4f,%i,%i]"),
+			  lb, res.termcode(), res.iternum());
 	}
-	printf("\n");
+	p.user->print(true, "\n");
     }
     // Print some statistics
     if (p.param(BCP_lp_par::LpVerb_ChildrenInfo)){
@@ -72,7 +73,7 @@ BCP_print_brobj_stat(BCP_lp_prob& p,
 	    case BCP_ReturnChild:
 		break;
 	    case BCP_FathomChild:
-		printf("LP:   Child %i is fathomed.\n", i);
+		p.user->print(true, "LP:   Child %i is fathomed.\n", i);
 		break;
 	    }
     }
@@ -302,9 +303,8 @@ BCP_lp_perform_strong_branching(BCP_lp_prob& p,
 			p.param(BCP_lp_par::MaxPresolveIter));
     }
 
-    if (p.param(BCP_lp_par::LpVerb_StrongBranchResult)) {
-	printf("\nLP: Starting strong branching:\n\n");
-    }
+    p.user->print(p.param(BCP_lp_par::LpVerb_StrongBranchResult),
+		  "\nLP: Starting strong branching:\n\n");
 
     const OsiBabSolver* babSolver = p.user->getOsiBabSolver();
 
@@ -341,7 +341,7 @@ BCP_lp_perform_strong_branching(BCP_lp_prob& p,
 				colbounds.begin());
 
 	if (p.param(BCP_lp_par::LpVerb_PresolveResult)) {
-	    printf("LP:   Presolving:");
+	    p.user->print(true, "LP:   Presolving:");
 	    if (p.param(BCP_lp_par::LpVerb_PresolvePositions)) {
 		can->print_branching_info(orig_colnum,
 					  p.lp_result->x(),
@@ -350,10 +350,11 @@ BCP_lp_perform_strong_branching(BCP_lp_prob& p,
 	    for (i = 0; i < can->child_num; ++i) {
 		const BCP_lp_result& res = tmp_presolved->lpres(i);
 		const double lb = res.objval();
-		printf((lb > BCP_DBL_MAX/10 ? " [%e,%i,%i]" : " [%.4f,%i,%i]"),
-		       lb, res.termcode(), res.iternum());
+		p.user->print(true,
+			      (lb>BCP_DBL_MAX/10 ? " [%e,%i,%i]":" [%.4f,%i,%i]"),
+			      lb, res.termcode(), res.iternum());
 	    }
-	    printf("\n");
+	    p.user->print(true, "\n");
 	}
 	// Compare the current one with the best so far
 	switch (p.user->compare_branching_candidates(tmp_presolved,
@@ -443,7 +444,7 @@ BCP_lp_select_branching_object(BCP_lp_prob& p,
 		    return BCP_DoNotBranch; // YES...
 		}
 	    }
-	    printf("\
+	    p.user->print(true, "\
 LP: ***WARNING*** : BCP_DoNotBranch, but nothing can be added! ***WARNING***\n");
 	    //throw BCP_fatal_error("BCP_DoNotBranch, but nothing can be added!\n");
 	}
@@ -467,7 +468,7 @@ BCP_lp_select_branching_object: branching forced but no candidates selected\n");
     int selected = 0;
     if (p.param(BCP_lp_par::MaxPresolveIter) < 0) {
 	if (candidates.size() > 1) {
-	    printf("\
+	    p.user->print(true, "\
 LP: Strong branching is disabled but more than one candidate is selected.\n\
     Deleting all candidates but the first.\n");
 	    // delete all other candidates
@@ -500,10 +501,9 @@ LP: Strong branching is disabled but more than one candidate is selected.\n\
 		needed_overriding = true;
 	    }
 	}
-	if (needed_overriding &&
-	    p.param(BCP_lp_par::LpVerb_StrongBranchResult)){
-	    printf("LP:   Every child is returned because of not diving.\n");
-	}
+	p.user->print(needed_overriding &&
+		      p.param(BCP_lp_par::LpVerb_StrongBranchResult),
+		      "LP:  Every child is returned because of not diving.\n");
     }
 
     // We don't know what is fathomable! strong branching may give an approx
@@ -640,9 +640,9 @@ BCP_lp_branch(BCP_lp_prob& p)
     if (keep < 0){ // if no diving then return quickly
 	if (p.param(BCP_lp_par::LpVerb_FathomInfo)) {
 	    if (best_presolved->is_pruned())
-		printf("LP:   Forcibly Pruning node\n");
+		p.user->print(true, "LP:   Forcibly Pruning node\n");
 	    else
-		printf("LP:   Returned children to TM. Waiting for new node.\n");
+		p.user->print(true, "LP:   Returned children to TM. Waiting for new node.\n");
 	}
 	delete best_presolved->candidate();
 	delete best_presolved;

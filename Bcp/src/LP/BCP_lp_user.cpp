@@ -1,6 +1,8 @@
 // Copyright (C) 2000, International Business Machines
 // Corporation and others.  All Rights Reserved.
 #include <cmath>
+#include <cstdarg>
+#include <cstdio>
 
 #include "CoinHelperFunctions.hpp"
 #include "CoinTime.hpp"
@@ -28,6 +30,17 @@ int BCP_lp_user::current_level() const     { return p->node->level; }
 int BCP_lp_user::current_index() const     { return p->node->index; }
 int BCP_lp_user::current_iteration() const { return p->node->iteration_count; }
 BCP_user_data* BCP_lp_user::get_user_data() { return p->node->user_data; }
+
+void BCP_lp_user::print(const bool ifprint, const char * format, ...) const {
+  if (ifprint) {
+    static bool serial = get_param(BCP_lp_par::MessagePassingIsSerial);
+    if (! serial) printf("[%i] ", p->get_process_id());
+    va_list valist;
+    va_start(valist, format);
+    vprintf(format, valist);
+    va_end(valist);
+  }
+}
 
 //#############################################################################
 // Informational methods for the user
@@ -135,9 +148,8 @@ BCP_lp_user::select_fractions(const double * first, const double * last,
 void
 BCP_lp_user::unpack_module_data(BCP_buffer & buf)
 {
-    if (p->param(BCP_lp_par::ReportWhenDefaultIsExecuted)) {
-	printf(" LP: Default unpack_module_data() executed.\n");
-    }
+  print(p->param(BCP_lp_par::ReportWhenDefaultIsExecuted),
+	"LP: Default unpack_module_data() executed.\n");
 }
 
 //#############################################################################
@@ -203,9 +215,8 @@ BCP_lp_user::initialize_new_search_tree_node(const BCP_vec<BCP_var*>& vars,
 					     BCP_vec<int>& cut_changed_pos,
 					     BCP_vec<double>& cut_new_bd)
 {
-    if (p->param(BCP_lp_par::ReportWhenDefaultIsExecuted)) {
-	printf(" LP: Default initialize_new_search_tree_node() executed.\n");
-    }
+  print(p->param(BCP_lp_par::ReportWhenDefaultIsExecuted),
+	"LP: Default initialize_new_search_tree_node() executed.\n");
 }
 
 //#############################################################################
@@ -214,9 +225,8 @@ void
 BCP_lp_user::modify_lp_parameters(OsiSolverInterface* lp,
 				  bool in_strong_branching)
 {
-    if (p->param(BCP_lp_par::ReportWhenDefaultIsExecuted)) {
-	printf(" LP: Default prepare_for_optimization() executed.\n");
-    }
+  print(p->param(BCP_lp_par::ReportWhenDefaultIsExecuted),
+	"LP: Default prepare_for_optimization() executed.\n");
 }
 
 //#############################################################################
@@ -275,9 +285,8 @@ BCP_lp_user::test_feasibility(const BCP_lp_result& lpres,
 			      const BCP_vec<BCP_var*>& vars,
 			      const BCP_vec<BCP_cut*>& cuts)
 {
-    if (p->param(BCP_lp_par::ReportWhenDefaultIsExecuted)) {
-	printf(" LP: Default test_feasibility() executed.\n");
-    }
+    print(p->param(BCP_lp_par::ReportWhenDefaultIsExecuted),
+	  "LP: Default test_feasibility() executed.\n");
 
     const double etol = p->param(BCP_lp_par::IntegerTolerance);
     BCP_feasibility_test test =
@@ -302,9 +311,9 @@ BCP_lp_user::test_binary(const BCP_lp_result& lpres,
 			 const BCP_vec<BCP_var*>& vars,
 			 const double etol) const
 {
-    if (p->param(BCP_lp_par::ReportWhenDefaultIsExecuted)) {
-	printf(" LP: Default test_binary() executed.\n");
-    }
+    print(p->param(BCP_lp_par::ReportWhenDefaultIsExecuted),
+	  "LP: Default test_binary() executed.\n");
+
     // Do anything only if the termination code is sensible
     const int tc = lpres.termcode();
     if (! (tc & BCP_ProvenOptimal))
@@ -339,9 +348,9 @@ BCP_lp_user::test_integral(const BCP_lp_result& lpres,
 			   const BCP_vec<BCP_var*>& vars,
 			   const double etol) const
 {
-    if (p->param(BCP_lp_par::ReportWhenDefaultIsExecuted)) {
-	printf(" LP: Default test_integral() executed.\n");
-    }
+    print(p->param(BCP_lp_par::ReportWhenDefaultIsExecuted),
+	  "LP: Default test_integral() executed.\n");
+
     // Do anything only if the termination code is sensible
     const int tc = lpres.termcode();
     if (! (tc & BCP_ProvenOptimal))
@@ -378,9 +387,9 @@ BCP_lp_user::test_full(const BCP_lp_result& lpres,
 		       const BCP_vec<BCP_var*>& vars,
 		       const double etol) const
 {
-    if (p->param(BCP_lp_par::ReportWhenDefaultIsExecuted)) {
-	printf(" LP: Default test_full() executed.\n");
-    }
+    print(p->param(BCP_lp_par::ReportWhenDefaultIsExecuted),
+	  "LP: Default test_full() executed.\n");
+
     // Do anything only if the termination code is sensible
     const int tc = lpres.termcode();
     if (! (tc & BCP_ProvenOptimal))
@@ -435,9 +444,8 @@ BCP_lp_user::generate_heuristic_solution(const BCP_lp_result& lpres,
 					 const BCP_vec<BCP_var*>& vars,
 					 const BCP_vec<BCP_cut*>& cuts)
 {
-    if (p->param(BCP_lp_par::ReportWhenDefaultIsExecuted)) {
-	printf(" LP: Default generate_heuristic_solution() executed.\n");
-    }
+    print(p->param(BCP_lp_par::ReportWhenDefaultIsExecuted),
+	  "LP: Default generate_heuristic_solution() executed.\n");
     return NULL;
 }
 //#############################################################################
@@ -445,9 +453,8 @@ BCP_lp_user::generate_heuristic_solution(const BCP_lp_result& lpres,
 void
 BCP_lp_user::pack_feasible_solution(BCP_buffer& buf, const BCP_solution* sol)
 {
-    if (p->param(BCP_lp_par::ReportWhenDefaultIsExecuted)) {
-	printf(" LP: Default pack_feasible_solution() executed.\n");
-    }
+    print(p->param(BCP_lp_par::ReportWhenDefaultIsExecuted),
+	  "LP: Default pack_feasible_solution() executed.\n");
 
     const BCP_solution_generic* gensol =
 	dynamic_cast<const BCP_solution_generic*>(sol);
@@ -470,9 +477,8 @@ BCP_lp_user::pack_primal_solution(BCP_buffer& buf,
 				  const BCP_vec<BCP_var*>& vars,
 				  const BCP_vec<BCP_cut*>& cuts)
 {
-    if (p->param(BCP_lp_par::ReportWhenDefaultIsExecuted)) {
-	printf(" LP: Default pack_for_cg() executed.\n");
-    }
+    print(p->param(BCP_lp_par::ReportWhenDefaultIsExecuted),
+	  "LP: Default pack_for_cg() executed.\n");
 
     BCP_vec<int> coll;
 
@@ -521,9 +527,8 @@ BCP_lp_user::pack_dual_solution(BCP_buffer& buf,
 				const BCP_vec<BCP_var*>& vars,
 				const BCP_vec<BCP_cut*>& cuts)
 {
-    if (p->param(BCP_lp_par::ReportWhenDefaultIsExecuted)) {
-	printf(" LP: Default pack_for_vg() executed.\n");
-    }
+    print(p->param(BCP_lp_par::ReportWhenDefaultIsExecuted),
+	  "LP: Default pack_for_vg() executed.\n");
 
     BCP_vec<int> coll;
 
@@ -567,23 +572,22 @@ BCP_lp_user::display_lp_solution(const BCP_lp_result& lpres,
 				 const BCP_vec<BCP_cut*>& cuts,
 				 const bool final_lp_solution)
 {
-    if (p->param(BCP_lp_par::ReportWhenDefaultIsExecuted)) {
-	printf(" LP: Default display_lp_solution() executed.\n");
-    }
+    print(p->param(BCP_lp_par::ReportWhenDefaultIsExecuted),
+	  "LP: Default display_lp_solution() executed.\n");
 
     if (final_lp_solution) {
 	if (! p->param(BCP_lp_par::LpVerb_FinalRelaxedSolution))
 	    return;
-	printf("  LP : Displaying LP solution (FinalRelaxedSolution) :\n");
+	print(true,"  LP : Displaying LP solution (FinalRelaxedSolution) :\n");
     } else {
 	if (! p->param(BCP_lp_par::LpVerb_RelaxedSolution))
 	    return;
-	printf("  LP : Displaying LP solution (RelaxedSolution) :\n");
+	print(true,"  LP : Displaying LP solution (RelaxedSolution) :\n");
     }
 
     const double ietol = p->param(BCP_lp_par::IntegerTolerance);
 
-    printf("  LP : Displaying solution :\n");
+    print(true, "  LP : Displaying solution :\n");
     BCP_vec<int> coll;
     const double * x = lpres.x();
     select_nonzeros(x, x+vars.size(), ietol, coll);
@@ -604,9 +608,8 @@ BCP_lp_user::restore_feasibility(const BCP_lp_result& lpres,
 				 BCP_vec<BCP_var*>& vars_to_add,
 				 BCP_vec<BCP_col*>& cols_to_add)
 {
-    if (p->param(BCP_lp_par::ReportWhenDefaultIsExecuted)) {
-	printf(" LP: Default restore_feasibility() executed.\n");
-    }
+    print(p->param(BCP_lp_par::ReportWhenDefaultIsExecuted),
+	  "LP: Default restore_feasibility() executed.\n");
 }
 
 //#############################################################################
@@ -621,9 +624,8 @@ BCP_lp_user::cuts_to_rows(const BCP_vec<BCP_var*>& vars, // on what to expand
 			  const BCP_lp_result& lpres,
 			  BCP_object_origin origin, bool allow_multiple)
 {
-    if (p->param(BCP_lp_par::ReportWhenDefaultIsExecuted)) {
-	printf(" LP: Default cuts_to_rows() executed.\n");
-    }
+    print(p->param(BCP_lp_par::ReportWhenDefaultIsExecuted),
+	  "LP: Default cuts_to_rows() executed.\n");
     throw BCP_fatal_error("cuts_to_rows() missing.\n");
 }
 //-----------------------------------------------------------------------------
@@ -636,9 +638,8 @@ BCP_lp_user::vars_to_cols(const BCP_vec<BCP_cut*>& cuts, // on what to expand
 			  const BCP_lp_result& lpres,
 			  BCP_object_origin origin, bool allow_multiple)
 {
-    if (p->param(BCP_lp_par::ReportWhenDefaultIsExecuted)) {
-	printf(" LP: Default vars_to_cols() executed.\n");
-    }
+    print(p->param(BCP_lp_par::ReportWhenDefaultIsExecuted),
+	"LP: Default vars_to_cols() executed.\n");
     throw BCP_fatal_error("vars_to_cols() missing.\n");
 }
 
@@ -651,9 +652,8 @@ BCP_lp_user::generate_cuts_in_lp(const BCP_lp_result& lpres,
 				 BCP_vec<BCP_cut*>& new_cuts,
 				 BCP_vec<BCP_row*>& new_rows)
 {
-    if (p->param(BCP_lp_par::ReportWhenDefaultIsExecuted)) {
-	printf(" LP: Default generate_cuts_in_lp() executed.\n");
-    }
+    print(p->param(BCP_lp_par::ReportWhenDefaultIsExecuted),
+	  "LP: Default generate_cuts_in_lp() executed.\n");
 }
 //-----------------------------------------------------------------------------
 void
@@ -664,26 +664,23 @@ BCP_lp_user::generate_vars_in_lp(const BCP_lp_result& lpres,
 				 BCP_vec<BCP_var*>& new_vars,
 				 BCP_vec<BCP_col*>& new_cols)
 {
-    if (p->param(BCP_lp_par::ReportWhenDefaultIsExecuted)) {
-	printf(" LP: Default generate_vars_in_lp() executed.\n");
-    }
+    print(p->param(BCP_lp_par::ReportWhenDefaultIsExecuted),
+	  "LP: Default generate_vars_in_lp() executed.\n");
 }
 //-----------------------------------------------------------------------------
 BCP_object_compare_result
 BCP_lp_user::compare_cuts(const BCP_cut* c0, const BCP_cut* c1)
 {
-    if (p->param(BCP_lp_par::ReportWhenDefaultIsExecuted)) {
-	printf(" LP: Default compare_cuts() executed.\n");
-    }
+    print(p->param(BCP_lp_par::ReportWhenDefaultIsExecuted),
+	  "LP: Default compare_cuts() executed.\n");
     return BCP_DifferentObjs;
 }
 //-----------------------------------------------------------------------------
 BCP_object_compare_result
 BCP_lp_user::compare_vars(const BCP_var* v0, const BCP_var* v1)
 {
-    if (p->param(BCP_lp_par::ReportWhenDefaultIsExecuted)) {
-	printf(" LP: Default compare_vars() executed.\n");
-    }
+    print(p->param(BCP_lp_par::ReportWhenDefaultIsExecuted),
+	  "LP: Default compare_vars() executed.\n");
     return BCP_DifferentObjs;
 }
 
@@ -748,9 +745,8 @@ BCP_lp_user::logical_fixing(const BCP_lp_result& lpres,
 			    BCP_vec<int>& changed_pos,
 			    BCP_vec<double>& new_bd)
 {
-    if (p->param(BCP_lp_par::ReportWhenDefaultIsExecuted)) {
-	printf(" LP: Default logical_fixing() executed.\n");
-    }
+    print(p->param(BCP_lp_par::ReportWhenDefaultIsExecuted),
+	  "LP: Default logical_fixing() executed.\n");
 }
 
 //#############################################################################
@@ -915,9 +911,8 @@ select_branching_candidates(const BCP_lp_result& lpres,
 			    BCP_vec<BCP_lp_branching_object*>& cands,
 			    bool force_branch)
 {
-    if (p->param(BCP_lp_par::ReportWhenDefaultIsExecuted)) {
-	printf(" LP: Default select_branching_candidates() executed.\n");
-    }
+    print(p->param(BCP_lp_par::ReportWhenDefaultIsExecuted),
+	  "LP: Default select_branching_candidates() executed.\n");
 
     // *THINK* : this branching object selection is very primitive
     // *THINK* : should check for tail-off, could check for branching cuts, etc
@@ -1080,10 +1075,8 @@ BCP_branching_object_relation BCP_lp_user::
 compare_branching_candidates(BCP_presolved_lp_brobj* new_presolved,
 			     BCP_presolved_lp_brobj* old_presolved)
 {
-    if (p->param(BCP_lp_par::ReportWhenDefaultIsExecuted)) {
-	printf("\
- LP: Default compare_presolved_branching_objects() executed.\n");
-    }
+    print(p->param(BCP_lp_par::ReportWhenDefaultIsExecuted),
+	  "LP: Default compare_presolved_branching_objects() executed.\n");
 
     // change the objvals according to the termcodes (in order to be able to
     // make decisions based on objval, no matter what the termcode is).
@@ -1219,9 +1212,8 @@ Unknown branching object comparison rule.\n");
 void
 BCP_lp_user::set_actions_for_children(BCP_presolved_lp_brobj* best)
 {
-    if (p->param(BCP_lp_par::ReportWhenDefaultIsExecuted)) {
-	printf(" LP: Default set_actions_for_children() executed.\n");
-    }
+    print(p->param(BCP_lp_par::ReportWhenDefaultIsExecuted),
+	  "LP: Default set_actions_for_children() executed.\n");
 
     // by default every action is set to BCP_ReturnChild
     if (p->node->dive == BCP_DoNotDive)
@@ -1273,8 +1265,8 @@ BCP_lp_user::set_user_data_for_children(BCP_presolved_lp_brobj* best,
 {
     using_deprecated_set_user_data_for_children = true;
     set_user_data_for_children(best);
-    if (using_deprecated_set_user_data_for_children) {
-	printf("\
+    print(using_deprecated_set_user_data_for_children,
+	  "\
 *** WARNING *** WARNING *** WARNING *** WARNING *** WARNING *** WARNING ***\n\
 You have overridden\n\
   BCP_lp_user::set_user_data_for_children(BCP_presolved_lp_brobj* best)\n\
@@ -1285,7 +1277,6 @@ instead. The old version will go away, your code will still compile, but it\n\
 will not do what you intend it to be doing.\n\
 *** WARNING *** WARNING *** WARNING *** WARNING *** WARNING *** WARNING ***\n"\
 	       );
-    }
 }
 
 //#############################################################################
@@ -1294,9 +1285,8 @@ void
 BCP_lp_user::set_user_data_for_children(BCP_presolved_lp_brobj* best)
 {
     using_deprecated_set_user_data_for_children = false;
-    if (p->param(BCP_lp_par::ReportWhenDefaultIsExecuted)) {
-	printf(" LP: Default set_user_data_for_children() executed.\n");
-    }
+    print(p->param(BCP_lp_par::ReportWhenDefaultIsExecuted),
+	  "LP: Default set_user_data_for_children() executed.\n");
 }
 
 //#############################################################################
@@ -1305,9 +1295,8 @@ void
 BCP_lp_user::purge_slack_pool(const BCP_vec<BCP_cut*>& slack_pool,
 			      BCP_vec<int>& to_be_purged)
 {
-    if (p->param(BCP_lp_par::ReportWhenDefaultIsExecuted)) {
-	printf(" LP: Default purge_slack_pool() executed.\n");
-    }
+    print(p->param(BCP_lp_par::ReportWhenDefaultIsExecuted),
+	  "LP: Default purge_slack_pool() executed.\n");
 
     switch (p->param(BCP_lp_par::SlackCutDiscardingStrategy)) {
     case BCP_DiscardSlackCutsAtNewNode:

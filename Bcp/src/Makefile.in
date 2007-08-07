@@ -75,7 +75,8 @@ am_libBcp_la_OBJECTS = BCP_cg_user.lo BCP_cg_param.lo BCP_cg.lo \
 	BCP_lp.lo BCP_lp_main.lo BCP_lp_pool.lo BCP_lp_param.lo \
 	BCP_tm_trimming.lo BCP_tm_msg_node_send.lo \
 	BCP_tm_msg_node_rec.lo BCP_tm_param.lo BCP_tm_user.lo \
-	BCP_tm_commandline.lo BCP_tm_node.lo BCP_tm_msgproc.lo \
+	BCP_tm_commandline.lo BCP_tm_node.lo \
+	BCP_tm_nodes_to_storage.lo BCP_tm_msgproc.lo \
 	BCP_tm_functions.lo BCP_tm_main.lo BCP_tm_statistics.lo \
 	BCP_tm.lo BCP_tmstorage.lo BCP_vg_param.lo BCP_vg_user.lo \
 	BCP_vg_main.lo BCP_vg.lo BCP_solution.lo BCP_node_change.lo \
@@ -314,6 +315,7 @@ libBcp_la_SOURCES = \
 	TM/BCP_tm_user.cpp \
 	TM/BCP_tm_commandline.cpp \
 	TM/BCP_tm_node.cpp \
+	TM/BCP_tm_nodes_to_storage.cpp \
 	TM/BCP_tm_msgproc.cpp \
 	TM/BCP_tm_functions.cpp \
 	TM/BCP_tm_main.cpp \
@@ -638,6 +640,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/BCP_tm_msg_node_send.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/BCP_tm_msgproc.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/BCP_tm_node.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/BCP_tm_nodes_to_storage.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/BCP_tm_param.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/BCP_tm_statistics.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/BCP_tm_trimming.Plo@am__quote@
@@ -895,6 +898,13 @@ BCP_tm_node.lo: TM/BCP_tm_node.cpp
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='TM/BCP_tm_node.cpp' object='BCP_tm_node.lo' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(LIBTOOL) --tag=CXX --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o BCP_tm_node.lo `test -f 'TM/BCP_tm_node.cpp' || echo '$(srcdir)/'`TM/BCP_tm_node.cpp
+
+BCP_tm_nodes_to_storage.lo: TM/BCP_tm_nodes_to_storage.cpp
+@am__fastdepCXX_TRUE@	if $(LIBTOOL) --tag=CXX --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT BCP_tm_nodes_to_storage.lo -MD -MP -MF "$(DEPDIR)/BCP_tm_nodes_to_storage.Tpo" -c -o BCP_tm_nodes_to_storage.lo `test -f 'TM/BCP_tm_nodes_to_storage.cpp' || echo '$(srcdir)/'`TM/BCP_tm_nodes_to_storage.cpp; \
+@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/BCP_tm_nodes_to_storage.Tpo" "$(DEPDIR)/BCP_tm_nodes_to_storage.Plo"; else rm -f "$(DEPDIR)/BCP_tm_nodes_to_storage.Tpo"; exit 1; fi
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='TM/BCP_tm_nodes_to_storage.cpp' object='BCP_tm_nodes_to_storage.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(LIBTOOL) --tag=CXX --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o BCP_tm_nodes_to_storage.lo `test -f 'TM/BCP_tm_nodes_to_storage.cpp' || echo '$(srcdir)/'`TM/BCP_tm_nodes_to_storage.cpp
 
 BCP_tm_msgproc.lo: TM/BCP_tm_msgproc.cpp
 @am__fastdepCXX_TRUE@	if $(LIBTOOL) --tag=CXX --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT BCP_tm_msgproc.lo -MD -MP -MF "$(DEPDIR)/BCP_tm_msgproc.Tpo" -c -o BCP_tm_msgproc.lo `test -f 'TM/BCP_tm_msgproc.cpp' || echo '$(srcdir)/'`TM/BCP_tm_msgproc.cpp; \

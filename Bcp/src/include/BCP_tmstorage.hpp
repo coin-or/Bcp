@@ -11,15 +11,14 @@
 #include "BCP_parameters.hpp"
 #include "BCP_process.hpp"
 #include "BCP_USER.hpp"
+#include "BCP_problem_core.hpp"
 
 //#############################################################################
 
 class BCP_var_algo;
 class BCP_cut_algo;
-class BCP_problem_core;
 
 class BCP_node_change;
-class BCP_User_data;
 
 //#############################################################################
 
@@ -36,6 +35,12 @@ struct BCP_ts_par {
     };
 
     enum int_params {
+        /** The maximum size of the memory heap the TS can use. The amount of
+	    free memory the TS indicates towards the TM uses this value. If
+	    positive, it's the number of megabytes. 0 indicates the TS should
+	    attempt to find this out. -1 indicates that the TS can use as much
+	    memory as it wants. Default: 0. */
+        MaxHeapSize,
 	NiceLevel,
 	end_of_int_params
     };
@@ -106,7 +111,7 @@ public:
 	BCP_process(my_id, parent),
 	user(0),
 	msg_env(0),
-	core(0) {}
+	core(new BCP_problem_core) {}
     /** */
     virtual ~BCP_ts_prob();
 

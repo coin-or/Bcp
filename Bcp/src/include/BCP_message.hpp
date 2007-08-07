@@ -11,127 +11,11 @@
 #include "BCP_message_tag.hpp"
 #include "BCP_vector.hpp"
 
-
 //#############################################################################
 
 class BCP_buffer;
+class BCP_proc_array;
 class USER_initialize;
-
-//#############################################################################
-
-/** This class holds an array of processes.  */
-
-class BCP_proc_array {
-private:
-    /**@name Disabled methods */
-    /*@{*/
-    /** The default constructor is declared but not defined to disable it. */
-    BCP_proc_array(const BCP_proc_array&);
-    /** The assignment operator is declared but not defined to disable it. */
-    BCP_proc_array& operator=(const BCP_proc_array&);
-    /*@}*/
-private:
-    /**@name Data members */
-    /*@{*/
-    /** Vector of all processes. */
-    BCP_vec<int> _procs;
-    /** Vector of free processes (subset of all processes). */
-    BCP_vec<int> _free_procs;
-    /*@}*/
-public:
-    /**@name Constructor and destructor */
-    /*@{*/
-    /** The default constructor creates an empty process array */
-    BCP_proc_array() : _procs(), _free_procs() {}
-    /** The destructor needs to do nothing */
-    ~BCP_proc_array() {}
-    /*@}*/
-
-    /**@name Query methods */
-    /*@{*/
-    /** Determine if the process indexed by the argument is free or not. */
-    inline bool is_free_proc(const int index) {
-	const int proc = _procs[index];
-	for (int i = _free_procs.size() - 1; i >= 0; --i)
-	    if (_free_procs[i] == proc)
-		return true;
-	return false;
-    }
-    /** Return the index of the process given by its process id in the
-	vector of all processes. */
-    inline int index_of_proc(const int proc) {
-	int i;
-	for (i = _procs.size() - 1; i >= 0; --i)
-	    if (_procs[i] == proc)
-		break;
-	return i;
-    }
-    /** Return the vector of all processes (const version). */
-    inline const BCP_vec<int>& procs() const { return _procs; }
-    /** Return the id of the i-th process. */
-    inline int process(const int i) const { return _procs[i]; }
-    /** Return the total number of processes. */
-    inline int size() const { return _procs.size(); }
-    /** Return the number of free processes. */
-    inline int free_num() const { return _free_procs.size(); }
-    /** Return the number of busy (not free) processes. */
-    inline int busy_num() const { return _procs.size() - _free_procs.size(); }
-    /** Get the process id of a free process. Return 0 if there are none. */
-    int get_free_proc() {
-	if (_free_procs.size() > 0) {
-	    int proc = _free_procs.back();
-	    _free_procs.pop_back();
-	    return proc;
-	}
-	return 0;
-    }
-    /*@}*/
-
-    /**@name Modifying methods */
-    /*@{*/
-    /** Purge all process ids from the process array. */
-    inline void clear() {
-	_procs.clear();
-	_free_procs.clear();
-    }
-    /** Append a process id to the end of the vector of all processes and mark
-	it as free. */
-   inline void add_proc(int proc_id) {
-       _procs.push_back(proc_id);
-       // the new proc is free to begin with
-       _free_procs.push_back(proc_id);
-   }
-    /** Append the processes in <code>[first,last)</code> to the end of
-	the vector of all processes and mark them as free. */
-   inline void add_procs(BCP_vec<int>::const_iterator first,
-			 BCP_vec<int>::const_iterator last) {
-       _procs.insert(_procs.end(), first, last);
-       // the new procs are free to begin with
-       _free_procs.insert(_free_procs.end(), first, last);
-   }
-    /** Delete the process indexed by the argument from the vector of
-	all processes (and also from the vector of free processes if
-	applicable) */
-    inline void delete_proc(const int index) { 
-	const int proc = _procs[index]; 
-	int i; 
-	for (i = _free_procs.size() - 1; i >= 0; --i)
-	    if (_free_procs[i] == proc)
-		break;
-	if (i >= 0)
-	    _free_procs.erase(_free_procs.entry(i));
-	_procs.erase(_procs.entry(index));
-    }
-
-    // *FIXME* check if the process is in _procs! 
-    /** Append the process to the end of the vector of free processes.
-	The process to be set free must already be in the vector of all
-	processes. */
-    void set_proc_free(int proc) {
-	_free_procs.push_back(proc);
-    }
-    /*@}*/
-};
 
 //#############################################################################
 
@@ -283,6 +167,12 @@ public:
 					    const bool debug) = 0;
     /*@}*/
   
+    /**@name Additional function for MPI interface */
+    /*@{*/
+    /**Return the number of processes. For non-MPI this just returns 0.*/
+    virtual int num_procs() { return 0; }
+    /*@}*/
+
     //    virtual void stop_process(int process) = 0;
     //    virtual void stop_processes(BCP_proc_array& processes) = 0;
 };

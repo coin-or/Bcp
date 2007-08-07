@@ -192,8 +192,9 @@ public:
    }
    ///
    virtual BCP_ts_user * ts_init(BCP_ts_prob& p) {
-      throw BCP_fatal_error("USER_initialize::ts_init() missing.\n");
-      return 0; // to satisfy aCC on HP-UX
+     // If the user does not need any info in the TS for (un)packing
+     // cuts/vars/user_data, then a NULL is fine
+      return 0;
    }
    ///
    virtual BCP_lp_user * lp_init(BCP_lp_prob& p) {

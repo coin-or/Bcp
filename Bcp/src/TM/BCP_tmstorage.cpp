@@ -16,6 +16,8 @@
 
 using std::make_pair;
 
+#define TS_MAX_HEAP_SIZE p.par.entry(BCP_ts_par::MaxHeapSize)
+
 //#############################################################################
 
 template <>
@@ -27,6 +29,9 @@ void BCP_parameter_set<BCP_ts_par>::create_keyword_list()
     keys.push_back(make_pair(BCP_string("BCP_LogFileName"),
 			     BCP_parameter(BCP_StringPar, 
 					   LogFileName)));
+    keys.push_back(make_pair(BCP_string("BCP_MaxHeapSize"),
+			     BCP_parameter(BCP_IntPar,
+					   MaxHeapSize)));
 }
 
 //#############################################################################
@@ -36,27 +41,16 @@ void BCP_parameter_set<BCP_ts_par>::set_default_entries()
 {
     //-------------------------------------------------------------------------
     set_entry(MessagePassingIsSerial, false);
+    set_entry(MaxHeapSize, 0);
     set_entry(NiceLevel, 0);
     set_entry(LogFileName,"");
 }
 
 //#############################################################################
 
-/** This method returns a nonnegative number that indicates how "willing is
-    this process to accept more data to be stored. As a simple implementation
-    it's the number of free megabytes. If it's les than 5, no new data is
-    accepted. */
-
-static inline int freeMemory()
-{
-    return 0;
-}
-
-//#############################################################################
-
 BCP_process_t BCP_tmstorage_main(BCP_message_environment* msg_env,
 				 USER_initialize* user_init,
-				 int my_id, int parent)
+				 int my_id, int parent, double ub)
 {
     // If we ever get here then the environment is parallel
 
@@ -100,7 +94,9 @@ BCP_process_t BCP_tmstorage_main(BCP_message_environment* msg_env,
 
     // now create the user universe
     p.user = user_init->ts_init(p);
-    p.user->setTsProblemPointer(&p);
+    if (p.user) {
+      p.user->setTsProblemPointer(&p);
+    }
     p.packer = user_init->packer_init(p.user);
     p.packer->user_class = p.user;
 
@@ -114,31 +110,37 @@ BCP_process_t BCP_tmstorage_main(BCP_message_environment* msg_env,
     p.msg_buf.clear();
     msg_env->receive(parent /*tree_manager*/,
 		     BCP_Msg_InitialUserInfo, p.msg_buf, -1);
-    p.user->unpack_module_data(p.msg_buf);
+    if (p.user) {
+      p.user->unpack_module_data(p.msg_buf);
+    }
 
     // ok, we're all geared up to generate vars
     // wait for messages and process them...
     BCP_message_tag msgtag;
     BCP_process_t ptype = BCP_ProcessType_EndProcess;
     while (true) {
-	p.msg_buf.clear();
-	msg_env->receive(BCP_AnyProcess, BCP_Msg_AnyMessage, p.msg_buf, 15);
-	msgtag = p.msg_buf.msgtag();
-	if (msgtag == BCP_Msg_NoMessage) {
-	    // test if the TM is still alive
-	    if (! p.msg_env->alive(parent /*tree_manager*/))
-		throw BCP_fatal_error("VG:   The TM has died -- VG exiting\n");
+      p.msg_buf.clear();
+      msg_env->receive(BCP_AnyProcess, BCP_Msg_AnyMessage, p.msg_buf, 15);
+      msgtag = p.msg_buf.msgtag();
+      if (msgtag == BCP_Msg_NoMessage) {
+	// test if the TM is still alive
+	if (! p.msg_env->alive(parent /*tree_manager*/)) {
+	  throw BCP_fatal_error("VG:   The TM has died -- VG exiting\n");
 	}
-	if (msgtag == BCP_Msg_ProcessType) {
-	    p.msg_buf.unpack(ptype);
-	    break;
-	}
-	p.process_message();
-	if (msgtag == BCP_Msg_FinishedBCP)
-	    break;
+	continue;    
+      }
+      if (msgtag == BCP_Msg_ProcessType) {
+	p.msg_buf.unpack(ptype);
+	break;
+      }
+      p.process_message();
+      if (msgtag == BCP_Msg_FinishedBCP) {
+	break;
+      }
     }
-    if (logfile)
-	fclose(logfile);
+    if (logfile) {
+      fclose(logfile);
+    }
 
     return ptype;
 }
@@ -167,28 +169,33 @@ static void process_Msg_NodeList(BCP_ts_prob& p, BCP_buffer& buf)
 {
     // FIXME: This routine depends on writing the corresponding routine in TM
     int index;
-    int num;
-    buf.unpack(num);
-    int i;
-    for (i = 1; i <= num; ++i) {
-	if ((i % 100 == 0) && freeMemory() < 2) {
-	    --i;
-	    break;
+    int num = 0;
+    int fm = 0;
+    bool has_user_data = false;
+
+    while (true) {
+      if (num % 10 == 0) {
+	fm = TS_MAX_HEAP_SIZE - BCP_used_heap();
+	if (fm < 1<<23 /* 8M */ ) {
+	  break;
 	}
-	// OK, receive a description
-	BCP_ts_node_data* data = new BCP_ts_node_data;
-	buf.unpack(index);
-	data->_desc = new BCP_node_change;
-
-	data->_desc->unpack(p.packer, false, buf);
-	data->_user = p.packer->unpack_user_data(buf);
-
-	p.nodes[index] = data;
+      }
+      buf.unpack(index);
+      if (index == -1) {
+	break;
+      }
+      BCP_ts_node_data* data = new BCP_ts_node_data;
+      data->_desc = new BCP_node_change;
+      data->_desc->unpack(p.packer, false, buf);
+      buf.unpack(has_user_data);
+      data->_user = has_user_data ? p.packer->unpack_user_data(buf) : 0;
+      p.nodes[index] = data;
+      ++num;
     }
-    // Now 'i' contains how many node descriptions were successfully received
+    fm = TS_MAX_HEAP_SIZE - BCP_used_heap();
     buf.clear();
-    buf.pack(i);
-    buf.pack(freeMemory());
+    buf.pack(num);
+    buf.pack(fm);
     p.msg_env->send(p.get_parent(), BCP_Msg_NodeListReply, buf);
 }
 
@@ -217,7 +224,11 @@ static void process_Msg_NodeListRequest(BCP_ts_prob& p, BCP_buffer& buf)
 	buf.pack(inds[i]);
 
 	data->_desc->pack(p.packer, false, buf);
-	p.packer->pack_user_data(data->_user, buf);
+	bool has_user_data = data->_user != 0;
+	buf.pack(has_user_data);
+	if (has_user_data) {
+	    p.packer->pack_user_data(data->_user, buf);
+	}
     }
     p.msg_env->send(p.get_parent(), BCP_Msg_NodeListRequestReply, buf);
 }
@@ -240,7 +251,8 @@ static void process_Msg_NodeListDelete(BCP_ts_prob& p, BCP_buffer& buf)
 	p.nodes.erase(n);
     }
     buf.clear();
-    buf.pack(freeMemory());
+    int fm = TS_MAX_HEAP_SIZE - BCP_used_heap();
+    buf.pack(fm);
     p.msg_env->send(p.get_parent(), BCP_Msg_NodeListDeleteReply, buf);
 }
 
@@ -250,22 +262,26 @@ static void process_Msg_CutList(BCP_ts_prob& p, BCP_buffer& buf)
 {
     // FIXME This routine depends on writing the corresponding routine in TM
     int num;
-    buf.unpack(num);
-    int i = 0; 
-    for (i = 1; i <= num; ++i) {
-	if ((i % 1000 == 0) && freeMemory() < 2) {
-	    --i;
-	    break;
+    int index;
+    int fm = 0;
+    while (true) {
+      if (num % 10 == 0) {
+	fm = TS_MAX_HEAP_SIZE - BCP_used_heap();
+	if (fm < 1<<23 /* 8M */ ) {
+	  break;
 	}
-	// OK, receive a description
-	int index;
-	buf.unpack(index);
-	p.cuts[index] = p.packer->unpack_cut_algo(buf);
+      }
+      buf.unpack(index);
+      if (index == -1) {
+	break;
+      }
+      p.cuts[index] = p.packer->unpack_cut_algo(buf);
+      ++num;
     }
-    // Now 'i' contains how many node descriptions were successfully received
+    fm = TS_MAX_HEAP_SIZE - BCP_used_heap();
     buf.clear();
-    buf.pack(i);
-    buf.pack(freeMemory());
+    buf.pack(num);
+    buf.pack(fm);
     p.msg_env->send(p.get_parent(), BCP_Msg_CutListReply, buf);
 }
 
@@ -314,7 +330,8 @@ static void process_Msg_CutListDelete(BCP_ts_prob& p, BCP_buffer& buf)
 	p.cuts.erase(c);
     }
     buf.clear();
-    buf.pack(freeMemory());
+    int fm = TS_MAX_HEAP_SIZE - BCP_used_heap();
+    buf.pack(fm);
     p.msg_env->send(p.get_parent(), BCP_Msg_CutListDeleteReply, buf);
 }
 
@@ -324,22 +341,26 @@ static void process_Msg_VarList(BCP_ts_prob& p, BCP_buffer& buf)
 {
     // FIXME This routine depends on writing the corresponding routine in TM
     int num;
-    buf.unpack(num);
-    int i = 0; 
-    for (i = 1; i <= num; ++i) {
-	if ((i % 1000 == 0) && freeMemory() < 2) {
-	    --i;
-	    break;
+    int index;
+    int fm = 0;
+    while (true) {
+      if (num % 10 == 0) {
+	fm = TS_MAX_HEAP_SIZE - BCP_used_heap();
+	if (fm < 1<<23 /* 8M */ ) {
+	  break;
 	}
-	// OK, receive a description
-	int index;
-	buf.unpack(index);
-	p.vars[index] = p.packer->unpack_var_algo(buf);
+      }
+      buf.unpack(index);
+      if (index == -1) {
+	break;
+      }
+      p.vars[index] = p.packer->unpack_var_algo(buf);
+      ++num;
     }
-    // Now 'i' contains how many node descriptions were successfully received
+    fm = TS_MAX_HEAP_SIZE - BCP_used_heap();
     buf.clear();
-    buf.pack(i);
-    buf.pack(freeMemory());
+    buf.pack(num);
+    buf.pack(fm);
     p.msg_env->send(p.get_parent(), BCP_Msg_VarListReply, buf);
 }
 
@@ -388,7 +409,8 @@ static void process_Msg_VarListDelete(BCP_ts_prob& p, BCP_buffer& buf)
 	p.vars.erase(v);
     }
     buf.clear();
-    buf.pack(freeMemory());
+    int fm = TS_MAX_HEAP_SIZE - BCP_used_heap();
+    buf.pack(fm);
     p.msg_env->send(p.get_parent(), BCP_Msg_VarListDeleteReply, buf);
 }
 
@@ -437,6 +459,10 @@ TS: BCP_ts_prob::process_message(): BCP_Msg_InitialUserInfo arrived\n");
     case BCP_Msg_VarListDelete:
 	process_Msg_VarListDelete(*this, msg_buf);
 	break;
+
+    case BCP_Msg_UpperBound:
+        // A message that's sent' to everyone, but here we don't care...
+        break;
 
     case BCP_Msg_FinishedBCP:
 	break;
