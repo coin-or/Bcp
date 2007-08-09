@@ -1,0 +1,16 @@
+small
+frac2.dat
+frac3.dat
+small.dat
+mcf.par
+include/MCF2_data.hpp
+include/MCF2_init.hpp
+include/MCF2_lp.hpp
+include/MCF2_par.hpp
+include/MCF2_tm.hpp
+include/MCF2_var.hpp
+LP/MCF2_lp.cpp
+TM/MCF2_tm.cpp
+Member/MCF2.cpp
+Member/MCF2_var.cpp
+Member/MCF2_data.cpp

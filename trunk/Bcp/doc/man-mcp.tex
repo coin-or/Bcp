@@ -1,0 +1,243 @@
+In this cahpter, we describe the implementation of a sample
+application---a solver for the maximum cut problem. This application
+is a prototypical example of branch and cut, i.e., BCP with a fixed
+set of variables. No column generation is used in this implementation.
+This simplifies many of the basic tasks.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\section{The Max Cut Problem}
+\label{MCP}
+
+Given an undirected graph $G=(N,E)$ with edge weight function $\omega:
+E \rightarrow {\rm \bf R}$, the Maximum Cut Problem (MCP) is that of
+partitioning the nodes into two subsets in such a way that the total
+weight of the edges in the cut separating the two sets is maximized.
+This is a well-known problem---several branch and cut algorithms for
+dense graphs have been presented in 
+\cite{A:barahona-junger-reinelt,A:desimone-rinaldi}. In the following
+description, we consider complete graphs only. For a complete graph
+undirected graph with $n$ nodes, a linear relaxation of the integer
+programming problem is givem by
+\begin{eqnarray}
+\min \;\; & c^Tx & \nonumber \\
+{\rm s.t.} \;\;\; && \nonumber \\
+& x_{ij}+x_{jk}+x_{ik} \le  2 & \;\;\;\forall (i,j,k) \in N^3 
+\label{tri-0} \\
+& x_{ij}-x_{jk}-x_{ik} \le  0 & \;\;\;\forall (i,j,k) \in N^3 
+\label{tri-1} \\
+& \hskip .51in 0 \le x_{ij} \le 1 & \;\;\;\forall (i,j) \in E \\
+\end{eqnarray}
+Here $x_{ij}$ takes value 1 if the edge $(i,j)$ appears in the cut, and 0
+otherwise. Constraints (\ref{tri-0}) - (\ref{tri-1}) are called the
+{\it triangle inequalities} and they define facets of the cut polytope
+(see \cite{A:barahona-mahjoub:cut-polytope}).
+
+Another set of inequalities, which is a superset of (\ref{tri-0}) -
+(\ref{tri-1}), is the following. Let $C$ be a cycle and $F \subseteq
+C$ with $|F|=2k+1$. Then
+\begin{equation}
+\sum_{e \in F} x_e - \sum_{e \in C\backslash F} x_e \le |F|-1 \label{c}
+\end{equation}
+is a valid inequality. This follows from the fact that the
+intersection of a cycle and a cut has even cardinality. Note, that
+although this set of inequalities include those in (\ref{tri-0}) -
+(\ref{tri-1}), the polytope defined by these is the same, i.e., these
+inequalities can be derived from those in (\ref{tri-0}) -
+(\ref{tri-1}) (see \cite{A:barahona-mahjoub:cut-polytope}).
+
+A polynomial time separation algorithm for this class of inequalities
+has been given in \cite{A:barahona-mahjoub:cut-polytope}. 
+However we use a faster heuristic as
+follows. Let $\bar{x}$ be the fractional solution we want to separate
+and define weights
+\begin{equation}
+w_e = c_e \cdot \max(\bar{x}_e, 1-\bar{x}_e).
+\end{equation}
+Then find a maximum weighted spanning tree $T$ with weights $w$. For
+an edge $e \in T$, if $\bar{x}_e \ge 1-\bar{x}_e$ then the end-nodes
+of $e$ should be on opposite sides of the cut---we give a label ``A''
+to this edge. Otherwise, if $ \bar{x}_e < 1-\bar{x}_e$ then the
+end-nodes should be on the same side of the cut, and we give the label
+``B'' to this edge. Once every edge in $T$ has been labeled we have a
+heuristic cut $K$. For each edge $e \notin T$, we add it to $T$ and
+look at the cycle $C$ that is created. If $e \in K$, we test the
+violation of an inequality (\ref{c}), where the set $F$ is given by
+the A-edges. If $e \notin K$ the set $F$ is given by the A-edges and
+the edge $e$. Although, as we noted above, inequalities (\ref{c}) are
+implied by (\ref{tri-0}) - (\ref{tri-1}), we use (\ref{c}) because our
+simple separation heuristic is faster than enumerating triangles.
+
+\section{Implementation}
+
+Because the size of the problems we can currently solve is small, we
+can easily include all the edge variables explicitly. Hence, we do not
+need to consider dynamiuc column generation. Hence, we do not need to
+concern ourselves with the {\tt BCP\_vg\_user} class or the {\tt
+BCP\_var\_algo} class. To simplify things further, we decided not to
+use a separate cut generator either. This is usually a good approach
+when cut generation is relatively inexpensive. It is also a good idea
+during initial development since it makes debugging much easier.
+Because we are not using a separate cut generator, we do not need to
+consider the {\tt BCP\_cg\_user} class either.
+
+As with virtually any BCP implementation, we will need to consider the
+{\tt BCP\_tm\_user} and {\tt BCP\_lp\_user} classes. Also, because we
+will be dynamically generating algorithmic cuts, we will need to
+derive a new class to represent the cycle cuts (\ref{c}) from the
+class {\tt BCP\_cut\_algo}. Finally, we will need to derive a new
+class for describing the feasible solutions from {\tt BCP\_solution}.
+In the remainder of the section, we provide a high-level description
+of each of these classes. The reader is encouraged to look at the
+source code and the HTML documentation for more detail. See Chapter
+\ref{getting-started} for information on getting and examining the
+source code and documentation.
+
+\subsection{\tt MC\_tm}
+\label{MC-tm}
+
+This is the class derived from the {\tt BCP\_tm\_user} class. This
+class is derived for the purpose of overriding a variety of functions
+that we need to customize. These consist mainly of routiines that pass
+data between the processes during parallel execution and the routines
+for describing the problem core and root node. Below, we list each
+function and describe how it was re-implemented.
+
+\begin{itemize}
+
+        \item {\tt unpack\_feasible\_solution()}: This subroutine
+        exists to unpack the user-defined solution class described in
+        Section \ref{MC-solution}. The corresponding {\tt
+        pack\_feasible\_solution()} routine will be described in
+        Section \ref{MC-lp}. Also, see Section \ref{MC-solution} for a
+        description of how the feasible solutions are represented.
+        
+        \item {\tt pack\_module\_data()}: Here, we are packing the
+        data that needs to be sent to the LP process. This consists of
+        the number of nodes and a list of the edges in the graph. The
+        corresponding {\tt unpack\_module\_data()} routines is
+        described in Section \ref{MC-lp}.
+
+        \item {\tt pack\_cut\_algo()}: Here, we pack the cycle cuts to
+        be sent to the LP solver. The corresponding {\tt
+        unpack\_cut\_algo()} routines is described in Section
+        \ref{MC-lp}.
+
+        \item {\tt unpack\_cut\_algo()}: Here, we unpack the cycle
+        cuts that are received from the LP solver. The corresponding
+        {\tt pack\_cut\_algo()} routines is described in Section
+        \ref{MC-lp}.
+
+        \item {\tt initialize\_core()}: Essentially for convenience
+        and ease of implementation, we place all the variables in the
+        core. This is possible since we are not using column
+        generation, but may not be the most efficient method. None of
+        the cuts are placed in the core since we don't have an
+        inherently important subset that we know should never be
+        removed from the problem.
+
+        \item {\tt create\_root()}: To initialize the root node, we
+        use some heuristics to generate an initial set of cycle cuts.
+        However, as noted before, these are ``extra'' cuts and do not
+        get put into the core. They may be removed later in the
+        calculation. 
+
+        \item {\tt display\_feasible\_solution()}: This routine is
+        used essentially to display the solutions in a more
+        ``user-friendly'' way, instead of simply as a list of variable
+        indices and values. See Section \ref{MC-solution} for a
+        description of how the feasible solutions are represented.
+
+\end{itemize}
+
+\subsection{\tt MC\_lp}
+\label{MC-lp}
+
+This is the class derived from the {\tt BCP\_lp\_user} class. Again, this
+class is derived for the purpose of overriding a variety of functions
+that we need to customize. These consist not only of routiines that pass
+data between the processes, as before, but also routines for
+generating cuts and performing strong branching. Below, we list each
+function and describe how it was re-implemented.
+
+\begin{itemize}
+
+        \item {\tt unpack\_module\_data()}: Here, we unpack the data
+        sent from the TM. This data is stored in a user-defined class
+        called {\tt MC\_problem}.
+
+        \item {\tt pack\_cut\_algo()}: Here, we pack the cycle cuts to
+        be sent to the TM. The cuts are represented as a list of
+        edges---first the edges in the set $F$, then the edges not in
+        $F$. To contruct the corresponding valid inequality, we need
+        only determine which edges variables are present in the
+        relaxation. See the description of {\tt cuts\_to\_rows()} below.
+
+        \item {\tt unpack\_cut\_algo()}: Here, we unpack the cycle
+        cuts that are received from the TM along with the description
+        of a subproblem.
+
+        \item {\tt modify\_lp\_parameters()}: Here, we modify the LP
+        parameters before solution of the relaxation commences.
+
+        \item {\tt test\_feasibility()}: Because integrality of the
+        solution is not enough to imply feasibility, we needed to
+        override this method. If it is found that the solution is
+        integral but not feasible, then cuts proving the infeasibility
+        are easy to derive and are added to the LP relaxation,
+        allowing the solution process to continue.
+
+        \item {\tt pack\_feasible\_solution()}: Here, any feasible
+        solutions that are found are packed and sent to the TM for
+        storage. See Section \ref{MC-solution} for a description of
+        how the feasible solutions are represented.
+
+        \item {\tt cuts\_to\_rows()}: This subroutine generates the
+        rows of the current LP relaxation corresponding to the cuts to
+        be added. For cycle cuts, this consists simply of determining
+        which of the edge variables that have a positive coefficient in
+        the cycle cut, i.e., the variables corresponding to the edges
+        of the corresponding cycle, are active in the current
+        subproblem. For each variable corresponding to an edge that is
+        in the cycle cut and also active in the subproblem, the
+        corresponding matrix coefficient must be added to the
+        row description.
+
+        \item {\tt compare\_cuts()}: This routine simply compares two
+        cuts and determines if they are the same cut. In the case of
+        cycle cuts, this is straightforward.
+
+        \item {\tt generate\_cut\_in\_lp()}: This is the subroutine
+        that generates the cuts to be added to the relaxation. A
+        description of the algorithm for generating the cycle cuts was
+        given in Section \ref{MCP}.
+
+        \item {\tt select\_branching\_candidates}: Here, we select the
+        edges to be branched on. We branch basically on edges that are
+        have high cost and are close to value .5.
+
+\end{itemize}
+
+\subsection{\tt MC\_solution}
+\label{MC-solution}
+
+Although feasible solutions to this problem consist of a set of edges,
+they can be more compactly represented as simply a list of the nodes
+contained in either shore of the cut. This user-defined class is used
+for representing the solutions in this more compact, intuitive
+fashion.
+
+\subsection{\tt MC\_cycle\_cut}
+
+This class was derived from {\tt BCP\_cut\_algo} to contain the
+representation of the cycle cuts (\ref{c}). They are stored simply as
+a list of edges in the cycle. The list is in two parts---first, the
+edges in the set $F$ are listed and then those not in the set $F$. Of
+course, the cardinality of the set $F$ has to be stored as well.
+
+\subsection{Other Classes}
+
+There are a number of other classes that we have defined to hold
+data used during the solution process. Please see the HTML
+documentation and the source code itself for a list of these. 
+

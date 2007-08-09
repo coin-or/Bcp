@@ -1,0 +1,117 @@
+# Copyright (C) 2006 International Business Machines and others.
+# All Rights Reserved.
+# This file is distributed under the Common Public License.
+
+# $Id$
+
+##########################################################################
+#    You can modify this example makefile to fit for your own program.   #
+#    Usually, you only need to change the five CHANGEME entries below.   #
+##########################################################################
+
+#CHANGEME: If you want to compile under Cygwin, uncomment the following
+# line.
+#CYGFLAG = -mno-cygwin
+
+# CHANGEME: add extra definitions here
+USER_DEFINES =
+
+# Possibilities: 
+#                -DHEUR_SOL :      generate heuristic solutions
+#                -DCUSTOM_BRANCH : branch on first non integer variable
+#                -DUSER_DATA :     define data associated with each node
+#
+
+# CHANGEME: This should be the name of your executable
+EXE = bac@EXEEXT@
+
+# CHANGEME: Here is the name of all object files corresponding to the source
+#           code that you wrote in order to define the problem statement
+OBJS = \
+	./LP/BB_lp.@OBJEXT@ \
+	./TM/BB_tm.@OBJEXT@ \
+	./Member/BB_user_data.@OBJEXT@ \
+	./Member/BB_packer.@OBJEXT@ \
+	./Member/BB_init.@OBJEXT@ \
+	./Member/BB.@OBJEXT@ \
+	./Member/BB_cut.@OBJEXT@
+
+# Add access to Cplex if available (see bac.pdf for installation)
+ifneq ($(ENV_CPLEX_LIB),)
+  LIB_CPLEX = -L$(ENV_CPLEX_LIB) -lcplex
+  CPLEX_H = $(ENV_CPLEX_H)
+  LIB_OsiCpx = -lOsiCpx
+endif
+
+# CHANGEME: 
+# The first two variables contain the OsiSolverInterface and the
+# actual solver library the code should be linked against. In the third
+# variable any additional libraries should be listed along with any other
+# necessary flags, like -L or -rpath, etc. Note that no -L flag needs to be
+# added for libraries from COIN.
+USER_OSI_LIBS = -lOsiClp $(LIB_OsiCpx)
+USER_SOLVER_LIBS = -lClp $(LIB_CPLEX)
+USER_EXTRA_LIBS = @MPILIB@
+
+# CHANGEME: Additional include directories for compilation. Note that no
+# include directory needs to be listed here for headers from COIN.
+USER_INCDIRS = include $(CPLEX_H) @MPIINCDIR@
+
+##########################################################################
+#  Usually, you don't have to change anything below.  Note that if you   #
+#  change certain compiler options, you might have to recompile the      #
+#  BCP package.                                                          #
+##########################################################################
+
+# C++ Compiler command
+CXX = @CXX@
+
+# C++ Compiler options
+CXXFLAGS = $(CYGFLAG) @CXXFLAGS@ $(USER_DEFINES)
+
+# additional C++ Compiler options for linking
+CXXLINKFLAGS = @RPATH_FLAGS@
+
+# Directory with COIN header files
+COININCDIR = @abs_include_dir@
+
+# Directory with COIN libraries
+COINLIBDIR = @abs_lib_dir@
+
+# Libraries necessary to link with Clp
+LIBS = -L$(COINLIBDIR) \
+	-lBcp \
+	-lCgl \
+	$(USER_OSI_LIBS) -lOsi $(USER_SOLVER_LIBS) \
+	-lCoinUtils \
+	$(USER_EXTRA_LIBS) \
+	`cat $(COINLIBDIR)/cgl_addlibs.txt` \
+	`cat $(COINLIBDIR)/osi_addlibs.txt` \
+	`cat $(COINLIBDIR)/clp_addlibs.txt` \
+	`cat $(COINLIBDIR)/coinutils_addlibs.txt`
+
+# The following is necessary under cygwin, if native compilers are used
+CYGPATH_W = @CYGPATH_W@
+
+# Necessary Include dirs (we use the CYGPATH_W variables to allow
+# compilation with Windows compilers)
+INCL = `for i in $(USER_INCDIRS) $(COININCDIR); do $(CYGPATH_W) $$i | sed -e 's/^/-I/'; done`
+
+all: $(EXE)
+
+.SUFFIXES: .cpp .c .o .obj
+
+$(EXE): $(OBJS)
+	bla=;\
+	for file in $(OBJS); do bla="$$bla `$(CYGPATH_W) $$file`"; done; \
+	$(CXX) $(CXXLINKFLAGS) $(CXXFLAGS) -o $@ $$bla $(ADDLIBS) $(LIBS)
+
+clean:
+	rm -rf $(EXE) $(OBJS)
+
+.cpp.o:
+	$(CXX) $(CXXFLAGS) $(INCL) -c -o $@ `test -f '$<' || echo '$(SRCDIR)/'`$<
+
+
+.cpp.obj:
+	$(CXX) $(CXXFLAGS) $(INCL) -c -o $@ `if test -f '$<'; then $(CYGPATH_W) '$<'; else $(CYGPATH_W) '$(SRCDIR)/$<'; fi`
