@@ -1,0 +1,329 @@
+In this chapter we describe how the solver for the MKC problem were
+implemented. This implementation is a sample for a column generation scheme;
+no cut generation is done. Since this problem is not so well known, first we
+will describe the problem setting then the implementation details.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\section{The MKC Problem}
+\label{mkc:problem}
+
+MKC stands for {\em Multiple Knapsack problem with Color constraints} as it is
+derived by generalizing the multiple knapsack problem along two directions:
+(i) adding assignment restrictions on items which can be assigned to a
+knapsack, (ii) adding a new attribute (called ``color'') to the items and then
+adding the associated ``color'' constraints which restrict the number of
+distinct colors which can be assigned to a knapsack to two.
+
+This problem is motivated by the surplus inventory matching problem in the
+steel industry (\cite{KDTL}): before planning production, an attempt is made
+to satisfy orders using leftover slabs from surplus inventory. The goal of
+inventory matching is to maximize the total weight of the orders satisfied
+from the leftover and to minimize the leftover weight of each slab used in the
+matching. For each order we can identify a set of applicable slabs from the
+surplus inventory.  These assignment restrictions are based on quality and
+physical dimension considerations.  For any given order only slabs which are
+of the same quality or better can be applied.  In addition, the thickness and
+width requirements for each order need to be compatible with those of the slab
+applicable.  These considerations restrict the number of applicable slabs for
+each order. The color constraints place restrictions on the sets of orders
+that can be matched to the same slab in the surplus inventory. Because of
+processing considerations in the finishing line of a steel mill not all orders
+assignable to a slab can be packed together on the slab. There is a route
+associated with each order that specifies the set of process operations that
+need to be applied in the finishing mill. Orders with different routes require
+different process operations and are referred to as being of different types.
+Slabs packed with different order types need to be cut before they are
+processed in the finishing mill.  Since cutting slabs is expensive and often
+the cutting machine is a bottleneck, strong constraints are posed in terms of
+the number of allowed cuts per slab. The simplest and most commonly used
+constraint used is to limit the number of required cuts to one; i.e., no more
+that two order types are allowed on a slab.  In order to describe this
+constraint formally we associate a unique {\em color} with each route code and
+restrict the number of colors on a slab to be no more than two.  Notice that
+this implies that we associate a color with each order based on its route
+code.  This restricts the number of different order types on a slab to two and
+the number of required cuts to be no more than one.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\section{Natural formulation for MKC}
+
+This formulation has three sets of variables and four sets of constraints
+modeling the various restrictions.
+\begin{eqnarray}[r@{\eqsep}c@{\eqsep}lqql]
+\multicolumn{3}{c}{
+\max \sum_{i = 1}^{N}\sum_{j \in N^i} w^i x^i_j -
+     \sum_{i = 1}^{N} (W_j - \sum_{j \in N^i} w^i x^i_j) z_j
+} & \nonumber \\
+\sum_{i \in N_j} w^i x^i_j & \le & W_j z_j & 1 \le j \le M \label{con-ks} \\
+\sum_{j \in N^i} x^i_j     & \le & 1       & 1 \le i \le N \label{con-order} \\
+\sum_{c \in C_j} y^c_j     & \le & 2       & 1 \le j \le M \label{con-col1} \\
+x^i_j & \le & y^{c^i}_{j}  & 1 \le i \le N, ~j \in N_{i} \label{con-col2} \\
+x^i_j & \in & \{0,1\}      & 1 \le i \le N, ~j \in N_{i} \nonumber \\
+y^c_j & \in & \{0,1\}      & \forall c \in C_j, ~1 \le j \le M \nonumber \\
+z_j   & \in & \{0,1\}      & 1 \le j \le M \nonumber 
+\end{eqnarray}
+
+\begin{table}[ht]
+\caption{List of notations}
+\begin{center}
+\begin{tabular}{|l@{ : }l|} 
+\hline
+$N$ & Total number of orders.\\
+$M$ & Total number of slabs. \\
+$N^i$ & Set of slabs incident to order $i$. \\
+$N_j$ & Set of orders incident to slab $j$. \\
+$w^i$ & Weight of order $i$. \\
+$W_j$ & Weight of slab $j$. \\ 
+$C_j$ & Set of colors incident on slab $j$. \\
+$c^i$ & The color of order $i$. \\
+$x^i_j$ & 1 if order $i$ is assigned to slab $j$; 0 otherwise. \\
+$y^c_j$ & 1 if orders of color $c$ obtain material from slab $j$; 0
+otherwise.\\
+$z_j$ & 1 if any order is incident to slab $j$; 0 otherwise. \\
+\hline 
+\end{tabular}
+\end{center}
+\end{table}
+
+The total number of variables in this formulation is 
+$$
+\sum_{i=1}^{N} |N^i| + \sum_{j=1}^{M} |C_j| + M \quad=\quad 
+\sum_{j=1}^{M} |N_j| + \sum_{j=1}^{M} |C_j| + M
+$$
+while the total number of constraints is $2\sum_{i=1}^{N} |N^i| + 2M + N$.
+
+Constraints (\ref{con-ks}) specify that if a slab is used then the total
+weight of the orders assigned to the slab cannot exceed the weight of the
+slab; Constraint (\ref{con-order}) describes that each order will be made at
+most once; while constraints (\ref{con-col1}) and (\ref{con-col2}) enforce the
+coloring restriction.
+
+Notice that the objective function is non-linear. However, since $z_j = 0$
+forces $x^i_j$ to be zero for all $i \in N_j$ and $z_j = 1$ implies
+$x^i_j z_j = x^i_j$, for all feasible solutions the objective function is
+equivalent to 
+$$
+\sum_{i = 1}^{N}\sum_{j \in N^i} w^i x^i_j -
+    \sum_{i = 1}^{N} ( W_j z_j - \sum_{j \in N^i} w^i x^i_j ) =
+\sum_{i = 1}^{N}\sum_{j \in N^i} 2w^i x^i_j - \sum_{i = 1}^{N} W_j z_j 
+$$.
+
+The final observation is that the objective function just combines the two
+stated goals (maximizing satisfied orders and minimizing wasted parts of
+slabs) with equal weights. This may or may not be the best composite
+objective, but this is how the creator of the application specified the
+problem. Also, all that a different composite weight would change is the
+multiplier $2$ for $w^i$ (the coefficient of $x^i_j$) and the multiplier $1$
+for $W_j$ (the coefficient of $z_j$); nothing in the proposed algorithms would
+need to be changed.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\section{A formulation suitable for column generation}
+
+This new formulation has significantly more columns than the original
+formulation, on the other hand it results in a well studied problem, the set
+packing problem (\cite{NW}).
+
+There are two types of constraints in this formulation. The first type
+corresponds to the slabs in the problem, the second type to the orders. The
+variables represent feasible production patterns, that is, variable $u$ has a
+$1$ in the row corresponding to the slab the production pattern is to be made
+of and $1$'s in the rows corresponding to the orders in the production
+pattern. Each variable is a binary variable indicating whether that production
+pattern is chosen in the solution or not. Let us introduce the following
+notation:
+\begin{itemize}
+\item $P$ is the set of feasible production patterns;
+\item $P_j$ is the set of set of feasible patterns manufacturable from slab
+  $j$;
+\item $P^i$ is the set of set of feasible patterns containing order $i$;
+\item $R_k$ is the row (constraint) corresponding to the slab the production
+  pattern corresponding to $u_k$ is made of; and
+\item $R^k$ is the set of rows (constraints) corresponding to the orders in
+  the production pattern corresponding to $u_k$.
+\end{itemize}
+Let the cost of variable $u_k$ be $\bar{c}_k = \sum_{i\in R^k} 2w^i - W_{R_k}$
+and create the following set packing problem:
+\begin{eqnarray}[rclqql]
+\multicolumn{3}{l}{\max \sum_{k\in P} \bar{c}_k u_k} & \nonumber \\
+\sum_{k\in P^i} u_k & \le & 1 & \forall 1 \le i \le N \\
+\sum_{k\in P_j} u_k & \le & 1 & \forall 1 \le j \le M \\
+\multicolumn{3}{l}{u_k\in\{0,1\}} & \forall k \in P \nonumber
+\end{eqnarray}
+
+It is very easy to see that there is a one to one correspondence between the
+feasible solutions of this set packing problem and the feasible solutions of
+the original formulation. Moreover, the construction of the $\bar c$ cost
+vector ensures that the corresponding solutions have identical objective
+values. Therefore optimizing this problem is the same as optimizing the
+original formulation.
+
+The obvious problem with this formulation is that the number of feasible
+production patterns is enormous. 
+
+\subsection{Generating columns with positive reduced costs}
+To improve the solution evenly, for each slab we generate a production pattern
+whose corresponding column has the highest reduced cost, i.e., the most
+positive if there is one with positive reduced cost. Finding these columns is
+again a set of optimization problems, since for a dual vector $\pi$ the
+reduced cost of variable $u_k$ whose production pattern is made of slab $j$ is
+simply
+\begin{equation}
+\bar{c}_k - \pi_j - \sum_{i\in R^k} \pi^i = 
+\sum_{i\in R^k}2w^i - W_j - \pi_j - \sum_{i\in R^k} \pi^i =
+- (W_j + \pi_j) + \sum_{i\in R^k} (2w^i - \pi^i)
+\end{equation}
+and we want to maximize this over the set of production patterns that can be
+manufactured from slab $j$. For a fixed $j$ the first term is constant. The
+feasible production patterns from slab $j$ are those that satisfy the capacity
+and color constraints, thus this problem is equivalent to (using the notation
+from the original formulation):
+\begin{eqnarray}[rcl]
+\multicolumn{3}{l}{\max\sum_j (2w^i - \pi_i) x^i_j} \\
+\sum_i w^i x^i_j & \le & W_j \\
+\sum_i y^{c(i)}_j & \le & 2 \\
+\multicolumn{3}{l}{x^i_j \in \{0,1\}}
+\end{eqnarray}
+which is a knapsack problem with the side constraint that selected objects
+must have no more than two different colors. Moreover, the constant term in
+the reduced cost implies that we are only looking for production patterns
+whose reduced cost exceeds $W_j + \pi_j$. Since solving the LP relaxation of
+the knapsack problem (even with the side constraint) is rather simple, this
+required lower bound on the reduced cost can be very helpful in quickly
+concluding that there is no improving pattern for a particular slab.
+
+\subsection{Upper bounding}
+
+The previous subsection addresses the issue of how to solve the full LP
+relaxation by iteratively solving smaller LP relaxations and generating
+columns, but we need something more. We need to be able to derive an upper
+bound on the optimal objective value of the full LP relaxation in every
+iteration. There are two reasons for this. The first is that in a
+Branch-and-Price algorithm we can fathom a search tree node if the upper bound
+on the optimal objective value of the LP relaxation at the node is already
+lower than the value of a currently known feasible solution. Since we may not
+be able to solve the subproblems that generate the columns (after all, even
+though the knapsack problem is considered relatively easy, it {\em is}
+NP-complete) we still want to have an upper bound for fathoming purposes. The
+second reason is that without an upper bound on the optimal value of the LP
+relaxation of the full problem we couldn't tell how close we are to
+optimality, we wouldn't have a proven gap.
+
+Fortunately, upper bounding is very easy using Dantzig-Wolfe decomposition
+\cite{dantzig-wolfe}. Since the sum of all variables in $P_i$ is not more than
+$1$, the objective value of the LP relaxation cannot change more than the
+highest reduced cost (or an upper bound on that value) as a result of changing
+the values of the variables in $P_i$. To get an upper bound on the reduced
+cost we can use the LP relaxation of the subproblem (the side constrained
+knapsack problem) which is very easy to solve. Now adding all ``per slab''
+upper bounds to the optimal objective value of the current LP relaxation
+yields an upper bound on the optimum of the full LP relaxation.
+
+\subsection{Finding integral feasible solutions}
+
+Another advantage of the column generation based formulation is that it is
+very easy to generate feasible solutions. In each iteration we considered the
+fractional solution and started by including every variable above $0.5$ in the
+solution. From the set of remaining fractional variables we exluded all that
+intersected the already selected variables. Whatever remained afterwards was
+always such a small set that we could solve the set packing problem on that
+set by enumeration.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\section{Implementation details}
+
+\subsection{Cuts, variables and solutions}
+First of all, we did not have to worry about anything cut generation related,
+since we were not generating cuts. Since the number of constraints is not too
+great (number of orders + number of slabs) we decided to treat all of them as
+core constraints, thus completely eliminating the need to bother about cuts.
+
+For the variables first we had to decide which ones are going to be core
+variables and which ones will be extra variables. Since we had no
+reason to believe that any one particular pattern was more likely to be in
+an optimal solution than some other pattern we decided not to have core
+variables at all (this also simplified coding somewhat). Since the variables
+are the feasible production patterns, they do not lend themselves to any
+enumeration scheme, so we decided not to have indexed variables either.
+Therefore all our variables are algorithmic ones. Actually, we had two kind of
+algorithmic variables, one for the production patterns and another one for
+branching, but we will discuss that latter in Section \ref{mkc:branching}. Both
+types of variables are derived from \code{BCP\_var\_algo} and are defined in
+\code{MKC\_var.hpp}.
+
+We have defined our solution class for two reasons. First, all our pattern
+variables are binary variables so there is no reason to include the value of
+the non-zero ones. Second, there might be branching variables (not pattern
+variables) that are at nonzero level as we go down in the tree, and we didn't
+want to include those in a feasible solution. Still, if we wanted to, we could
+have used a generic solution type. We just thought that using our own solution
+type makes the code clearer. 
+
+\subsection{Branching}
+The problem with branching when generating columns is that we must be able to
+generate columns after branching, too. In other words, every generated column
+must conform to whatever branching decisions have been made to that point.
+That means that branching on a regular variable is out of question. On one
+side (when it is fixed to 1) we'd have great results, it would significantly
+shrink the search space. However, on the other side (fixing the variable to 0)
+the restriction is that we cannot regenerate that variable. But that variable
+will almost always ``want to be regenerated'' (definitely immediately after
+branching), since its reduced cost will make it attractive (after all, we have
+forcibly moved it away from where it ended up in the LP-optimal solution). So
+for our problem this would mean that after one branching we have to check the
+optimal solution to the knapsack subproblem and if it is the forbidden
+variable then we have to find the second best solution. After two branchings
+we may have to find the third best solution, etc. This is impossible. 
+
+Instead, the following logic is introduced. A branching object will specify
+whether a particular order $O$ is manufactured from slab $S$ or not.
+
+\subsection{Packing and unpacking}
+
+Packing and unpacking of user objects is really straightforward. For example,
+look at the \code{MKC\_var\_(un)pack()} functions. The packing function packs
+the 
+type of each variable and invokes the pack member of the variables while the
+unpacking function unpacks the types and invokes the appropriate constructor. 
+
+In general, when an object is packed it is simply torn down to built-in types
+and those are packed. On the other side the date is unpacked in the same order
+and the appropriate objects are constructed. In the following subsection we
+will not mention the (un)packing member methods.
+
+\subsection{MKC\_init}
+
+This is the implementation of the intializer class. The TM initializer reads
+in the problem and the parameters. Unfortunately this piece is rather
+complicated since the problem is specified as an MPS file and we have to
+extract order and slab information from it. The problem is loaded into the
+\code{kss} member of the \code{MKC\_tm} class. See the \code{MKC\_knapsack.hpp}
+file for data structures. Once the problem is read in a pointer to the 
+\code{MKC\_tm} class is returned. The LP initializer just returns a pointer to
+an empty \code{MKC\_lp} object.
+
+\subsection{MKC\_tm}
+
+There were only four methods (besides the (un)packing ones) we had to deal
+with. Initializing the core consisted of simply specifying the core cuts as we
+had no core variables (hence no core matrix). Since we had no core variables
+we had to add some extra variable in creating the root. There are two options
+for this, one is to add those variables that were read in from a file (maybe
+as a result of a previous run), or we could generate columns for the all zero
+dual solution (which is in some sense the optimal solution if we have no
+variables...). Displaying the solution has the option to test the solution
+that it really satisfies the original formulation (we have used this for
+debugging purposes) and then the solution is printed in two different ways.
+Finally, there will be only one phase and we will generate columns in it, so
+we set this in the \code{init\_new\_phase()} method.
+
+\subsection{MKC\_lp}
+
+
+
+
+

@@ -1,0 +1,81 @@
+BAC README
+==========
+
+In this document, the following names are used:
+
+1. 'Pkg' is the name of the package containing BCP and BAC that you have 
+   downloaded.
+
+2. 'coin-Pkg' is the full path to the directory in which you have 
+    downloaded Pkg.
+
+3. 'build' is the directory used for the installation of Pkg. This
+   directory must have 'lib' and 'include' subdirectories containing
+   all the libraries and header files of Pkg, including all the 
+   BCP libraries and header files.
+
+4. 'BACdir' is the main directory of the BAC example and containing this 
+   README file. It is located in build/Bcp/examples/BAC.
+
+
+OVERVIEW
+========
+
+BAC is distributed under the Common Public License Version 1.0 and is 
+freely redistributable. All source code and documentation is Copyright 
+2003-2007 Francois Margot, Carnegie Mellon University, International Business 
+Machines Corporation, and/or others. This README may be distributed freely.
+
+BAC is an illustrative example for the Branch-Cut-Price code BCP of 
+COIN-OR. BAC illustrates several basic features of BCP and it is hoped
+that a study of the BAC example is an almost painless introduction
+to BCP. BAC is not an efficient code for doing anything interesting,
+besides serving as an example for BCP. The file bac.pdf in BACdir serves 
+as main support for understanding the code.
+
+
+BCP TRAC PAGE
+=============
+
+https://projects.coin-or.org/Bcp
+
+Additional introductory material for BCP and other COIN-OR
+modules is available at:
+
+   http://wpweb2.tepper.cmu.edu/fmargot/COIN/coin.html
+
+
+INSTALLATION
+============
+
+If you have downloaded the package BCP
+in the local directory coin-Bcp, please see the INSTALL file in 
+coin-Bcp for a guide to install this package. Alternatively, 
+the installation of BCP is covered in BACdir/bac.pdf.
+
+To install BAC itself, see the file BACdir/INSTALL. This installation 
+is also covered in the file BACdir/bac.pdf.
+
+If you have obtained BAC by downloading another package Pkg containing 
+BCP, BCP should be installed as part of the installation of Pkg. 
+See the INSTALL file in coin-Pkg.
+
+
+SUPPORT
+=======
+
+1. Authors
+
+   See the AUTHORS file.
+
+2. Mailing list
+
+   BCP and BAC users should use the coin-bcpdiscuss mailing list. 
+   To subscribe, go to  
+   http://list.coin-or.org/mailman/listinfo/coin-bcpdiscuss
+
+3. Bug Reports
+
+   Bug reports should be posted to the BCP mailing list and/or on the
+   BCP Trac page.
+

@@ -1,0 +1,7 @@
+These directories contain the source code for BCP, a Branch-Cut-Price
+framework. It enables one to write a problem class specific
+branch-cut-price code that exploits the properties of the problem
+class.
+
+For more information see 
+http://www.coin-or.org/documentation.html#BCP
