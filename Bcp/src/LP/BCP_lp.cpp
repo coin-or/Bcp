@@ -83,6 +83,7 @@ BCP_lp_prob::BCP_lp_prob(int my_id, int parent) :
 BCP_lp_prob::~BCP_lp_prob() {
 
    delete user;
+   delete packer;
    delete master_lp;
    delete lp_solver;
 

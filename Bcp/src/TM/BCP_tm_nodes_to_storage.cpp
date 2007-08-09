@@ -7,13 +7,17 @@
 #include "BCP_tm_user.hpp"
 #include "BCP_tm_functions.hpp"
 
+#define NUMNODES_BASED_ON_BUFSIZE
+
 //#############################################################################
 
 static bool BCP_tm_scan_children(BCP_tm_prob& p, BCP_tm_node* node,
 				 std::vector<BCP_tm_node*>& nodes_to_send,
 				 const long bufsize)
 {
+#ifndef NUMNODES_BASED_ON_BUFSIZE
   const size_t send_size = 100;
+#endif
   BCP_vec<BCP_tm_node*>& children = node->_children;
   for (int i = children.size() - 1; i >= 0; --i) {
     BCP_tm_node* s = children[i];
@@ -33,8 +37,11 @@ static bool BCP_tm_scan_children(BCP_tm_prob& p, BCP_tm_node* node,
       p.packer->pack_user_data(node->_data._user.GetRawPtr(), p.msg_buf);
     }
   }
+#ifndef NUMNODES_BASED_ON_BUFSIZE
   return (nodes_to_send.size() >= send_size);
-  //  return (p.msg_buf.size() > bufsize);
+#else
+  return (p.msg_buf.size() > bufsize);
+#endif
 }
 
 //#############################################################################
@@ -43,7 +50,9 @@ static bool BCP_tm_scan_siblings(BCP_tm_prob& p, BCP_tm_node* node,
 				 std::vector<BCP_tm_node*>& nodes_to_send,
 				 const long bufsize)
 {
+#ifndef NUMNODES_BASED_ON_BUFSIZE
   const size_t send_size = 100;
+#endif
   if (node->_data._desc.IsValid()) {
     nodes_to_send.push_back(node);
     const bool def = p.param(BCP_tm_par::ReportWhenDefaultIsExecuted);
@@ -54,10 +63,14 @@ static bool BCP_tm_scan_siblings(BCP_tm_prob& p, BCP_tm_node* node,
     if (has_user_data) {
       p.packer->pack_user_data(node->_data._user.GetRawPtr(), p.msg_buf);
     }
-    if (nodes_to_send.size() >= send_size) {
-      //    if (p.msg_buf.size() > bufsize) {
-      return true;
-    }
+#ifndef NUMNODES_BASED_ON_BUFSIZE
+    if (nodes_to_send.size() >= send_size)
+#else
+    if (p.msg_buf.size() > bufsize)
+#endif
+      {
+	return true;
+      }
   }
   BCP_tm_node* parent = node->_parent;
   if (parent == NULL)
@@ -92,11 +105,14 @@ bool BCP_tm_is_data_balanced(BCP_tm_prob& p)
   printf("local nodes: %i\n", BCP_tm_node::num_local_nodes);
   printf("remote nodes: %i\n", BCP_tm_node::num_remote_nodes);
 
+//   return (BCP_tm_node::num_local_nodes < 10);
+
   const double usedheap = BCP_used_heap();
   if (usedheap == -1)
     return true;
   const double freeheap = maxheap - usedheap;
-  printf("freeheap: %f   freeheap/maxheap : %f\n", freeheap, freeheap/maxheap);
+  printf("free: %f   used: %f   free/max: %f\n",
+	 freeheap, usedheap, freeheap/maxheap);
   return (freeheap > 1<<24 /* 16M */ && freeheap / maxheap > 0.15);
 }
 
@@ -152,6 +168,7 @@ bool BCP_tm_balance_data(BCP_tm_prob& p)
       lp->delete_proc(pid);
       ts->add_proc(pid);
       BCP_vec<int> pid_vec(1, pid);
+      printf("Turning LP (#%i) into a TS\n", pid);
       BCP_tm_notify_process_type(p, BCP_ProcessType_TS, &pid_vec);
     }
   }
@@ -174,11 +191,13 @@ bool BCP_tm_balance_data(BCP_tm_prob& p)
   /* 'node' is a leaf. Starting from it traverse the tree until there is
      enough data to be sent off. The "enough" means that the message buffer
      takes up 25% of the free space. */
-  const int usedheap = BCP_used_heap();
+  int usedheap = BCP_used_heap();
   assert(usedheap > 0);
   const int maxheap = p.param(BCP_tm_par::MaxHeapSize);
   assert(maxheap > 0);
-  const int freeheap = maxheap - usedheap;
+  int freeheap = maxheap - usedheap;
+  printf("Before sending off: freeheap: %i   usedheap: %i\n",
+	 freeheap, usedheap);
   buf.clear();
   BCP_tm_scan_siblings(p, node, nodes_to_send, freeheap >> 2);
   int num = nodes_to_send.size();
@@ -203,8 +222,15 @@ bool BCP_tm_balance_data(BCP_tm_prob& p)
     node->_data_location = pid;
   }
   nodes_to_send.clear();
+
+  usedheap = BCP_used_heap();
+  freeheap = maxheap - usedheap;
+  printf("After sending off: freeheap: %i   usedheap: %i\n",
+	 freeheap, usedheap);
+
   if (saved == 0) {
     // Something is wrong. The least full TS did not accept anything...
+    //    sleep(10000);
     throw BCP_fatal_error("TS did not accept anything\n");
   }
   

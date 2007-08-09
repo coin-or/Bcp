@@ -21,6 +21,7 @@ BCP_cg_prob::BCP_cg_prob(int my_id, int parent) :
 BCP_cg_prob::~BCP_cg_prob()
 {
    delete user;   user = 0;
+   delete packer; packer = 0;
    delete core;   core = 0;
    purge_ptr_vector(vars);
 }

@@ -17,6 +17,7 @@ BCP_tm_parse_command_line(BCP_tm_prob& p,
      // Read in the parameters
      p.par.read_from_file(arglist[1]);
      p.slave_pars.lp.read_from_file(arglist[1]);
+     p.slave_pars.ts.read_from_file(arglist[1]);
      p.slave_pars.cg.read_from_file(arglist[1]);
      p.slave_pars.vg.read_from_file(arglist[1]);
   } else if (argnum == 1) {
@@ -24,6 +25,7 @@ BCP_tm_parse_command_line(BCP_tm_prob& p,
   } else {
      p.par.read_from_arglist(argnum, arglist);
      p.slave_pars.lp.read_from_arglist(argnum, arglist);
+     p.slave_pars.ts.read_from_arglist(argnum, arglist);
      p.slave_pars.cg.read_from_arglist(argnum, arglist);
      p.slave_pars.vg.read_from_arglist(argnum, arglist);
   }

@@ -3,6 +3,7 @@
 #ifndef _BCP_OS_H
 #define _BCP_OS_H
 
+#include <cstdio>
 #include "BcpConfig.h"
 
 //-----------------------------------------------------------------------------

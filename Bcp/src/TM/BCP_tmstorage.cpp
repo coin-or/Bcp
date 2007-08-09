@@ -151,6 +151,8 @@ BCP_ts_prob::~BCP_ts_prob()
 {
     std::map<int, BCP_ts_node_data*>::iterator n;
     for (n = nodes.begin(); n != nodes.end(); ++n) {
+	delete n->second->_desc;
+	delete n->second->_user;
 	delete n->second;
     }
     std::map<int, BCP_cut_algo*>::iterator c;
@@ -161,13 +163,15 @@ BCP_ts_prob::~BCP_ts_prob()
     for (v = vars.begin(); v != vars.end(); ++v) {
 	delete v->second;
     }
+    delete core;
+    delete packer;
+    delete user;
 }
     
 //#############################################################################
 
 static void process_Msg_NodeList(BCP_ts_prob& p, BCP_buffer& buf)
 {
-    // FIXME: This routine depends on writing the corresponding routine in TM
     int index;
     int num = 0;
     int fm = 0;
@@ -175,7 +179,8 @@ static void process_Msg_NodeList(BCP_ts_prob& p, BCP_buffer& buf)
 
     while (true) {
       if (num % 10 == 0) {
-	fm = TS_MAX_HEAP_SIZE - BCP_used_heap();
+	fm = TS_MAX_HEAP_SIZE;
+	fm -= BCP_used_heap();
 	if (fm < 1<<23 /* 8M */ ) {
 	  break;
 	}
@@ -184,6 +189,7 @@ static void process_Msg_NodeList(BCP_ts_prob& p, BCP_buffer& buf)
       if (index == -1) {
 	break;
       }
+      assert(p.nodes.find(index) == p.nodes.end());
       BCP_ts_node_data* data = new BCP_ts_node_data;
       data->_desc = new BCP_node_change;
       data->_desc->unpack(p.packer, false, buf);
@@ -237,7 +243,6 @@ static void process_Msg_NodeListRequest(BCP_ts_prob& p, BCP_buffer& buf)
 
 static void process_Msg_NodeListDelete(BCP_ts_prob& p, BCP_buffer& buf)
 {
-    // FIXME This routine depends on writing the corresponding routine in TM
     BCP_vec<int>& inds = p.indices;
     buf.unpack(inds);
     const int num = inds.size();
@@ -247,6 +252,8 @@ static void process_Msg_NodeListDelete(BCP_ts_prob& p, BCP_buffer& buf)
 	    throw BCP_fatal_error("TS: Node to be deleted (%i) is not here\n",
 				  inds[i]);
 	}
+	delete n->second->_desc;
+	delete n->second->_user;
 	delete n->second;
 	p.nodes.erase(n);
     }

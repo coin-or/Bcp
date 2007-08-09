@@ -31,6 +31,7 @@ BCP_tm_prob::BCP_tm_prob() :
 BCP_tm_prob::~BCP_tm_prob()
 {
    delete user;
+   delete packer;
 
    delete lp_stat;
    
