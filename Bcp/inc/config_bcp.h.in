@@ -18,7 +18,7 @@
 /* Define to 1 if the CoinUtils package is used */
 #undef COIN_HAS_COINUTILS
 
-/* Define to 1 if the Mpi package is used */
+/* Define to 1 if the Mpi package is available */
 #undef COIN_HAS_MPI
 
 /* Define to 1 if the Osi package is used */
