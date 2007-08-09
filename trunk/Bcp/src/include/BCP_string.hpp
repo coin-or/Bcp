@@ -24,7 +24,7 @@ private:
    char * _data;
 public:
    /* The default constructor creates an empty sting. */
-   BCP_string() : _len(0), _data(0) {};
+   BCP_string() : _len(0), _data(0) {}
    /* Create a <code>BCP_string</code> from a C style string. */
    BCP_string(const char * str) {
       _len = strlen(str);
