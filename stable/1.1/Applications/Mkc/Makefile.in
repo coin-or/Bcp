@@ -1,0 +1,95 @@
+# Copyright (C) 2006 International Business Machines and others.
+# All Rights Reserved.
+# This file is distributed under the Common Public License.
+
+# $Id$
+
+##########################################################################
+#    You can modify this example makefile to fit for your own program.   #
+#    Usually, you only need to change the five CHANGEME entries below.   #
+##########################################################################
+
+# CHANGEME: This should be the name of your executable
+EXE = mkc@EXEEXT@
+
+# CHANGEME: Here is the name of all object files corresponding to the source
+#           code that you wrote in order to define the problem statement
+OBJS = \
+	LP/MKC_lp__branch.@OBJEXT@ \
+	LP/MKC_lp.@OBJEXT@ \
+	LP/MKC_lp__param.@OBJEXT@ \
+	TM/MKC_tm_param.@OBJEXT@ \
+	TM/MKC_tm.@OBJEXT@ \
+	Member/MKC_vargen.@OBJEXT@ \
+	Member/MKC_solution.@OBJEXT@ \
+	Member/MKC_init.@OBJEXT@ \
+	Member/MKC_optim.@OBJEXT@ \
+	Member/MKC_knapsack.@OBJEXT@
+
+# CHANGEME: Additional include directories for compilation. Note that no
+# include directory needs to be listed here for headers from COIN.
+USER_INCDIRS = include $(CPLEX_H) @MPIINCDIR@
+
+##########################################################################
+#  Usually, you don't have to change anything below.  Note that if you   #
+#  change certain compiler options, you might have to recompile the      #
+#  COIN package.                                                         #
+##########################################################################
+
+# C++ Compiler command
+CXX = @CXX@
+
+# C++ Compiler options
+CXXFLAGS = @CXXFLAGS@
+
+# additional C++ Compiler options for linking
+CXXLINKFLAGS = @RPATH_FLAGS@
+
+# Directory with COIN header files
+COININCDIR = @abs_include_dir@
+
+# Directory with COIN libraries
+COINLIBDIR = @abs_lib_dir@
+
+# Libraries necessary to link with Clp
+LIBS = \
+	-L$(COINLIBDIR) \
+	-lBcp \
+	-lOsiClp \
+	-lOsiVol \
+	-lOsi \
+	-lClp \
+	-lVol \
+	-lCoinUtils \
+	`cat $(COINLIBDIR)/bcp_addlibs.txt` \
+	`cat $(COINLIBDIR)/cgl_addlibs.txt` \
+	`cat $(COINLIBDIR)/osi_addlibs.txt` \
+	`cat $(COINLIBDIR)/clp_addlibs.txt` \
+	`cat $(COINLIBDIR)/vol_addlibs.txt` \
+	`cat $(COINLIBDIR)/coinutils_addlibs.txt`
+
+# The following is necessary under cygwin, if native compilers are used
+CYGPATH_W = @CYGPATH_W@
+
+# Necessary Include dirs (we use the CYGPATH_W variables to allow
+# compilation with Windows compilers)
+INCL = `for i in $(USER_INCDIRS) $(COININCDIR); do $(CYGPATH_W) $$i | sed -e 's/^/-I/'; done`
+
+all: $(EXE)
+
+.SUFFIXES: .cpp .c .o .obj
+
+$(EXE): $(OBJS)
+	bla=;\
+	for file in $(OBJS); do bla="$$bla `$(CYGPATH_W) $$file`"; done; \
+	$(CXX) $(CXXLINKFLAGS) $(CXXFLAGS) -o $@ $$bla $(ADDLIBS) $(LIBS)
+
+clean:
+	rm -rf $(EXE) $(OBJS)
+
+.cpp.o:
+	$(CXX) $(CXXFLAGS) $(INCL) -c -o $@ `test -f '$<' || echo '$(SRCDIR)/'`$<
+
+
+.cpp.obj:
+	$(CXX) $(CXXFLAGS) $(INCL) -c -o $@ `if test -f '$<'; then $(CYGPATH_W) '$<'; else $(CYGPATH_W) '$(SRCDIR)/$<'; fi`
