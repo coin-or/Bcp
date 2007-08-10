@@ -6,6 +6,7 @@
 // This file is fully docified.
 
 #include <cstring>
+using namespace std ;
 
 /** This class is a very simple impelementation of a constant length string.
     Using it one can avoid some memory errors related to using functions
