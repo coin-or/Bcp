@@ -31,13 +31,20 @@
 #  define GETPID (0)
 #endif
 //-----------------------------------------------------------------------------
-
-#ifdef HAVE_SYSINFO
+/*
+  The problem here is that Solaris defines a sysinfo function, but it does
+  something completely different. This may not be an adequate guard when
+  using GCC on Solaris. It may be that you'll need to change the test in
+  configure.ac to check specifically for sysinfo.freeram with AC_CHECK_MEMBER.
+  See http://developers.sun.com/solaris/articles/free_phys_ram.html for a way
+  to do this on Solaris. Didn't try to implement it.  -- lh, 070810 --
+*/
+#if defined(HAVE_SYSINFO) && !defined(__sun)
 #include <sys/sysinfo.h>
 #endif
 static inline long BCP_free_mem()
 {
-#ifdef HAVE_SYSINFO
+#if defined(HAVE_SYSINFO) && !defined(__sun)
   struct sysinfo info;
   sysinfo(&info);
   return info.mem_unit*info.freeram;
