@@ -1,4 +1,4 @@
-# Copyright (C) 2006 International Business Machines.
+# Copyright (C) 2006, 2007 International Business Machines.
 # All Rights Reserved.
 # This file is distributed under the Common Public License.
 
@@ -90,72 +90,13 @@ AC_CHECK_FUNCS(gethostname getpid sysinfo mallinfo)
 AC_PROG_LN_S
 AC_COIN_CHECK_VPATH
 
-AC_DEFUN([COIN_UPPATH],
-[
-if test $1 = . ; then
-	$2=.
-else
-	t=`echo $1 | sed -e 's=/\./=/=g' -e 's=^\./==' -e 's=/\.$==' -e 's=[[^/]]*=..=g'`
-	if test $t = "" ; then
-		t=.
-	fi
-	$2=$t
-fi
-])
-	
-AC_DEFUN([COIN_LINK_FROM_FILELIST], 
-[
-COIN_UPPATH([$1], updir)
-if test -e $srcdir/$2 ; then
-	echo Creating links in $1 ...
-	fromdir=$updir/$srcdir/`dirname $2`
-	mkdir -p $1
-	cd $1
-	for f in `cat $updir/$srcdir/$2` ; do
-		if test ! -e $f ; then
-		   	fdir=`dirname $f`
-		    mkdir -p $fdir
-			COIN_UPPATH([$fdir], uppath)
-			cd $fdir
-		    $LN_S $uppath/$fromdir/$f `basename $f`
-			cd $uppath
-		fi
-	done
-	cd $updir
-fi
-])
+AC_COIN_LINK_FROM_FILELIST(test/BAC, examples/BAC/testfiles.txt)
+AC_COIN_COPY_FROM_FILELIST(examples/BAC, examples/BAC/examplefiles.txt)
+AC_COIN_COPY_FROM_FILELIST(examples/MaxCut, examples/MaxCut/examplefiles.txt)
 
-AC_DEFUN([COIN_COPY_FROM_FILELIST], 
-[
-if test $coin_vpath_config = yes; then
-	COIN_UPPATH([$1], updir)
-	if test -e $srcdir/$2 ; then
-		echo Copying example $1 ...
-		fromdir=$updir/$srcdir/`dirname $2`
-		mkdir -p $1
-		cd $1
-		for f in `cat $updir/$srcdir/$2` ; do
-			if test ! -e $f ; then
-		   		fdir=`dirname $f`
-				mkdir -p $fdir
-				COIN_UPPATH([$fdir], uppath)
-				cd $fdir
-				cp -p $uppath/$fromdir/$f `basename $f`
-				cd $uppath
-			fi
-		done
-		cd $updir
-	fi
-fi
-])
-
-COIN_LINK_FROM_FILELIST(test/BAC, examples/BAC/testfiles.txt)
-COIN_COPY_FROM_FILELIST(examples/BAC, examples/BAC/examplefiles.txt)
-COIN_COPY_FROM_FILELIST(examples/MaxCut, examples/MaxCut/examplefiles.txt)
-
-COIN_COPY_FROM_FILELIST(examples/MCF-1, examples/MCF-1/examplefiles.txt)
-COIN_COPY_FROM_FILELIST(examples/MCF-2, examples/MCF-2/examplefiles.txt)
-COIN_COPY_FROM_FILELIST(examples/MCF-3, examples/MCF-3/examplefiles.txt)
+AC_COIN_COPY_FROM_FILELIST(examples/MCF-1, examples/MCF-1/examplefiles.txt)
+AC_COIN_COPY_FROM_FILELIST(examples/MCF-2, examples/MCF-2/examplefiles.txt)
+AC_COIN_COPY_FROM_FILELIST(examples/MCF-3, examples/MCF-3/examplefiles.txt)
 
 # In case this is a VPATH configuration we need to make sure that the
 # input files for the examples are available in the VPATH directory.
