@@ -202,11 +202,13 @@ BCP_tm_node_to_send::send()
 	return false;
     }
 
-    // FIXME--DELETE
+#if 0
+    // FIXME--DELETE (used to test Bonmin code)
     for (i = 0; i <= level; ++i) {
       assert(node_data_on_root_path[level]._desc.IsValid());
       assert(node_data_on_root_path[level]._user.IsValid());
     }
+#endif
 
     // OK, we have all the descriptions. Now if we haven't done so yet (which
     // is indicated by missing_var_num (and missing_cut_num) being negative)
