@@ -86,22 +86,22 @@ AC_COIN_CHECK_HEADER(process.h)
 AC_CHECK_FUNCS(gethostname getpid mallinfo)
 
 # Check if sysinfo is present and does what we expect it to do
-AC_MSG_CHECKING([whether we have sysinfo that we can use])
-AC_LANG_PUSH(C++)
-AC_COMPILE_IFELSE([
-#ifdef HAVE_SYS_SYSINFO_H
+if test x$ac_cv_header_sys_stat_h = xyes; then
+  AC_MSG_CHECKING([whether we have sysinfo that we can use])
+  AC_LANG_PUSH(C++)
+  AC_COMPILE_IFELSE([
 #include <sys/sysinfo.h>
-#endif
 long bla()
 {
   struct sysinfo info;
   sysinfo(&info);
   return info.mem_unit*info.freeram;
 }],
-                  [AC_MSG_RESULT([yes])
-                   AC_DEFINE([HAVE_SYSINFO], [1], [Define to 1 if sysinfo function exists and runs with Bcp code])],
-                  [AC_MSG_RESULT([no])])
-AC_LANG_POP(C++)
+                    [AC_MSG_RESULT([yes])
+                     AC_DEFINE([HAVE_SYSINFO], [1], [Define to 1 if sysinfo function exists and runs with Bcp code])],
+                    [AC_MSG_RESULT([no])])
+  AC_LANG_POP(C++)
+fi
 
 ##############################################################################
 #                   VPATH links for example input files                      #
