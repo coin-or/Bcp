@@ -65,7 +65,7 @@ BCP_tm_print_info_line(BCP_tm_prob& p, BCP_tm_node& node)
     if ((processed % freq) == 0 || processed == 1) {
 	++lines;
 	printf("BCP: ");                                           // 5
-	printf("%7i ", p.search_tree.size());                      // 8
+	printf("%7i ", (int)p.search_tree.size());                 // 8
 	printf("%7i ", processed);                                 // 8
 	printf("%10g ", p.ub());                                   // 11
 	printf("%10g ", p.candidate_list.bestQuality());           // 11
