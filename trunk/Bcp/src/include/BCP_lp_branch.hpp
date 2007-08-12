@@ -404,10 +404,10 @@ public:
 
     /** Return true if every children can be fathomed. (The lower bound for
 	each is above <code>objval_limit</code>.) */
-    const bool fathomable(const double objval_limit) const;
+    bool fathomable(const double objval_limit) const;
     /** Return true if at least one child had numerical difficulties while
 	presolving. */
-    const bool had_numerical_problems() const; 
+    bool had_numerical_problems() const; 
     /*@}*/
 
     /**@name Modifying methods */

@@ -254,7 +254,7 @@ void BCP_presolved_lp_brobj::fake_objective_values(const double itlim_objval)
    }
 }
 
-const bool BCP_presolved_lp_brobj::fathomable(const double objval_limit) const
+bool BCP_presolved_lp_brobj::fathomable(const double objval_limit) const
 {
    // If ALL descendants in cand terminated with primal infeasibility
    // or high cost, that proves that the current node can be fathomed.
@@ -268,7 +268,7 @@ const bool BCP_presolved_lp_brobj::fathomable(const double objval_limit) const
    return true;
 }
 
-const bool BCP_presolved_lp_brobj::had_numerical_problems() const
+bool BCP_presolved_lp_brobj::had_numerical_problems() const
 {
    for (int i = _candidate->child_num - 1; i >= 0; --i)
       if (_lpres[i]->termcode() == BCP_Abandoned)

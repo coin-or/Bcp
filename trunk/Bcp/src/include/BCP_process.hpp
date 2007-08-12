@@ -14,8 +14,8 @@ public:
     BCP_process(int self, int my_parent) : me(self), parent(my_parent) {}
     // default copy constructor & assignment operator are OK.
     virtual ~BCP_process() {}
-    const int get_process_id() const { return me; }
-    const int get_parent() const { return parent; }
+    int get_process_id() const { return me; }
+    int get_parent() const { return parent; }
 
     virtual BCP_buffer& get_message_buffer() = 0;
     virtual void process_message() = 0;
