@@ -102,17 +102,17 @@ bool
 BCP_tm_node_to_send::receive_node_desc(BCP_buffer& buf)
 {
     const bool def = p.param(BCP_tm_par::ReportWhenDefaultIsExecuted);
-    int cnt, level, index;
+    int cnt, lclLevel, index;
     buf.unpack(cnt);
     missing_desc_num -= cnt;
     bool has_user_data = false;
     while (--cnt >= 0) {
-	buf.unpack(level).unpack(index);
-	assert(root_path[level]->_index == index);
-	node_data_on_root_path[level]._desc =
+	buf.unpack(lclLevel).unpack(index);
+	assert(root_path[lclLevel]->_index == index);
+	node_data_on_root_path[lclLevel]._desc =
 	    new BCP_node_change(p.packer, def, buf);
 	buf.unpack(has_user_data);
-	node_data_on_root_path[level]._user =
+	node_data_on_root_path[lclLevel]._user =
 	  has_user_data ? p.packer->unpack_user_data(buf) : 0;
     }
     assert(missing_desc_num >= 0);
