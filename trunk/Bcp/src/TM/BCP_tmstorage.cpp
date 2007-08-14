@@ -268,7 +268,7 @@ static void process_Msg_NodeListDelete(BCP_ts_prob& p, BCP_buffer& buf)
 static void process_Msg_CutList(BCP_ts_prob& p, BCP_buffer& buf)
 {
     // FIXME This routine depends on writing the corresponding routine in TM
-    int num;
+    int num = 0 ;
     int index;
     int fm = 0;
     while (true) {
@@ -347,7 +347,7 @@ static void process_Msg_CutListDelete(BCP_ts_prob& p, BCP_buffer& buf)
 static void process_Msg_VarList(BCP_ts_prob& p, BCP_buffer& buf)
 {
     // FIXME This routine depends on writing the corresponding routine in TM
-    int num;
+    int num = 0 ;
     int index;
     int fm = 0;
     while (true) {
