@@ -101,10 +101,11 @@ bool BCP_tm_is_data_balanced(BCP_tm_prob& p)
   if (maxheap == -1) {
     return true;
   }
-  // FIXME--DELETE
+#if 0
+  // FIXME--DELETE (used to test Bonmin code)
   printf("local nodes: %i\n", BCP_tm_node::num_local_nodes);
   printf("remote nodes: %i\n", BCP_tm_node::num_remote_nodes);
-
+#endif
 //   return (BCP_tm_node::num_local_nodes < 10);
 
   const double usedheap = BCP_used_heap();
@@ -237,13 +238,15 @@ bool BCP_tm_balance_data(BCP_tm_prob& p)
   BCP_tm_node::num_local_nodes -= saved;
   BCP_tm_node::num_remote_nodes += saved;
 
-  // FIXME--DELETE
+#if 0
+  // FIXME--DELETE (used to test Bonmin code)
   for (size_t k = 0; k < p.search_tree.size(); ++k) {
     BCP_tm_node* n = p.search_tree[k];
     if (n && n->_locally_stored) {
       assert(n->_data._desc.IsNull() && n->_data._user.IsNull());
     }
   }
+#endif
 
   return false;
 }

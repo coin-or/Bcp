@@ -396,11 +396,12 @@ BCP_lp_pack_branching_info(BCP_lp_prob& p, BCP_presolved_lp_brobj* lp_brobj)
    int keep = -1;
    if (p.node->dive != BCP_DoNotDive){
       for (int i = child_num - 1; i >= 0; --i)
-	 if (action[i] == BCP_KeepChild)
+	 if (action[i] == BCP_KeepChild) {
 	    if (keep == -1)
 	       keep = i;
 	    else
 	       throw BCP_fatal_error("LP : Can't keep more than one child!\n");
+         }
    }
    return keep;
 }

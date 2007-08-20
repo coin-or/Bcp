@@ -8,6 +8,9 @@
 
 //##############################################################################
 
+// to get memmove
+#include <cstring>
+
 template<> inline void BCP_vec<bool>::destroy(iterator pos)
 {
 }

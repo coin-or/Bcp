@@ -85,9 +85,9 @@ int bcp_main(int argc, char* argv[], USER_initialize* user_init)
 	while (ptype != BCP_ProcessType_EndProcess) {
 	    switch (ptype) {
 	    case BCP_ProcessType_LP:
-	      printf("usedheap before LP: %i\n", BCP_used_heap());
+	      printf("usedheap before LP: %i\n", (int)BCP_used_heap());
 	      ptype = BCP_lp_main(msg_env, user_init, my_id, parent, ub);
-	      printf("usedheap after LP: %i\n", BCP_used_heap());
+	      printf("usedheap after LP: %i\n", (int)BCP_used_heap());
 	      break;
 	    case BCP_ProcessType_CP:
 	      // BCP_cp_main(msg_env, user_init, my_id, parent, ub);
@@ -102,9 +102,9 @@ int bcp_main(int argc, char* argv[], USER_initialize* user_init)
 	      ptype = BCP_vg_main(msg_env, user_init, my_id, parent, ub);
 	      break;
 	    case BCP_ProcessType_TS:
-	      printf("usedheap before TS: %i\n", BCP_used_heap());
+	      printf("usedheap before TS: %i\n", (int)BCP_used_heap());
 	      ptype = BCP_tmstorage_main(msg_env, user_init, my_id, parent, ub);
-	      printf("usedheap after TS: %i\n", BCP_used_heap());
+	      printf("usedheap after TS: %i\n", (int)BCP_used_heap());
 	      break;
 	    case BCP_ProcessType_Any:
 	      throw BCP_fatal_error("\

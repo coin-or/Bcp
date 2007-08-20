@@ -32,7 +32,7 @@
 #endif
 //-----------------------------------------------------------------------------
 
-#ifdef HAVE_SYSINFO
+#ifdef HAVE_SYS_SYSINFO_H
 #include <sys/sysinfo.h>
 #endif
 static inline long BCP_free_mem()

@@ -24,19 +24,19 @@ private:
    char * _data;
 public:
    /* The default constructor creates an empty sting. */
-   BCP_string() : _len(0), _data(0) {};
+   BCP_string() : _len(0), _data(0) {}
    /* Create a <code>BCP_string</code> from a C style string. */
    BCP_string(const char * str) {
-      _len = strlen(str);
+      _len = std::strlen(str);
       _data = new char[_len+1];
-      memcpy(_data, str, _len);
+      std::memcpy(_data, str, _len);
       _data[_len] = 0;
    }
    /* Make a copy of the argument string. */
    BCP_string(const BCP_string& str) {
       _len = str.length();
       _data = new char[_len+1];
-      memcpy(_data, str.c_str(), _len);
+      std::memcpy(_data, str.c_str(), _len);
       _data[_len] = 0;
    }
    /* Delete the data members. */
@@ -49,7 +49,7 @@ public:
       delete[] _data;
       _len = len;
       _data = new char[_len+1];
-      memcpy(_data, source, _len);
+      std::memcpy(_data, source, _len);
       _data[_len] = 0;
       return *this;
    }
@@ -61,7 +61,7 @@ public:
    /* replace the current <code>BCP_string</code> with a copy of the argument
       C style string. */ 
    BCP_string& operator= (const char * str) {
-      return assign(str, strlen(str));
+      return assign(str, std::strlen(str));
    }
 
 };
@@ -70,7 +70,7 @@ public:
 inline bool operator==(const BCP_string& s0, const char* s1) {
    if (s0.c_str() == 0)
       return s1 == 0;
-   return s1 == 0 ? false : (strcmp(s0.c_str(), s1) == 0);
+   return s1 == 0 ? false : (std::strcmp(s0.c_str(), s1) == 0);
 }
 
 /** Equality tester for a C style string and a <code>BCP_string</code>. */
