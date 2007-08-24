@@ -103,5 +103,7 @@ BCP_tm_wrapup(BCP_tm_prob* tm, BCP_lp_prob* lp,
 	}
     }
 
+    tm->stat.print(true /* final stat */, 0);
+
     tm->user->display_final_information(lp ? lp->stat : *tm->lp_stat);
 }

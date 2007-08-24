@@ -85,9 +85,9 @@ int bcp_main(int argc, char* argv[], USER_initialize* user_init)
 	while (ptype != BCP_ProcessType_EndProcess) {
 	    switch (ptype) {
 	    case BCP_ProcessType_LP:
-	      printf("usedheap before LP: %i\n", (int)BCP_used_heap());
+	      printf("usedheap before LP: %li\n", BCP_used_heap());
 	      ptype = BCP_lp_main(msg_env, user_init, my_id, parent, ub);
-	      printf("usedheap after LP: %i\n", (int)BCP_used_heap());
+	      printf("usedheap after LP: %li\n", BCP_used_heap());
 	      break;
 	    case BCP_ProcessType_CP:
 	      // BCP_cp_main(msg_env, user_init, my_id, parent, ub);
@@ -102,9 +102,9 @@ int bcp_main(int argc, char* argv[], USER_initialize* user_init)
 	      ptype = BCP_vg_main(msg_env, user_init, my_id, parent, ub);
 	      break;
 	    case BCP_ProcessType_TS:
-	      printf("usedheap before TS: %i\n", (int)BCP_used_heap());
+	      printf("usedheap before TS: %li\n", BCP_used_heap());
 	      ptype = BCP_tmstorage_main(msg_env, user_init, my_id, parent, ub);
-	      printf("usedheap after TS: %i\n", (int)BCP_used_heap());
+	      printf("usedheap after TS: %li\n", BCP_used_heap());
 	      break;
 	    case BCP_ProcessType_Any:
 	      throw BCP_fatal_error("\
@@ -167,6 +167,8 @@ Number of process in parameter file %d > n_proc in mpirun -np %d!\n",
 	}
     }
 #endif
+
+    p.stat.set_num_lp(p.param(BCP_tm_par::LpProcessNum));
 
     p.start_time = CoinCpuTime();
 
@@ -292,9 +294,13 @@ bool BCP_tm_do_one_phase(BCP_tm_prob& p)
 
 	// Process incoming messages. If there are no active nodes left then
 	// timeout is set to 0, so we just check the queue, but not wait.
+	const double t0 = CoinCpuTime();
 	p.msg_env->receive(BCP_AnyProcess, BCP_Msg_AnyMessage, buf,
 			   p.slaves.lp->busy_num() == 0 ?
 			   0 : p.param(BCP_tm_par::TmTimeout));
+	const double t1 = CoinCpuTime();
+	p.stat.update_wait_time(p.slaves.lp->busy_num(), t1-t0);
+	p.stat.print(false /* not final */, t1 - p.start_time);
 	try {
 	    p.process_message();
 	}
