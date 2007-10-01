@@ -42,6 +42,7 @@ class BCP_lp_cut_pool;
 
 class BCP_lp_node;
 class BCP_lp_parent;
+class CoinWarmStart;
 
 //#############################################################################
 
@@ -163,10 +164,14 @@ public:
     // the search tree node we are working on and its parent
     /**@name Current search tree node and its parent */
     /*@{*/
-    /** */
+    /** Description he current search tree node. */
     BCP_lp_node* node;
-    /** */
+    /** Description of the parent of the current node. */
     BCP_lp_parent* parent;
+    /** Description of the warmstart info from the end of the root node. Used
+	only if the BCP_lp_par::WarmstartInfo parameter is set to
+	BCP_WarmstartRoot. */
+    CoinWarmStart* warmstartRoot;
     /*@}*/
    
     //------------------------------------------------------------------------

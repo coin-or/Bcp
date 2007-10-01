@@ -414,12 +414,15 @@ BCP_lp_select_branching_object(BCP_lp_prob& p,
     BCP_cut_set& cuts = p.node->cuts;
     BCP_vec<BCP_lp_branching_object*> candidates;
 
+    bool force_branch = (p.lp_result->termcode() & BCP_Abandoned) != 0;
+
     BCP_branching_decision do_branch = 
 	p.user->select_branching_candidates(*p.lp_result,
 					    vars, cuts,
 					    *p.local_var_pool,
 					    *p.local_cut_pool,
-					    candidates);
+					    candidates,
+					    force_branch);
     switch (do_branch){
     case BCP_DoNotBranch_Fathomed:
 	return BCP_DoNotBranch_Fathomed;

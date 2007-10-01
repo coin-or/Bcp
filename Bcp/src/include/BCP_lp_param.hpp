@@ -37,9 +37,6 @@ struct BCP_lp_par{
 	  variable, no matter what is their current value. <br>
 	  Values: true (1), false (0). Default: 1. */
       DoReducedCostFixingAtAnything,
-      /** Indicate whether BCP is supposed to track the indexed variables yet
-	  to be priced out. */
-      MaintainIndexedVarPricingList,
       /** Indicates whether message passing is serial (all processes are on
 	  the same processor) or not. <br>
 	  Values: true (1), false (0). Default: 1. */
@@ -171,11 +168,6 @@ struct BCP_lp_par{
 	  Values: whatever is valid for the LP solver that the user has passed
 	  on to BCP. Default: 0. */
       ScaleMatrix,
-      /** Indicates the number of entries stored in a
-	  <code>BCP_indexed_pricing_list</code>. <br>
-	  Values: any positive. Default: 1000. */
-      IndexedToPriceStorageSize,
-
       /** The slack cut discarding strategy used in the default version of the
 	  function <code>purge_slack_pool()</code>. <br> 
 	  Values: \link BCP_slack_cut_discarding.<br>
@@ -218,17 +210,6 @@ struct BCP_lp_par{
       /** See the description of the previous parameter. <br>
 	  Values: . Default: 200. */
       MaxNonDualFeasToAdd_Max,
-      /** When the tableau is total dual feasible some of variables from
-	  the list of the not yet fixed indexed variables are added to the
-	  formulation so that the list can be shorter in the descendant nodes
-	  (or may become empty). These parameters play the same role in
-	  limiting the number of such variables as the two previous parameters
-	  for the non dual feasible variables. <br>
-	  Values: . Default: 5. */
-      MaxIndexedToPriceToAdd_Min,
-      /** See the description of the previous parameter. <br>
-	  Values: . Default: 200. */
-      MaxIndexedToPriceToAdd_Max,
 
       /** How cut violation should be computed.<br>
 	  Values: \link BCP_CutViolationNorm. <br>
@@ -301,6 +282,13 @@ struct BCP_lp_par{
 	  Values: \link BCP_feasibility_test.<br>
 	  Default: <code>BCP_FullTest_Feasible</code> */
       FeasibilityTest,
+      /** Specifies how warmstart information should be stored in the TM.
+	  Possible valueas: BCP_WarmstartNone, BCP_WarmstartRoot,
+	  BCP_WarmstartParent. The first is obvious, the second means the root
+	  node's warmstart info should be sent out along with each node, the
+	  last means the parent's warmstart info should be sent out.
+	  Default: BCP_WarmstartParent */
+      WarmstartInfo,
       /** Indicates what part of the primal solution is sent to the Cut
 	  Generator process if the BCP_lp_user::pack_primal_solution() method
 	  is not overridden.<br>
@@ -339,19 +327,10 @@ struct BCP_lp_par{
 	  formulation at a time cannot exceed this fraction of the the number
 	  of columns in the curent formulation. However, this limit can be
 	  overruled by the hard bounds 
-	  <code>MaxIndexedToPriceToAdd_Min</code> and
-	  <code>MaxIndexedToPriceToAdd_Max</code> (see above). <br>
-	  Values: . Default: 0.05.*/
+	  <code>MaxNonDualFeasToAdd_Min</code> and
+	  <code>MaxNonDualFeasToAdd_Max</code> (see above). <br>
+	  Default: 0.05.*/
       MaxNonDualFeasToAdd_Frac,
-      /** When the tableau is total dual feasible and variables from the list
-	  of the not yet fixed indexed variables are added to the formulation,
-	  the number of such columns is limited to this fraction of the
-	  columns currently in the formulation. However, this limit might be
-	  overruled by the hard bounds 
-	  <code>MaxIndexedToPriceToAdd_Min</code> and
-	  <code>MaxIndexedToPriceToAdd_Max</code> (see above). <br>
-	  Values: . Default: 0.05. */
-      MaxIndexedToPriceToAdd_Frac,
       /** The maximum fraction of the violated but not added cuts to be kept
 	  from one iteration to the next. Also see the MaxLeftoverCutNum
 	  parameter.*/

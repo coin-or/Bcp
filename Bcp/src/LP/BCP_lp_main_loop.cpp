@@ -119,27 +119,27 @@ LP:   Terminating and fathoming due to proven high cost.\n",
 	    continue;
 	}
 
-	if (tc & (BCP_ProvenDualInf | BCP_PrimalObjLimReached | BCP_TimeLimit)) {
+	if (tc & (BCP_ProvenDualInf | BCP_PrimalObjLimReached | BCP_TimeLimit)){
 	    // *FIXME* : for now just throw an exception, but *THINK*
 	    p.user->print(true, "LP: ############ Unexpected termcode: %i\n",
 			  lpres. termcode());
 	    throw BCP_fatal_error("Unexpected termcode in BCP_lp_main_loop!\n");
 	}
 
-	if (tc & BCP_Abandoned) {
-	    // *FIXME* : later we might want to prune this node, but continue
-	    throw BCP_fatal_error("LP solver abandoned the lp.\n");
-	}
-
 	// We came here, therefore termcode must have been optimal and the
-	// cost cannot be too high.
+	// cost cannot be too high. OR, the LP solver has abandoned things and
+	// we want to branch through.
 
-	// So far we haven't generated any new variables.
-	varset_changed = false;
+	if (! (tc & BCP_Abandoned)) {
+	  // So termcode must have been optimal and the cost cannot be too
+	  // high.
 
-	if (BCP_lp_fix_vars(p) ||
-	    (p.lp_solver->canDoSimplexInterface() &&
-	     !p.lp_solver->basisIsAvailable())) {
+	  // So far we haven't generated any new variables.
+	  varset_changed = false;
+
+	  if (BCP_lp_fix_vars(p) ||
+	      (p.lp_solver->canDoSimplexInterface() &&
+	       !p.lp_solver->basisIsAvailable())) {
 	    // during variable fixing primal feasibility is lost (must be due
 	    // to logical fixing by the user) OR we can do simplex, but for
 	    // some reason the basis is lost (generally when the LP solver
@@ -147,11 +147,11 @@ LP:   Terminating and fathoming due to proven high cost.\n",
 	    // but keep the same iteration number
 	    --p.node->iteration_count;
 	    continue;
-	}
+	  }
 
-	p.no_more_cuts_cnt = 0;
-	p.no_more_vars_cnt = 0;
-	if (! p.param(BCP_lp_par::MessagePassingIsSerial)) {
+	  p.no_more_cuts_cnt = 0;
+	  p.no_more_vars_cnt = 0;
+	  if (! p.param(BCP_lp_par::MessagePassingIsSerial)) {
 	    // If the message passing environment is really parallel (i.e.,
 	    // while the CG/CP are working we can do something else) then:
 	    // send the current solution to CG, and also to CP if either
@@ -161,100 +161,101 @@ LP:   Terminating and fathoming due to proven high cost.\n",
 	    //    it doesn't hurt and no big time is lost.)
 	    //  - or this is the cut_pool_check_freq-th iteration.
 	    if (p.node->cg != -1 || p.node->cp != -1) {
-		const BCP_message_tag msgtag = BCP_lp_pack_for_cg(p);
-		if (p.node->cg != -1) {
-		    ++p.no_more_cuts_cnt;
-		    p.msg_env->send(p.node->cg, msgtag, p.msg_buf);
+	      const BCP_message_tag msgtag = BCP_lp_pack_for_cg(p);
+	      if (p.node->cg != -1) {
+		++p.no_more_cuts_cnt;
+		p.msg_env->send(p.node->cg, msgtag, p.msg_buf);
+	      }
+	      if (p.node->cp != -1) {
+		if (! (p.node->iteration_count %
+		       p.param(BCP_lp_par::CutPoolCheckFrequency))
+		    || varset_changed) {
+		  ++p.no_more_cuts_cnt;
+		  p.msg_env->send(p.node->cp, msgtag, p.msg_buf);
 		}
-		if (p.node->cp != -1) {
-		    if (! (p.node->iteration_count %
-			   p.param(BCP_lp_par::CutPoolCheckFrequency))
-			|| varset_changed) {
-			++p.no_more_cuts_cnt;
-			p.msg_env->send(p.node->cp, msgtag, p.msg_buf);
-		    }
-		}
+	      }
 	    }
 	    // Similarly, send stuff to the VG/VP
 	    if (p.node->vg != -1 || p.node->vp != -1) {
-		const BCP_message_tag msgtag = BCP_lp_pack_for_vg(p);
-		if (p.node->vg != -1) {
-		    ++p.no_more_vars_cnt;
-		    p.msg_env->send(p.node->vg, msgtag, p.msg_buf);
+	      const BCP_message_tag msgtag = BCP_lp_pack_for_vg(p);
+	      if (p.node->vg != -1) {
+		++p.no_more_vars_cnt;
+		p.msg_env->send(p.node->vg, msgtag, p.msg_buf);
+	      }
+	      if (p.node->vp != -1) {
+		if (! (p.node->iteration_count %
+		       p.param(BCP_lp_par::VarPoolCheckFrequency))
+		    || cutset_changed) {
+		  ++p.no_more_vars_cnt;
+		  p.msg_env->send(p.node->cp, msgtag, p.msg_buf);
 		}
-		if (p.node->vp != -1) {
-		    if (! (p.node->iteration_count %
-			   p.param(BCP_lp_par::VarPoolCheckFrequency))
-			|| cutset_changed) {
-			++p.no_more_vars_cnt;
-			p.msg_env->send(p.node->cp, msgtag, p.msg_buf);
-		    }
-		}
+	      }
 	    }
-	}
+	  }
 
-	BCP_lp_adjust_row_effectiveness(p);
+	  BCP_lp_adjust_row_effectiveness(p);
 
-	// Generate and receive the cuts
-	const int cuts_to_add_cnt =
+	  // Generate and receive the cuts
+	  const int cuts_to_add_cnt =
 	    BCP_lp_generate_cuts(p, varset_changed, from_repricing);
-	// Generate and receive the vars
-	const int vars_to_add_cnt =
+	  // Generate and receive the vars
+	  const int vars_to_add_cnt =
 	    BCP_lp_generate_vars(p, cutset_changed, from_repricing);
 
-	time0 = CoinCpuTime();
-	BCP_solution* sol =
+	  time0 = CoinCpuTime();
+	  BCP_solution* sol =
 	    p.user->generate_heuristic_solution(lpres,
 						p.node->vars, p.node->cuts);
-	p.stat.time_heuristics += CoinCpuTime() - time0;
-	// If the sol is a generic sol then look through the vars in it, and
-	// if any of them has 0 bcpindex then assign an index to it.
-	BCP_solution_generic* gsol = dynamic_cast<BCP_solution_generic*>(sol);
-	if (gsol) {
+	  p.stat.time_heuristics += CoinCpuTime() - time0;
+	  // If the sol is a generic sol then look through the vars in it, and
+	  // if any of them has 0 bcpindex then assign an index to it.
+	  BCP_solution_generic* gsol = dynamic_cast<BCP_solution_generic*>(sol);
+	  if (gsol) {
 	    const int size = gsol->_vars.size();
 	    for (int i = 0; i < size; ++i) {
-		if (gsol->_vars[i]->bcpind() == 0 &&
-		    gsol->_vars[i]->obj_type() == BCP_AlgoObj)
-		    gsol->_vars[i]->set_bcpind(-BCP_lp_next_var_index(p));
+	      if (gsol->_vars[i]->bcpind() == 0 &&
+		  gsol->_vars[i]->obj_type() == BCP_AlgoObj)
+		gsol->_vars[i]->set_bcpind(-BCP_lp_next_var_index(p));
 	    }
-	}
+	  }
 
-	if (sol != NULL) {
+	  if (sol != NULL) {
 	    p.user->send_feasible_solution(sol);
 	    delete sol;
 	    if (p.over_ub(p.node->true_lower_bound)) {
-		BCP_lp_perform_fathom(p, "\
+	      BCP_lp_perform_fathom(p, "\
 LP:   Terminating and fathoming due to proven high cost (good heur soln!).\n",
-				      BCP_Msg_NodeDescription_OverUB_Pruned);
-		return;
+				    BCP_Msg_NodeDescription_OverUB_Pruned);
+	      return;
 	    }
-	}
+	  }
 
-	const bool verb_cut = p.param(BCP_lp_par::LpVerb_GeneratedCutCount);
-	const bool verb_var = p.param(BCP_lp_par::LpVerb_GeneratedVarCount);
-	// Report how many have been generated
-	if (verb_cut && ! verb_var) {
+	  const bool verb_cut = p.param(BCP_lp_par::LpVerb_GeneratedCutCount);
+	  const bool verb_var = p.param(BCP_lp_par::LpVerb_GeneratedVarCount);
+	  // Report how many have been generated
+	  if (verb_cut && ! verb_var) {
 	    p.user->print(true, "LP:   In iteration %i BCP generated",
 			  p.node->iteration_count);
 	    p.user->print(true, " %i cuts before calling branch()\n",
 			  cuts_to_add_cnt);
-	} else if (! verb_cut && verb_var) {
+	  } else if (! verb_cut && verb_var) {
 	    p.user->print(true, "LP:   In iteration %i BCP generated",
 			  p.node->iteration_count);
 	    p.user->print(true, " %i vars before calling branch()\n",
 			  vars_to_add_cnt);
-	} else if (verb_cut && verb_var) {
+	  } else if (verb_cut && verb_var) {
 	    p.user->print(true, "LP:   In iteration %i BCP generated",
 			  p.node->iteration_count);
 	    p.user->print(true," %i cuts , %i vars before calling branch()\n",
 			  cuts_to_add_cnt, vars_to_add_cnt);
-	}
-
-	if (cuts_to_add_cnt == 0 && vars_to_add_cnt == 0 &&
-	    p.param(BCP_lp_par::LpVerb_FinalRelaxedSolution)){
+	  }
+	  
+	  if (cuts_to_add_cnt == 0 && vars_to_add_cnt == 0 &&
+	      p.param(BCP_lp_par::LpVerb_FinalRelaxedSolution)){
 	    // Display solution if nothing is generated
 	    p.user->display_lp_solution(lpres,
 					p.node->vars, p.node->cuts, true);
+	  }
 	}
 
 	// Try to branch

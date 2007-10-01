@@ -227,6 +227,21 @@ enum BCP_feasibility_test{
 
 //-----------------------------------------------------------------------------
 /**
+   This enumerative constant describes how warmstarting information should be
+   passed from the end of a parent node to the beginning of its children. */
+
+enum BCP_warmstart_info {
+  /** Do not use any warmstart information. */
+  BCP_WarmstartNone,
+  /** Use the warmstart info from the end of the root in all search tree
+      nodes. */
+  BCP_WarmstartRoot,
+  /** Use the warmstart info from the end of the parent in the children. */
+  BCP_WarmstartParent
+};
+
+//-----------------------------------------------------------------------------
+/**
    This enumerative constant describes the origin (originating process) of an
    object (variable or cut). 
  */

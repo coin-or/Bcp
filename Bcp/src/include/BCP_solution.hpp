@@ -60,6 +60,9 @@ public:
   /** Return the objective value of the solution. */
   inline virtual double objective_value() const { return _objective; }
 
+  /** Set the objective value of the solution. */
+  inline void set_objective_value(double v) { _objective = v; }
+
   /** Display the solution. */
   void display() const;
 

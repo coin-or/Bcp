@@ -71,6 +71,8 @@ BCP_tm_user::unpack_feasible_solution(BCP_buffer& buf)
 	var->set_bcpind(bcpind < 0 ? -bcpind : bcpind);
 	soln->add_entry(var, val);
     }
+    buf.unpack(val);
+    soln->set_objective_value(val);
 
     return soln;
 }

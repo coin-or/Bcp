@@ -34,6 +34,7 @@
 //#############################################################################
 
 class BCP_lp_prob;
+class BCP_problem_core;
 
 //#############################################################################
 
@@ -255,6 +256,15 @@ public:
 				    BCP_vec<double>& var_new_bd,
 				    BCP_vec<int>& cut_changed_pos,
 				    BCP_vec<double>& cut_new_bd);
+
+    //=========================================================================
+    /** Load the problem specified by core, vars, and cuts into the solver
+	interface. If the solver is an LP solver then the default is fine. If
+	it's an NLP then the user has to do this herself.
+    */
+    virtual void
+    load_problem(OsiSolverInterface& osi, BCP_problem_core* core,
+		 BCP_var_set& vars, BCP_cut_set& cuts);
 
     //=========================================================================
     /** Modify parameters of the LP solver before optimization.

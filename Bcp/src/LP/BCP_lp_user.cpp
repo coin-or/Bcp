@@ -12,6 +12,7 @@
 #include "BCP_USER.hpp"
 #include "BCP_var.hpp"
 #include "BCP_cut.hpp"
+#include "BCP_problem_core.hpp"
 #include "BCP_lp_user.hpp"
 #include "BCP_lp.hpp"
 #include "BCP_lp_pool.hpp"
@@ -21,6 +22,7 @@
 #include "BCP_problem_core.hpp"
 #include "BCP_solution.hpp"
 #include "BCP_functions.hpp"
+#include "BCP_lp_functions.hpp"
 
 //#############################################################################
 // Informational methods for the user
@@ -217,6 +219,127 @@ BCP_lp_user::initialize_new_search_tree_node(const BCP_vec<BCP_var*>& vars,
 {
   print(p->param(BCP_lp_par::ReportWhenDefaultIsExecuted),
 	"LP: Default initialize_new_search_tree_node() executed.\n");
+}
+
+//#############################################################################
+
+void
+BCP_lp_user::load_problem(OsiSolverInterface& osi, BCP_problem_core* core,
+			  BCP_var_set& vars, BCP_cut_set& cuts)
+{
+  const int varnum = vars.size();
+  const int cutnum = cuts.size();
+
+  if (varnum == 0) {
+    // *FIXME* : kill all the processes
+    throw BCP_fatal_error("There are no vars in the description for node %i!\n",
+			  current_index());
+  }
+
+  if (cutnum == 0) {
+    // *FIXME* : kill all the processes
+    throw BCP_fatal_error("There are no cuts in the description for node %i!\n",
+			  current_index());
+  }
+
+  BCP_vec<BCP_col*> cols;
+  BCP_vec<BCP_row*> rows;
+
+  int bvarnum = core->varnum();
+  int bcutnum = core->cutnum();
+
+  if (varnum == 0 || cutnum == 0){
+    throw BCP_fatal_error("No rows or no cols to create a matrix from!\n");
+  }
+
+  BCP_lp_relax* m = 0;
+  if (bvarnum == 0) {
+    // no core vars. doesn't matter if there're any core cuts, the starting
+    // matrix is computed the same way
+    cols.reserve(varnum);
+    vars_to_cols(cuts, vars, cols,
+		 *p->lp_result, BCP_Object_FromTreeManager, false);
+    BCP_vec<double> RLB;
+    BCP_vec<double> RUB;
+    RLB.reserve(cutnum);
+    RUB.reserve(cutnum);
+    BCP_cut_set::const_iterator ci = cuts.begin();
+    BCP_cut_set::const_iterator lastci = cuts.end();
+    for ( ; ci != lastci; ++ci) {
+      RLB.unchecked_push_back((*ci)->lb());
+      RUB.unchecked_push_back((*ci)->ub());
+    }
+    m = new BCP_lp_relax(cols, RLB, RUB);
+    purge_ptr_vector(cols);
+  } else {
+    if (bcutnum == 0) {
+      rows.reserve(cutnum);
+      cuts_to_rows(vars, cuts, rows,
+		   *p->lp_result, BCP_Object_FromTreeManager, false);
+      BCP_vec<double> CLB;
+      BCP_vec<double> CUB;
+      BCP_vec<double> OBJ;
+      CLB.reserve(varnum);
+      CUB.reserve(varnum);
+      OBJ.reserve(varnum);
+      BCP_var_set::const_iterator vi = vars.begin();
+      BCP_var_set::const_iterator lastvi = vars.end();
+      for ( ; vi != lastvi; ++vi) {
+	CLB.unchecked_push_back((*vi)->lb());
+	CUB.unchecked_push_back((*vi)->ub());
+	OBJ.unchecked_push_back((*vi)->obj());
+      }
+      m = new BCP_lp_relax(rows, CLB, CUB, OBJ);
+      purge_ptr_vector(rows);
+    } else {
+      // has core vars and cuts, the starting matrix is the core matrix
+      m = core->matrix;
+    }
+  }
+   
+  // We have the description in p.node. Load it into the lp solver.
+  // First load the core matrix
+  osi.loadProblem(*m,
+		  m->ColLowerBound().begin(), m->ColUpperBound().begin(),
+		  m->Objective().begin(),
+		  m->RowLowerBound().begin(), m->RowUpperBound().begin());
+
+  if (bvarnum > 0 && bcutnum > 0) {
+    //-----------------------------------------------------------------------
+    // We have to add the 'added' stuff only if we had a core matrix
+    //-----------------------------------------------------------------------
+    // Add the Named and Algo cols if there are any (and if we have any cols)
+    if (varnum > bvarnum && bcutnum > 0) {
+      BCP_vec<BCP_var*> added_vars(vars.entry(bvarnum), vars.end());
+      BCP_vec<BCP_cut*> core_cuts(cuts.begin(), cuts.entry(bcutnum));
+      cols.reserve(vars.size());
+      vars_to_cols(core_cuts, added_vars, cols,
+		   *p->lp_result, BCP_Object_FromTreeManager, false);
+      BCP_lp_add_cols_to_lp(cols, &osi);
+      purge_ptr_vector(cols);
+    }
+    //-----------------------------------------------------------------------
+    // Add the Named and Algo rows if there are any (and if we have any such
+    // rows AND if there are core vars)
+    if (cutnum > bcutnum) {
+      BCP_vec<BCP_cut*> added_cuts(cuts.entry(bcutnum), cuts.end());
+      rows.reserve(added_cuts.size());
+      BCP_fatal_error::abort_on_error = false;
+      try {
+	 cuts_to_rows(vars, added_cuts, rows,
+		      *p->lp_result, BCP_Object_FromTreeManager, false);
+      }
+      catch (...) {
+      }
+      BCP_fatal_error::abort_on_error = true;
+      BCP_lp_add_rows_to_lp(rows, &osi);
+      purge_ptr_vector(rows);
+    }
+  } else {
+    // Otherwise (i.e., if we had no core matrix) we just have to get rid of
+    // 'm'.
+    delete m;
+  }
 }
 
 //#############################################################################
@@ -466,6 +589,7 @@ BCP_lp_user::pack_feasible_solution(BCP_buffer& buf, const BCP_solution* sol)
 	buf.pack(values[i]);
 	p->pack_var(*solvars[i]);
     }
+    buf.pack(gensol->objective_value());
 }
 
 //#############################################################################
@@ -855,10 +979,13 @@ BCP_lp_user::try_to_branch(OsiBranchingInformation& branchInfo,
 	    const double * cub = solver->getColUpper();
 	    BCP_vec<BCP_var*>& vars = p->node->vars;
 	    for (int i = numUnsatisfied - 1; i >= 0; --i) {
-		const int ind = choose->candidates()[i];
-		assert(vars[ind]->lb() <= clb[ind]);
-		assert(vars[ind]->ub() >= cub[ind]);
-		vars[ind]->set_lb_ub(clb[ind], cub[ind]);
+	        const int ind =
+		  solver->object(choose->candidates()[i])->columnNumber();
+		if (ind >= 0) {
+		  assert(vars[ind]->lb() <= clb[ind]);
+		  assert(vars[ind]->ub() >= cub[ind]);
+		  vars[ind]->set_lb_ub(clb[ind], cub[ind]);
+		}
 	    }
 		
 	    /* update number of strong iterations etc
@@ -913,6 +1040,12 @@ select_branching_candidates(const BCP_lp_result& lpres,
 {
     print(p->param(BCP_lp_par::ReportWhenDefaultIsExecuted),
 	  "LP: Default select_branching_candidates() executed.\n");
+
+    if (lpres.termcode() & BCP_Abandoned) {
+      // *THINK*: maybe we should branch through...
+      print(true, "\
+LP: ############ LP solver abandoned. Branching through...\n");
+    }
 
     // *THINK* : this branching object selection is very primitive
     // *THINK* : should check for tail-off, could check for branching cuts, etc

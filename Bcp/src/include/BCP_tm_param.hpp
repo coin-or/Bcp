@@ -101,6 +101,13 @@ struct BCP_tm_par{
    
   /** Integer parameters. */
   enum int_params{
+    /** Specifies how warmstart information should be stored in the TM.
+	Possible valueas: BCP_WarmstartNone, BCP_WarmstartRoot,
+	BCP_WarmstartParent. The first is obvious, the second means the root
+	node's warmstart info should be sent out along with each node, the
+	last means the parent's warmstart info should be sent out.
+	Default: BCP_WarmstartParent */
+    WarmstartInfo,
     /** The maximum size of the memory heap the TM can use. If the TM reaches
 	this limit then it converts an LP process into a TS (storage)
 	process). If positive, it's the number of megabytes. 0 indicates the

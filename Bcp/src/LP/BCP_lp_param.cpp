@@ -34,9 +34,6 @@ void BCP_parameter_set<BCP_lp_par>::create_keyword_list() {
     keys.push_back(make_pair(BCP_string("BCP_DoReducedCostFixing"),
 			     BCP_parameter(BCP_CharPar, 
 					   DoReducedCostFixingAtAnything)));
-    keys.push_back(make_pair(BCP_string("BCP_MaintainIndexedVarPricingList"),
-			     BCP_parameter(BCP_CharPar, 
-					   MaintainIndexedVarPricingList)));
     keys.push_back(make_pair(BCP_string("BCP_ReportWhenDefaultIsExecuted"),
 			     BCP_parameter(BCP_CharPar,
 					   ReportWhenDefaultIsExecuted)));
@@ -145,9 +142,6 @@ void BCP_parameter_set<BCP_lp_par>::create_keyword_list() {
     keys.push_back(make_pair(BCP_string("BCP_ScaleMatrix"),
 			     BCP_parameter(BCP_IntPar, 
 					   ScaleMatrix)));
-    keys.push_back(make_pair(BCP_string("BCP_IndexedToPriceStorageSize"),
-			     BCP_parameter(BCP_IntPar, 
-					   IndexedToPriceStorageSize)));
 
     keys.push_back(make_pair(BCP_string("BCP_SlackCutDiscardingStrategy"),
 			     BCP_parameter(BCP_IntPar, 
@@ -174,12 +168,6 @@ void BCP_parameter_set<BCP_lp_par>::create_keyword_list() {
     keys.push_back(make_pair(BCP_string("BCP_MaxNonDualFeasToAdd_Max"),
 			     BCP_parameter(BCP_IntPar, 
 					   MaxNonDualFeasToAdd_Max)));
-    keys.push_back(make_pair(BCP_string("BCP_MaxIndexedToPriceToAdd_Min"),
-			     BCP_parameter(BCP_IntPar, 
-					   MaxIndexedToPriceToAdd_Min)));
-    keys.push_back(make_pair(BCP_string("BCP_MaxIndexedToPriceToAdd_Max"),
-			     BCP_parameter(BCP_IntPar, 
-					   MaxIndexedToPriceToAdd_Max)));
 
     keys.push_back(make_pair(BCP_string("BCP_CutViolationNorm"),
 			     BCP_parameter(BCP_IntPar,
@@ -222,6 +210,9 @@ void BCP_parameter_set<BCP_lp_par>::create_keyword_list() {
     keys.push_back(make_pair(BCP_string("BCP_FeasibilityTest"),
 			     BCP_parameter(BCP_IntPar, 
 					   FeasibilityTest)));
+    keys.push_back(make_pair(BCP_string("BCP_WarmstartInfo"),
+			     BCP_parameter(BCP_IntPar,
+					   WarmstartInfo)));
     keys.push_back(make_pair(BCP_string("BCP_InfoForCG"),
 			     BCP_parameter(BCP_IntPar, 
 					   InfoForCG)));
@@ -245,9 +236,6 @@ void BCP_parameter_set<BCP_lp_par>::create_keyword_list() {
     keys.push_back(make_pair(BCP_string("BCP_MaxNonDualFeasToAdd_Frac"),
 			     BCP_parameter(BCP_DoublePar, 
 					   MaxNonDualFeasToAdd_Frac)));
-    keys.push_back(make_pair(BCP_string("BCP_MaxIndexedToPriceToAdd_Frac"),
-			     BCP_parameter(BCP_DoublePar, 
-					   MaxIndexedToPriceToAdd_Frac)));
     keys.push_back(make_pair(BCP_string("BCP_MaxLeftoverCutFrac"),
 			     BCP_parameter(BCP_DoublePar, 
 					   MaxLeftoverCutFrac)));
@@ -310,7 +298,6 @@ void BCP_parameter_set<BCP_lp_par>::set_default_entries() {
     set_entry(CompareNewVarsToOldOnes, true);
     set_entry(DoReducedCostFixingAtZero, true);
     set_entry(DoReducedCostFixingAtAnything, true);
-    set_entry(MaintainIndexedVarPricingList, true);
     set_entry(MessagePassingIsSerial, false);
     set_entry(ReportWhenDefaultIsExecuted, true);
     set_entry(NoCompressionAtFathom, false);
@@ -349,7 +336,6 @@ void BCP_parameter_set<BCP_lp_par>::set_default_entries() {
     set_entry(NiceLevel, 0);
 
     set_entry(ScaleMatrix, 0);
-    set_entry(IndexedToPriceStorageSize, 1000);
 
     set_entry(SlackCutDiscardingStrategy, BCP_DiscardSlackCutsAtNewIteration);
     set_entry(CutEffectiveCountBeforePool, 1000);
@@ -360,8 +346,6 @@ void BCP_parameter_set<BCP_lp_par>::set_default_entries() {
 
     set_entry(MaxNonDualFeasToAdd_Min, 5);
     set_entry(MaxNonDualFeasToAdd_Max, 200);
-    set_entry(MaxIndexedToPriceToAdd_Min, 5);
-    set_entry(MaxIndexedToPriceToAdd_Max, 200);
 
     set_entry(CutViolationNorm, BCP_CutViolationNorm_Plain);
 
@@ -379,6 +363,7 @@ void BCP_parameter_set<BCP_lp_par>::set_default_entries() {
     set_entry(ChildPreference, BCP_PreferChild_LowBound);
 
     set_entry(FeasibilityTest, BCP_FullTest_Feasible);
+    set_entry(WarmstartInfo, BCP_WarmstartParent);
     set_entry(InfoForCG, BCP_PrimalSolution_Nonzeros);
     set_entry(InfoForVG, BCP_DualSolution_Full);
     //-------------------------------------------------------------------------
@@ -387,7 +372,6 @@ void BCP_parameter_set<BCP_lp_par>::set_default_entries() {
     set_entry(DeletedColToCompress_Frac, 0.0);
     set_entry(DeletedRowToCompress_Frac, 0.0);
     set_entry(MaxNonDualFeasToAdd_Frac, 0.05);
-    set_entry(MaxIndexedToPriceToAdd_Frac, 0.05);
     set_entry(MaxLeftoverCutFrac, 1.0);
     set_entry(IntegerTolerance, 1e-5);
 

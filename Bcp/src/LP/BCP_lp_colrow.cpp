@@ -53,9 +53,11 @@ bool BCP_lp_fix_vars(BCP_lp_prob& p)
 
    BCP_lp_check_ub(p);
 
-   p.user->reduced_cost_fixing(lpres.dj(), lpres.x(),
-			       p.ub() - lpres.objval() - p.granularity(),
-			       vars, newly_changed);
+   if (lpres.dj()) {
+     p.user->reduced_cost_fixing(lpres.dj(), lpres.x(),
+				 p.ub() - lpres.objval() - p.granularity(),
+				 vars, newly_changed);
+   }
    if (newly_changed > 0 && p.param(BCP_lp_par::LpVerb_VarTightening)) {
       printf("LP: Reduced cost fixing has changed the bounds on %i vars\n",
 	     newly_changed);

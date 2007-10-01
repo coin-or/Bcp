@@ -376,28 +376,5 @@ void BCP_check_parameters(BCP_tm_prob& p)
 
 void BCP_sanity_checks(BCP_tm_prob& p)
 {
-    const BCP_node_change* root_desc =
-	p.search_tree.root()->_data._desc.GetRawPtr();
-
-    if (p.core->varnum() == 0 &&
-	root_desc->var_change.added_num() == 0) {
-	// *FIXME* : kill all the processes
-	throw BCP_fatal_error("\
-          There are no vars either in core nor in root!\n\n\
-A possible source of this error is that the argument list for the\n\
-create_root() method has changed. Now there's an extra user_data\n\
-argument. Please, update your own implementation of create_root().\n");
-    }
-
-    if (p.core->cutnum() == 0 &&
-	root_desc->cut_change.added_num() == 0) {
-	// *FIXME* : kill all the processes
-	throw BCP_fatal_error("\
-          There are no cuts neither in core nor in root!\n\n\
-A possible source of this error is that the argument list for the\n\
-create_root() method has changed. Now there's an extra user_data\n\
-argument. Please, update your own implementation of create_root().\n");
-    }
-
 }
 

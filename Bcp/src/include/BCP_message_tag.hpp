@@ -99,6 +99,8 @@ enum BCP_message_tag{
 
    /**@name Messages from the Tree Manager to an LP process */
    /*@{*/
+   /** The warmstart information at the end of the root */
+   BCP_Msg_WarmstartRoot,     // TM -> LP
    /** TM sends the description of a new search tree node. */   
    BCP_Msg_ActiveNodeData,    // TM -> LP
    /** TM warns an LP process that the second phase will start. (An LP

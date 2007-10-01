@@ -313,6 +313,16 @@ TM: Solution value: %f (best solution value so far: %f)\n",
 	}
 	break;
 
+    case BCP_Msg_WarmstartRoot:
+        {
+	    BCP_warmstart* ws = packer->unpack_warmstart(msg_buf);
+	    msg_buf.clear();
+	    packer->pack_warmstart(ws, msg_buf);
+	    msg_env->multicast(*slaves.all, BCP_Msg_WarmstartRoot);
+	    delete ws;
+	}
+	break;
+
     case BCP_Msg_RequestCutIndexSet:
 	sender = msg_buf.sender();
 	msg_buf.clear();

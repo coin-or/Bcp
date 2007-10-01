@@ -68,6 +68,7 @@ BCP_lp_prob::BCP_lp_prob(int my_id, int parent) :
    core_as_change(new BCP_problem_core_change),
    node(new BCP_lp_node),
    parent(new BCP_lp_parent),
+   warmstartRoot(NULL),
    lp_result(new BCP_lp_result),
    var_bound_changes_since_logical_fixing(0),
    local_var_pool(new BCP_lp_var_pool),
@@ -92,6 +93,7 @@ BCP_lp_prob::~BCP_lp_prob() {
 
    delete node;
    delete parent;
+   delete warmstartRoot;
 
    delete lp_result;
    purge_ptr_vector(slack_pool);

@@ -442,11 +442,30 @@ int BCP_lp_send_node_description(BCP_lp_prob& p,
 	 throw BCP_fatal_error("\
 LP: there is ws info in BCP_lp_send_node_description()!\n");
       }
-      // get and pack the warmstart info
-      CoinWarmStart* ws = p.lp_solver->getWarmStart();
-      p.node->warmstart = BCP_lp_convert_CoinWarmStart(p, ws);
-      BCP_lp_pack_warmstart(p, del_vars, del_cuts);
-      BCP_lp_pack_user_data(p);
+      // If necessary, get and pack the warmstart info
+      CoinWarmStart* ws = NULL;
+      switch (p.param(BCP_lp_par::WarmstartInfo)) {
+      case BCP_WarmstartNone:
+	break;
+      case BCP_WarmstartRoot:
+	if (node.index == 0) { // we are in the root
+	  ws = p.lp_solver->getWarmStart();
+	  BCP_warmstart* bws = BCP_lp_convert_CoinWarmStart(p, ws);
+	  const bool def = p.param(BCP_lp_par::ReportWhenDefaultIsExecuted);
+	  BCP_buffer wsbuf;
+	  p.packer->pack_warmstart(bws, wsbuf, def);
+	  p.msg_env->send(p.get_parent() /*tree_manager*/,
+			  BCP_Msg_WarmstartRoot, wsbuf);
+	  p.warmstartRoot = ws;
+	  delete bws;
+	}
+	break;
+      case BCP_WarmstartParent:
+	ws = p.lp_solver->getWarmStart();
+	p.node->warmstart = BCP_lp_convert_CoinWarmStart(p, ws);
+	BCP_lp_pack_warmstart(p, del_vars, del_cuts);
+	BCP_lp_pack_user_data(p);
+      }
    }
 
    int keep = -1;
