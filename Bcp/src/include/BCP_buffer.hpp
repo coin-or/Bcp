@@ -53,8 +53,9 @@ public:
 
        Note that:
        <ol>
-         <li>The size of the buffer never decreases. The buffer size increases
-	     when the current size is not sufficient for the message.
+         <li>The max size of the buffer never decreases. The buffer max size
+             increases when the current max size is not sufficient for the
+	     message.
 	 <li>With normal usage for incoming messages <code>_size</code> stays
 	     constant while reading out the message and <code>_pos</code> moves
 	     forward in the buffer.
@@ -70,7 +71,7 @@ public:
    /** The process id of the sender of the last <em>received</em> message.
        This member has no meaning if the buffer holds an outgoing message. */ 
    int    _sender;
-   /** The next read/write position in the buffer. */
+   /** The next read position in the buffer. */
    size_t _pos;
    /** The amount of memory allocated for the buffer. */
    size_t _max_size;
@@ -99,12 +100,17 @@ public:
 
    /**@name Modifying methods */
    /*@{*/
-   /** Position the read/write head in the buffer. Must be between 0 and
-       size(). */
+   /** Position the read head in the buffer. Must be between 0 and size(). */
    inline void set_position(const int pos) throw(BCP_fatal_error) {
-     if (pos < 0 || pos >= size())
+     if (pos < 0 || pos > size())
        throw BCP_fatal_error("Incorrest buffer position setting.\n");
      _pos = pos;
+   }
+   /** Cut off the end of the buffer. Must be between 0 and size(). */
+   inline void set_size(const int s) throw(BCP_fatal_error) {
+     if (s < 0 || s > size())
+       throw BCP_fatal_error("Incorrest buffer position setting.\n");
+     _size = s;
    }
    /** Set the message tag on the buffer */
    inline void set_msgtag(const BCP_message_tag tag) { _msgtag = tag; }

@@ -27,6 +27,7 @@
 //#############################################################################
 // Informational methods for the user
 double BCP_lp_user::upper_bound() const    { return p->ub(); }
+bool BCP_lp_user::over_ub(double lb) const { return p->over_ub(lb); }
 int BCP_lp_user::current_phase() const     { return p->phase; }
 int BCP_lp_user::current_level() const     { return p->node->level; }
 int BCP_lp_user::current_index() const     { return p->node->index; }
@@ -163,12 +164,28 @@ BCP_lp_user::process_id() const
     return p->get_process_id();
 }
 
+/** the process id of the parent */
+int 
+BCP_lp_user::parent() const
+{
+    return p->get_parent();
+}
+
 /** Send a message to a particular process */
 void
-BCP_lp_user::send_message(const int target, const BCP_buffer& buf)
+BCP_lp_user::send_message(const int target, const BCP_buffer& buf,
+			  BCP_message_tag tag)
 {
-    p->msg_env->send(target, BCP_Msg_User, buf);
+    p->msg_env->send(target, tag, buf);
 }    
+
+/** Wait for a message and receive it */
+void
+BCP_lp_user::receive_message(const int sender, BCP_buffer& buf,
+			     BCP_message_tag tag)
+{
+    p->msg_env->receive(sender, tag, buf, -1);
+}
 
 /** Broadcast the message to all processes of the given type */
 void

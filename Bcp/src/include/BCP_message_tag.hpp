@@ -113,6 +113,9 @@ enum BCP_message_tag{
    BCP_Msg_CutIndexSet,        // TM -> LP
    /** Send index set for variables to be generated in the future. */
    BCP_Msg_VarIndexSet,        // TM -> LP
+   /** Send a list of process ids the LP can use to do distributed strong
+       branching */
+   BCP_Msg_ProcessList,        // TM -> LP
    /*@}*/
 
    /**@name Messages from an LP process to the Tree Manager */
@@ -147,6 +150,13 @@ enum BCP_message_tag{
    /** Request an index set for variables to be genarated. Empty
        message body. */
    BCP_Msg_RequestVarIndexSet, // LP -> TM
+   /** Request a list of process ids the LP can use to do distributed strong
+       branching */
+   BCP_Msg_RequestProcessList, // LP -> TM
+   /** An LP process (that is used as a strong branching node) indicates that
+       it's finished. The message also contains data for pseudocost
+       computation. */
+   BCP_Msg_SBnodeFinished,     // LP -> TM
    /*@}*/
 
    /**@name Messages from an LP process to a Cut Generator or Cut Pool

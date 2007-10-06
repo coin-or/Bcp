@@ -102,6 +102,9 @@ public:
     /*@{*/
     /// Return what is the best known upper bound (might be BCP_DBL_MAX)
     double upper_bound() const;
+    /** Return true / false depending on whether the lb argument is over the
+	current upper bound or not. */
+    bool over_ub(double lb) const;
     /// Return the phase the algorithm is in
     int current_phase() const;
     /// Return the level of the search tree node being processed
@@ -197,9 +200,16 @@ public:
     //=========================================================================
     /** What is the process id of the current process */
     int process_id() const;
+    /** the process id of the parent */
+    int parent() const;
     /** Send a message to a particular process */
     void
-    send_message(const int target, const BCP_buffer& buf);
+    send_message(const int target, const BCP_buffer& buf,
+		 BCP_message_tag tag = BCP_Msg_User);
+    /** Wait for a message and receive it */
+    void
+    receive_message(const int sender, BCP_buffer& buf,
+		    BCP_message_tag tag = BCP_Msg_User);
     /** Broadcast the message to all processes of the given type */
     void
     broadcast_message(const BCP_process_t proc_type, const BCP_buffer& buf);

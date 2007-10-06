@@ -37,6 +37,10 @@ BCP_lp_prob::process_message()
   int node_itcnt;
 
   switch (msg_buf.msgtag()){
+  case BCP_Msg_User:
+    user->process_message(msg_buf);
+    break;
+
   case BCP_Msg_InitialUserInfo:
     throw BCP_fatal_error("\
 LP: BCP_Msg_InitialUserInfo arrived in BCP_lp_prob::process_message().\n");
@@ -214,11 +218,6 @@ LP: BCP_Msg_InitialUserInfo arrived in BCP_lp_prob::process_message().\n");
     msg_env->send(get_parent() /*ree_manager*/,
 		  BCP_Msg_LpStatistics, msg_buf);
     return;
-
-    //     case BCP_Msg_UserMessageToLp:
-    //       user->unpack_user_message(*this, msg_buf);
-    //       msg_buf.clear();
-    //       break;
 
   default:
     printf("Unknown message type arrived to LP: %i\n", msg_buf.msgtag());
