@@ -38,16 +38,16 @@ BCP_tm_assign_processes(BCP_tm_prob& p, BCP_tm_node* node)
     bool so_far_so_good = true;
 
     if (so_far_so_good) {
-	lp = p.slaves.lp->get_free_proc();
+        lp = p.lp_scheduler.request_node_id();
 	if (lp == -1)
 	    return false;
 	if (! p.msg_env->alive(lp)) {
 	    BCP_tm_remove_lp(p, lp);
-	    so_far_so_good = false;
+	    return false;
 	}
     }
 
-#if ! defined(BCP_CG_VG_PROCESS_HANDLING_BROKEN)
+#if ! defined(BCP_ONLY_LP_PROCESS_HANDLING_WORKS)
     if (so_far_so_good && p.slaves.cg) {
 	cg = p.slaves.cg->get_free_proc();
 	if (cg == -1)
@@ -67,7 +67,6 @@ BCP_tm_assign_processes(BCP_tm_prob& p, BCP_tm_node* node)
 	    so_far_so_good = false;
 	}
     }
-#endif
 
     if (so_far_so_good && p.slaves.cp) {
 	while (true) {
@@ -116,6 +115,7 @@ BCP_tm_assign_processes(BCP_tm_prob& p, BCP_tm_node* node)
 	    }
 	} 
     }
+#endif
 
     if (! so_far_so_good)
 	return BCP_tm_assign_processes(p, node);
@@ -266,12 +266,12 @@ void dump_procinfo(BCP_tm_prob& p, const char* str)
 
 BCP_node_start_result BCP_tm_start_new_nodes(BCP_tm_prob& p)
 {
-    while (p.slaves.lp->free_num()){
+    while (p.lp_scheduler.has_free_node_id()) {
 	switch (BCP_tm_start_one_node(p)){
 	case BCP_NodeStart_NoNode:
 	    return BCP_NodeStart_NoNode;
 	case BCP_NodeStart_Error:
-	    if (p.slaves.lp->free_num() != 0) {
+	    if (p.lp_scheduler.has_free_node_id()) {
 		throw BCP_fatal_error("\
 TM: couldn't start new node but there's a free LP ?!\n");
 	    }

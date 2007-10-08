@@ -4,6 +4,7 @@
 #include <map>
 
 #include "BCP_math.hpp"
+#include "BCP_process.hpp"
 #include "BCP_lp.hpp"
 #include "BCP_tm.hpp"
 #include "BCP_problem_core.hpp"

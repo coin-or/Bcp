@@ -79,7 +79,7 @@ BCP_tm_wrapup(BCP_tm_prob* tm, BCP_lp_prob* lp,
 
     if (! lp) {
 	// Now ask every process
-        const BCP_vec<int>& lps = tm->slaves.lp->procs();
+        const std::vector<int>& lps = tm->lp_procs;
         const int num_lp = lps.size();
 	BCP_lp_statistics this_lp_stat;
    

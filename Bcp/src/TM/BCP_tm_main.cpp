@@ -220,6 +220,7 @@ Number of process in parameter file %d > n_proc in mpirun -np %d!\n",
     // their parameters, core and user info.
     BCP_tm_notify_processes(p);
 
+#if ! defined(BCP_ONLY_LP_PROCESS_HANDLING_WORKS)
     // Initialize the number of leaves assigned to CP's and VP's as 0
     if (p.param(BCP_tm_par::CpProcessNum) > 0) {
       for (int i = p.slaves.cp->procs().size() - 1; i >= 0; --i)
@@ -229,6 +230,7 @@ Number of process in parameter file %d > n_proc in mpirun -np %d!\n",
       for (int i = p.slaves.vp->procs().size() - 1; i >= 0; --i)
 	p.leaves_per_vp.push_back(std::make_pair(p.slaves.vp->procs()[i], 0));
     }
+#endif
 
     // Initialize the root of the search tree (can't invoke directly
     // p.user->create_root(), b/c the root might contain extra vars/cuts and
@@ -282,7 +284,7 @@ bool BCP_tm_do_one_phase(BCP_tm_prob& p)
     BCP_buffer& buf = p.msg_buf;
     // While there are nodes waiting to be processed (or being processed) we
     // don't go to the next phase
-    while (!p.candidate_list.empty() > 0 || p.slaves.lp->busy_num() > 0){
+    while (!p.candidate_list.empty() > 0 || p.lp_scheduler.numNodeIds() > 0){
 	// Fill up as many free LP processes as we can
 	if (BCP_tm_start_new_nodes(p) == BCP_NodeStart_Error)
 	    // Error indicates that something has died
@@ -296,10 +298,10 @@ bool BCP_tm_do_one_phase(BCP_tm_prob& p)
 	// timeout is set to 0, so we just check the queue, but not wait.
 	const double t0 = CoinCpuTime();
 	p.msg_env->receive(BCP_AnyProcess, BCP_Msg_AnyMessage, buf,
-			   p.slaves.lp->busy_num() == 0 ?
+			   p.lp_scheduler.numNodeIds() == 0 ?
 			   0 : p.param(BCP_tm_par::TmTimeout));
 	const double t1 = CoinCpuTime();
-	p.stat.update_wait_time(p.slaves.lp->busy_num(), t1-t0);
+	p.stat.update_wait_time(p.lp_scheduler.numNodeIds(), t1-t0);
 	p.stat.print(false /* not final */, t1 - p.start_time);
 	try {
 	    p.process_message();

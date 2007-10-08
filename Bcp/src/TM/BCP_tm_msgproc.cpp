@@ -18,14 +18,16 @@ BCP_tm_change_config(BCP_tm_prob& p, BCP_buffer& buf);
 
 void BCP_tm_idle_processes(BCP_tm_prob& p)
 {
-    p.msg_env->multicast(*p.slaves.all, BCP_Msg_FinishedBCP);
+    p.msg_env->multicast(p.lp_procs.size(), &p.lp_procs[0],
+			 BCP_Msg_FinishedBCP);
 }
 
 //#############################################################################
 
 void BCP_tm_stop_processes(BCP_tm_prob& p)
 {
-    p.msg_env->multicast(*p.slaves.all, BCP_Msg_FinishedBCP);
+    p.msg_env->multicast(p.lp_procs.size(), &p.lp_procs[0],
+			 BCP_Msg_FinishedBCP);
 }
 
 //#############################################################################
@@ -34,22 +36,20 @@ void BCP_tm_start_processes(BCP_tm_prob& p)
 {
     const BCP_string& exe = p.param(BCP_tm_par::ExecutableName);
 
-    p.slaves.all = new BCP_proc_array;
-
     if (p.param(BCP_tm_par::LpProcessNum) > 0) {
 	const bool debug = p.param(BCP_tm_par::DebugLpProcesses) != 0;
 	const int  num = p.param(BCP_tm_par::LpProcessNum);
 	const BCP_vec<BCP_string>& machines = p.param(BCP_tm_par::LpMachines);
-	if (machines.size() == 0) {
-	    p.slaves.lp= p.msg_env->start_processes(exe, num, debug);
-	} else {
-	    p.slaves.lp= p.msg_env->start_processes(exe, num, machines, debug);
+	p.lp_procs.insert(p.lp_procs.end(), num, -1);
+	bool success = machines.size() == 0 ?
+	  p.msg_env->start_processes(exe, num, debug, &p.lp_procs[0]) :
+	  p.msg_env->start_processes(exe, num, machines, debug, &p.lp_procs[0]);
+	if (! success) {
+	  throw BCP_fatal_error("Failed to start up the LP processes\n");
 	}
-	p.slaves.all->add_procs(p.slaves.lp->procs().begin(),
-				p.slaves.lp->procs().end());
     }
 
-#if ! defined(BCP_CG_VG_PROCESS_HANDLING_BROKEN)
+#if ! defined(BCP_ONLY_LP_PROCESS_HANDLING_WORKS)
     if (p.param(BCP_tm_par::CgProcessNum) > 0) {
 	const bool debug = p.param(BCP_tm_par::DebugCgProcesses) != 0;
 	const int  num = p.param(BCP_tm_par::CgProcessNum);
@@ -75,7 +75,6 @@ void BCP_tm_start_processes(BCP_tm_prob& p)
 	p.slaves.all->add_procs(p.slaves.vg->procs().begin(),
 				p.slaves.vg->procs().end());
     }
-#endif
 
     if (p.param(BCP_tm_par::CpProcessNum) > 0) {
 	const bool debug = p.param(BCP_tm_par::DebugCpProcesses) != 0;
@@ -102,59 +101,74 @@ void BCP_tm_start_processes(BCP_tm_prob& p)
 	p.slaves.all->add_procs(p.slaves.vp->procs().begin(),
 				p.slaves.vp->procs().end());
     }
+#endif
 }
 
 //#############################################################################
 
 void BCP_tm_notify_about_new_phase(BCP_tm_prob& p)
 {
-    p.msg_env->multicast(*p.slaves.all, BCP_Msg_NextPhaseStarts);
+  p.msg_env->multicast(p.lp_procs.size(), &p.lp_procs[0],
+		       BCP_Msg_NextPhaseStarts);
 }
 
 //#############################################################################
 
-template <class T> void
+template <typename T> void
 BCP_tm_initialize_process_type(BCP_tm_prob& p,
 			       BCP_process_t ptype,
 			       BCP_parameter_set<T>& par,
-			       const BCP_vec<int>& procs)
+			       int num, const int* pids)
 {
-    if (procs.empty())
+    if (num == 0) {
 	return;
+    }
 
     p.msg_buf.clear();
     p.msg_buf.pack(ptype);
     p.msg_buf.pack(p.ub());
-    p.msg_env->multicast(procs, BCP_Msg_ProcessType, p.msg_buf);
+    p.msg_env->multicast(num, pids, BCP_Msg_ProcessType, p.msg_buf);
 
     p.msg_buf.clear();
     par.pack(p.msg_buf);
-    p.msg_env->multicast(procs, BCP_Msg_ProcessParameters, p.msg_buf);
+    p.msg_env->multicast(num, pids, BCP_Msg_ProcessParameters, p.msg_buf);
 
     p.msg_buf.clear();
     p.core->pack(p.msg_buf);
-    p.msg_env->multicast(procs, BCP_Msg_CoreDescription, p.msg_buf);
+    p.msg_env->multicast(num, pids, BCP_Msg_CoreDescription, p.msg_buf);
 
     p.msg_buf.clear();
     p.user->pack_module_data(p.msg_buf, ptype);
-    p.msg_env->multicast(procs, BCP_Msg_InitialUserInfo, p.msg_buf);
+    p.msg_env->multicast(num, pids, BCP_Msg_InitialUserInfo, p.msg_buf);
+}
+
+//-----------------------------------------------------------------------------
+
+template <typename T> void
+BCP_tm_initialize_process_type(BCP_tm_prob& p,
+			       BCP_process_t ptype,
+			       BCP_parameter_set<T>& par,
+			       const std::vector<int>& pids)
+{
+  BCP_tm_initialize_process_type(p, ptype, par, pids.size(), &pids[0]);
 }
 
 //#############################################################################
 
 void
 BCP_tm_notify_process_type(BCP_tm_prob& p, BCP_process_t ptype,
-			   const BCP_vec<int>* procs)
+			   int num, const int* pids)
 {
     switch (ptype) {
     case BCP_ProcessType_LP:
 	BCP_tm_initialize_process_type(p, BCP_ProcessType_LP, p.slave_pars.lp,
-				       procs ? *procs : p.slaves.lp->procs());
+				       num, pids);
 	break;
     case BCP_ProcessType_TS:
 	BCP_tm_initialize_process_type(p, BCP_ProcessType_TS, p.slave_pars.ts,
-				       *procs);
+				       num, pids);
 	break;
+#if ! defined(BCP_ONLY_LP_PROCESS_HANDLING_WORKS)
     case BCP_ProcessType_CP:
 // 	BCP_tm_initialize_process_type(p, BCP_ProcessType_CP, p.slave_pars.cp,
 // 				       procs ? *procs : p.slaves.cp->procs());
@@ -163,7 +177,6 @@ BCP_tm_notify_process_type(BCP_tm_prob& p, BCP_process_t ptype,
 // 	BCP_tm_initialize_process_type(p, BCP_ProcessType_VP, p.slave_pars.vp,
 // 				       procs ? *procs : p.slaves.vp->procs());
 	break;
-#if ! defined(BCP_CG_VG_PROCESS_HANDLING_BROKEN)
     case BCP_ProcessType_CG:
 	BCP_tm_initialize_process_type(p, BCP_ProcessType_CG, p.slave_pars.cg,
 				       procs ? *procs : p.slaves.cg->procs());
@@ -178,17 +191,63 @@ BCP_tm_notify_process_type(BCP_tm_prob& p, BCP_process_t ptype,
     }
 }
 
+//-----------------------------------------------------------------------------
+
+void
+BCP_tm_notify_process_type(BCP_tm_prob& p, BCP_process_t ptype,
+			   const std::vector<int>& pids)
+{
+  BCP_tm_notify_process_type(p, ptype, pids.size(), &pids[0]);
+}
+  
 //#############################################################################
 
-void BCP_tm_notify_processes(BCP_tm_prob& p)
+void
+BCP_tm_notify_processes(BCP_tm_prob& p)
 {
-    BCP_tm_notify_process_type(p, BCP_ProcessType_LP, &p.slaves.lp->procs());
-#if ! defined(BCP_CG_VG_PROCESS_HANDLING_BROKEN)
+    BCP_tm_notify_process_type(p, BCP_ProcessType_LP, p.lp_procs);
+#if ! defined(BCP_ONLY_LP_PROCESS_HANDLING_WORKS)
     BCP_tm_notify_process_type(p, BCP_ProcessType_CG, &p.slaves.cg->procs());
     BCP_tm_notify_process_type(p, BCP_ProcessType_VG, &p.slaves.vg->procs());
-#endif
     BCP_tm_notify_process_type(p, BCP_ProcessType_CP, &p.slaves.cp->procs());
     BCP_tm_notify_process_type(p, BCP_ProcessType_VP, &p.slaves.vp->procs());
+#endif
+}
+
+//#############################################################################
+
+void
+BCP_tm_broadcast_ub(BCP_tm_prob& p)
+{
+  p.msg_buf.clear();
+  p.msg_buf.pack(p.ub());
+  p.msg_env->multicast(p.lp_procs.size(), &p.lp_procs[0],
+		       BCP_Msg_UpperBound, p.msg_buf);
+#if ! defined(BCP_ONLY_LP_PROCESS_HANDLING_WORKS)
+#endif
+}
+
+//#############################################################################
+
+void
+BCP_tm_rebroadcast_root_warmstart(BCP_tm_prob& p)
+{
+  BCP_warmstart* ws = p.packer->unpack_warmstart(p.msg_buf);
+  p.msg_buf.clear();
+  p.packer->pack_warmstart(ws, p.msg_buf);
+  p.msg_env->multicast(p.lp_procs.size(), &p.lp_procs[0],
+		       BCP_Msg_WarmstartRoot, p.msg_buf);
+#if ! defined(BCP_ONLY_LP_PROCESS_HANDLING_WORKS)
+#endif
+}
+
+//#############################################################################
+
+void
+BCP_tm_process_SB_info(BCP_tm_prob& p)
+{
+  int sender = p.msg_buf.sender();
+  p.lp_scheduler.release_sb_id(sender);
 }
 
 //#############################################################################
@@ -211,7 +270,7 @@ BCP_tm_prob::process_message()
     // Of course, this makes sense only if the computing environment in NOT
     // serial.
     static int msg_count = 0;
-    static const int test_frequency = 1;
+    // static const int test_frequency = 1;
 
     ++msg_count;
 
@@ -302,10 +361,7 @@ TM: Solution value: %f (best solution value so far: %f)\n",
 		    ub(new_sol->objective_value());
 		    delete feas_sol;
 		    feas_sol = new_sol;
-		    msg_buf.clear();
-		    msg_buf.pack(new_sol->objective_value());
-		    msg_env->multicast(*slaves.all, BCP_Msg_UpperBound,
-				       msg_buf);
+		    BCP_tm_broadcast_ub(*this);
 		} else {
 		    delete new_sol;
 		}
@@ -313,14 +369,12 @@ TM: Solution value: %f (best solution value so far: %f)\n",
 	}
 	break;
 
+    case BCP_Msg_SBnodeFinished:
+        BCP_tm_process_SB_info(*this);
+	break;
+
     case BCP_Msg_WarmstartRoot:
-        {
-	    BCP_warmstart* ws = packer->unpack_warmstart(msg_buf);
-	    msg_buf.clear();
-	    packer->pack_warmstart(ws, msg_buf);
-	    msg_env->multicast(*slaves.all, BCP_Msg_WarmstartRoot);
-	    delete ws;
-	}
+        BCP_tm_rebroadcast_root_warmstart(*this);
 	break;
 
     case BCP_Msg_RequestCutIndexSet:
@@ -413,6 +467,8 @@ Unknown message in BCP_tm_prob::process_message.\n");
     const double t = CoinCpuTime() - start_time;
     const bool time_is_over = t > param(BCP_tm_par::MaxRunTime);
 
+    /* FIXME: for now we disable testing the machine... */
+#if ! defined(BCP_ONLY_LP_PROCESS_HANDLING_WORKS)
     if (! param(BCP_tm_par::MessagePassingIsSerial) &&
 	msg_count % test_frequency == 0) {
 	// run the machine testing while it returns false (i.e., it did not
@@ -421,6 +477,7 @@ Unknown message in BCP_tm_prob::process_message.\n");
 	if (slaves.lp->procs().size() == 0)
 	    throw BCP_fatal_error("TM: No LP process left to compute with.\n");
     }
+#endif
 
     if (time_is_over) {
 	const double lb = search_tree.true_lower_bound(search_tree.root());
@@ -433,6 +490,8 @@ TM: Best lower bound in this phase: %f\n", lb);
 
 //#############################################################################
 
+/* FIXME: for now we disable testing the machine... */
+#if ! defined(BCP_ONLY_LP_PROCESS_HANDLING_WORKS)
 bool
 BCP_tm_test_machine(BCP_tm_prob& p)
 {
@@ -453,7 +512,7 @@ BCP_tm_test_machine(BCP_tm_prob& p)
       continue_testing = false;
     }
 
-#if ! defined(BCP_CG_VG_PROCESS_HANDLING_BROKEN)
+#if ! defined(BCP_ONLY_LP_PROCESS_HANDLING_WORKS)
     int i;
     if (continue_testing && p.slaves.cg) {
 	i = p.slaves.cg->index_of_proc(dead_process);
@@ -478,11 +537,14 @@ BCP_tm_test_machine(BCP_tm_prob& p)
 
     return false;
 }
+#endif
 
 //#############################################################################
 
 void BCP_tm_modify_pool_counters(BCP_tm_prob& p, BCP_tm_node* node)
 {
+/* FIXME: we don't have pools anyway... */
+#if ! defined(BCP_ONLY_LP_PROCESS_HANDLING_WORKS)
     if (node->cp != -1) {
 	BCP_vec< std::pair<int, int> >::iterator proc =
 	    BCP_tm_identify_process(p.leaves_per_cp, node->cp);
@@ -505,13 +567,18 @@ TM: non-existing VP was assigned to a just pruned node.\n");
 	if (--proc->second == 0)
 	    p.slaves.vp->set_proc_free(proc->first);
     }
+#endif
 }
 
 //#############################################################################
 
+/* FIXME: for now we disable testing the machine... */
 void
 BCP_tm_remove_lp(BCP_tm_prob& p, const int dead_pid)
 {
+  printf("For now we can't remove dead processes...\n");
+  abort();
+#if ! defined(BCP_ONLY_LP_PROCESS_HANDLING_WORKS)
     BCP_tm_node* node = p.active_nodes[dead_pid];
     if (node) {
 	if (node->lp != dead_pid)
@@ -539,7 +606,7 @@ BCP_tm_remove_lp(BCP_tm_prob& p, const int dead_pid)
 	p.candidate_list.push(node, false);
     }
 
-#if ! defined(BCP_CG_VG_PROCESS_HANDLING_BROKEN)
+#if ! defined(BCP_ONLY_LP_PROCESS_HANDLING_WORKS)
     int proc;
     if (p.slaves.cg) {
 	proc = p.slaves.cg->procs()[index];
@@ -555,9 +622,10 @@ BCP_tm_remove_lp(BCP_tm_prob& p, const int dead_pid)
 
     p.slaves.lp->delete_proc(dead_pid);
     p.slaves.all->delete_proc(dead_pid);
+#endif
 }
 
-#if ! defined(BCP_CG_VG_PROCESS_HANDLING_BROKEN)
+#if ! defined(BCP_ONLY_LP_PROCESS_HANDLING_WORKS)
 void
 BCP_tm_remove_cg(BCP_tm_prob& p, const int index)
 {
@@ -578,14 +646,17 @@ BCP_tm_remove_vg(BCP_tm_prob& p, const int index)
 void
 BCP_tm_unpack_priced_root(BCP_tm_prob& p, BCP_buffer& buf)
 {
+    abort();
+    // BROKEN: multistage is BROKEN
+#if 0
     // only a BCP_named_pricing_list is sent over, unpack it.
     BCP_tm_node* root = p.search_tree.root();
 
-    // BROKEN: multistage is BROKEN
     p.flags.root_pricing_unpacked = true;
 
     BCP_tm_free_procs_of_node(p, root);
     p.active_nodes.erase(root->lp);
+#endif
 }
 
 //#############################################################################
@@ -593,8 +664,8 @@ BCP_tm_unpack_priced_root(BCP_tm_prob& p, BCP_buffer& buf)
 void
 BCP_tm_free_procs_of_node(BCP_tm_prob& p, BCP_tm_node* node)
 {
-    p.slaves.lp->set_proc_free(node->lp);
-#if ! defined(BCP_CG_VG_PROCESS_HANDLING_BROKEN)
+  p.lp_scheduler.release_node_id(node->lp);
+#if ! defined(BCP_ONLY_LP_PROCESS_HANDLING_WORKS)
     if (node->cg != -1)
 	p.slaves.cg->set_proc_free(node->cg);
     if (node->vg != -1)
@@ -609,6 +680,8 @@ BCP_tm_free_procs_of_node(BCP_tm_prob& p, BCP_tm_node* node)
 static void
 BCP_tm_change_config(BCP_tm_prob& p, BCP_buffer& buf)
 {
+  /* FIXME: Do not allow config change for now */
+#if 0
     int i;
     int sender = buf.sender();
 
@@ -644,7 +717,7 @@ BCP_tm_change_config(BCP_tm_prob& p, BCP_buffer& buf)
 
     // Check that everything works out fine
 
-#if ! defined(BCP_CG_VG_PROCESS_HANDLING_BROKEN)
+#if ! defined(BCP_ONLY_LP_PROCESS_HANDLING_WORKS)
     // At least for now cg_num/vg_num must be the same as lp_num or must be 0
     if (p.slaves.cg->size() > 0) {
 	if (cg_num != lp_num) {
@@ -692,7 +765,7 @@ BCP: config change: VG's are not running thus no new VG's can be started.\
 			       new_lps->procs().end());
 	BCP_tm_notify_process_type(p, BCP_ProcessType_LP, &new_lps->procs());
     }
-#if ! defined(BCP_CG_VG_PROCESS_HANDLING_BROKEN)
+#if ! defined(BCP_ONLY_LP_PROCESS_HANDLING_WORKS)
     if (cg_num > 0) {
 	const bool debug = p.param(BCP_tm_par::DebugCgProcesses) != 0;
 	BCP_proc_array* new_cgs =
@@ -709,7 +782,6 @@ BCP: config change: VG's are not running thus no new VG's can be started.\
 			       new_vgs->procs().end());
 	BCP_tm_notify_process_type(p, BCP_ProcessType_VG, &new_vgs->procs());
     }
-#endif
     if (cp_num > 0) {
 	const bool debug = p.param(BCP_tm_par::DebugCpProcesses) != 0;
 	BCP_proc_array* new_cps =
@@ -726,7 +798,9 @@ BCP: config change: VG's are not running thus no new VG's can be started.\
 			       new_vps->procs().end());
 	BCP_tm_notify_process_type(p, BCP_ProcessType_VP, &new_vps->procs());
     }
+#endif
 
     // Signal back that everything is OK.
     p.msg_env->send(sender, BCP_CONFIG_OK);
+#endif
 }

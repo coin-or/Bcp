@@ -98,6 +98,7 @@ TM: non-existing VP is assigned to a leaf.\n");
 	++nodep;
     }
 
+#if ! defined(BCP_ONLY_LP_PROCESS_HANDLING_WORKS)
     // scan through the CP and VP list to mark the free ones
     BCP_vec< std::pair<int, int> >::iterator proc;
     BCP_vec< std::pair<int, int> >::iterator lastproc;
@@ -111,6 +112,7 @@ TM: non-existing VP is assigned to a leaf.\n");
     for (proc = p.leaves_per_vp.begin(); proc != lastproc; ++proc)
 	if (proc->second == 0)
 	    p.slaves.vp->set_proc_free(proc->first);
+#endif
 }
 
 //#############################################################################

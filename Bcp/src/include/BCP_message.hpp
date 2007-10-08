@@ -14,7 +14,6 @@
 //#############################################################################
 
 class BCP_buffer;
-class BCP_proc_array;
 class USER_initialize;
 
 //#############################################################################
@@ -57,9 +56,9 @@ public:
 	not. Return true if alive, false otherwise. */
     virtual bool alive(const int pid) = 0;
     /** Test if the processes given by the process array in the argument
-	are alive or not. Return an iterator to the first dead process,
+	are alive or not. Return a pointer to the first dead process,
 	or to the end of the array if there are no dead processes. */
-    virtual BCP_vec<int>::const_iterator alive(const BCP_proc_array& parray)=0;
+    virtual const int* alive(int num, const int* pids) = 0;
     /*@}*/
 
     /**@name Send to one process */
@@ -77,44 +76,13 @@ public:
     /*@{*/
     /** Send an empty message (message tag only) to all the processes in
 	the process array. */
-    virtual void multicast(const BCP_proc_array& target,
+    virtual void multicast(int num, const int* targets,
 			   const BCP_message_tag tag) = 0;
     /** Send the message in the buffer with the given message tag to all
 	processes in the process array. */
-    virtual void multicast(const BCP_proc_array& target,
+    virtual void multicast(int num, const int* targets,
 			   const BCP_message_tag tag,
 			   const BCP_buffer& buf) = 0;
-    /*@}*/
-
-    /**@name Selective broadcasting */
-    /*@{*/
-    /** Send an empty message (message tag only) to the processes in
-	<code>[beg, end)</code>. */
-    virtual void multicast(BCP_vec<int>::const_iterator beg,
-			   BCP_vec<int>::const_iterator end,
-			   const BCP_message_tag tag) = 0;
-    /** Send the message in the buffer with the given message tag to the
-	processes in <code>[beg, end)</code>. */
-    virtual void multicast(BCP_vec<int>::const_iterator beg,
-			   BCP_vec<int>::const_iterator end,
-			   const BCP_message_tag tag,
-			   const BCP_buffer& buf) = 0;
-
-    /** Send an empty message (message tag only) to every process in
-	<code>procs</code>. */
-    inline void multicast(const BCP_vec<int>& procs,
-			  const BCP_message_tag tag)
-    {
-	multicast(procs.begin(), procs.end(), tag);
-    }
-    /** Send the message in the buffer with the given message tag to every 
-	process in <code>procs</code>. */
-    inline void multicast(const BCP_vec<int>& procs,
-			  const BCP_message_tag tag,
-			  const BCP_buffer& buf)
-    {
-	multicast(procs.begin(), procs.end(), tag, buf);
-    }
     /*@}*/
 
     // blocking receive w/ timeout (ms??) from given source given msgtag (can
@@ -155,16 +123,26 @@ public:
     virtual int start_process(const BCP_string& exe,
 			      const BCP_string& machine,
 			      const bool debug) = 0;
-    /** Spawn <code>proc_num</code> processes, all with the same executable. */
-    virtual BCP_proc_array* start_processes(const BCP_string& exe,
-					    const int proc_num,
-					    const bool debug) = 0;
+    /** Spawn <code>proc_num</code> processes, all with the same executable.
+	NOTE: ids must be allocated already and have enough space for \c
+	proc_num entries.
+	\return true/false depending on success.
+    */
+    virtual bool start_processes(const BCP_string& exe,
+				 const int proc_num,
+				 const bool debug,
+				 int* ids) = 0;
     /** Spawn <code>proc_num</code> processes on the machines given by
-	the third argument, all with the same executable. */
-    virtual BCP_proc_array* start_processes(const BCP_string& exe,
-					    const int proc_num,
-					    const BCP_vec<BCP_string>& machines,
-					    const bool debug) = 0;
+	the third argument, all with the same executable.
+	NOTE: ids must be allocated already and have enough space for \c
+	proc_num entries.
+	\return true/false depending on success.
+    */
+    virtual bool start_processes(const BCP_string& exe,
+				 const int proc_num,
+				 const BCP_vec<BCP_string>& machines,
+				 const bool debug,
+				 int* ids) = 0;
     /*@}*/
   
     /**@name Additional function for MPI interface */

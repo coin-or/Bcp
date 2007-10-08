@@ -99,11 +99,11 @@ BCP_mpi_environment::alive(const int pid)
     return true;
 }
 
-BCP_vec<int>::const_iterator
-BCP_mpi_environment::alive(const BCP_proc_array& parray)
+const int*
+BCP_mpi_environment::alive(cint num, const int* pids)
 {
-    //In Mpi is not possible check if a process is alive
-    return parray.procs().end();
+  //In Mpi is not possible check if a process is alive
+  return NULL;
 }
 
 //-----------------------------------------------------------------------------
@@ -128,51 +128,24 @@ BCP_mpi_environment::send(const int target,
 //-----------------------------------------------------------------------------
 
 void
-BCP_mpi_environment::multicast(const BCP_proc_array& target,
+BCP_mpi_environment::multicast(int num, const int* targets,
 			       const BCP_message_tag tag)
 {
-    const BCP_vec<int>& pids = target.procs();
-    void * buf = NULL;
-    for (int i=target.procs().size()-1; i>=0; --i) {
+    for (int i = 0; i < num; ++i) {
 	check_error(MPI_Send(&buf, 0, MPI_CHAR,
-			     pids[i], tag, MPI_COMM_WORLD),"MPI_Send");
+			     targets[i], tag, MPI_COMM_WORLD),"MPI_Send");
     }
 }
 
 void
-BCP_mpi_environment::multicast(const BCP_proc_array& target,
+BCP_mpi_environment::multicast(int num, const int* targets,
 			       const BCP_message_tag tag,
 			       const BCP_buffer& buf)
 {
-    const BCP_vec<int>& pids = target.procs();
-    for (int i=target.procs().size()-1; i>=0; --i) {
+    for (int i = 0; i < num; ++i) {
 	check_error(MPI_Send(const_cast<char*>(buf.data()), buf.size(),
-			     MPI_CHAR, pids[i], tag, MPI_COMM_WORLD),
+			     MPI_CHAR, targets[i], tag, MPI_COMM_WORLD),
 		    "MPI_Send");
-    }
-}
-
-void
-BCP_mpi_environment::multicast(BCP_vec<int>::const_iterator beg,
-			       BCP_vec<int>::const_iterator end,
-			       const BCP_message_tag tag)
-{
-    void * buf = NULL;
-    for ( ; beg != end; ++beg) {
-	check_error(MPI_Send(&buf, 0, MPI_CHAR,
-			     *beg, tag, MPI_COMM_WORLD),"MPI_Send");
-    }
-}
-
-void
-BCP_mpi_environment::multicast(BCP_vec<int>::const_iterator beg,
-			       BCP_vec<int>::const_iterator end,
-			       const BCP_message_tag tag,
-			       const BCP_buffer& buf)
-{
-    for ( ; beg != end; ++beg) {
-	check_error(MPI_Send(const_cast<char*>(buf.data()),buf.size(),
-			     MPI_CHAR, *beg, tag, MPI_COMM_WORLD),"MPI_Send");
     }
 }
 
@@ -264,10 +237,11 @@ BCP_mpi_environment::start_process(const BCP_string& exe,
 #endif
 }
 
-BCP_proc_array*
+bool
 BCP_mpi_environment::start_processes(const BCP_string& exe,
 				     const int proc_num,
-				     const bool debug)
+				     const bool debug,
+			 int* ids)
 {
 #ifdef COIN_HAS_MPI2
     // FIXME: implement MPI2 proces spawning
@@ -275,22 +249,19 @@ BCP_mpi_environment::start_processes(const BCP_string& exe,
     abort();
 #else
     // Fake it...
-    int* pids = new int[proc_num];
     for (int i = 0; i < proc_num; ++i) {
-	pids[i] = ++seqproc;
+      ids[i] = ++seqproc;
     }
-    BCP_proc_array* pa = new BCP_proc_array;
-    pa->add_procs(pids, pids+proc_num);
-    delete[] pids;
-    return pa;
+    return true;
 #endif
 }
 
-BCP_proc_array*
+bool
 BCP_mpi_environment::start_processes(const BCP_string& exe,
 				     const int proc_num,
 				     const BCP_vec<BCP_string>& machines,
-				     const bool debug)
+				     const bool debug,
+			 int* ids)
 {
 #ifdef COIN_HAS_MPI2
     // FIXME: implement MPI2 proces spawning
@@ -298,14 +269,10 @@ BCP_mpi_environment::start_processes(const BCP_string& exe,
     abort();
 #else
     // Fake it...
-    int* pids = new int[proc_num];
     for (int i = 0; i < proc_num; ++i) {
-	pids[i] = ++seqproc;
+	ids[i] = ++seqproc;
     }
-    BCP_proc_array* pa = new BCP_proc_array;
-    pa->add_procs(pids, pids+proc_num);
-    delete[] pids;
-    return pa;
+    return true;
 #endif
 }
 

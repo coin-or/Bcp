@@ -71,7 +71,7 @@ BCP_single_environment::register_process(USER_initialize* user_init)
     // We start as it is in tm_main.cpp
     int _tm_id(0);
     int _lp_id(1);
-#if ! defined(BCP_CG_VG_PROCESS_HANDLING_BROKEN)
+#if ! defined(BCP_ONLY_LP_PROCESS_HANDLING_WORKS)
     int _cg_id(2);
     int _vg_id(3);
 #endif
@@ -106,6 +106,7 @@ BCP_single_environment::register_process(USER_initialize* user_init)
     _tm_prob->packer->user_class = _tm_prob->user;
 
     // Initialize the number of leaves assigned to CP's and VP's as 0
+#if ! defined(BCP_ONLY_LP_PROCESS_HANDLING_WORKS)
     if (_tm_prob->param(BCP_tm_par::CpProcessNum) > 0) {
        _tm_prob->leaves_per_cp.reserve(_tm_prob->slaves.cp->procs().size());
        for (int i = _tm_prob->slaves.cp->procs().size() - 1; i >= 0; --i)
@@ -118,6 +119,7 @@ BCP_single_environment::register_process(USER_initialize* user_init)
 	    _tm_prob->leaves_per_vp.unchecked_push_back
 		(std::make_pair(_tm_prob->slaves.vp->procs()[i], 0));
     }
+#endif
 
     // Set the core (variables & cuts)
     _tm_prob->core = BCP_tm_create_core(*_tm_prob);
@@ -138,23 +140,23 @@ BCP_single_environment::register_process(USER_initialize* user_init)
     // The TM is ready to roll
 
     //=========================================================================
-    // Create the slave "processes" (also fill up _tm_prob->slaves)
+    // Create the slave "processes"
     //=========================================================================
-    // All processes
-    _tm_prob->slaves.all = new BCP_proc_array;
-
-    //-------------------------------------------------------------------------
     // LP
     BCP_lp_prob* _lp_prob = new BCP_lp_prob(_lp_id, _tm_id);
     processes[_lp_id] = _lp_prob;
     _lp_prob->msg_env = new BCP_single_environment(_lp_id);
-    _tm_prob->slaves.lp = new BCP_proc_array;
-    _tm_prob->slaves.lp->add_proc(_lp_id);
-    _tm_prob->slaves.all->add_proc(_lp_id);
+    _tm_prob->lp_procs.push_back(_lp_id);
+    _tm_prob->lp_scheduler.add_free_ids(&_tm_prob->lp_procs[0],
+					&_tm_prob->lp_procs[1]);
+    //-------------------------------------------------------------------------
+    BCP_cg_prob* _cg_prob = 0;
+    BCP_vg_prob* _vg_prob = 0;
+//     BCP_cp_prob* _cp_prob = 0;
+//     BCP_vp_prob* _vp_prob = 0;
     //-------------------------------------------------------------------------
     // CG
-    BCP_cg_prob* _cg_prob = 0;
-#if ! defined(BCP_CG_VG_PROCESS_HANDLING_BROKEN)
+#if ! defined(BCP_ONLY_LP_PROCESS_HANDLING_WORKS)
     if (_tm_prob->param(BCP_tm_par::CgProcessNum) > 0) {
 	_cg_prob = new BCP_cg_prob(_cg_id, _tm_id);
 	processes[_cg_id] = _cg_prob;
@@ -163,11 +165,8 @@ BCP_single_environment::register_process(USER_initialize* user_init)
 	_tm_prob->slaves.cg->add_proc(_cg_id);
 	_tm_prob->slaves.all->add_proc(_cg_id);
     }
-#endif
     //-------------------------------------------------------------------------
     // VG
-    BCP_vg_prob* _vg_prob = 0;
-#if ! defined(BCP_CG_VG_PROCESS_HANDLING_BROKEN)
     if (_tm_prob->param(BCP_tm_par::VgProcessNum) > 0) {
 	_vg_prob = new BCP_vg_prob(_vg_id, _tm_id);
 	processes[_vg_id] = _vg_prob;
@@ -176,29 +175,27 @@ BCP_single_environment::register_process(USER_initialize* user_init)
 	_tm_prob->slaves.vg->add_proc(_vg_id);
 	_tm_prob->slaves.all->add_proc(_vg_id);
     }
-#endif
     //-------------------------------------------------------------------------
     // CP
-//     BCP_cp_prob* _cp_prob = 0;
-//     if (_tm_prob->param(BCP_tm_par::CpProcessNum) > 0) {
-// 	_cp_prob = new BCP_cp_prob(_cp_id, _tm_id);
-// 	processes[_cp_id] = _cp_prob;
-// 	_cp_prob->msg_env = new BCP_single_environment(_cp_id);
-// 	_tm_prob->slaves.cp = new BCP_proc_array;
-// 	_tm_prob->slaves.cp->add_proc(_cp_id);
-// 	_tm_prob->slaves.all->add_proc(_cp_id);
-//     }
+    if (_tm_prob->param(BCP_tm_par::CpProcessNum) > 0) {
+	_cp_prob = new BCP_cp_prob(_cp_id, _tm_id);
+	processes[_cp_id] = _cp_prob;
+	_cp_prob->msg_env = new BCP_single_environment(_cp_id);
+	_tm_prob->slaves.cp = new BCP_proc_array;
+	_tm_prob->slaves.cp->add_proc(_cp_id);
+	_tm_prob->slaves.all->add_proc(_cp_id);
+    }
     //-------------------------------------------------------------------------
     // VP
-//     BCP_vp_prob* _vp_prob = 0;
-//     if (_tm_prob->param(BCP_tm_par::VpProcessNum) > 0) {
-// 	_vp_prob = new BCP_vp_prob(_vp_id, _tm_id);
-// 	processes[_vp_id] = _vp_prob;
-// 	_vp_prob->msg_env = new BCP_single_environment(_vp_id);
-// 	_tm_prob->slaves.vp = new BCP_proc_array;
-// 	_tm_prob->slaves.vp->add_proc(_vp_id);
-// 	_tm_prob->slaves.all->add_proc(_vp_id);
-//     }
+    if (_tm_prob->param(BCP_tm_par::VpProcessNum) > 0) {
+	_vp_prob = new BCP_vp_prob(_vp_id, _tm_id);
+	processes[_vp_id] = _vp_prob;
+	_vp_prob->msg_env = new BCP_single_environment(_vp_id);
+	_tm_prob->slaves.vp = new BCP_proc_array;
+	_tm_prob->slaves.vp->add_proc(_vp_id);
+	_tm_prob->slaves.all->add_proc(_vp_id);
+    }
+#endif
 
     //=========================================================================
     // distribute the core to the slave processes
@@ -294,7 +291,7 @@ BCP_single_environment::register_process(USER_initialize* user_init)
 	    // processed) we don't go to the next phase
 	    something_died = false;
 	    while (! _tm_prob->candidate_list.empty() ||
-		   _tm_prob->slaves.lp->busy_num() > 0){
+		   _tm_prob->lp_scheduler.numNodeIds() > 0){
 		// Fill up as many free LP processes as we can
 		if (BCP_tm_start_new_nodes(*_tm_prob) == BCP_NodeStart_Error) {
 		    // Error indicates that something has died
@@ -354,10 +351,10 @@ BCP_single_environment::alive(const int pid)
     return true;
 }
 
-BCP_vec<int>::const_iterator
-BCP_single_environment::alive(const BCP_proc_array& parray)
+const int* 
+BCP_single_environment::alive(int num, const int* pids)
 {
-    return parray.procs().end();
+  return NULL;
 }
 
 //-----------------------------------------------------------------------------
@@ -390,51 +387,22 @@ BCP_single_environment::send(const int target,
 //-----------------------------------------------------------------------------
 
 void
-BCP_single_environment::multicast(const BCP_proc_array& target,
+BCP_single_environment::multicast(int num, const int* targets,
 				  const BCP_message_tag tag)
 {
-    BCP_vec<int>::const_iterator pi = target.procs().begin();
-    BCP_vec<int>::const_iterator lastpi = target.procs().end();
-    while (pi != lastpi) {
-	send(*pi, tag);
-	++pi;
-    }
+  for (int i = 0; i < num; ++i) {
+    send(targets[i], tag);
+  }
 }
 
 void
-BCP_single_environment::multicast(const BCP_proc_array& target,
+BCP_single_environment::multicast(int num, const int* targets,
 				  const BCP_message_tag tag,
 				  const BCP_buffer& buf)
 {
-    BCP_vec<int>::const_iterator pi = target.procs().begin();
-    BCP_vec<int>::const_iterator lastpi = target.procs().end();
-    while (pi != lastpi) {
-	send(*pi, tag, buf);
-	++pi;
-    }
-}
-
-void
-BCP_single_environment::multicast(BCP_vec<int>::const_iterator beg,
-				  BCP_vec<int>::const_iterator end,
-				  const BCP_message_tag tag)
-{
-    while (beg != end) {
-	send(*beg, tag);
-	++beg;
-    }
-}
-
-void
-BCP_single_environment::multicast(BCP_vec<int>::const_iterator beg,
-				  BCP_vec<int>::const_iterator end,
-				  const BCP_message_tag tag,
-				  const BCP_buffer& buf)
-{
-    while (beg != end) {
-	send(*beg, tag, buf);
-	++beg;
-    }
+  for (int i = 0; i < num; ++i) {
+    send(targets[i], tag, buf);
+  }
 }
 
 //-----------------------------------------------------------------------------
@@ -483,23 +451,25 @@ BCP_single_environment::start_process(const BCP_string& exe,
     return 0; // to satisfy aCC on HP-UX
 }
 
-BCP_proc_array*
+bool
 BCP_single_environment::start_processes(const BCP_string& exe,
 					const int proc_num,
-					const bool debug)
+					const bool debug,
+					int* ids)
 {
     throw BCP_fatal_error("start_processes() called!\n");
-    return 0; // to satisfy aCC on HP-UX
+    return false; // to satisfy aCC on HP-UX
 }
 
-BCP_proc_array*
+bool
 BCP_single_environment::start_processes(const BCP_string& exe,
 					const int proc_num,
 					const BCP_vec<BCP_string>& machines,
-					const bool debug)
+					const bool debug,
+					int* ids)
 {
     throw BCP_fatal_error("start_processes() called!\n");
-    return 0; // to satisfy aCC on HP-UX
+    return false; // to satisfy aCC on HP-UX
 }
 
 //-----------------------------------------------------------------------------

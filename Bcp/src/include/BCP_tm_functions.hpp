@@ -63,7 +63,7 @@ void BCP_tm_remove_cg(BCP_tm_prob& p, const int index);
 void BCP_tm_remove_vg(BCP_tm_prob& p, const int index);
 void BCP_tm_notify_about_new_phase(BCP_tm_prob& p);
 void BCP_tm_notify_process_type(BCP_tm_prob& p, BCP_process_t ptype,
-				const BCP_vec<int>* procs);
+				int num, const int* pids);
 void BCP_tm_notify_processes(BCP_tm_prob& p);
 void BCP_tm_unpack_priced_root(BCP_tm_prob& p, BCP_buffer& buf);
 void BCP_tm_free_procs_of_node(BCP_tm_prob& p, BCP_tm_node* node);

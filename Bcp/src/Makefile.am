@@ -70,6 +70,7 @@ libBcp_la_SOURCES = \
 	Member/BCP_warmstart_dual.cpp \
 	Member/BCP_matrix.cpp \
 	Member/BCP_problem_core.cpp \
+	Member/BCP_process.cpp \
 	Member/BCP_warmstart_pack.cpp \
 	Member/BCP_matrix_pack.cpp \
 	Member/BCP_var.cpp \

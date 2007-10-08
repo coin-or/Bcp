@@ -22,42 +22,36 @@ public:
     int parent_process();
 
     bool alive(const int pid); 
-    BCP_vec<int>::const_iterator alive(const BCP_proc_array& parray);
+    const int* alive(int num, const int* pids);
 
     void send(const int target, const BCP_message_tag tag);
     void send(const int target,
 	      const BCP_message_tag tag, const BCP_buffer& buf);
 
-    void multicast(const BCP_proc_array& target,
-		   const BCP_message_tag tag);
-    void multicast(const BCP_proc_array& target,
-		   const BCP_message_tag tag, const BCP_buffer& buf);
-    void multicast(BCP_vec<int>::const_iterator beg,
-		   BCP_vec<int>::const_iterator end,
-		   const BCP_message_tag tag);
-    void multicast(BCP_vec<int>::const_iterator beg,
-		   BCP_vec<int>::const_iterator end,
-		   const BCP_message_tag tag,
-		   const BCP_buffer& buf);
+    void multicast(int num, const int* targets,
+    		   const BCP_message_tag tag);
+    void multicast(int num, const int* targets,
+    		   const BCP_message_tag tag, const BCP_buffer& buf);
 
     void receive(const int source,
-		 const BCP_message_tag tag, BCP_buffer& buf,
-		 const double timeout);
-    bool probe(const int source,
-	       const BCP_message_tag tag);
+    		 const BCP_message_tag tag, BCP_buffer& buf,
+    		 const double timeout);
+    bool probe(const int source, const BCP_message_tag tag);
 
     int start_process(const BCP_string& exe,
-		      const bool debug);
+    		      const bool debug);
     int start_process(const BCP_string& exe,
-		      const BCP_string& machine,
-		      const bool debug);
-    BCP_proc_array* start_processes(const BCP_string& exe,
-				    const int proc_num,
-				    const bool debug);
-    BCP_proc_array* start_processes(const BCP_string& exe,
-				    const int proc_num,
-				    const BCP_vec<BCP_string>& machines,
-				    const bool debug);
+    		      const BCP_string& machine,
+    		      const bool debug);
+    bool start_processes(const BCP_string& exe,
+			 const int proc_num,
+			 const bool debug,
+			 int* ids);
+    bool start_processes(const BCP_string& exe,
+			 const int proc_num,
+			 const BCP_vec<BCP_string>& machines,
+			 const bool debug,
+			 int* ids);
 
 //    void stop_process(const int process);
 //    void stop_processes(const BCP_proc_array* processes);

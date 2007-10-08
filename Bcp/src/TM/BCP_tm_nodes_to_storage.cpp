@@ -159,18 +159,21 @@ bool BCP_tm_balance_data(BCP_tm_prob& p)
 
   if (pid == -1) {
     /* None of the TS processes accept data, we need a new one. */
-    BCP_proc_array* lp = p.slaves.lp;
-    if (lp->procs().size() > 1) {
-      BCP_proc_array* ts = p.slaves.ts;
-      if (!ts) {
-        p.slaves.ts = ts = new BCP_proc_array;
+    if (p.lp_scheduler.maxNodeIds() > 1) {
+      pid = p.lp_scheduler.request_node_id();
+      if (pid == -1) {
+	return true;
       }
-      pid = lp->get_free_proc();
-      lp->delete_proc(pid);
-      ts->add_proc(pid);
-      BCP_vec<int> pid_vec(1, pid);
+      std::vector<int>::iterator ipid =
+	std::find(p.lp_procs.begin(), p.lp_procs.end(), pid);
+      if (ipid == p.lp_procs.end()) {
+	throw BCP_fatal_error("\
+Trying to convert an LP into TS, but its pid is not in lp_procs!\n");
+      }
+      p.lp_procs.erase(ipid);
+      p.ts_procs.push_back(pid);
       printf("Turning LP (#%i) into a TS\n", pid);
-      BCP_tm_notify_process_type(p, BCP_ProcessType_TS, &pid_vec);
+      BCP_tm_notify_process_type(p, BCP_ProcessType_TS, 1, &pid);
     }
   }
 

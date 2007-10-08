@@ -109,7 +109,8 @@ BCP_tm_user::broadcast_message(const BCP_process_t proc_type,
 {
     switch (proc_type) {
     case BCP_ProcessType_LP:
-	p->msg_env->multicast(*p->slaves.lp, BCP_Msg_User, buf);
+        p->msg_env->multicast(p->lp_procs.size(), &p->lp_procs[0],
+			      BCP_Msg_User, buf);
 	break;
     case BCP_ProcessType_CP:
 	throw BCP_fatal_error("\
@@ -119,7 +120,7 @@ BCP_tm_user::broadcast_message: CP not yet implemented\n");
 	throw BCP_fatal_error("\
 BCP_tm_user::broadcast_message: VP not yet implemented\n");
 	break;
-#if ! defined(BCP_CG_VG_PROCESS_HANDLING_BROKEN)
+#if ! defined(BCP_ONLY_LP_PROCESS_HANDLING_WORKS)
     case BCP_ProcessType_CG:
 	p->msg_env->multicast(*p->slaves.cg, BCP_Msg_User, buf);
 	break;
@@ -128,8 +129,9 @@ BCP_tm_user::broadcast_message: VP not yet implemented\n");
 	break;
 #endif
     case BCP_ProcessType_Any:
-	p->msg_env->multicast(*p->slaves.lp, BCP_Msg_User, buf);
-#if ! defined(BCP_CG_VG_PROCESS_HANDLING_BROKEN)
+        p->msg_env->multicast(p->lp_procs.size(), &p->lp_procs[0],
+			      BCP_Msg_User, buf);
+#if ! defined(BCP_ONLY_LP_PROCESS_HANDLING_WORKS)
 	p->msg_env->multicast(*p->slaves.cg, BCP_Msg_User, buf);
 	p->msg_env->multicast(*p->slaves.vg, BCP_Msg_User, buf);
 #endif

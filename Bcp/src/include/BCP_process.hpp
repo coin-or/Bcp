@@ -4,7 +4,6 @@
 #define _BCP_PROCESS_H
 
 class BCP_buffer;
-#include "BCP_vector.hpp"
 
 class BCP_process {
 private:
@@ -23,102 +22,140 @@ public:
 
 //#############################################################################
 
-/** This class holds an array of processes.  */
+// (C) 2007 Copyright International Business Machines Corporation
+// All Rights Reserved.
+// This code is published under the Common Public License.
+//
+// Authors :
+// Pierre Bonami, International Business Machines Corporation
+// Andreas Waechter, International Business Machines Corporation
+// Laszlo Ladanyi, International Business Machines Corporation
+//
+// Date : 10/03/2007
 
-class BCP_proc_array {
-private:
-    /**@name Disabled methods */
-    /*@{*/
-    /** The default constructor is declared but not defined to disable it. */
-    BCP_proc_array(const BCP_proc_array&);
-    /** The assignment operator is declared but not defined to disable it. */
-    BCP_proc_array& operator=(const BCP_proc_array&);
-    /*@}*/
-private:
-    /**@name Data members */
-    /*@{*/
-    /** Vector of all processes. */
-    BCP_vec<int> _procs;
-    /** Vector of free processes (subset of all processes). */
-    BCP_vec<int> _free_procs;
-    /*@}*/
+#include <vector>
+#include <cmath>
+#include <sys/time.h>
+#include "CoinHelperFunctions.hpp"
+
+class BCP_scheduler {
 public:
-    /**@name Constructor and destructor */
-    /*@{*/
-    /** The default constructor creates an empty process array */
-    BCP_proc_array() : _procs(), _free_procs() {}
-    /** The destructor needs to do nothing */
-    ~BCP_proc_array() {}
-    /*@}*/
+  /** Default constructor.*/
+  BCP_scheduler();
 
-    /**@name Query methods */
-    /*@{*/
-    /** Return the vector of all processes (const version). */
-    inline const BCP_vec<int>& procs() const { return _procs; }
-    /** Return the number of free processes. */
-    inline int free_num() const { return _free_procs.size(); }
-    /** Return the number of busy (not free) processes. */
-    inline int busy_num() const { return _procs.size() - _free_procs.size(); }
-    /** Get the process id of a free process. Return 0 if there are none. */
-    int get_free_proc() {
-       if (_free_procs.size() > 0) {
-           int proc = _free_procs.back();
-           _free_procs.pop_back();
-           return proc;
-       }
-       return -1;
-    }
-    /*@}*/
+  /** Method for setting scheduler parameters.
+   * \param OverEstimationStatic: Factor for providing more IDs in static strategy.
+   * \param SwitchToRateThreshold: When more than SwitchToRateThreshold times the number of strong-branching CPUs are busy, which to rate-based strategy.
+   * \param TimeRootNodeSolve: Time to solve root node NLP (in secs)
+   * \param FactorTimeHorizon: This number times TimeRootNodeSolve is used to compute the rates
+   * \param OverEstimationRate: Factor for providing more IDs in rate-based strategy.
+   * \param MaxNodeIdRatio: At most this fraction of the total number of ids can be used as a nodeid.
+   * \param MaxNodeIdNum: At most this many ids can be used as a nodeid.
+   */
+  void setParams(double OverEstimationStatic,
+		 double SwitchToRateThreshold,
+		 double TimeRootNodeSolve,
+		 double FactorTimeHorizon,
+		 double OverEstimationRate,
+		 double MaxNodeIdRatio,
+		 int    MaxNodeIdNum);
 
-    /**@name Modifying methods */
-    /*@{*/
-    /** Purge all process ids from the process array. */
-    inline void clear() {
-       _procs.clear();
-       _free_procs.clear();
-    }
-    /** Append a process id to the end of the vector of all processes and mark
-       it as free. */
-   inline void add_proc(int proc_id) {
-       _procs.push_back(proc_id);
-       // the new proc is free to begin with
-       _free_procs.push_back(proc_id);
-   }
-    /** Append the processes in <code>[first,last)</code> to the end of
-       the vector of all processes and mark them as free. */
-   inline void add_procs(BCP_vec<int>::const_iterator first,
-                        BCP_vec<int>::const_iterator last) {
-       _procs.insert(_procs.end(), first, last);
-       // the new procs are free to begin with
-       _free_procs.insert(_free_procs.end(), first, last);
-   }
-    /** Delete the process (whose id is the argument) from the vector of
-       all processes (and also from the vector of free processes if
-       applicable) */
-    inline void delete_proc(const int proc) { 
-       int i; 
-       for (i = _free_procs.size() - 1; i >= 0; --i) {
-	 if (_free_procs[i] == proc) {
-	   _free_procs.erase(_free_procs.begin() + i);
-	   break;
-	 }
-       }
-       for (i = _procs.size() - 1; i >= 0; --i) {
-	 if (_procs[i] == proc) {
-	   _procs.erase(_procs.begin() + i);
-	   break;
-	 }
-       }
-    }
+  /** Pass in a list of freeIds_ to add.*/
+  template <typename InputIterator>
+  inline void add_free_ids(InputIterator first, InputIterator last){
+    const int oldsize = freeIds_.size();
+    freeIds_.insert(freeIds_.end(), first, last);
+    totalNumberIds_ += freeIds_.size() - oldsize;
+    maxNodeIds_ = CoinMin((int)floor(maxNodeIdRatio_ * totalNumberIds_),
+			  maxNodeIdNum_);
+  }
 
-    // *FIXME* check if the process is in _procs! 
-    /** Append the process to the end of the vector of free processes.
-       The process to be set free must already be in the vector of all
-       processes. */
-    void set_proc_free(int proc) {
-       _free_procs.push_back(proc);
-    }
-    /*@}*/
+  /** Request for a number of id's to do some strong branching.
+      NOTE: ids must be already allocated to be at least \c numIds size.
+    * \param numIds : number of ids requested
+    * \param ids : filled vector with the number of ids served.
+    * \return number of ids served.
+  */
+  int request_sb_ids(int numIds, int* ids);
+  /** Gives back to scheduler an id used for strong branching.*/
+  void release_sb_id(int id);
+
+  /** Request an id for processing nodes.
+      \return id number or -1 if none is available. */
+  inline int request_node_id() {
+    if (freeIds_.empty()) return -1;
+    numNodeIds_ ++;
+    int id = freeIds_.back();
+    freeIds_.pop_back();
+    return id;
+  }
+  /** Give back an id to scheduler used for processing a node */
+  inline void release_node_id(int id) {
+    release_sb_id(id);
+    numNodeIds_--;
+  }
+  /** Decide if there is an id that can be returned for processin a node */
+  inline bool has_free_node_id() const {
+    return (!freeIds_.empty() && maxNodeIds_ > numNodeIds_);
+  }
+  /** Return the number of busy LP processes */
+  inline int numNodeIds() const {
+    return numNodeIds_;
+  }
+  /** Return the maximum possible number of busy LP processes */
+  inline int maxNodeIds() const {
+    return maxNodeIds_;
+  }
+
+private:
+  /** Compute max allowed allocation of CPUs.*/
+  int max_id_allocation();
+  /** Update the counts and the static_ flag */
+  void update_rates(int add_req, int add_rel);
+
+private:
+  /** Store the total number of CPUs.*/
+  int totalNumberIds_;
+  /** List of free CPUs ids.*/
+  std::vector<int> freeIds_;
+  /** number of lp ids served.*/
+  int numNodeIds_;
+  /** The maximum number of lp ids that can be served */
+  int maxNodeIds_;
+
+  /** At most this fraction of the total number of ids can be used as a
+   * nodeid. */
+  double maxNodeIdRatio_;
+  /** At most this many ids can be used as a nodeid. This is a parameter to
+      the class. The true max is stored in \c maxNodeIds_ */
+  int    maxNodeIdNum_;
+
+  /** overestimation factor for static strategy */
+  double rho_static_;
+  /** percentage threshold to swtich to rate-based strategy */
+  double switch_thresh_;
+  /** Number of seconds in time horizon for rate computation. */
+  int numSecRateInterval_;
+  /** vector for counting id requests per time unit */
+  std::vector<int> request_counts_;
+  /** total number of requests in considered time interval */
+  int request_counts_tot_;
+  /** vector for counting released sb id requests per time unit */
+  std::vector<int> release_counts_;
+  /** total number of releases in considered time interval */
+  int release_counts_tot_;
+  /** Array counter */
+  int counts_ptr_;
+  /** Time stamp of last request or release */
+  time_t time_last_action_;
+  /** overestimation factor for rate-based strategy */
+  double rho_rate_;
+  /** flag indicating whether we are in the static or the rate-based
+   *  phase */
+  bool static_;
+  /** flag indicating whether we have rate information (i.e., the time
+      horizon has passed at least once) */
+  bool have_rates_;
 };
 
 #endif
