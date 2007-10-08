@@ -102,6 +102,20 @@ BCP_tm_unpack_node_description(BCP_tm_prob& p, BCP_buffer& buf)
     // the first thing is the index of the node
     int index;
     buf.unpack(index);
+    if (index == 0) {
+      struct timeval tt;
+      gettimeofday(&tt, NULL);
+      p.root_node_received_ = tt.tv_sec + tt.tv_usec/1e6;
+      p.lp_scheduler.
+	setParams(p.param(BCP_tm_par::LPscheduler_OverEstimationStatic),
+		  p.param(BCP_tm_par::LPscheduler_SwitchToRateThreshold),
+		  p.root_node_received_ - p.root_node_sent_,
+		  p.param(BCP_tm_par::LPscheduler_FactorTimeHorizon),
+		  p.param(BCP_tm_par::LPscheduler_OverEstimationRate),
+		  p.param(BCP_tm_par::LPscheduler_MaxNodeIdRatio),
+		  p.param(BCP_tm_par::LPscheduler_MaxNodeIdNum));
+    }
+
     // get a pointer to this node
     BCP_tm_node* node = p.search_tree[index];
     p.search_tree.increase_processed();

@@ -14,7 +14,9 @@
 BCP_scheduler::BCP_scheduler():
     totalNumberIds_(0),
     freeIds_(),
-    numNodeIds_(0) {}
+    numNodeIds_(0),
+    maxNodeIds_(1)
+{}
 
 void
 BCP_scheduler::setParams(double OverEstimationStatic,
@@ -29,16 +31,16 @@ BCP_scheduler::setParams(double OverEstimationStatic,
   switch_thresh_ = SwitchToRateThreshold;
   numSecRateInterval_ = (int)ceil(TimeRootNodeSolve*FactorTimeHorizon);
   request_counts_.reserve(numSecRateInterval_+1);
-  std::fill_n(back_inserter(request_counts_), numSecRateInterval_+1, -1);
+  request_counts_.insert(request_counts_.end(), numSecRateInterval_+1, -1);
   request_counts_tot_ = 0;
   release_counts_.reserve(numSecRateInterval_+1);
-  std::fill_n(back_inserter(release_counts_), numSecRateInterval_+1, -1);
+  release_counts_.insert(release_counts_.end(), numSecRateInterval_+1, -1);
   release_counts_tot_ = 0;
   counts_ptr_ = 0;
   time_last_action_ = 0;
   static_ = true;
   have_rates_ = false;
-  rho_static_ = OverEstimationRate;
+  rho_rate_ = OverEstimationRate;
   maxNodeIdRatio_ = MaxNodeIdRatio;
   maxNodeIdNum_ = MaxNodeIdNum;
   maxNodeIds_ = CoinMin((int)floor(maxNodeIdRatio_ * totalNumberIds_),

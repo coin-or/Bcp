@@ -183,6 +183,10 @@ public: // Data members
   std::vector<int> lp_procs;
   /** */
   BCP_scheduler lp_scheduler;
+  /** members to measure how long it took to process the root node. Needed for
+      the scheduler (both are in wallclock) */
+  double root_node_sent_;
+  double root_node_received_;
   /*@}*/
 
   //-------------------------------------------------------------------------

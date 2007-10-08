@@ -138,6 +138,8 @@ struct BCP_tm_par{
     VpProcessNum,
     /** ??? */
     TmTimeout,
+    /** Parameters related to scheduling the LP processes */
+    LPscheduler_MaxNodeIdNum,
     //
     end_of_int_params
   };
@@ -166,6 +168,12 @@ struct BCP_tm_par{
     TerminationGap_Relative,
     /** ??? Values: Default: */
     UpperBound,
+    /** Parameters related to scheduling the LP processes */
+    LPscheduler_OverEstimationStatic,
+    LPscheduler_SwitchToRateThreshold,
+    LPscheduler_FactorTimeHorizon,
+    LPscheduler_OverEstimationRate,
+    LPscheduler_MaxNodeIdRatio,
     //
     end_of_dbl_params
   };

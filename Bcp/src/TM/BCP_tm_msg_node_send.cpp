@@ -407,6 +407,11 @@ TM: cut in node description is neither local nor remote.\n");
     }
 
     p.msg_env->send(node->lp, msgtag, buf);
+    if (node->_index == 0) {
+      struct timeval tt;
+      gettimeofday(&tt, NULL);
+      p.root_node_sent_ = tt.tv_sec + tt.tv_usec/1e6;
+    }
 
 #ifdef BCP__DUMP_PROCINFO
 #if (BCP__DUMP_PROCINFO == 1)

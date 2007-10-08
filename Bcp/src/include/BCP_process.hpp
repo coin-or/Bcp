@@ -83,7 +83,7 @@ public:
   /** Request an id for processing nodes.
       \return id number or -1 if none is available. */
   inline int request_node_id() {
-    if (freeIds_.empty()) return -1;
+    if (freeIds_.empty() || numNodeIds_ == maxNodeIds_) return -1;
     numNodeIds_ ++;
     int id = freeIds_.back();
     freeIds_.pop_back();
