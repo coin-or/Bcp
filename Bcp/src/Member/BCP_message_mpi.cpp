@@ -100,7 +100,7 @@ BCP_mpi_environment::alive(const int pid)
 }
 
 const int*
-BCP_mpi_environment::alive(cint num, const int* pids)
+BCP_mpi_environment::alive(int num, const int* pids)
 {
   //In Mpi is not possible check if a process is alive
   return NULL;
@@ -131,6 +131,7 @@ void
 BCP_mpi_environment::multicast(int num, const int* targets,
 			       const BCP_message_tag tag)
 {
+    void * buf = NULL;
     for (int i = 0; i < num; ++i) {
 	check_error(MPI_Send(&buf, 0, MPI_CHAR,
 			     targets[i], tag, MPI_COMM_WORLD),"MPI_Send");
