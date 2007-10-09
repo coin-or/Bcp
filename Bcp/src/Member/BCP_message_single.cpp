@@ -147,8 +147,17 @@ BCP_single_environment::register_process(USER_initialize* user_init)
     processes[_lp_id] = _lp_prob;
     _lp_prob->msg_env = new BCP_single_environment(_lp_id);
     _tm_prob->lp_procs.push_back(_lp_id);
-    _tm_prob->lp_scheduler.add_free_ids(&_tm_prob->lp_procs[0],
-					&_tm_prob->lp_procs[1]);
+    _tm_prob->lp_scheduler.add_free_ids(_tm_prob->lp_procs.begin(),
+					_tm_prob->lp_procs.end());
+    _tm_prob->lp_scheduler.
+      setParams(_tm_prob->param(BCP_tm_par::LPscheduler_OverEstimationStatic),
+		_tm_prob->param(BCP_tm_par::LPscheduler_SwitchToRateThreshold),
+		10.0, /* estimated root time */
+		_tm_prob->param(BCP_tm_par::LPscheduler_FactorTimeHorizon),
+		_tm_prob->param(BCP_tm_par::LPscheduler_OverEstimationRate),
+		_tm_prob->param(BCP_tm_par::LPscheduler_MaxNodeIdRatio),
+		_tm_prob->param(BCP_tm_par::LPscheduler_MaxNodeIdNum));
+
     //-------------------------------------------------------------------------
     BCP_cg_prob* _cg_prob = 0;
     BCP_vg_prob* _vg_prob = 0;

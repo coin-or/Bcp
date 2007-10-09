@@ -215,6 +215,14 @@ Number of process in parameter file %d > n_proc in mpirun -np %d!\n",
     // Fire up the LP/CG/CP/VG/VP processes
     // Actually, this is firing up enough copies of self.
     BCP_tm_start_processes(p);
+    p.lp_scheduler.
+      setParams(p.param(BCP_tm_par::LPscheduler_OverEstimationStatic),
+		p.param(BCP_tm_par::LPscheduler_SwitchToRateThreshold),
+		10.0, /* estimated root time */
+		p.param(BCP_tm_par::LPscheduler_FactorTimeHorizon),
+		p.param(BCP_tm_par::LPscheduler_OverEstimationRate),
+		p.param(BCP_tm_par::LPscheduler_MaxNodeIdRatio),
+		p.param(BCP_tm_par::LPscheduler_MaxNodeIdNum));
 
     // Notify the LP/CG/CP/VG/VP processes about their identity. Also, send out
     // their parameters, core and user info.
