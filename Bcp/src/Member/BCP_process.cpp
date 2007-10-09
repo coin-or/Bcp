@@ -45,6 +45,9 @@ BCP_scheduler::setParams(double OverEstimationStatic,
   maxNodeIdNum_ = MaxNodeIdNum;
   maxNodeIds_ = CoinMin((int)floor(maxNodeIdRatio_ * totalNumberIds_),
 			maxNodeIdNum_);
+  if (maxNodeIds_ == 0) {
+    maxNodeIds_ = 1;
+  }
 }
 
 //------------------------------------------------------------------------------

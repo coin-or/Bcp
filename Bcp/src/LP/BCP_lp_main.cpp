@@ -119,7 +119,7 @@ BCP_process_t BCP_lp_main(BCP_message_environment* msg_env,
    BCP_process_t ptype = BCP_ProcessType_EndProcess;
    while (true) {
       p.msg_buf.clear();
-      msg_env->receive(parent /*tree_manager*/,
+      msg_env->receive(BCP_AnyProcess,
 		       BCP_Msg_AnyMessage, p.msg_buf, -1);
       msgtag = p.msg_buf.msgtag();
       if (msgtag == BCP_Msg_ProcessType) {

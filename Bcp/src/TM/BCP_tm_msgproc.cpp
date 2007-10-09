@@ -245,6 +245,22 @@ BCP_tm_rebroadcast_root_warmstart(BCP_tm_prob& p)
 //#############################################################################
 
 void
+BCP_tm_provide_SB_processes(BCP_tm_prob& p)
+{
+  int sender = p.msg_buf.sender();
+  int branchNum;
+  p.msg_buf.unpack(branchNum);
+  int * pids = new int[branchNum];
+  int numIds = p.lp_scheduler.request_sb_ids(branchNum, pids);
+  p.msg_buf.clear();
+  p.msg_buf.pack(pids, numIds);
+  p.msg_env->send(sender, BCP_Msg_ProcessList, p.msg_buf);
+  delete[] pids;
+}
+
+//#############################################################################
+  
+void
 BCP_tm_process_SB_info(BCP_tm_prob& p)
 {
   int sender = p.msg_buf.sender();
@@ -370,6 +386,10 @@ TM: Solution value: %f (best solution value so far: %f)\n",
 	}
 	break;
 
+    case BCP_Msg_RequestProcessList:
+        BCP_tm_provide_SB_processes(*this);
+	break;
+	
     case BCP_Msg_SBnodeFinished:
         BCP_tm_process_SB_info(*this);
 	break;
