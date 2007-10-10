@@ -118,7 +118,7 @@ BCP_scheduler::update_rates(int add_req, int add_rel)
     request_counts_[counts_ptr_] = add_req;
     release_counts_[counts_ptr_] = add_rel;
 
-    static_ = (!have_rates_ || freeIds_.size() >= (1.-switch_thresh_)*(totalNumberIds_-numNodeIds_));
+    static_ = (!have_rates_ || freeIds_.size() >= (1.-switch_thresh_)*(totalNumberIds_-numNodeIds_) );
   }
 }
 
@@ -133,18 +133,20 @@ BCP_scheduler::max_id_allocation(int numIds)
      requested. If only LPs processes are used then it's correct. */
 
   const int numFree = freeIds_.size();
+
+  double expansionRate = CoinMin((double) 2*numNodeIds_, (double) maxNodeIds_)/ (double) numNodeIds_;
+
   if (static_) {
-    retval = (int)floor(CoinMin((double) numFree, rho_static_ * (double) (totalNumberIds_ - numNodeIds_)/( (double) numNodeIds_) ));
+    retval = (int)floor(CoinMin((double) numFree, rho_static_ * (double) (totalNumberIds_ - numNodeIds_*expansionRate)/( (double) numNodeIds_*expansionRate) ));
   }
   else {
     if (request_counts_tot_ == 0) {
       retval = numFree;
     }
     else {
-      retval = CoinMin(numFree,(int)floor(rho_rate_*(double)(release_counts_tot_)/(double)(request_counts_tot_)));
+      retval = CoinMin(numFree,(int)floor(rho_rate_*(double)(release_counts_tot_)/(double)(request_counts_tot_) / expansionRate));
     }
   }
-
   // At this point, we only want to send an odd number of processors
   if (retval && (retval & 1) == 0) {
     --retval;
