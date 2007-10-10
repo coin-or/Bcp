@@ -222,7 +222,8 @@ Number of process in parameter file %d > n_proc in mpirun -np %d!\n",
 		p.param(BCP_tm_par::LPscheduler_FactorTimeHorizon),
 		p.param(BCP_tm_par::LPscheduler_OverEstimationRate),
 		p.param(BCP_tm_par::LPscheduler_MaxNodeIdRatio),
-		p.param(BCP_tm_par::LPscheduler_MaxNodeIdNum));
+		p.param(BCP_tm_par::LPscheduler_MaxNodeIdNum),
+		p.param(BCP_tm_par::LPscheduler_MinSbIdNum));
 
     // Notify the LP/CG/CP/VG/VP processes about their identity. Also, send out
     // their parameters, core and user info.

@@ -140,6 +140,8 @@ struct BCP_tm_par{
     TmTimeout,
     /** Parameters related to scheduling the LP processes */
     LPscheduler_MaxNodeIdNum,
+    /** Parameters related to scheduling the LP processes */
+    LPscheduler_MinSbIdNum,
     //
     end_of_int_params
   };

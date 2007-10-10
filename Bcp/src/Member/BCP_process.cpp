@@ -25,7 +25,8 @@ BCP_scheduler::setParams(double OverEstimationStatic,
 			 double FactorTimeHorizon,
 			 double OverEstimationRate,
 			 double MaxNodeIdRatio,
-			 int    MaxNodeIdNum)
+			 int    MaxNodeIdNum,
+			 int    MinSbIds)
 {
   rho_static_ = OverEstimationStatic;
   switch_thresh_ = SwitchToRateThreshold;
@@ -48,6 +49,7 @@ BCP_scheduler::setParams(double OverEstimationStatic,
   if (maxNodeIds_ == 0) {
     maxNodeIds_ = 1;
   }
+  minSbIds_ = MinSbIds;
 }
 
 //------------------------------------------------------------------------------
@@ -57,8 +59,10 @@ BCP_scheduler::request_sb_ids(int numIds, int* ids)
 {
   // increase the count for requests by one
   update_rates(1, 0);
-  
-  numIds = CoinMin(numIds, max_id_allocation());
+
+  numIds = CoinMin(numIds, max_id_allocation(numIds));
+  if (numIds==0) return 0;
+
   const int newsize = freeIds_.size() - numIds;
   CoinDisjointCopyN(&freeIds_[newsize], numIds, ids);
   freeIds_.erase(freeIds_.begin()+newsize, freeIds_.end());
@@ -119,7 +123,7 @@ BCP_scheduler::update_rates(int add_req, int add_rel)
 //------------------------------------------------------------------------------
 
 int 
-BCP_scheduler::max_id_allocation()
+BCP_scheduler::max_id_allocation(int numIds)
 {
   int retval;
 
@@ -137,6 +141,15 @@ BCP_scheduler::max_id_allocation()
     else {
       retval = CoinMin(numFree,(int)floor(rho_rate_*(double)(release_counts_tot_)/(double)(request_counts_tot_)));
     }
+  }
+
+  // At this point, we only want to send an odd number of processors
+  if (retval && (retval & 1) == 0) {
+    --retval;
+  }
+
+  if (numIds >= minSbIds_ && retval < minSbIds_) {
+    retval = 0;
   }
 
   return retval;

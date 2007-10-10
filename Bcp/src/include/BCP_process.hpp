@@ -58,7 +58,8 @@ public:
 		 double FactorTimeHorizon,
 		 double OverEstimationRate,
 		 double MaxNodeIdRatio,
-		 int    MaxNodeIdNum);
+		 int    MaxNodeIdNum,
+		 int    MinSbIdNum);
 
   /** Pass in a list of freeIds_ to add.*/
   template <typename InputIterator>
@@ -109,7 +110,7 @@ public:
 
 private:
   /** Compute max allowed allocation of CPUs.*/
-  int max_id_allocation();
+  int max_id_allocation(int numIds);
   /** Update the counts and the static_ flag */
   void update_rates(int add_req, int add_rel);
 
@@ -129,6 +130,9 @@ private:
   /** At most this many ids can be used as a nodeid. This is a parameter to
       the class. The true max is stored in \c maxNodeIds_ */
   int    maxNodeIdNum_;
+  /** Lower threshold for IDs returned at a request.  If less than
+      that number are requested, we still return less. */
+  int    minSbIds_;
 
   /** overestimation factor for static strategy */
   double rho_static_;

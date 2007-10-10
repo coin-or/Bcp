@@ -123,6 +123,9 @@ void BCP_parameter_set<BCP_tm_par>::create_keyword_list() {
     keys.push_back(make_pair(BCP_string("BCP_LPscheduler_MaxNodeIdNum"),
 			     BCP_parameter(BCP_IntPar,
 					   LPscheduler_MaxNodeIdNum)));
+    keys.push_back(make_pair(BCP_string("BCP_LPscheduler_MinSbIdNum"),
+			     BCP_parameter(BCP_IntPar,
+					   LPscheduler_MinSbIdNum)));
     //    keys.push_back(make_pair(BCP_string("BCP_"),
     // 			    BCP_parameter(BCP_IntPar,
     // 					  )));
@@ -255,6 +258,7 @@ void BCP_parameter_set<BCP_tm_par>::set_default_entries(){
     set_entry(VpProcessNum, 0);
     set_entry(TmTimeout, -1);
     set_entry(LPscheduler_MaxNodeIdNum, 2000);
+    set_entry(LPscheduler_MinSbIdNum, 5);
     //-------------------------------------------------------------------------
     // DoublePar
     set_entry(UnconditionalDiveProbability, 0.02);
