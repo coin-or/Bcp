@@ -450,14 +450,18 @@ LP: there is ws info in BCP_lp_send_node_description()!\n");
       case BCP_WarmstartRoot:
 	if (node.index == 0) { // we are in the root
 	  ws = p.lp_solver->getWarmStart();
-	  BCP_warmstart* bws = BCP_lp_convert_CoinWarmStart(p, ws);
-	  const bool def = p.param(BCP_lp_par::ReportWhenDefaultIsExecuted);
-	  BCP_buffer wsbuf;
-	  p.packer->pack_warmstart(bws, wsbuf, def);
-	  p.msg_env->send(p.get_parent() /*tree_manager*/,
-			  BCP_Msg_WarmstartRoot, wsbuf);
-	  p.warmstartRoot = ws;
-	  delete bws;
+	  if (ws) {
+	    BCP_warmstart* bws = BCP_lp_convert_CoinWarmStart(p, ws);
+	    if (bws) {
+	      const bool def = p.param(BCP_lp_par::ReportWhenDefaultIsExecuted);
+	      BCP_buffer wsbuf;
+	      p.packer->pack_warmstart(bws, wsbuf, def);
+	      p.msg_env->send(p.get_parent() /*tree_manager*/,
+			      BCP_Msg_WarmstartRoot, wsbuf);
+	      p.warmstartRoot = ws;
+	      delete bws;
+	    }
+	  }
 	}
 	break;
       case BCP_WarmstartParent:

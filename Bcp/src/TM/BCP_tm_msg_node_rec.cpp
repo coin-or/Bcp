@@ -166,10 +166,20 @@ BCP_tm_unpack_node_description: received node is different from processed.\n");
 	    
 	// warmstart info
 	bool has_data;
-	buf.unpack(has_data);
-	if (has_data) {
+	switch (p.param(BCP_tm_par::WarmstartInfo)) {
+	case BCP_WarmstartNone:
+	  break;
+	case BCP_WarmstartRoot:
+	  // nothing needs to be done even in this case as the WS has been
+	  // sent in a separate message
+	  break;
+	case BCP_WarmstartParent:
+	  buf.unpack(has_data);
+	  if (has_data) {
 	    const bool def = p.param(BCP_tm_par::ReportWhenDefaultIsExecuted);
 	    desc->warmstart = p.packer->unpack_warmstart(buf, def);
+	  }
+	  break;
 	}
 	// user data
 	buf.unpack(has_data);
