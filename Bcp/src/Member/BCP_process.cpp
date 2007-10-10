@@ -127,6 +127,7 @@ BCP_scheduler::update_rates(int add_req, int add_rel)
 int 
 BCP_scheduler::max_id_allocation(int numIds)
 {
+  double dretval;
   int retval;
 
   /* FIXME: this might be incorrect if in request_node_ids() more than 1 id is
@@ -134,19 +135,24 @@ BCP_scheduler::max_id_allocation(int numIds)
 
   const int numFree = freeIds_.size();
 
-  double expansionRate = CoinMin((double) 2*numNodeIds_, (double) maxNodeIds_)/ (double) numNodeIds_;
+  double expRate =
+    (double)CoinMin(2*numNodeIds_,maxNodeIds_) / (double)numNodeIds_;
 
   if (static_) {
-    retval = (int)floor(CoinMin((double) numFree, rho_static_ * (double) (totalNumberIds_ - numNodeIds_*expansionRate)/( (double) numNodeIds_*expansionRate) ));
+    dretval = (rho_static_ * (double)(totalNumberIds_-numNodeIds_*expRate) /
+	       (double)(numNodeIds_*expRate) );
   }
   else {
     if (request_counts_tot_ == 0) {
-      retval = numFree;
+      dretval = numFree;
     }
     else {
-      retval = CoinMin(numFree,(int)floor(rho_rate_*(double)(release_counts_tot_)/(double)(request_counts_tot_) / expansionRate));
+      dretval = (rho_rate_ * (double)(release_counts_tot_) /
+		(double)(request_counts_tot_*expRate));
     }
   }
+  retval = CoinMin(numFree, (int)floor(dretval));
+
   // At this point, we only want to send an odd number of processors
   if (retval && (retval & 1) == 0) {
     --retval;
