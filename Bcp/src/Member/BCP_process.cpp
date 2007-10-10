@@ -15,7 +15,9 @@ BCP_scheduler::BCP_scheduler():
     totalNumberIds_(0),
     freeIds_(),
     numNodeIds_(0),
-    maxNodeIds_(1)
+    maxNodeIds_(1),
+    maxNodeIdRatio_(1.0),
+    maxNodeIdNum_(1)
 {}
 
 void
