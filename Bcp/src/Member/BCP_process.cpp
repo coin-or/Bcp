@@ -28,6 +28,7 @@ BCP_scheduler::setParams(double OverEstimationStatic,
 			 double OverEstimationRate,
 			 double MaxNodeIdRatio,
 			 int    MaxNodeIdNum,
+			 int    MaxSbIds,
 			 int    MinSbIds)
 {
   rho_static_ = OverEstimationStatic;
@@ -51,6 +52,8 @@ BCP_scheduler::setParams(double OverEstimationStatic,
   if (maxNodeIds_ == 0) {
     maxNodeIds_ = 1;
   }
+  maxSbIds_ = MaxSbIds;
+  printf("Setting max SbIds to %i",maxSbIds_);
   minSbIds_ = MinSbIds;
 }
 
@@ -153,13 +156,16 @@ BCP_scheduler::max_id_allocation(int numIds)
   }
   retval = CoinMin(numFree, (int)floor(dretval));
 
+  if (numIds >= minSbIds_ && retval < minSbIds_) {
+    retval = 0;
+  }
+  if (retval > maxSbIds_) {
+    retval = maxSbIds_;
+  }
+
   // At this point, we only want to send an odd number of processors
   if (retval && (retval & 1) == 0) {
     --retval;
-  }
-
-  if (numIds >= minSbIds_ && retval < minSbIds_) {
-    retval = 0;
   }
 
   return retval;

@@ -140,6 +140,8 @@ struct BCP_tm_par{
     TmTimeout,
     /** Parameters related to scheduling the LP processes */
     LPscheduler_MaxNodeIdNum,
+    /** Max how many SB nodes should the scheduler give to an LP process */
+    LPscheduler_MaxSbIdNum,
     /** Parameters related to scheduling the LP processes */
     LPscheduler_MinSbIdNum,
     //

@@ -157,6 +157,7 @@ BCP_single_environment::register_process(USER_initialize* user_init)
 		_tm_prob->param(BCP_tm_par::LPscheduler_OverEstimationRate),
 		_tm_prob->param(BCP_tm_par::LPscheduler_MaxNodeIdRatio),
 		_tm_prob->param(BCP_tm_par::LPscheduler_MaxNodeIdNum),
+		_tm_prob->param(BCP_tm_par::LPscheduler_MaxSbIdNum),
 		_tm_prob->param(BCP_tm_par::LPscheduler_MinSbIdNum));
 
     //-------------------------------------------------------------------------

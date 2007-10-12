@@ -3,6 +3,14 @@
 #ifndef _BCP_PROCESS_H
 #define _BCP_PROCESS_H
 
+#if 1
+   #define TMDBG  
+   #define LPDBG 
+#else
+   #define TMDBG   printf("TMDBG: %s:%i\n", __FILE__, __LINE__)
+   #define LPDBG   printf("LPDBG: %s:%i\n", __FILE__, __LINE__)
+#endif
+
 class BCP_buffer;
 
 class BCP_process {
@@ -59,6 +67,7 @@ public:
 		 double OverEstimationRate,
 		 double MaxNodeIdRatio,
 		 int    MaxNodeIdNum,
+		 int    MaxSbIdNum,
 		 int    MinSbIdNum);
 
   /** Pass in a list of freeIds_ to add.*/
@@ -130,6 +139,9 @@ private:
   /** At most this many ids can be used as a nodeid. This is a parameter to
       the class. The true max is stored in \c maxNodeIds_ */
   int    maxNodeIdNum_;
+  /** Upper threshold for IDs returned at a request. If more than that number
+      are requested (and are available) we still return this many. */
+  int    maxSbIds_;
   /** Lower threshold for IDs returned at a request.  If less than
       that number are requested, we still return less. */
   int    minSbIds_;

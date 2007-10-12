@@ -83,11 +83,16 @@ int bcp_main(int argc, char* argv[], USER_initialize* user_init)
 	msg_buf.unpack(ptype);
 	msg_buf.unpack(ub);
 	while (ptype != BCP_ProcessType_EndProcess) {
+	    const bool maxheap_set = false;
 	    switch (ptype) {
 	    case BCP_ProcessType_LP:
-	      printf("usedheap before LP: %li\n", BCP_used_heap());
+	      if (maxheap_set) {
+		 printf("usedheap before LP: %li\n", BCP_used_heap());
+	      }
 	      ptype = BCP_lp_main(msg_env, user_init, my_id, parent, ub);
-	      printf("usedheap after LP: %li\n", BCP_used_heap());
+	      if (maxheap_set) {
+		  printf("usedheap after LP: %li\n", BCP_used_heap());
+	      }
 	      break;
 	    case BCP_ProcessType_CP:
 	      // BCP_cp_main(msg_env, user_init, my_id, parent, ub);
@@ -102,9 +107,13 @@ int bcp_main(int argc, char* argv[], USER_initialize* user_init)
 	      ptype = BCP_vg_main(msg_env, user_init, my_id, parent, ub);
 	      break;
 	    case BCP_ProcessType_TS:
-	      printf("usedheap before TS: %li\n", BCP_used_heap());
+	      if (maxheap_set) {
+		  printf("usedheap before TS: %li\n", BCP_used_heap());
+	      }
 	      ptype = BCP_tmstorage_main(msg_env, user_init, my_id, parent, ub);
-	      printf("usedheap after TS: %li\n", BCP_used_heap());
+	      if (maxheap_set) {
+		  printf("usedheap after TS: %li\n", BCP_used_heap());
+	      }
 	      break;
 	    case BCP_ProcessType_Any:
 	      throw BCP_fatal_error("\
@@ -223,6 +232,7 @@ Number of process in parameter file %d > n_proc in mpirun -np %d!\n",
 		p.param(BCP_tm_par::LPscheduler_OverEstimationRate),
 		p.param(BCP_tm_par::LPscheduler_MaxNodeIdRatio),
 		p.param(BCP_tm_par::LPscheduler_MaxNodeIdNum),
+		p.param(BCP_tm_par::LPscheduler_MaxSbIdNum),
 		p.param(BCP_tm_par::LPscheduler_MinSbIdNum));
 
     // Notify the LP/CG/CP/VG/VP processes about their identity. Also, send out
