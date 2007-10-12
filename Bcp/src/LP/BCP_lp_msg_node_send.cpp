@@ -468,8 +468,8 @@ LP: there is ws info in BCP_lp_send_node_description()!\n");
 	ws = p.lp_solver->getWarmStart();
 	p.node->warmstart = BCP_lp_convert_CoinWarmStart(p, ws);
 	BCP_lp_pack_warmstart(p, del_vars, del_cuts);
-	BCP_lp_pack_user_data(p);
       }
+      BCP_lp_pack_user_data(p);
    }
 
    int keep = -1;
