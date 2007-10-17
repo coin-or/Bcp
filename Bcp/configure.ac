@@ -75,7 +75,7 @@ AC_COIN_HAS_PROJECT(Osi)
 #                             Other dependencies                            #
 #############################################################################
 
-AC_COIN_HAS_USER_LIBRARY([Mpi], [MPI], [mpi.h], [MPI_Irecv])
+AC_COIN_HAS_USER_LIBRARY([Mpi], [MPI], [mpi.h], )
 # ToDo: Automatically choose MPI compiler
 # AC_COIN_HAS_USER_LIBRARY([Pvm], [PVM], [pvm3.h], [???])
 
