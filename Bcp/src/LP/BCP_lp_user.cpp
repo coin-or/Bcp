@@ -36,8 +36,6 @@ BCP_user_data* BCP_lp_user::get_user_data() { return p->node->user_data; }
 
 void BCP_lp_user::print(const bool ifprint, const char * format, ...) const {
   if (ifprint) {
-    static bool serial = get_param(BCP_lp_par::MessagePassingIsSerial);
-    if (! serial) printf("[%i] ", p->get_process_id());
     va_list valist;
     va_start(valist, format);
     vprintf(format, valist);
