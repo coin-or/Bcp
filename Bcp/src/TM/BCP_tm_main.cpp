@@ -179,7 +179,7 @@ Number of process in parameter file %d > n_proc in mpirun -np %d!\n",
 
     p.stat.set_num_lp(p.param(BCP_tm_par::LpProcessNum));
 
-    p.start_time = CoinCpuTime();
+    p.start_time = CoinWallclockTime();
 
     FILE* logfile = 0;
 

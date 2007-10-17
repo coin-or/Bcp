@@ -91,7 +91,7 @@ BCP_single_environment::register_process(USER_initialize* user_init)
     BCP_tm_parse_command_line(*_tm_prob, _argnum, _arglist);
     
     _tm_prob->msg_env = this;
-    _tm_prob->start_time = CoinCpuTime();
+    _tm_prob->start_time = CoinWallclockTime();
     _my_id = _tm_id;
 
     // BCP_tm_user_init() returns a BCP_tm_user* and that will be part of p.

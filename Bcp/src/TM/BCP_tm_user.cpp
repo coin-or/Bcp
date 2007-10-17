@@ -216,7 +216,7 @@ void
 BCP_tm_user::display_final_information(const BCP_lp_statistics& lp_stat)
 {
     if (p->param(BCP_tm_par::TmVerb_FinalStatistics)) {
-	printf("TM: Running time: %.3f\n", CoinCpuTime() - p->start_time);
+	printf("TM: Running time: %.3f\n", CoinWallclockTime() - p->start_time);
 	printf("TM: search tree size: %i   ( processed %i )   max depth: %i\n",
 	       int(p->search_tree.size()), int(p->search_tree.processed()),
 	       p->search_tree.maxdepth());
