@@ -281,4 +281,54 @@ int BCP_mpi_environment::num_procs() {
     return num_proc;
 }
 
+//#define MPID_DEV_REQUEST_DECL
+#if 0
+struct MPIDI_BGLTS_Request {
+    MPIDI_Message_match match;     /* enough information to to MPI matching */
+    MPI_Datatype        datatype;  /* data type of message */
+    struct MPID_Datatype *datatype_ptr;
+    int ca; /* completion action */
+    char *userbuf;  /* user buffer for messages */
+    unsigned userbufcount; /* count (not size) of userbuf */
+    char *uebuf; /* unexpected buffer */
+    unsigned uebuflen; /* length (bytes) of unexpected buffer */
+    MPID_Segment segment; /* segment used for non-contigouous buffers */
+    MPIDI_BGLTS_REQUEST_STATE state; /* state of request */
+    int type; /* type of request, used by gettype and settype */
+              /* one of send, rsend, recv, irecv. etc. */
+    int msgtype; /* type of associated message */
+                 /* one of self, eager, etc. */
+    BGLML_Message msgdata;
+    char slack[300];
+    struct MPID_Request *next;    /* link to next request */
+    int cancel_pending; /* Cancel State */
+    int dest_rank;
+    int dest_tag;
+    int dest_context_id;
+} bglts;
+#endif
+
+#ifdef MPID_DEV_REQUEST_DECL
+int MPIDI_BGLTS_get_num_messages()
+{
+    register MPID_Request * rreq = MPIDI_Process.recv_posted_head;
+    register int cnt = 0;
+    while (rreq != NULL) {
+	++cnt;
+	rreq = rreq->bglts.next;
+    }
+    rreq = MPIDI_Process.recv_unexpected_head;
+    while (rreq != NULL) {
+	++cnt;
+	rreq = rreq->bglts.next;
+    }
+    return cnt;
+}
+#else
+int MPIDI_BGLTS_get_num_messages()
+{
+    return -1;
+}
+#endif
+
 #endif /* COIN_HAS_MPI */
