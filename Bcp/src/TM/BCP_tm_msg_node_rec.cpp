@@ -478,6 +478,7 @@ BCP_tm_unpack_branching_info(BCP_tm_prob& p, BCP_buffer& buf,
 
     CoinTreeNode** children = new CoinTreeNode*[child_num];
     int numChildrenAdded = 0;
+    const int depth = node->getDepth() + 1;
     for (i = 0; i < child_num; ++i){
 	desc = new BCP_node_change;
 	BCP_tm_create_core_change(desc, bvarnum, bcutnum, brobj, i);
@@ -499,7 +500,7 @@ BCP_tm_unpack_branching_info(BCP_tm_prob& p, BCP_buffer& buf,
 	child->_parent = node;
 	child->_birth_index = node->child_num();
 	/* Fill out the fields in CoinTreeNode */
-	child->setDepth(node->getDepth() + 1);
+	child->setDepth(depth);
 	child->setQuality(qualities[i]);
 	child->setTrueLB(true_lb[i]);
 	/* Add the child to the list of children in the parent */
@@ -525,58 +526,61 @@ BCP_tm_unpack_branching_info(BCP_tm_prob& p, BCP_buffer& buf,
 	// lp, cg, vg  initialized to -1 -- OK, none assigned yet
     }
 
-    CoinTreeSiblings siblings(numChildrenAdded, children);
-    delete[] children;
+    if (numChildrenAdded > 0) {
+      if (depth <= 63) {
+	children[0]->setPreferred(node->getPreferred() | (1 << (63-depth)));
+      }
+      CoinTreeSiblings siblings(numChildrenAdded, children);
 
-    BCP_print_memusage(p);
-    p.need_a_TS = ! BCP_tm_is_data_balanced(p);
+      BCP_print_memusage(p);
+      p.need_a_TS = ! BCP_tm_is_data_balanced(p);
 
-    // check the one that's proposed to be kept if there's one
-    if (keep >= 0) {
+      // check the one that's proposed to be kept if there's one
+      if (keep >= 0) {
 	child = node->child(keep);
 	if (dive == BCP_DoDive || dive == BCP_TestBeforeDive){
-	    // we've got to answer
-	    buf.clear();
-	    if (p.need_a_TS) {
-	        /* Force no diving if we need a TS process */
-	        dive = BCP_DoNotDive;
-	    } else {
-	        if (dive == BCP_TestBeforeDive)
-		    dive = BCP_tm_shall_we_dive(p, child->getQuality());
-	    }
-	    buf.pack(dive);
-	    if (dive != BCP_DoNotDive){
-		p.user->display_node_information(p.search_tree, *child);
-		child->status = BCP_ActiveNode;
-		// if diving then send the new index and var/cut_names
-		buf.pack(child->index());
-		siblings.advanceNode();
-	    }
-	    p.candidate_list.push(siblings);
-	    p.user->change_candidate_heap(p.candidate_list, false);
-	    p.msg_env->send(node->lp, BCP_Msg_DivingInfo, buf);
+	  // we've got to answer
+	  buf.clear();
+	  if (p.need_a_TS) {
+	    /* Force no diving if we need a TS process */
+	    dive = BCP_DoNotDive;
+	  } else {
+	    if (dive == BCP_TestBeforeDive)
+	      dive = BCP_tm_shall_we_dive(p, child->getQuality());
+	  }
+	  buf.pack(dive);
+	  if (dive != BCP_DoNotDive){
+	    p.user->display_node_information(p.search_tree, *child);
+	    child->status = BCP_ActiveNode;
+	    // if diving then send the new index and var/cut_names
+	    buf.pack(child->index());
+	    siblings.advanceNode();
+	  }
+	  p.candidate_list.push(siblings);
+	  p.user->change_candidate_heap(p.candidate_list, false);
+	  p.msg_env->send(node->lp, BCP_Msg_DivingInfo, buf);
 	} else {
-	    p.candidate_list.push(siblings);
-	    p.user->change_candidate_heap(p.candidate_list, false);
+	  p.candidate_list.push(siblings);
+	  p.user->change_candidate_heap(p.candidate_list, false);
 	}
-    } else {
+      } else {
 	p.candidate_list.push(siblings);
 	p.user->change_candidate_heap(p.candidate_list, false);
 	dive = BCP_DoNotDive;
-    }
+      }
 
-    if (dive == BCP_DoNotDive){
+      if (dive == BCP_DoNotDive){
 	// lp,cg,vg becomes free (zeroes out node->{lp,cg,vg})
 	BCP_tm_free_procs_of_node(p, node);
-    } else {
+      } else {
 	// if diving then the child takes over the parent's lp,cg,vg
 	// XXX
 	if (child != node->child(keep)) {
-	    throw BCP_fatal_error("\
+	  throw BCP_fatal_error("\
 BCP_tm_unpack_branching_info: the value of child is messed up!\n");
 	}
 	if (node->lp == -1) {
-	    throw BCP_fatal_error("\
+	  throw BCP_fatal_error("\
 BCP_tm_unpack_branching_info: the (old) node has no LP associated with!\n");
 	}
 	child->lp = node->lp;
@@ -584,7 +588,9 @@ BCP_tm_unpack_branching_info: the (old) node has no LP associated with!\n");
 	child->vg = node->vg;
 	p.active_nodes[node->lp] = child;
 	node->lp = node->cg = node->vg = -1;
+      }
     }
+    delete[] children;
 
     // and the node is done
     node->status = BCP_ProcessedNode;

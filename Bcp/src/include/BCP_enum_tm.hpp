@@ -8,7 +8,8 @@
 enum BCP_tree_search_method {
   BCP_BestFirstSearch,
   BCP_BreadthFirstSearch,
-  BCP_DepthFirstSearch
+  BCP_DepthFirstSearch,
+  BCP_PreferredFirstSearch
 };
 
 //-----------------------------------------------------------------------------
