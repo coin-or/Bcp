@@ -503,6 +503,13 @@ BCP_tm_unpack_branching_info(BCP_tm_prob& p, BCP_buffer& buf,
 	child->setDepth(depth);
 	child->setQuality(qualities[i]);
 	child->setTrueLB(true_lb[i]);
+	if (i > 0 && depth <= 63) {
+	  child->setPreferred(node->getPreferred() | (1 << (63-depth)));
+	} else {
+	  child->setPreferred(node->getPreferred());
+	}
+	//	printf("index: %i, depth: %i, preferred: %li\n",
+	//	       child->_index, depth, child->getPreferred());
 	/* Add the child to the list of children in the parent */
 	node->new_child(child);
 	// _children  initialized to be empty -- OK
@@ -527,9 +534,6 @@ BCP_tm_unpack_branching_info(BCP_tm_prob& p, BCP_buffer& buf,
     }
 
     if (numChildrenAdded > 0) {
-      if (depth <= 63) {
-	children[0]->setPreferred(node->getPreferred() | (1 << (63-depth)));
-      }
       CoinTreeSiblings siblings(numChildrenAdded, children);
 
       BCP_print_memusage(p);
