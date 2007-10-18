@@ -81,6 +81,7 @@ BCP_tm_wrapup(BCP_tm_prob* tm, BCP_lp_prob* lp,
 	// Now ask every process
         const std::vector<int>& lps = tm->lp_procs;
         const int num_lp = lps.size();
+	BCP_lp_statistics* lp_stats = new BCP_lp_statistics[num_lp];
 	BCP_lp_statistics this_lp_stat;
    
 	int i;
@@ -88,7 +89,7 @@ BCP_tm_wrapup(BCP_tm_prob* tm, BCP_lp_prob* lp,
 	    while (true) {
 		tm->msg_env->receive(lps[i],
 				     BCP_Msg_LpStatistics,
-				     tm->msg_buf, 10);
+				     tm->msg_buf, 1);
 		BCP_message_tag msgtag = tm->msg_buf.msgtag();
 		if (msgtag == BCP_Msg_NoMessage) {
 		    // test if the LP is still alive
@@ -98,8 +99,13 @@ BCP_tm_wrapup(BCP_tm_prob* tm, BCP_lp_prob* lp,
 		    break;
 		}
 	    }
-	    this_lp_stat.unpack(tm->msg_buf);
-	    tm->lp_stat->add(this_lp_stat);
+	    lp_stats[i].unpack(tm->msg_buf);
+	    tm->lp_stat->add(lp_stats[i]);
+	}
+	for (i = 0; i < num_lp; ++i) {
+	    printf("LP # %i : node idle: %12.6f  SB idle: %12.6f\n",
+		   lps[i], tm->lp_scheduler.node_idle(lps[i]),
+		   tm->lp_scheduler.sb_idle(lps[i]));
 	}
     }
 

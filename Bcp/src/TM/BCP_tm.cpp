@@ -45,6 +45,38 @@ BCP_tm_prob::~BCP_tm_prob()
 //#############################################################################
 
 void
+BCP_tm_stat::print(bool final, double t)
+{
+  bool do_print = false;
+  if (final) {
+    printf("TM: final statistics:\n");
+    do_print = true;
+  } else {
+    if (floor(t/1200) > cnt) {
+	cnt = static_cast<int>(floor(t/1200));
+	printf("TM: statistics at %12.6f:\n", t);
+	do_print = true;
+    }
+  }
+  if (do_print) {
+    for (int i = 0; i <= num_lp; ++i) {
+      if ((wait_time[i] > 5e-3) ||
+          (numQueueLength[i]>0 && sumQueueLength[i]/numQueueLength[i] > 5)) {
+        if (numQueueLength[i] > 0) {
+          printf("TM:    With %5i LP working:  wait: %12.6f   queue: %.2f\n",
+		 i, wait_time[i], sumQueueLength[i]/numQueueLength[i]);
+	} else {
+	  printf("TM:    With %5i LP working:  wait: %12.6f   queue: %.2f\n",
+		 i, wait_time[i], 0.0);
+	}
+      }
+    }
+  }
+}
+
+//#############################################################################
+
+void
 BCP_tm_prob::pack_var(const BCP_var& var)
 {
   const int bcpind = var.bcpind();

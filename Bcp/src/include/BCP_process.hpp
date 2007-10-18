@@ -3,7 +3,7 @@
 #ifndef _BCP_PROCESS_H
 #define _BCP_PROCESS_H
 
-#if 1
+#if 0
    #define TMDBG  
    #define LPDBG 
 #else
@@ -41,6 +41,7 @@ public:
 //
 // Date : 10/03/2007
 
+#include <map>
 #include <vector>
 #include <cmath>
 #include <sys/time.h>
@@ -71,15 +72,7 @@ public:
 		 int    MinSbIdNum);
 
   /** Pass in a list of freeIds_ to add.*/
-  template <typename InputIterator>
-  inline void add_free_ids(InputIterator first, InputIterator last){
-    const int oldsize = freeIds_.size();
-    freeIds_.insert(freeIds_.end(), first, last);
-    totalNumberIds_ += freeIds_.size() - oldsize;
-    maxNodeIds_ = CoinMin((int)floor(maxNodeIdRatio_ * totalNumberIds_),
-			  maxNodeIdNum_);
-  }
-
+  void add_free_ids(int numIds, const int* ids);
   /** Request for a number of id's to do some strong branching.
       NOTE: ids must be already allocated to be at least \c numIds size.
     * \param numIds : number of ids requested
@@ -92,18 +85,9 @@ public:
 
   /** Request an id for processing nodes.
       \return id number or -1 if none is available. */
-  inline int request_node_id() {
-    if (freeIds_.empty() || numNodeIds_ == maxNodeIds_) return -1;
-    numNodeIds_ ++;
-    int id = freeIds_.back();
-    freeIds_.pop_back();
-    return id;
-  }
+  int request_node_id();
   /** Give back an id to scheduler used for processing a node */
-  inline void release_node_id(int id) {
-    release_sb_id(id);
-    numNodeIds_--;
-  }
+  void release_node_id(int id);
   /** Decide if there is an id that can be returned for processin a node */
   inline bool has_free_node_id() const {
     return (!freeIds_.empty() && maxNodeIds_ > numNodeIds_);
@@ -116,6 +100,16 @@ public:
   inline int maxNodeIds() const {
     return maxNodeIds_;
   }
+  /** Return how much time did process p spent idling as a node process */
+  inline double node_idle(int p) {
+    return node_idle_time_[p];
+  }
+  /** Return how much time did process p spent idling as a SB process */
+  inline double sb_idle(int p) {
+    return sb_idle_time_[p];
+  }
+  /** Update idle times with the last idle time */
+  void update_idle_times();
 
 private:
   /** Compute max allowed allocation of CPUs.*/
@@ -124,6 +118,14 @@ private:
   void update_rates(int add_req, int add_rel);
 
 private:
+  /** the SB idle time for each process */
+  std::map<int, double> sb_idle_time_;
+  /** the node idle time for each process */
+  std::map<int, double> node_idle_time_;
+  /** the type of the last release (0: algo start, 1: from SB, 2: from node */
+  std::map<int, double> last_release_type_;
+  /** when was the process release last time */
+  std::map<int, double> last_release_time_;
   /** Store the total number of CPUs.*/
   int totalNumberIds_;
   /** List of free CPUs ids.*/

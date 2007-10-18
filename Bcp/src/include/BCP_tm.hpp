@@ -88,42 +88,43 @@ private:
   // An array whose i-th entry indicates what was the totel wait time when
   // exactly i LP processes were working
   double* wait_time;
+  // An array whose i-th entry indicates what was the totel queue length when
+  // exactly i LP processes were working
+  double* sumQueueLength;
+  // An array whose i-th entry indicates how many times we have sampled the
+  // queue length when exactly i LP processes were working
+  int* numQueueLength;
   int cnt; // how many times we have printed stats
 public:
-  BCP_tm_stat() : num_lp(0), wait_time(NULL), cnt(0) {}
+  BCP_tm_stat() :
+      num_lp(0),
+      wait_time(NULL),
+      sumQueueLength(NULL),
+      numQueueLength(NULL),
+      cnt(0) {}
   ~BCP_tm_stat() {
     delete[] wait_time;
   }
   void set_num_lp(int num) {
     delete[] wait_time;
+    delete[] sumQueueLength;
+    delete[] numQueueLength;
     num_lp = num;
-    wait_time = new double[num];
-    for (int i = 0; i < num_lp; ++i) {
+    wait_time = new double[num+1];
+    sumQueueLength = new double[num+1];
+    numQueueLength = new int[num+1];
+    for (int i = 0; i <= num_lp; ++i) {
       wait_time[i] = 0;
+      sumQueueLength[i] = 0;
+      numQueueLength[i] = 0;
     }
   }
   void update_wait_time(int i, double t) { wait_time[i] += t; }
-  void print(bool final, double t) {
-    bool do_print = false;
-    if (final) {
-      printf("TM: final statistics:\n");
-      do_print = true;
-    } else {
-      if (floor(t/600) > cnt) {
-	cnt = static_cast<int>(floor(t/600));
-	printf("TM: statistics at %12.6f:\n", t);
-	do_print = true;
-      }
-    }
-    if (do_print) {
-      for (int i = 0; i < num_lp; ++i) {
-	if (wait_time[i] > 5e-6) {
-	  printf("TM:    Wait time when %5i LP was working: %12.6f\n",
-		 i, wait_time[i]);
-	}
-      }
-    }
+  void update_queue_length(int i, int len) {
+    sumQueueLength[i] += len;
+    ++numQueueLength[i];
   }
+  void print(bool final, double t);
 };
 
 //-----------------------------------------------------------------------------

@@ -73,6 +73,8 @@ public:
 //    void stop_processes(const BCP_proc_array* processes);
 };
 
+int MPIDI_BGLTS_get_num_messages();
+
 #endif /* COIN_HAS_MPI */
 
 #endif

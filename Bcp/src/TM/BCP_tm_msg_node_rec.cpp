@@ -68,7 +68,11 @@ BCP_tm_print_info_line(BCP_tm_prob& p, BCP_tm_node& node)
 	printf("%7i ", (int)p.search_tree.size());                 // 8
 	printf("%7i ", processed);                                 // 8
 	printf("%10g ", p.ub());                                   // 11
-	printf("%10g ", p.candidate_list.bestQuality());           // 11
+	if (p.candidate_list.empty()) {
+	    printf("%10g ", 0.0);                                  // 11
+	} else {
+	    printf("%10g ", p.candidate_list.bestQuality());       // 11
+	}
 	/*
 	int quality_above_UB;
 	int quality_below_UB;
@@ -84,6 +88,7 @@ BCP_tm_print_info_line(BCP_tm_prob& p, BCP_tm_node& node)
 
 void BCP_print_memusage(BCP_tm_prob& p)
 {
+#if 0
     static int cnt = 0;
     ++cnt;
     if ((cnt % 100) == 0) {
@@ -92,6 +97,7 @@ void BCP_print_memusage(BCP_tm_prob& p)
 	    printf("    mallinfo used: %li\n", usedheap);
 	}
     }
+#endif
 }
 
 //#############################################################################

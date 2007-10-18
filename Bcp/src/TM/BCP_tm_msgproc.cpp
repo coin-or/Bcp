@@ -47,7 +47,7 @@ void BCP_tm_start_processes(BCP_tm_prob& p)
 	if (! success) {
 	  throw BCP_fatal_error("Failed to start up the LP processes\n");
 	}
-	p.lp_scheduler.add_free_ids(p.lp_procs.begin(), p.lp_procs.end());
+	p.lp_scheduler.add_free_ids(p.lp_procs.size(), &p.lp_procs[0]);
     }
 
 #if ! defined(BCP_ONLY_LP_PROCESS_HANDLING_WORKS)

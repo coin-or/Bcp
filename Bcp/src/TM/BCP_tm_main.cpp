@@ -285,6 +285,7 @@ Number of process in parameter file %d > n_proc in mpirun -np %d!\n",
     // first let the processes know that they're not needed in BCP any more,
     // they can start idling (this will be used when we'll loop around in TM).
     // The processes will respond by sending statistics.
+    p.lp_scheduler.update_idle_times();
     BCP_tm_idle_processes(p);
 
     BCP_tm_wrapup(&p, 0, 0, 0, true);
@@ -315,12 +316,16 @@ bool BCP_tm_do_one_phase(BCP_tm_prob& p)
 
 	// Process incoming messages. If there are no active nodes left then
 	// timeout is set to 0, so we just check the queue, but not wait.
-	const double t0 = CoinCpuTime();
-	p.msg_env->receive(BCP_AnyProcess, BCP_Msg_AnyMessage, buf,
-			   p.lp_scheduler.numNodeIds() == 0 ?
-			   0 : p.param(BCP_tm_par::TmTimeout));
-	const double t1 = CoinCpuTime();
-	p.stat.update_wait_time(p.lp_scheduler.numNodeIds(), t1-t0);
+	const int numNodeIds = p.lp_scheduler.numNodeIds();
+	const double t0 = CoinWallclockTime();
+	const double timeout = (p.lp_scheduler.numNodeIds() == 0 ?
+				0 : p.param(BCP_tm_par::TmTimeout));
+	p.msg_env->receive(BCP_AnyProcess, BCP_Msg_AnyMessage, buf, timeout);
+	const double t1 = CoinWallclockTime();
+	p.stat.update_wait_time(numNodeIds, t1-t0);
+#ifdef COIN_HAS_MPI
+	p.stat.update_queue_length(numNodeIds, MPIDI_BGLTS_get_num_messages());
+#endif
 	p.stat.print(false /* not final */, t1 - p.start_time);
 	try {
 	    p.process_message();
