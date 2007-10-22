@@ -47,13 +47,14 @@ BCP_tm_prob::~BCP_tm_prob()
 void
 BCP_tm_stat::print(bool final, double t)
 {
+  const int wait_stat_freq = 1200;
   bool do_print = false;
   if (final) {
     printf("TM: final statistics:\n");
     do_print = true;
   } else {
-    if (floor(t/1200) > cnt) {
-	cnt = static_cast<int>(floor(t/1200));
+    if (floor(t/wait_stat_freq) > cnt) {
+	cnt = static_cast<int>(floor(t/wait_stat_freq));
 	printf("TM: statistics at %12.6f:\n", t);
 	do_print = true;
     }
