@@ -3,7 +3,7 @@
 #ifndef _BCP_PROCESS_H
 #define _BCP_PROCESS_H
 
-#if 0
+#if 1
    #define TMDBG  
    #define LPDBG 
 #else

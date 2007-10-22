@@ -111,6 +111,7 @@ BCP_tm_unpack_node_description(BCP_tm_prob& p, BCP_buffer& buf)
     // get a pointer to this node
     BCP_tm_node* node = p.search_tree[index];
     p.search_tree.increase_processed();
+TMDBG;
 
     // XXX
     const int lp_id = node->lp;
@@ -121,9 +122,11 @@ BCP_tm_unpack_node_description: received node is different from processed.\n");
 
     // get the quality and new lb for this node
     double q, tlb;
+TMDBG;
     buf.unpack(q).unpack(tlb);
     node->setQuality(q);
     node->setTrueLB(tlb);
+TMDBG;
 
     // wipe out any previous description of this node and create a new one if
     // the description is sent over
@@ -132,17 +135,20 @@ BCP_tm_unpack_node_description: received node is different from processed.\n");
 	node->_data._user = NULL;
     } else {
 	BCP_buffer b;
+TMDBG;
 	BCP_vec<int> indices(1, index);
 	b.pack(indices);
 	p.msg_env->send(node->_data_location, BCP_Msg_NodeListDelete, b);
 	--BCP_tm_node::num_remote_nodes;
 	++BCP_tm_node::num_local_nodes;
+TMDBG;
 	node->_locally_stored = true;
     }
 
     bool desc_sent = false;
     buf.unpack(desc_sent);
 
+TMDBG;
     if (desc_sent) {
 	BCP_node_change* desc = new BCP_node_change;
 
@@ -161,6 +167,7 @@ BCP_tm_unpack_node_description: received node is different from processed.\n");
 	    p.unpack_var();
 	}
 	// Now unpack the change data.
+TMDBG;
 	desc->var_change.unpack(buf);
 
 	// same for cuts
@@ -168,10 +175,12 @@ BCP_tm_unpack_node_description: received node is different from processed.\n");
 	while (--cnt >= 0) {
 	    p.unpack_cut();
 	}
+TMDBG;
 	desc->cut_change.unpack(buf);
 	    
 	// warmstart info
 	bool has_data;
+TMDBG;
 	switch (p.param(BCP_tm_par::WarmstartInfo)) {
 	case BCP_WarmstartNone:
 	  break;
@@ -187,8 +196,10 @@ BCP_tm_unpack_node_description: received node is different from processed.\n");
 	  }
 	  break;
 	}
+TMDBG;
 	// user data
 	buf.unpack(has_data);
+TMDBG;
 	BCP_user_data* udata = has_data ? p.packer->unpack_user_data(buf) : 0;
 
 	node->_data._desc = desc;
@@ -198,6 +209,7 @@ BCP_tm_unpack_node_description: received node is different from processed.\n");
 	node->_cut_storage = desc->cut_change.storage();
 	node->_ws_storage =
 	    desc->warmstart ? desc->warmstart->storage() : BCP_Storage_NoData;
+TMDBG;
     } else {
 	node->_core_storage = BCP_Storage_NoData;
 	node->_var_storage = BCP_Storage_NoData;
@@ -206,6 +218,7 @@ BCP_tm_unpack_node_description: received node is different from processed.\n");
     }
 
     p.active_nodes.erase(lp_id);
+TMDBG;
 
     return index;
 }
@@ -422,6 +435,7 @@ static void
 BCP_tm_unpack_branching_info(BCP_tm_prob& p, BCP_buffer& buf,
 			     BCP_tm_node* node)
 {
+TMDBG;
     BCP_diving_status dive; // the old diving status
 
     BCP_vec<BCP_child_action> action;
@@ -429,7 +443,15 @@ BCP_tm_unpack_branching_info(BCP_tm_prob& p, BCP_buffer& buf,
     BCP_vec<double> true_lb;
     BCP_vec<double> qualities;
 
-    buf.unpack(dive).unpack(action).unpack(qualities).unpack(true_lb);
+TMDBG;
+    buf.unpack(dive);
+TMDBG;
+    buf.unpack(action);
+TMDBG;
+    buf.unpack(qualities);
+TMDBG;
+    buf.unpack(true_lb);
+TMDBG;
 
     const int child_num = action.size();
     user_data.insert(user_data.end(), child_num, 0);
@@ -440,6 +462,7 @@ BCP_tm_unpack_branching_info(BCP_tm_prob& p, BCP_buffer& buf,
 	    user_data[i] = p.packer->unpack_user_data(buf);
 	}
     }
+TMDBG;
 
     BCP_internal_brobj* brobj = new BCP_internal_brobj;
     brobj->unpack(buf);

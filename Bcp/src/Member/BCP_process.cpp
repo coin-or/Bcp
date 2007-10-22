@@ -221,7 +221,7 @@ BCP_scheduler::max_id_allocation(int numIds)
     }
     else {
       dretval = (rho_rate_ * (double)(release_counts_tot_) /
-		(double)(request_counts_tot_*expRate));
+		(double)(request_counts_tot_));
     }
   }
   retval = CoinMin(numFree, (int)floor(dretval));
