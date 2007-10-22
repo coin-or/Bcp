@@ -17,6 +17,8 @@
 #include "BCP_tm_user.hpp"
 #include "BCP_tm_functions.hpp"
 
+// #define DEBUG_PRINT
+
 static int
 BCP_tm_unpack_node_description(BCP_tm_prob& p, BCP_buffer& buf);
 static void
@@ -502,6 +504,11 @@ TMDBG;
     CoinTreeNode** children = new CoinTreeNode*[child_num];
     int numChildrenAdded = 0;
     const int depth = node->getDepth() + 1;
+    BitVector128 nodePref = node->getPreferred();
+#ifdef DEBUG_PRINT
+    char output[44];
+    output[43] = 0;
+#ifdef DEBUG_PRINT
     for (i = 0; i < child_num; ++i){
 	desc = new BCP_node_change;
 	BCP_tm_create_core_change(desc, bvarnum, bcutnum, brobj, i);
@@ -526,13 +533,19 @@ TMDBG;
 	child->setDepth(depth);
 	child->setQuality(qualities[i]);
 	child->setTrueLB(true_lb[i]);
-	if (i > 0 && depth <= 63) {
-	  child->setPreferred(node->getPreferred() | (1 << (63-depth)));
+	if (i > 0 && depth <= 127) {
+	  BitVector128 pref = nodePref;
+	  pref.setBit(127-depth);
+	  child->setPreferred(pref);
+#ifdef DEBUG_PRINT
+	  pref.print(output);
+#ifdef DEBUG_PRINT
 	} else {
-	  child->setPreferred(node->getPreferred());
+	  child->setPreferred(nodePref);
+#ifdef DEBUG_PRINT
+	  nodePref.print(output);
+#ifdef DEBUG_PRINT
 	}
-	//	printf("index: %i, depth: %i, preferred: %li\n",
-	//	       child->_index, depth, child->getPreferred());
 	/* Add the child to the list of children in the parent */
 	node->new_child(child);
 	// _children  initialized to be empty -- OK
@@ -554,11 +567,10 @@ TMDBG;
 	child->vp = node->vp;
 	child->cp = node->cp;
 	// lp, cg, vg  initialized to -1 -- OK, none assigned yet
-// #define DEBUG_PRINT
 #ifdef DEBUG_PRINT
-	printf("TM:    sibling[%i]: %i, quality: %lf, tlb: %lf, pref: %llX\n",
+	printf("TM:    sibling[%i]: %i, quality: %lf, tlb: %lf, pref: %s\n",
 	       i, child->_index, child->getQuality(),
-	       child->getTrueLB(), child->getPreferred());
+	       child->getTrueLB(), output);
 #endif
     }
 
