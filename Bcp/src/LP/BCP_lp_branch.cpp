@@ -72,7 +72,8 @@ BCP_lp_branching_object(const BCP_lp_integer_branching_object& o,
     forced_var_pos(new BCP_vec<int>(1,-1)), forced_cut_pos(0),
     forced_var_bd(new BCP_vec<double>(4,0.0)), forced_cut_bd(0),
     implied_var_pos(0), implied_cut_pos(0),
-    implied_var_bd(0), implied_cut_bd(0)
+    implied_var_bd(0), implied_cut_bd(0),
+    objval_(0), termcode_(0)
 {
     BCP_vec<int>& fvp = *forced_var_pos;
     BCP_vec<double>& fvb = *forced_var_bd;
@@ -92,7 +93,8 @@ BCP_lp_branching_object(const OsiSolverInterface* osi,
     forced_var_pos(0), forced_cut_pos(0),
     forced_var_bd(0), forced_cut_bd(0),
     implied_var_pos(0), implied_cut_pos(0),
-    implied_var_bd(0), implied_cut_bd(0)
+    implied_var_bd(0), implied_cut_bd(0),
+    objval_(0), termcode_(0)
 {
     const OsiSOS* sos = dynamic_cast<const OsiSOS*>(o.originalObject());
     const int * which = sos->members();
