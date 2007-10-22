@@ -531,6 +531,12 @@ BCP_tm_unpack_branching_info(BCP_tm_prob& p, BCP_buffer& buf,
 	child->vp = node->vp;
 	child->cp = node->cp;
 	// lp, cg, vg  initialized to -1 -- OK, none assigned yet
+// #define DEBUG_PRINT
+#ifdef DEBUG_PRINT
+	printf("TM:    sibling[%i]: %i, quality: %lf, tlb: %lf, pref: %llX\n",
+	       i, child->_index, child->getQuality(),
+	       child->getTrueLB(), child->getPreferred());
+#endif
     }
 
     if (numChildrenAdded > 0) {

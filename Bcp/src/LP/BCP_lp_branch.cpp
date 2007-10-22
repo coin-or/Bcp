@@ -254,6 +254,26 @@ void BCP_presolved_lp_brobj::fake_objective_values(const double itlim_objval)
    }
 }
 
+void BCP_presolved_lp_brobj::set_objective_values(const BCP_vec<double>& obj,
+						  const BCP_vec<int>& termcode,
+						  const double itlim_objval)
+{
+   for (int i = _candidate->child_num - 1; i >= 0; --i) {
+      const int tc = termcode[i];
+      if (tc & (BCP_ProvenPrimalInf | BCP_DualObjLimReached)) {
+	 _lpres[i]->fake_objective_value(BCP_DBL_MAX);
+	 continue;
+      }
+      // *THINK* : what to do in these cases?
+      if (tc & (BCP_ProvenDualInf | BCP_PrimalObjLimReached |
+		BCP_IterationLimit | BCP_Abandoned | BCP_TimeLimit) ) {
+	 _lpres[i]->fake_objective_value(itlim_objval);
+	 continue;
+      }
+      _lpres[i]->fake_objective_value(obj[i]);
+   }
+}
+
 bool BCP_presolved_lp_brobj::fathomable(const double objval_limit) const
 {
    // If ALL descendants in cand terminated with primal infeasibility

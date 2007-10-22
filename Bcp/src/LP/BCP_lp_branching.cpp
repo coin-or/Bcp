@@ -484,7 +484,13 @@ LP: Strong branching is disabled but more than one candidate is selected.\n\
 	}
 	BCP_add_branching_objects(p, candidates);
 	best_presolved = new BCP_presolved_lp_brobj(candidates[0]);
-	best_presolved->initialize_lower_bound(p.node->true_lower_bound);
+	if (candidates[0]->objval_) {
+	    best_presolved->set_objective_values(*candidates[0]->objval_,
+						 *candidates[0]->termcode_,
+						 p.node->true_lower_bound);
+	} else {
+	    best_presolved->initialize_lower_bound(p.node->true_lower_bound);
+	}
     } else {
 	selected = BCP_lp_perform_strong_branching(p, candidates,
 						   best_presolved);

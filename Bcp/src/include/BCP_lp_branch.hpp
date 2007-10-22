@@ -131,6 +131,15 @@ public:
     ///
     BCP_vec<double>* implied_cut_bd;
     /*@}*/
+
+    /**@name Data members referring to presolved values. The user may have
+       presolved the candidate. Then she may store the termcodes and objvals
+       of the children here. */
+    /*@{*/
+    BCP_vec<double>* objval_;
+    BCP_vec<int>* termcode_;
+    /*@}*/
+  
     /*@}*/
 
 public:
@@ -157,7 +166,8 @@ public:
 	forced_var_pos(0), forced_cut_pos(0),
 	forced_var_bd(0), forced_cut_bd(0),
 	implied_var_pos(0), implied_cut_pos(0),
-	implied_var_bd(0), implied_cut_bd(0)
+	implied_var_bd(0), implied_cut_bd(0),
+	objval_(0), termcode_(0)
     {
 	if ( ((fvp == 0) ^ (fvb == 0)) || ((fcp == 0) ^ (fcb == 0)) || 
 	     ((ivp == 0) ^ (ivb == 0)) || ((icp == 0) ^ (icb == 0)) )
@@ -193,6 +203,12 @@ public:
 			    const BCP_lp_sos_branching_object& o,
 			    const int* order);
 
+    inline void set_presolve_result(const BCP_vec<double>& objval,
+				    const BCP_vec<int>& termcode) {
+        objval_ = new BCP_vec<double>(objval);
+	termcode_ = new BCP_vec<int>(termcode);
+    }
+
     // NOTE: when the desctructor `delete's vars_to_add and cuts_to_add, it
     // will just delete the pointers in the BCP_lp_..._sets (see the
     // destructors of those classes). But this is intentional, because the
@@ -205,6 +221,7 @@ public:
 	delete forced_var_bd;   delete forced_cut_bd;
 	delete implied_var_pos; delete implied_cut_pos;
 	delete implied_var_bd;  delete implied_cut_bd;
+	delete objval_;         delete termcode_;
     }
     /*@}*/
 
@@ -461,6 +478,13 @@ public:
 	</ul>
     */
     void fake_objective_values(const double itlim_objval);
+
+    /** Set the appropriate fields of all _lpres to the given termcode and
+	objval if the termcode is "normal". If not normal (like the cases in
+	fake_objective_values(), then apply the same rules. */
+    void set_objective_values(const BCP_vec<double>& obj,
+			      const BCP_vec<int>& termcode,
+			      const double itlim_objval);
 
     /** swap the two presolved branching object */
     void swap(BCP_presolved_lp_brobj& rhs) {
