@@ -50,7 +50,8 @@ BCP_tm_print_info_line(BCP_tm_prob& p, BCP_tm_node& node)
 
     static int lines = 0;
 
-    if ((lines % 40) == 0) {
+    if ((lines % 41) == 0) {
+        ++lines;
 	printf("\n");
 	printf("BCP: ");
 	printf(" Nodes  ");
@@ -508,7 +509,7 @@ TMDBG;
 #ifdef DEBUG_PRINT
     char output[44];
     output[43] = 0;
-#ifdef DEBUG_PRINT
+#endif
     for (i = 0; i < child_num; ++i){
 	desc = new BCP_node_change;
 	BCP_tm_create_core_change(desc, bvarnum, bcutnum, brobj, i);
@@ -539,12 +540,12 @@ TMDBG;
 	  child->setPreferred(pref);
 #ifdef DEBUG_PRINT
 	  pref.print(output);
-#ifdef DEBUG_PRINT
+#endif
 	} else {
 	  child->setPreferred(nodePref);
 #ifdef DEBUG_PRINT
 	  nodePref.print(output);
-#ifdef DEBUG_PRINT
+#endif
 	}
 	/* Add the child to the list of children in the parent */
 	node->new_child(child);
