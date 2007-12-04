@@ -132,6 +132,8 @@ BCP_tm_initialize_process_type(BCP_tm_prob& p,
 
     p.msg_buf.clear();
     par.pack(p.msg_buf);
+    double startTimeOfDay = CoinGetTimeOfDay() - CoinWallclockTime();
+    p.msg_buf.pack(startTimeOfDay);
     p.msg_env->multicast(num, pids, BCP_Msg_ProcessParameters, p.msg_buf);
 
     p.msg_buf.clear();
@@ -360,15 +362,22 @@ BCP_tm_prob::process_message()
 			printf("TM: Solution found at %.3f sec.\n",
 			       CoinCpuTime() - start_time);
 		    }
+		    const int tree_size = search_tree.size();
+		    const int tree_proc = search_tree.processed();
+		    const int cand_list_size = candidate_list.size();
+		    const int cand_list_ins = candidate_list.numInserted();
+		    char bdstr[1000];
+		    
 		    if (upper_bound > BCP_DBL_MAX/10) {
-			printf("\
-TM: Solution value: %f (best solution value so far: infinity)\n",
-			       new_sol->objective_value());
+		      sprintf(bdstr, "infinity");
 		    } else {
-			printf("\
-TM: Solution value: %f (best solution value so far: %f)\n",
-			       new_sol->objective_value(), upper_bound);
+		      sprintf(bdstr, "%lf", upper_bound);
 		    }
+		    printf("TM %.3lf: Sol from proc: %i  val: %f (prev best: %s)  tree size/procd: %i/%i  cand list ins/size: %i/%i\n",
+			   CoinWallclockTime() - start_time, sender,
+			   new_sol->objective_value(), bdstr,
+			   tree_size, tree_proc,
+			   cand_list_ins, cand_list_size);
 		    if (allsol || (bettersol && better)) {
 			user->display_feasible_solution(new_sol);
 		    }

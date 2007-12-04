@@ -3,6 +3,8 @@
 #include <cfloat>
 #include <cerrno>
 
+#include "CoinTime.hpp"
+
 #include "BcpConfig.h"
 #include "BCP_os.hpp"
 
@@ -64,6 +66,9 @@ BCP_process_t BCP_lp_main(BCP_message_environment* msg_env,
    msg_env->receive(parent /*tree_manager*/,
 		    BCP_Msg_ProcessParameters, p.msg_buf, -1);
    p.par.unpack(p.msg_buf);
+   double startTimeOfDay;
+   p.msg_buf.unpack(startTimeOfDay);
+   CoinWallclockTime(startTimeOfDay);
 
    // Let us be nice
    setpriority(PRIO_PROCESS, 0, p.par.entry(BCP_lp_par::NiceLevel));
