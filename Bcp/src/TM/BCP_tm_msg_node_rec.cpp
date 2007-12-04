@@ -17,7 +17,7 @@
 #include "BCP_tm_user.hpp"
 #include "BCP_tm_functions.hpp"
 
-// #define DEBUG_PRINT
+#define DEBUG_PRINT
 
 static int
 BCP_tm_unpack_node_description(BCP_tm_prob& p, BCP_buffer& buf);
@@ -506,9 +506,15 @@ TMDBG;
     int numChildrenAdded = 0;
     const int depth = node->getDepth() + 1;
     BitVector128 nodePref = node->getPreferred();
+    const double tt = CoinWallclockTime()-p.start_time;
 #ifdef DEBUG_PRINT
-    char output[44];
-    output[43] = 0;
+    if (p.candidate_list.size() == 0) {
+      printf("TM %.3lf: parent: %i  cand_list empty\n", tt, node->_index);
+    } else {
+      printf("TM %.3lf: parent: %i  cand_list top pref: %s\n",
+	     tt, node->_index,
+	     p.candidate_list.top()->getPreferred().str().c_str());
+    }
 #endif
     for (i = 0; i < child_num; ++i){
 	desc = new BCP_node_change;
@@ -538,14 +544,8 @@ TMDBG;
 	  BitVector128 pref = nodePref;
 	  pref.setBit(127-depth);
 	  child->setPreferred(pref);
-#ifdef DEBUG_PRINT
-	  pref.print(output);
-#endif
 	} else {
 	  child->setPreferred(nodePref);
-#ifdef DEBUG_PRINT
-	  nodePref.print(output);
-#endif
 	}
 	/* Add the child to the list of children in the parent */
 	node->new_child(child);
@@ -569,9 +569,10 @@ TMDBG;
 	child->cp = node->cp;
 	// lp, cg, vg  initialized to -1 -- OK, none assigned yet
 #ifdef DEBUG_PRINT
-	printf("TM:    sibling[%i]: %i, quality: %lf, tlb: %lf, pref: %s\n",
-	       i, child->_index, child->getQuality(),
-	       child->getTrueLB(), output);
+	printf("TM %.3lf: parent: %i  sibling: %i  siblingind: %i  depth: %i  quality: %lf  pref: %s\n",
+	       tt, node->_index, i, child->_index, depth, child->getQuality(),
+	       child->getPreferred().str().c_str());
+
 #endif
     }
 

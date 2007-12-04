@@ -1,5 +1,6 @@
 // Copyright (C) 2000, International Business Machines
 // Corporation and others.  All Rights Reserved.
+#include "CoinTime.hpp"
 #include "BCP_message.hpp"
 
 #include "BCP_enum_branch.hpp"
@@ -15,6 +16,8 @@
 
 //XXX
 #include "BCP_tm_functions.hpp"
+
+#define DEBUG_PRINT
 
 //#############################################################################
 
@@ -405,6 +408,15 @@ TM: cut in node description is neither local nor remote.\n");
     if (has_user_data) {
 	p.packer->pack_user_data(ud, buf);
     }
+
+#ifdef DEBUG_PRINT
+    //    const char* compName = p.candidate_list.getTree()->compName();
+    printf("TM %.3lf: Sending to proc %i  node: %i  quality: %lf  pref: %s\n",
+	   CoinWallclockTime()-p.start_time,
+	   node->lp, node->_index, node->getQuality(), 
+	   node->getPreferred().str().c_str());
+
+#endif
 
     p.msg_env->send(node->lp, msgtag, buf);
     if (node->_index == 0) {
