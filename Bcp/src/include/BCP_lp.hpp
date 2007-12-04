@@ -208,6 +208,8 @@ public:
     /**@name Time measurement */
     /*@{*/
     /** */
+    double start_time;
+    /** */
     BCP_lp_statistics stat;
     /*@}*/
 
