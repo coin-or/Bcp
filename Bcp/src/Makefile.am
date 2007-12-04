@@ -68,6 +68,7 @@ libBcp_la_SOURCES = \
 	Member/BCP_cut.cpp \
 	Member/BCP_obj_change.cpp \
 	Member/BCP_warmstart_dual.cpp \
+	Member/BCP_warmstart_primaldual.cpp \
 	Member/BCP_matrix.cpp \
 	Member/BCP_problem_core.cpp \
 	Member/BCP_process.cpp \
@@ -108,6 +109,7 @@ libBcp_la_SOURCES = \
 	include/BCP_cg_param.hpp \
 	include/BCP_obj_change.hpp \
 	include/BCP_warmstart_dual.hpp \
+	include/BCP_warmstart_primaldual.hpp \
 	include/BCP_vector_int.hpp \
 	include/BCP_lp_node.hpp \
 	include/BCP_string.hpp \
@@ -255,6 +257,7 @@ include_HEADERS = \
 	include/BCP_vg_user.hpp \
 	include/BCP_warmstart_basis.hpp \
 	include/BCP_warmstart_dual.hpp \
+	include/BCP_warmstart_primaldual.hpp \
 	include/BCP_warmstart.hpp
 
 #############################################################################

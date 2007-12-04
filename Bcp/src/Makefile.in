@@ -82,12 +82,12 @@ am_libBcp_la_OBJECTS = BCP_cg_user.lo BCP_cg_param.lo BCP_cg.lo \
 	BCP_vg_main.lo BCP_vg.lo BCP_solution.lo BCP_node_change.lo \
 	BCP_indexed_pricing.lo BCP_USER.lo BCP_warmstart_basis.lo \
 	BCP_branch.lo BCP_vector_sanity.lo BCP_cut.lo \
-	BCP_obj_change.lo BCP_warmstart_dual.lo BCP_matrix.lo \
-	BCP_problem_core.lo BCP_process.lo BCP_warmstart_pack.lo \
-	BCP_matrix_pack.lo BCP_var.lo BCP_vector_bool.lo \
-	BCP_vector_char.lo BCP_vector_double.lo BCP_vector_int.lo \
-	BCP_vector_short.lo BCP_message_single.lo BCP_message_mpi.lo \
-	BCP_message_pvm.lo
+	BCP_obj_change.lo BCP_warmstart_dual.lo \
+	BCP_warmstart_primaldual.lo BCP_matrix.lo BCP_problem_core.lo \
+	BCP_process.lo BCP_warmstart_pack.lo BCP_matrix_pack.lo \
+	BCP_var.lo BCP_vector_bool.lo BCP_vector_char.lo \
+	BCP_vector_double.lo BCP_vector_int.lo BCP_vector_short.lo \
+	BCP_message_single.lo BCP_message_mpi.lo BCP_message_pvm.lo
 libBcp_la_OBJECTS = $(am_libBcp_la_OBJECTS)
 depcomp = $(SHELL) $(top_srcdir)/../depcomp
 am__depfiles_maybe = depfiles
@@ -271,6 +271,7 @@ prefix = @prefix@
 program_transform_name = @program_transform_name@
 sbindir = @sbindir@
 sharedstatedir = @sharedstatedir@
+sol_cc_compiler = @sol_cc_compiler@
 sysconfdir = @sysconfdir@
 target_alias = @target_alias@
 AUTOMAKE_OPTIONS = foreign
@@ -337,6 +338,7 @@ libBcp_la_SOURCES = \
 	Member/BCP_cut.cpp \
 	Member/BCP_obj_change.cpp \
 	Member/BCP_warmstart_dual.cpp \
+	Member/BCP_warmstart_primaldual.cpp \
 	Member/BCP_matrix.cpp \
 	Member/BCP_problem_core.cpp \
 	Member/BCP_process.cpp \
@@ -377,6 +379,7 @@ libBcp_la_SOURCES = \
 	include/BCP_cg_param.hpp \
 	include/BCP_obj_change.hpp \
 	include/BCP_warmstart_dual.hpp \
+	include/BCP_warmstart_primaldual.hpp \
 	include/BCP_vector_int.hpp \
 	include/BCP_lp_node.hpp \
 	include/BCP_string.hpp \
@@ -519,6 +522,7 @@ include_HEADERS = \
 	include/BCP_vg_user.hpp \
 	include/BCP_warmstart_basis.hpp \
 	include/BCP_warmstart_dual.hpp \
+	include/BCP_warmstart_primaldual.hpp \
 	include/BCP_warmstart.hpp
 
 
@@ -663,6 +667,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/BCP_warmstart_basis.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/BCP_warmstart_dual.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/BCP_warmstart_pack.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/BCP_warmstart_primaldual.Plo@am__quote@
 
 .cpp.o:
 @am__fastdepCXX_TRUE@	if $(CXXCOMPILE) -MT $@ -MD -MP -MF "$(DEPDIR)/$*.Tpo" -c -o $@ $<; \
@@ -1048,6 +1053,13 @@ BCP_warmstart_dual.lo: Member/BCP_warmstart_dual.cpp
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='Member/BCP_warmstart_dual.cpp' object='BCP_warmstart_dual.lo' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(LIBTOOL) --tag=CXX --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o BCP_warmstart_dual.lo `test -f 'Member/BCP_warmstart_dual.cpp' || echo '$(srcdir)/'`Member/BCP_warmstart_dual.cpp
+
+BCP_warmstart_primaldual.lo: Member/BCP_warmstart_primaldual.cpp
+@am__fastdepCXX_TRUE@	if $(LIBTOOL) --tag=CXX --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT BCP_warmstart_primaldual.lo -MD -MP -MF "$(DEPDIR)/BCP_warmstart_primaldual.Tpo" -c -o BCP_warmstart_primaldual.lo `test -f 'Member/BCP_warmstart_primaldual.cpp' || echo '$(srcdir)/'`Member/BCP_warmstart_primaldual.cpp; \
+@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/BCP_warmstart_primaldual.Tpo" "$(DEPDIR)/BCP_warmstart_primaldual.Plo"; else rm -f "$(DEPDIR)/BCP_warmstart_primaldual.Tpo"; exit 1; fi
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='Member/BCP_warmstart_primaldual.cpp' object='BCP_warmstart_primaldual.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(LIBTOOL) --tag=CXX --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o BCP_warmstart_primaldual.lo `test -f 'Member/BCP_warmstart_primaldual.cpp' || echo '$(srcdir)/'`Member/BCP_warmstart_primaldual.cpp
 
 BCP_matrix.lo: Member/BCP_matrix.cpp
 @am__fastdepCXX_TRUE@	if $(LIBTOOL) --tag=CXX --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT BCP_matrix.lo -MD -MP -MF "$(DEPDIR)/BCP_matrix.Tpo" -c -o BCP_matrix.lo `test -f 'Member/BCP_matrix.cpp' || echo '$(srcdir)/'`Member/BCP_matrix.cpp; \

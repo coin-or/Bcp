@@ -2,10 +2,12 @@
 // Corporation and others.  All Rights Reserved.
 
 #include "CoinWarmStartDual.hpp"
+#include "CoinWarmStartPrimalDual.hpp"
 #include "CoinWarmStartBasis.hpp"
 
 #include "BCP_lp_functions.hpp"
 #include "BCP_warmstart_dual.hpp"
+#include "BCP_warmstart_primaldual.hpp"
 
 BCP_warmstart*
 BCP_lp_convert_CoinWarmStart(BCP_lp_prob& p, CoinWarmStart*& warmstart)
@@ -20,6 +22,22 @@ BCP_lp_convert_CoinWarmStart(BCP_lp_prob& p, CoinWarmStart*& warmstart)
       const int size = ws->size();
       const double* dual = ws->dual();
       BCP_warmstart* bcp_ws = new BCP_warmstart_dual(dual, dual+size);
+      delete warmstart;
+      warmstart = NULL;
+      return bcp_ws;
+    }
+  }
+
+  {
+    const CoinWarmStartPrimalDual* ws =
+      dynamic_cast<const CoinWarmStartPrimalDual*>(warmstart);
+    if (ws != NULL) {
+      const int psize = ws->primalSize();
+      const int dsize = ws->dualSize();
+      const double* primal = ws->primal();
+      const double* dual = ws->dual();
+      BCP_warmstart* bcp_ws =
+	  new BCP_warmstart_primaldual(primal, primal+psize, dual, dual+dsize);
       delete warmstart;
       warmstart = NULL;
       return bcp_ws;
