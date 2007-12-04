@@ -12,6 +12,8 @@
 #include "CoinTime.hpp"
 #include "BCP_process.hpp"
 
+#define DEBUG_PRINT
+
 BCP_scheduler::BCP_scheduler():
     totalNumberIds_(0),
     freeIds_(),
@@ -67,10 +69,11 @@ BCP_scheduler::add_free_ids(int numIds, const int* ids)
   totalNumberIds_ += numIds;
   maxNodeIds_ = CoinMin((int)floor(maxNodeIdRatio_ * totalNumberIds_),
 			maxNodeIdNum_);
+  const double t = CoinWallclockTime();
   for (int i = 0; i < numIds; ++i) {
     sb_idle_time_[ids[i]] = 0.0;
     node_idle_time_[ids[i]] = 0.0;
-    last_release_time_[ids[i]] = 0.0;
+    last_release_time_[ids[i]] = t;
     last_release_type_[ids[i]] = 0;
   }
 }
@@ -78,17 +81,29 @@ BCP_scheduler::add_free_ids(int numIds, const int* ids)
 //------------------------------------------------------------------------------
 
 int
-BCP_scheduler::request_sb_ids(int numIds, int* ids)
+BCP_scheduler::request_sb_ids(int reqNumIds, int* ids)
 {
   // increase the count for requests by one
   update_rates(1, 0);
 
-  numIds = CoinMin(numIds, max_id_allocation(numIds));
+  int numIds = CoinMin(reqNumIds, max_id_allocation(reqNumIds));
+#ifdef DEBUG_PRINT
+  if (static_) {
+    printf("SC static:  req: %i  given: %i  total: %i  node(max): %i(%i)  free: %i  minSb: %i  maxSb: %i  rho: %lf\n",
+	   reqNumIds, numIds, totalNumberIds_, numNodeIds_, maxNodeIds_,
+	   (int)freeIds_.size(), minSbIds_, maxSbIds_, rho_static_);
+  } else {
+    printf("SC rate:  req: %i  given: %i  total: %i  node(max): %i(%i)  free: %i  minSb: %i  maxSb: %i  rho: %lf  rel_cnt: %i  req_cnt: %i\n",
+	   reqNumIds, numIds, totalNumberIds_, numNodeIds_, maxNodeIds_,
+	   (int)freeIds_.size(), minSbIds_, maxSbIds_, rho_rate_,
+	   release_counts_tot_, request_counts_tot_);
+  }
+#endif
   if (numIds==0) return 0;
 
   const int newsize = freeIds_.size() - numIds;
   CoinDisjointCopyN(&freeIds_[newsize], numIds, ids);
-  freeIds_.erase(freeIds_.begin()+newsize, freeIds_.end());
+  freeIds_.erase(freeIds_.begin()+newsize, freeIds_.end()); 
   const double t = CoinWallclockTime();
   for (int i = 0; i < numIds; ++i) {
     const int id = ids[i];
