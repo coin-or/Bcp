@@ -50,67 +50,13 @@ AC_COIN_MAIN_SUBDIRS(Vol)
 AC_COIN_MAIN_SUBDIRS(Clp)
 AC_COIN_MAIN_SUBDIRS(Cgl)
 
-#############################################################################
-#                  Copy over the examples                                   #
-#############################################################################
-
-AC_COIN_CHECK_VPATH
-
-AC_DEFUN([COIN_UPPATH],
-[
-if test $1 = . ; then
-	$2=.
-else
-	t=`echo $1 | sed -e 's=/\./=/=g' -e 's=^\./==' -e 's=/\.$==' -e 's=[[^/]]*=..=g'`
-	if test $t = "" ; then
-		t=.
-	fi
-	$2=$t
-fi
-])
-
-AC_DEFUN([COIN_COPY_FROM_FILELIST], 
-[
-if test $coin_vpath_config = yes ; then
-	COIN_UPPATH([$1], updir)
-	if test -e $srcdir/$2 ; then
-		echo Copying example $1 ...
-		fromdir=$updir/$srcdir/`dirname $2`
-		mkdir -p $1
-		cd $1
-		for f in `cat $updir/$srcdir/$2` ; do
-			if test ! -e $f ; then
-		   		fdir=`dirname $f`
-				mkdir -p $fdir
-				COIN_UPPATH([$fdir], uppath)
-				cd $fdir
-				cp -p $uppath/$fromdir/$f `basename $f`
-				cd $uppath
-			fi
-		done
-		cd $updir
-	fi
-fi
-])
-
-COIN_COPY_FROM_FILELIST(Applications/MaxCut, 
-                        Applications/MaxCut/examplefiles.txt)
-COIN_COPY_FROM_FILELIST(Applications/Csp, 
-                        Applications/Csp/examplefiles.txt)
-COIN_COPY_FROM_FILELIST(Applications/Mkc, 
-                        Applications/Mkc/examplefiles.txt)
-
-
 ##############################################################################
 #                   Finishing up by writing all the output                   #
 ##############################################################################
 
 # Here list all the files that configure should create (except for the
 # configuration header file)
-AC_CONFIG_FILES([Makefile
-                 Applications/MaxCut/Makefile
-                 Applications/Csp/Makefile
-                 Applications/Mkc/Makefile])
+AC_CONFIG_FILES([Makefile])
 
 # Finally, we let configure write all the output...
 AC_COIN_FINALIZE

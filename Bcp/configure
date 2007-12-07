@@ -472,7 +472,7 @@ ac_includes_default="\
 # include <unistd.h>
 #endif"
 
-ac_subst_vars='SHELL PATH_SEPARATOR PACKAGE_NAME PACKAGE_TARNAME PACKAGE_VERSION PACKAGE_STRING PACKAGE_BUGREPORT exec_prefix prefix program_transform_name bindir sbindir libexecdir datadir sysconfdir sharedstatedir localstatedir libdir includedir oldincludedir infodir mandir build_alias host_alias target_alias DEFS ECHO_C ECHO_N ECHO_T LIBS build build_cpu build_vendor build_os ADDLIBS FADDLIBS ALWAYS_FALSE_TRUE ALWAYS_FALSE_FALSE CDEFS ADD_CFLAGS DBG_CFLAGS OPT_CFLAGS CC CFLAGS LDFLAGS CPPFLAGS ac_ct_CC EXEEXT OBJEXT MPICC CXXDEFS ADD_CXXFLAGS DBG_CXXFLAGS OPT_CXXFLAGS CXX CXXFLAGS ac_ct_CXX MPICXX EGREP INSTALL_PROGRAM INSTALL_SCRIPT INSTALL_DATA CYGPATH_W PACKAGE VERSION ACLOCAL AUTOCONF AUTOMAKE AUTOHEADER MAKEINFO install_sh STRIP ac_ct_STRIP INSTALL_STRIP_PROGRAM mkdir_p AWK SET_MAKE am__leading_dot AMTAR am__tar am__untar DEPDIR am__include am__quote AMDEP_TRUE AMDEP_FALSE AMDEPBACKSLASH CCDEPMODE am__fastdepCC_TRUE am__fastdepCC_FALSE CXXDEPMODE am__fastdepCXX_TRUE am__fastdepCXX_FALSE MAINTAINER_MODE_TRUE MAINTAINER_MODE_FALSE MAINT LIBTOOLM4 have_autoconf have_automake have_svn BUILDTOOLSDIR AUX_DIR abs_source_dir abs_lib_dir abs_include_dir abs_bin_dir HAVE_EXTERNALS_TRUE HAVE_EXTERNALS_FALSE host host_cpu host_vendor host_os LN_S ECHO AR ac_ct_AR RANLIB ac_ct_RANLIB CPP CXXCPP F77 FFLAGS ac_ct_F77 LIBTOOL ac_c_preproc_warn_flag ac_cxx_preproc_warn_flag RPATH_FLAGS LT_LDFLAGS BCPSRCDIR BCPOBJDIR COIN_HAS_BCP_TRUE COIN_HAS_BCP_FALSE COINUTILSSRCDIR COINUTILSOBJDIR COIN_HAS_COINUTILS_TRUE COIN_HAS_COINUTILS_FALSE VOLSRCDIR VOLOBJDIR COIN_HAS_VOL_TRUE COIN_HAS_VOL_FALSE CLPSRCDIR CLPOBJDIR COIN_HAS_CLP_TRUE COIN_HAS_CLP_FALSE CGLSRCDIR CGLOBJDIR COIN_HAS_CGL_TRUE COIN_HAS_CGL_FALSE OSISRCDIR OSIOBJDIR COIN_HAS_OSI_TRUE COIN_HAS_OSI_FALSE MPIINCDIR MPILIB COIN_HAS_MPI_TRUE COIN_HAS_MPI_FALSE LIBEXT VPATH_DISTCLEANFILES LIBOBJS LTLIBOBJS'
+ac_subst_vars='SHELL PATH_SEPARATOR PACKAGE_NAME PACKAGE_TARNAME PACKAGE_VERSION PACKAGE_STRING PACKAGE_BUGREPORT exec_prefix prefix program_transform_name bindir sbindir libexecdir datadir sysconfdir sharedstatedir localstatedir libdir includedir oldincludedir infodir mandir build_alias host_alias target_alias DEFS ECHO_C ECHO_N ECHO_T LIBS build build_cpu build_vendor build_os ADDLIBS FADDLIBS ALWAYS_FALSE_TRUE ALWAYS_FALSE_FALSE CDEFS ADD_CFLAGS DBG_CFLAGS OPT_CFLAGS sol_cc_compiler CC CFLAGS LDFLAGS CPPFLAGS ac_ct_CC EXEEXT OBJEXT MPICC CXXDEFS ADD_CXXFLAGS DBG_CXXFLAGS OPT_CXXFLAGS CXX CXXFLAGS ac_ct_CXX MPICXX EGREP INSTALL_PROGRAM INSTALL_SCRIPT INSTALL_DATA CYGPATH_W PACKAGE VERSION ACLOCAL AUTOCONF AUTOMAKE AUTOHEADER MAKEINFO install_sh STRIP ac_ct_STRIP INSTALL_STRIP_PROGRAM mkdir_p AWK SET_MAKE am__leading_dot AMTAR am__tar am__untar DEPDIR am__include am__quote AMDEP_TRUE AMDEP_FALSE AMDEPBACKSLASH CCDEPMODE am__fastdepCC_TRUE am__fastdepCC_FALSE CXXDEPMODE am__fastdepCXX_TRUE am__fastdepCXX_FALSE MAINTAINER_MODE_TRUE MAINTAINER_MODE_FALSE MAINT LIBTOOLM4 have_autoconf have_automake have_svn BUILDTOOLSDIR AUX_DIR abs_source_dir abs_lib_dir abs_include_dir abs_bin_dir HAVE_EXTERNALS_TRUE HAVE_EXTERNALS_FALSE host host_cpu host_vendor host_os LN_S ECHO AR ac_ct_AR RANLIB ac_ct_RANLIB CPP CXXCPP F77 FFLAGS ac_ct_F77 LIBTOOL ac_c_preproc_warn_flag ac_cxx_preproc_warn_flag RPATH_FLAGS LT_LDFLAGS BCPSRCDIR BCPOBJDIR COIN_HAS_BCP_TRUE COIN_HAS_BCP_FALSE COINUTILSSRCDIR COINUTILSOBJDIR COIN_HAS_COINUTILS_TRUE COIN_HAS_COINUTILS_FALSE VOLSRCDIR VOLOBJDIR COIN_HAS_VOL_TRUE COIN_HAS_VOL_FALSE CLPSRCDIR CLPOBJDIR COIN_HAS_CLP_TRUE COIN_HAS_CLP_FALSE CGLSRCDIR CGLOBJDIR COIN_HAS_CGL_TRUE COIN_HAS_CGL_FALSE OSISRCDIR OSIOBJDIR COIN_HAS_OSI_TRUE COIN_HAS_OSI_FALSE MPIINCDIR MPILIB COIN_HAS_MPI_TRUE COIN_HAS_MPI_FALSE LIBEXT VPATH_DISTCLEANFILES LIBOBJS LTLIBOBJS'
 ac_subst_files=''
 
 # Initialize some variables set by options.
@@ -1814,9 +1814,9 @@ if test "${enable_doscompile+set}" = set; then
   enableval="$enable_doscompile"
   if test "$enable_doscompile" != no; then
      case $build in
-       *-cygwin*) ;;
-       *) { { echo "$as_me:$LINENO: error: --enable-doscompile option makes sense only under Cygwin" >&5
-echo "$as_me: error: --enable-doscompile option makes sense only under Cygwin" >&2;}
+       *-cygwin* | *-mingw*) ;;
+       *) { { echo "$as_me:$LINENO: error: --enable-doscompile option makes sense only under Cygwin or MinGW" >&5
+echo "$as_me: error: --enable-doscompile option makes sense only under Cygwin or MinGW" >&2;}
    { (exit 1); exit 1; }; } ;;
      esac
    fi
@@ -1824,7 +1824,12 @@ else
   enable_doscompile=no
 fi;
  case "$enable_doscompile" in
-   msvc|mingw|no) ;;
+   mingw)
+     case $build in
+       *-mingw*) enable_doscompile=no ;;
+     esac
+     ;;
+   msvc|no) ;;
    yes) enable_doscompile=mingw ;;
    *) { { echo "$as_me:$LINENO: error: Invalid value $enable_doscompile for --enable-doscompile.
 		    Try configure --help=recursive." >&5
@@ -1870,10 +1875,12 @@ fi
 coin_has_cc=yes
 
 save_cflags="$CFLAGS"
-# For sparc-sun-solaris, promote Studio/Workshop compiler to front of list.
-# ToDo: If Studio/Workshop cc is not present, we may find /usr/ucb/cc, which
-# is likely to be a non-functional shell. But many installations will have
-# both cc and gcc, so promoting gcc isn't good either. How to test reliably?
+
+# For *-*-solaris*, promote Studio/Workshop cc compiler to front of list.
+# Depending on the user's PATH, when Studio/Workshop cc is not present we may
+# find /usr/ucb/cc, which is almost certainly not a good choice for the C
+# compiler. In this case, put cc after gcc.
+
 case $build in
   *-cygwin* | *-mingw*)
   	     if test "$enable_doscompile" = msvc ; then
@@ -1881,8 +1888,65 @@ case $build in
 	     else
 	       comps="gcc cl"
 	     fi ;;
-  sparc-sun-solaris*)
-  	     comps="cc xlc gcc pgcc icc" ;;
+  *-*-solaris*)
+	     # Extract the first word of "cc", so it can be a program name with args.
+set dummy cc; ac_word=$2
+echo "$as_me:$LINENO: checking for $ac_word" >&5
+echo $ECHO_N "checking for $ac_word... $ECHO_C" >&6
+if test "${ac_cv_prog_sol_cc_compiler+set}" = set; then
+  echo $ECHO_N "(cached) $ECHO_C" >&6
+else
+  if test -n "$sol_cc_compiler"; then
+  ac_cv_prog_sol_cc_compiler="$sol_cc_compiler" # Let the user override the test.
+else
+  ac_prog_rejected=no
+as_save_IFS=$IFS; IFS=$PATH_SEPARATOR
+for as_dir in $PATH
+do
+  IFS=$as_save_IFS
+  test -z "$as_dir" && as_dir=.
+  for ac_exec_ext in '' $ac_executable_extensions; do
+  if $as_executable_p "$as_dir/$ac_word$ac_exec_ext"; then
+    if test "$as_dir/$ac_word$ac_exec_ext" = "/usr/ucb/cc"; then
+       ac_prog_rejected=yes
+       continue
+     fi
+    ac_cv_prog_sol_cc_compiler="cc"
+    echo "$as_me:$LINENO: found $as_dir/$ac_word$ac_exec_ext" >&5
+    break 2
+  fi
+done
+done
+
+if test $ac_prog_rejected = yes; then
+  # We found a bogon in the path, so make sure we never use it.
+  set dummy $ac_cv_prog_sol_cc_compiler
+  shift
+  if test $# != 0; then
+    # We chose a different compiler from the bogus one.
+    # However, it has the same basename, so the bogon will be chosen
+    # first if we set sol_cc_compiler to just the basename; use the full file name.
+    shift
+    ac_cv_prog_sol_cc_compiler="$as_dir/$ac_word${1+' '}$@"
+  fi
+fi
+fi
+fi
+sol_cc_compiler=$ac_cv_prog_sol_cc_compiler
+if test -n "$sol_cc_compiler"; then
+  echo "$as_me:$LINENO: result: $sol_cc_compiler" >&5
+echo "${ECHO_T}$sol_cc_compiler" >&6
+else
+  echo "$as_me:$LINENO: result: no" >&5
+echo "${ECHO_T}no" >&6
+fi
+
+	     if test "$sol_cc_compiler" = "cc" ; then
+	       comps="cc xlc gcc pgcc icc"
+	     else
+	       comps="xlc gcc pgcc icc cc"
+	     fi
+	     ;;
   *-linux-*) comps="xlc gcc cc pgcc icc" ;;
   *)         comps="xlc_r xlc cc gcc pgcc icc" ;;
 esac
@@ -2774,7 +2838,7 @@ rm -f conftest.err conftest.$ac_objext \
         case "$CC" in
           xlc* | */xlc* | mpxlc* | */mpxlc*)
             coin_opt_cflags="-O3 -qarch=auto -qcache=auto -qtune=auto -qmaxmem=-1"
-            coin_add_cflags="-bmaxdata:0x80000000"
+            coin_add_cflags="-bmaxdata:0x80000000 -qsuppress=1500-036 -qsuppress=1500-029"
             coin_dbg_cflags="-g"
           ;;
         esac
@@ -2784,7 +2848,7 @@ rm -f conftest.err conftest.$ac_objext \
         coin_add_cflags="-Ae"
         coin_dbg_cflags="-g"
         ;;
-      *-sun-*)
+      *-*-solaris*)
         coin_opt_cflags="-xO4"
         coin_dbg_cflags="-g"
         ;;
@@ -3057,7 +3121,7 @@ ac_compiler_gnu=$ac_cv_cxx_compiler_gnu
 coin_has_cxx=yes
 
 save_cxxflags="$CXXFLAGS"
-# For sparc-sun-solaris, promote Studio/Workshop compiler to front of list.
+# For *-*-solaris*, promote Studio/Workshop compiler to front of list.
 case $build in
   *-cygwin* | *-mingw*)
   	     if test "$enable_doscompile" = msvc ; then
@@ -3065,7 +3129,7 @@ case $build in
 	     else
 	       comps="g++ cl"
 	     fi ;;
-  sparc-sun-solaris*)
+  *-*-solaris*)
   	     comps="CC xlC aCC g++ c++ pgCC icpc gpp cxx cc++ cl FCC KCC RCC" ;;
   *-darwin*) comps="g++ c++ CC" ;;
           *) comps="xlC aCC CC g++ c++ pgCC icpc gpp cxx cc++ cl FCC KCC RCC" ;;
@@ -3615,7 +3679,7 @@ rm -f conftest.err conftest.$ac_objext \
         case "$CXX" in
           xlC* | */xlC* | mpxlC* | */mpxlC*)
             coin_opt_cxxflags="-O3 -qarch=auto -qcache=auto -qtune=auto -qmaxmem=-1"
-            coin_add_cxxflags="-bmaxdata:0x80000000 -qrtti=dyna"
+            coin_add_cxxflags="-bmaxdata:0x80000000 -qrtti=dyna -qsuppress=1500-036 -qsuppress=1500-029"
             coin_dbg_cxxflags="-g"
             ;;
         esac
@@ -3629,7 +3693,7 @@ rm -f conftest.err conftest.$ac_objext \
             ;;
         esac
         ;;
-      *-sun-*)
+      *-*-solaris*)
           coin_opt_cxxflags="-O4"
           coin_dbg_cxxflags="-g"
         ;;
@@ -3900,11 +3964,15 @@ fi
 
 # START
 
-# On Cygwin, building DLLs doesn't work
+# On Cygwin and AIX, building DLLs doesn't work
 case $build in
   *-cygwin*)
     coin_disable_shared=yes
     platform=Cygwin
+  ;;
+  *-aix*)
+    coin_disable_shared=yes
+    platform=AIX
   ;;
   *-mingw*)
     coin_disable_shared=yes
@@ -5621,7 +5689,7 @@ ia64-*-hpux*)
   ;;
 *-*-irix6*)
   # Find out which ABI we are using.
-  echo '#line 5624 "configure"' > conftest.$ac_ext
+  echo '#line 5692 "configure"' > conftest.$ac_ext
   if { (eval echo "$as_me:$LINENO: \"$ac_compile\"") >&5
   (eval $ac_compile) 2>&5
   ac_status=$?
@@ -6755,7 +6823,7 @@ fi
 
 
 # Provide some information about the compiler.
-echo "$as_me:6758:" \
+echo "$as_me:6826:" \
      "checking for Fortran 77 compiler version" >&5
 ac_compiler=`set X $ac_compile; echo $2`
 { (eval echo "$as_me:$LINENO: \"$ac_compiler --version </dev/null >&5\"") >&5
@@ -7822,11 +7890,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:7825: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:7893: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>conftest.err)
    ac_status=$?
    cat conftest.err >&5
-   echo "$as_me:7829: \$? = $ac_status" >&5
+   echo "$as_me:7897: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s "$ac_outfile"; then
      # The compiler can only warn and ignore the option if not recognized
      # So say no if there are warnings other than the usual output.
@@ -8090,11 +8158,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:8093: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:8161: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>conftest.err)
    ac_status=$?
    cat conftest.err >&5
-   echo "$as_me:8097: \$? = $ac_status" >&5
+   echo "$as_me:8165: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s "$ac_outfile"; then
      # The compiler can only warn and ignore the option if not recognized
      # So say no if there are warnings other than the usual output.
@@ -8194,11 +8262,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:8197: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:8265: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>out/conftest.err)
    ac_status=$?
    cat out/conftest.err >&5
-   echo "$as_me:8201: \$? = $ac_status" >&5
+   echo "$as_me:8269: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s out/conftest2.$ac_objext
    then
      # The compiler can only warn and ignore the option if not recognized
@@ -10539,7 +10607,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<EOF
-#line 10542 "configure"
+#line 10610 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -10639,7 +10707,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<EOF
-#line 10642 "configure"
+#line 10710 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -12983,11 +13051,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:12986: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:13054: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>conftest.err)
    ac_status=$?
    cat conftest.err >&5
-   echo "$as_me:12990: \$? = $ac_status" >&5
+   echo "$as_me:13058: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s "$ac_outfile"; then
      # The compiler can only warn and ignore the option if not recognized
      # So say no if there are warnings other than the usual output.
@@ -13087,11 +13155,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:13090: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:13158: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>out/conftest.err)
    ac_status=$?
    cat out/conftest.err >&5
-   echo "$as_me:13094: \$? = $ac_status" >&5
+   echo "$as_me:13162: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s out/conftest2.$ac_objext
    then
      # The compiler can only warn and ignore the option if not recognized
@@ -14657,11 +14725,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:14660: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:14728: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>conftest.err)
    ac_status=$?
    cat conftest.err >&5
-   echo "$as_me:14664: \$? = $ac_status" >&5
+   echo "$as_me:14732: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s "$ac_outfile"; then
      # The compiler can only warn and ignore the option if not recognized
      # So say no if there are warnings other than the usual output.
@@ -14761,11 +14829,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:14764: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:14832: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>out/conftest.err)
    ac_status=$?
    cat out/conftest.err >&5
-   echo "$as_me:14768: \$? = $ac_status" >&5
+   echo "$as_me:14836: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s out/conftest2.$ac_objext
    then
      # The compiler can only warn and ignore the option if not recognized
@@ -16968,11 +17036,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:16971: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:17039: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>conftest.err)
    ac_status=$?
    cat conftest.err >&5
-   echo "$as_me:16975: \$? = $ac_status" >&5
+   echo "$as_me:17043: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s "$ac_outfile"; then
      # The compiler can only warn and ignore the option if not recognized
      # So say no if there are warnings other than the usual output.
@@ -17236,11 +17304,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:17239: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:17307: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>conftest.err)
    ac_status=$?
    cat conftest.err >&5
-   echo "$as_me:17243: \$? = $ac_status" >&5
+   echo "$as_me:17311: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s "$ac_outfile"; then
      # The compiler can only warn and ignore the option if not recognized
      # So say no if there are warnings other than the usual output.
@@ -17340,11 +17408,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:17343: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:17411: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>out/conftest.err)
    ac_status=$?
    cat out/conftest.err >&5
-   echo "$as_me:17347: \$? = $ac_status" >&5
+   echo "$as_me:17415: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s out/conftest2.$ac_objext
    then
      # The compiler can only warn and ignore the option if not recognized
@@ -20026,25 +20094,6 @@ LIBTOOL='$(SHELL) $(top_builddir)/libtool'
 
 
 
-# Fix bugs in libtool script for Windows native compilation:
-# - cygpath is not correctly quoted in fix_srcfile_path
-# - paths generated for .lib files is not run through cygpath -w
-
-
-# - lib includes subdirectory information; we want to replace
-#
-# old_archive_cmds="lib /OUT:\$oldlib\$oldobjs\$old_deplibs"
-#
-# by
-#
-# old_archive_cmds="echo \$oldlib | grep .libs >/dev/null; if test \$? = 0; then cd .libs; lib /OUT:\`echo \$oldlib\$oldobjs\$old_deplibs | sed -e s@\.libs/@@g\`; cd .. ; else lib /OUT:\$oldlib\$oldobjs\$old_deplibs ; fi"
-#
-#          -e 's%old_archive_cmds="lib /OUT:\\\$oldlib\\\$oldobjs\\\$old_deplibs"%old_archive_cmds="echo \\\$oldlib \| grep .libs >/dev/null; if test \\\$? = 0; then cd .libs; lib /OUT:\\\`echo \\\$oldlib\\\$oldobjs\\\$old_deplibs \| sed -e s@\\.libs/@@g\\\`; cd .. ; else lib /OUT:\\\$oldlib\\\$oldobjs\\\$old_deplibs; fi"%' \
-
-# The following was a hack for chaniing @BACKSLASH to \
-#          -e 'sYcompile_command=`\$echo "X\$compile_command" | \$Xsed -e '"'"'s%@OUTPUT@%'"'"'"\$output"'"'"'%g'"'"'`Ycompile_command=`\$echo "X\$compile_command" | \$Xsed -e '"'"'s%@OUTPUT@%'"'"'"\$output"'"'"'%g'"'"' | \$Xsed -e '"'"'s%@BACKSLASH@%\\\\\\\\\\\\\\\\%g'"'"'`Y' \
-
-  # Correct cygpath for minGW (ToDo!)
   { echo "$as_me:$LINENO: Build is \"$build\"." >&5
 echo "$as_me: Build is \"$build\"." >&6;}
   mydos2unix='| dos2unix'
@@ -20056,8 +20105,9 @@ echo "$as_me: Build is \"$build\"." >&6;}
   esac
 
   case $build in
+    # Here we need to check if -m32 is specified.  If so, we need to correct
+    # sys_lib_search_path_spec
     *x86_64-*)
-# Here we need to check if -m32 is specified.  If so, we need to correct sys_lib_search_path_spec
       if test "$GCC" = yes && (echo $CXXFLAGS $CFLAGS $FFLAGS | $EGREP 'm32' >& /dev/null); then
         { echo "$as_me:$LINENO: Applying patches to libtool for 32bit compilation" >&5
 echo "$as_me: Applying patches to libtool for 32bit compilation" >&6;}
@@ -20066,40 +20116,70 @@ echo "$as_me: Applying patches to libtool for 32bit compilation" >&6;}
         chmod 755 libtool
       fi
       ;;
+
+    *-solaris*)
+       if test "$GCC" = yes && \
+     (echo $CXXFLAGS $CFLAGS $FFLAGS | $EGREP 'm64' >/dev/null 2>&1) ; then
+    hdwisa=`isainfo | sed -e 's/\([^ ]*\) .*$/\1/'`
+    if `$EGREP 'sys_lib_search_path_spec=' libtool | $EGREP -v $hdwisa >/dev/null 2>&1` ; then
+      { echo "$as_me:$LINENO: Applying patches to libtool for 64-bit GCC compilation" >&5
+echo "$as_me: Applying patches to libtool for 64-bit GCC compilation" >&6;}
+      fixlibtmp=`$CC -m64 -print-search-dirs | $EGREP '^libraries:'`
+      fixlibtmp=`echo $fixlibtmp | sed -e 's/libraries: =//' -e 's/:/ /g'`
+      if `echo "$fixlibtmp" | $EGREP -v $hdwisa  >/dev/null 2>&1` ; then
+	# AC_MSG_NOTICE(Compensating for broken gcc)
+	for lib in $fixlibtmp ; do
+	  if test -d "${lib}${hdwisa}" ; then
+	    syslibpath64="$syslibpath64 ${lib}${hdwisa}/"
+	  fi
+	done
+	syslibpath64="${syslibpath64} ${fixlibtmp}"
+      else
+	syslibpath64="$fixlibtmp"
+      fi
+      sed -e 's|sys_lib_search_path_spec=".*"|sys_lib_search_path_spec="'"$syslibpath64"'"|' libtool > conftest.bla
+      mv conftest.bla libtool
+      chmod 755 libtool
+    fi
+    # AC_MSG_NOTICE(Result is )
+    # $EGREP 'sys_lib_search_path_spec=' libtool
+  fi
+      ;;
+    # Cygwin. Ah, cygwin. Too big and ugly to inline; see the macro.
     *-cygwin* | *-mingw*)
-    case "$CXX" in
-      cl* | */cl* | CL* | */CL*)
-        { echo "$as_me:$LINENO: Applying patches to libtool for cl compiler" >&5
+       case "$CXX" in
+    cl* | */cl* | CL* | */CL*)
+      { echo "$as_me:$LINENO: Applying patches to libtool for cl compiler" >&5
 echo "$as_me: Applying patches to libtool for cl compiler" >&6;}
-        sed -e 's|fix_srcfile_path=\"`cygpath -w \"\$srcfile\"`\"|fix_srcfile_path=\"\\\`'"$CYGPATH_W"' \\\"\\$srcfile\\\"\\\`\"|' \
-            -e 's|fix_srcfile_path=\"\"|fix_srcfile_path=\"\\\`'"$CYGPATH_W"' \\\"\\$srcfile\\\"\\\`\"|' \
-            -e 's%compile_deplibs=\"\$dir/\$old_library \$compile_deplibs\"%compile_deplibs="'\`"$CYGPATH_W"' \$dir/\$old_library | sed -e '"'"'sY\\\\\\\\Y/Yg'"'"\`' \$compile_deplibs\"'% \
-            -e 's%compile_deplibs=\"\$dir/\$linklib \$compile_deplibs\"%compile_deplibs="'\`"$CYGPATH_W"' \$dir/\$linklib | sed -e '"'"'sY\\\\\\\\Y/Yg'"'"\`' \$compile_deplibs\"'% \
-	    -e 's%lib /OUT:%lib -OUT:%' \
-	    -e "s%cygpath -w%$CYGPATH_W%" \
-  	    -e 's%$AR x \\$f_ex_an_ar_oldlib%bla=\\`lib -nologo -list \\$f_ex_an_ar_oldlib | xargs echo '"$mydos2unix"'\\`; echo \\$bla; for i in \\$bla; do lib -nologo -extract:\\$i \\$f_ex_an_ar_oldlib; done%' \
-	    -e 's/$AR t/lib -nologo -list/' \
-	    -e 's%f_ex_an_ar_oldlib="\($?*1*\)"%f_ex_an_ar_oldlib='\`"$CYGPATH_W"' \1`%' \
-	    -e 's%^archive_cmds=.*%archive_cmds="\\$CC -o \\$lib \\$libobjs \\$compiler_flags \\\\\\`echo \\\\\\"\\$deplibs\\\\\\" | \\$SED -e '"\'"'s/ -lc\\$//'"\'"'\\\\\\` -link -dll~linknames="%' \
-	    -e 's%old_archive_cmds="lib -OUT:\\$oldlib\\$oldobjs\\$old_deplibs"%old_archive_cmds="if test -r \\$oldlib; then bla=\\"\\$oldlib\\"; else bla=; fi; lib -OUT:\\$oldlib \\\\\\$bla\\$oldobjs\\$old_deplibs"%' \
-        libtool > conftest.bla
+      sed -e 's|fix_srcfile_path=\"`cygpath -w \"\$srcfile\"`\"|fix_srcfile_path=\"\\\`'"$CYGPATH_W"' \\\"\\$srcfile\\\"\\\`\"|' \
+	  -e 's|fix_srcfile_path=\"\"|fix_srcfile_path=\"\\\`'"$CYGPATH_W"' \\\"\\$srcfile\\\"\\\`\"|' \
+	  -e 's%compile_deplibs=\"\$dir/\$old_library \$compile_deplibs\"%compile_deplibs="'\`"$CYGPATH_W"' \$dir/\$old_library | sed -e '"'"'sY\\\\\\\\Y/Yg'"'"\`' \$compile_deplibs\"'% \
+	  -e 's%compile_deplibs=\"\$dir/\$linklib \$compile_deplibs\"%compile_deplibs="'\`"$CYGPATH_W"' \$dir/\$linklib | sed -e '"'"'sY\\\\\\\\Y/Yg'"'"\`' \$compile_deplibs\"'% \
+	  -e 's%lib /OUT:%lib -OUT:%' \
+	  -e "s%cygpath -w%$CYGPATH_W%" \
+	  -e 's%$AR x \\$f_ex_an_ar_oldlib%bla=\\`lib -nologo -list \\$f_ex_an_ar_oldlib | xargs echo '"$mydos2unix"'\\`; echo \\$bla; for i in \\$bla; do lib -nologo -extract:\\$i \\$f_ex_an_ar_oldlib; done%' \
+	  -e 's/$AR t/lib -nologo -list/' \
+	  -e 's%f_ex_an_ar_oldlib="\($?*1*\)"%f_ex_an_ar_oldlib='\`"$CYGPATH_W"' \1`%' \
+	  -e 's%^archive_cmds=.*%archive_cmds="\\$CC -o \\$lib \\$libobjs \\$compiler_flags \\\\\\`echo \\\\\\"\\$deplibs\\\\\\" | \\$SED -e '"\'"'s/ -lc\\$//'"\'"'\\\\\\` -link -dll~linknames="%' \
+	  -e 's%old_archive_cmds="lib -OUT:\\$oldlib\\$oldobjs\\$old_deplibs"%old_archive_cmds="if test -r \\$oldlib; then bla=\\"\\$oldlib\\"; else bla=; fi; lib -OUT:\\$oldlib \\\\\\$bla\\$oldobjs\\$old_deplibs"%' \
+      libtool > conftest.bla
 
-        mv conftest.bla libtool
-        chmod 755 libtool
-        ;;
-      *)
-        { echo "$as_me:$LINENO: Applying patches to libtool for GNU compiler" >&5
+      mv conftest.bla libtool
+      chmod 755 libtool
+      ;;
+    *)
+      { echo "$as_me:$LINENO: Applying patches to libtool for GNU compiler" >&5
 echo "$as_me: Applying patches to libtool for GNU compiler" >&6;}
-        sed -e 's|fix_srcfile_path=\"`cygpath -w \"\$srcfile\"`\"|fix_srcfile_path=\"\\\`'"$CYGPATH_W"' \\\"\\$srcfile\\\"\\\`\"|' \
-            -e 's|"lib /OUT:\\$oldlib\\$oldobjs\\$old_deplibs"|"\\$AR \\$AR_FLAGS \\$oldlib\\$oldobjs\\$old_deplibs~\\$RANLIB \\$oldlib"|' \
-            -e 's|libext="lib"|libext="a"|' \
-        libtool > conftest.bla
+      sed -e 's|fix_srcfile_path=\"`cygpath -w \"\$srcfile\"`\"|fix_srcfile_path=\"\\\`'"$CYGPATH_W"' \\\"\\$srcfile\\\"\\\`\"|' \
+	  -e 's|"lib /OUT:\\$oldlib\\$oldobjs\\$old_deplibs"|"\\$AR \\$AR_FLAGS \\$oldlib\\$oldobjs\\$old_deplibs~\\$RANLIB \\$oldlib"|' \
+	  -e 's|libext="lib"|libext="a"|' \
+      libtool > conftest.bla
 
-        mv conftest.bla libtool
-        chmod 755 libtool
-        ;;
-    esac
-    ;;
+      mv conftest.bla libtool
+      chmod 755 libtool
+      ;;
+  esac
+      ;;
     *-darwin*)
       { echo "$as_me:$LINENO: Applying patches to libtool for Darwin" >&5
 echo "$as_me: Applying patches to libtool for Darwin" >&6;}
@@ -20141,7 +20221,7 @@ if test $enable_shared = yes; then
         RPATH_FLAGS=nothing ;;
     *-mingw32)
         RPATH_FLAGS=nothing ;;
-    *-sun-*)
+    *-*-solaris*)
         RPATH_FLAGS=
         for dir in $abs_lib_dir; do
           RPATH_FLAGS="$RPATH_FLAGS -R$dir"
@@ -20636,84 +20716,6 @@ fi
 # Force the use of C as the best single choice amongst C++, C, and Fortran.
 # Obviously, this has limits.
 
-    if test x"$mpi_libcheck" != xno; then
-	   coin_save_LIBS="$LIBS"
-	   LIBS="$MPILIB $ADDLIBS"
-	   coin_MPI_link=no
-	   ac_ext=c
-ac_cpp='$CPP $CPPFLAGS'
-ac_compile='$CC -c $CFLAGS $CPPFLAGS conftest.$ac_ext >&5'
-ac_link='$CC -o conftest$ac_exeext $CFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ext $LIBS >&5'
-ac_compiler_gnu=$ac_cv_c_compiler_gnu
-
-	   for fnm in MPI_Irecv ; do
-	     echo "$as_me:$LINENO: checking whether symbol $fnm is available with MPI" >&5
-echo $ECHO_N "checking whether symbol $fnm is available with MPI... $ECHO_C" >&6
-	     cat >conftest.$ac_ext <<_ACEOF
-/* confdefs.h.  */
-_ACEOF
-cat confdefs.h >>conftest.$ac_ext
-cat >>conftest.$ac_ext <<_ACEOF
-/* end confdefs.h.  */
-
-int
-main ()
-{
-$fnm()
-  ;
-  return 0;
-}
-_ACEOF
-rm -f conftest.$ac_objext conftest$ac_exeext
-if { (eval echo "$as_me:$LINENO: \"$ac_link\"") >&5
-  (eval $ac_link) 2>conftest.er1
-  ac_status=$?
-  grep -v '^ *+' conftest.er1 >conftest.err
-  rm -f conftest.er1
-  cat conftest.err >&5
-  echo "$as_me:$LINENO: \$? = $ac_status" >&5
-  (exit $ac_status); } &&
-	 { ac_try='test -z "$ac_c_werror_flag"
-			 || test ! -s conftest.err'
-  { (eval echo "$as_me:$LINENO: \"$ac_try\"") >&5
-  (eval $ac_try) 2>&5
-  ac_status=$?
-  echo "$as_me:$LINENO: \$? = $ac_status" >&5
-  (exit $ac_status); }; } &&
-	 { ac_try='test -s conftest$ac_exeext'
-  { (eval echo "$as_me:$LINENO: \"$ac_try\"") >&5
-  (eval $ac_try) 2>&5
-  ac_status=$?
-  echo "$as_me:$LINENO: \$? = $ac_status" >&5
-  (exit $ac_status); }; }; then
-  echo "$as_me:$LINENO: result: yes" >&5
-echo "${ECHO_T}yes" >&6
-		  coin_MPI_link=yes
-		  break
-else
-  echo "$as_me: failed program was:" >&5
-sed 's/^/| /' conftest.$ac_ext >&5
-
-echo "$as_me:$LINENO: result: no" >&5
-echo "${ECHO_T}no" >&6
-fi
-rm -f conftest.err conftest.$ac_objext \
-      conftest$ac_exeext conftest.$ac_ext
-	   done
-	   ac_ext=c
-ac_cpp='$CPP $CPPFLAGS'
-ac_compile='$CC -c $CFLAGS $CPPFLAGS conftest.$ac_ext >&5'
-ac_link='$CC -o conftest$ac_exeext $CFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ext $LIBS >&5'
-ac_compiler_gnu=$ac_cv_c_compiler_gnu
-
-	   if test x"$coin_MPI_link" = xyes ; then
-	     LIBS="$coin_save_LIBS"
-	   else
-	     { { echo "$as_me:$LINENO: error: Cannot find symbol(s) MPI_Irecv with MPI" >&5
-echo "$as_me: error: Cannot find symbol(s) MPI_Irecv with MPI" >&2;}
-   { (exit 1); exit 1; }; }
-	   fi
-	 fi
 
 
 # If we make it this far, we've verified the file and linked the function. Add
@@ -20755,6 +20757,163 @@ fi
 #AC_CHECK_HEADERS([sys/resource.h],[],[],[$hdr])
 
 for ac_header in sys/resource.h
+do
+as_ac_Header=`echo "ac_cv_header_$ac_header" | $as_tr_sh`
+if eval "test \"\${$as_ac_Header+set}\" = set"; then
+  echo "$as_me:$LINENO: checking for $ac_header" >&5
+echo $ECHO_N "checking for $ac_header... $ECHO_C" >&6
+if eval "test \"\${$as_ac_Header+set}\" = set"; then
+  echo $ECHO_N "(cached) $ECHO_C" >&6
+fi
+echo "$as_me:$LINENO: result: `eval echo '${'$as_ac_Header'}'`" >&5
+echo "${ECHO_T}`eval echo '${'$as_ac_Header'}'`" >&6
+else
+  # Is the header compilable?
+echo "$as_me:$LINENO: checking $ac_header usability" >&5
+echo $ECHO_N "checking $ac_header usability... $ECHO_C" >&6
+cat >conftest.$ac_ext <<_ACEOF
+/* confdefs.h.  */
+_ACEOF
+cat confdefs.h >>conftest.$ac_ext
+cat >>conftest.$ac_ext <<_ACEOF
+/* end confdefs.h.  */
+$ac_includes_default
+#include <$ac_header>
+_ACEOF
+rm -f conftest.$ac_objext
+if { (eval echo "$as_me:$LINENO: \"$ac_compile\"") >&5
+  (eval $ac_compile) 2>conftest.er1
+  ac_status=$?
+  grep -v '^ *+' conftest.er1 >conftest.err
+  rm -f conftest.er1
+  cat conftest.err >&5
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); } &&
+	 { ac_try='test -z "$ac_c_werror_flag"
+			 || test ! -s conftest.err'
+  { (eval echo "$as_me:$LINENO: \"$ac_try\"") >&5
+  (eval $ac_try) 2>&5
+  ac_status=$?
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); }; } &&
+	 { ac_try='test -s conftest.$ac_objext'
+  { (eval echo "$as_me:$LINENO: \"$ac_try\"") >&5
+  (eval $ac_try) 2>&5
+  ac_status=$?
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); }; }; then
+  ac_header_compiler=yes
+else
+  echo "$as_me: failed program was:" >&5
+sed 's/^/| /' conftest.$ac_ext >&5
+
+ac_header_compiler=no
+fi
+rm -f conftest.err conftest.$ac_objext conftest.$ac_ext
+echo "$as_me:$LINENO: result: $ac_header_compiler" >&5
+echo "${ECHO_T}$ac_header_compiler" >&6
+
+# Is the header present?
+echo "$as_me:$LINENO: checking $ac_header presence" >&5
+echo $ECHO_N "checking $ac_header presence... $ECHO_C" >&6
+cat >conftest.$ac_ext <<_ACEOF
+/* confdefs.h.  */
+_ACEOF
+cat confdefs.h >>conftest.$ac_ext
+cat >>conftest.$ac_ext <<_ACEOF
+/* end confdefs.h.  */
+#include <$ac_header>
+_ACEOF
+if { (eval echo "$as_me:$LINENO: \"$ac_cpp conftest.$ac_ext\"") >&5
+  (eval $ac_cpp conftest.$ac_ext) 2>conftest.er1
+  ac_status=$?
+  grep -v '^ *+' conftest.er1 >conftest.err
+  rm -f conftest.er1
+  cat conftest.err >&5
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); } >/dev/null; then
+  if test -s conftest.err; then
+    ac_cpp_err=$ac_c_preproc_warn_flag
+    ac_cpp_err=$ac_cpp_err$ac_c_werror_flag
+  else
+    ac_cpp_err=
+  fi
+else
+  ac_cpp_err=yes
+fi
+if test -z "$ac_cpp_err"; then
+  ac_header_preproc=yes
+else
+  echo "$as_me: failed program was:" >&5
+sed 's/^/| /' conftest.$ac_ext >&5
+
+  ac_header_preproc=no
+fi
+rm -f conftest.err conftest.$ac_ext
+echo "$as_me:$LINENO: result: $ac_header_preproc" >&5
+echo "${ECHO_T}$ac_header_preproc" >&6
+
+# So?  What about this header?
+case $ac_header_compiler:$ac_header_preproc:$ac_c_preproc_warn_flag in
+  yes:no: )
+    { echo "$as_me:$LINENO: WARNING: $ac_header: accepted by the compiler, rejected by the preprocessor!" >&5
+echo "$as_me: WARNING: $ac_header: accepted by the compiler, rejected by the preprocessor!" >&2;}
+    { echo "$as_me:$LINENO: WARNING: $ac_header: proceeding with the compiler's result" >&5
+echo "$as_me: WARNING: $ac_header: proceeding with the compiler's result" >&2;}
+    ac_header_preproc=yes
+    ;;
+  no:yes:* )
+    { echo "$as_me:$LINENO: WARNING: $ac_header: present but cannot be compiled" >&5
+echo "$as_me: WARNING: $ac_header: present but cannot be compiled" >&2;}
+    { echo "$as_me:$LINENO: WARNING: $ac_header:     check for missing prerequisite headers?" >&5
+echo "$as_me: WARNING: $ac_header:     check for missing prerequisite headers?" >&2;}
+    { echo "$as_me:$LINENO: WARNING: $ac_header: see the Autoconf documentation" >&5
+echo "$as_me: WARNING: $ac_header: see the Autoconf documentation" >&2;}
+    { echo "$as_me:$LINENO: WARNING: $ac_header:     section \"Present But Cannot Be Compiled\"" >&5
+echo "$as_me: WARNING: $ac_header:     section \"Present But Cannot Be Compiled\"" >&2;}
+    { echo "$as_me:$LINENO: WARNING: $ac_header: proceeding with the preprocessor's result" >&5
+echo "$as_me: WARNING: $ac_header: proceeding with the preprocessor's result" >&2;}
+    { echo "$as_me:$LINENO: WARNING: $ac_header: in the future, the compiler will take precedence" >&5
+echo "$as_me: WARNING: $ac_header: in the future, the compiler will take precedence" >&2;}
+    (
+      cat <<\_ASBOX
+## --------------------------------------------------------- ##
+## Report this to https://projects.coin-or.org/Bcp/newticket ##
+## --------------------------------------------------------- ##
+_ASBOX
+    ) |
+      sed "s/^/$as_me: WARNING:     /" >&2
+    ;;
+esac
+echo "$as_me:$LINENO: checking for $ac_header" >&5
+echo $ECHO_N "checking for $ac_header... $ECHO_C" >&6
+if eval "test \"\${$as_ac_Header+set}\" = set"; then
+  echo $ECHO_N "(cached) $ECHO_C" >&6
+else
+  eval "$as_ac_Header=\$ac_header_preproc"
+fi
+echo "$as_me:$LINENO: result: `eval echo '${'$as_ac_Header'}'`" >&5
+echo "${ECHO_T}`eval echo '${'$as_ac_Header'}'`" >&6
+
+fi
+if test `eval echo '${'$as_ac_Header'}'` = yes; then
+  cat >>confdefs.h <<_ACEOF
+#define `echo "HAVE_$ac_header" | $as_tr_cpp` 1
+_ACEOF
+
+fi
+
+done
+
+
+#if test x"" = x; then
+#  hdr="#include <sys/sysinfo.h>"
+#else
+#  hdr=""
+#fi
+#AC_CHECK_HEADERS([sys/sysinfo.h],[],[],[$hdr])
+
+for ac_header in sys/sysinfo.h
 do
 as_ac_Header=`echo "ac_cv_header_$ac_header" | $as_tr_sh`
 if eval "test \"\${$as_ac_Header+set}\" = set"; then
@@ -21061,10 +21220,167 @@ fi
 done
 
 
+#if test x"" = x; then
+#  hdr="#include <process.h>"
+#else
+#  hdr=""
+#fi
+#AC_CHECK_HEADERS([process.h],[],[],[$hdr])
+
+for ac_header in process.h
+do
+as_ac_Header=`echo "ac_cv_header_$ac_header" | $as_tr_sh`
+if eval "test \"\${$as_ac_Header+set}\" = set"; then
+  echo "$as_me:$LINENO: checking for $ac_header" >&5
+echo $ECHO_N "checking for $ac_header... $ECHO_C" >&6
+if eval "test \"\${$as_ac_Header+set}\" = set"; then
+  echo $ECHO_N "(cached) $ECHO_C" >&6
+fi
+echo "$as_me:$LINENO: result: `eval echo '${'$as_ac_Header'}'`" >&5
+echo "${ECHO_T}`eval echo '${'$as_ac_Header'}'`" >&6
+else
+  # Is the header compilable?
+echo "$as_me:$LINENO: checking $ac_header usability" >&5
+echo $ECHO_N "checking $ac_header usability... $ECHO_C" >&6
+cat >conftest.$ac_ext <<_ACEOF
+/* confdefs.h.  */
+_ACEOF
+cat confdefs.h >>conftest.$ac_ext
+cat >>conftest.$ac_ext <<_ACEOF
+/* end confdefs.h.  */
+$ac_includes_default
+#include <$ac_header>
+_ACEOF
+rm -f conftest.$ac_objext
+if { (eval echo "$as_me:$LINENO: \"$ac_compile\"") >&5
+  (eval $ac_compile) 2>conftest.er1
+  ac_status=$?
+  grep -v '^ *+' conftest.er1 >conftest.err
+  rm -f conftest.er1
+  cat conftest.err >&5
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); } &&
+	 { ac_try='test -z "$ac_c_werror_flag"
+			 || test ! -s conftest.err'
+  { (eval echo "$as_me:$LINENO: \"$ac_try\"") >&5
+  (eval $ac_try) 2>&5
+  ac_status=$?
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); }; } &&
+	 { ac_try='test -s conftest.$ac_objext'
+  { (eval echo "$as_me:$LINENO: \"$ac_try\"") >&5
+  (eval $ac_try) 2>&5
+  ac_status=$?
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); }; }; then
+  ac_header_compiler=yes
+else
+  echo "$as_me: failed program was:" >&5
+sed 's/^/| /' conftest.$ac_ext >&5
+
+ac_header_compiler=no
+fi
+rm -f conftest.err conftest.$ac_objext conftest.$ac_ext
+echo "$as_me:$LINENO: result: $ac_header_compiler" >&5
+echo "${ECHO_T}$ac_header_compiler" >&6
+
+# Is the header present?
+echo "$as_me:$LINENO: checking $ac_header presence" >&5
+echo $ECHO_N "checking $ac_header presence... $ECHO_C" >&6
+cat >conftest.$ac_ext <<_ACEOF
+/* confdefs.h.  */
+_ACEOF
+cat confdefs.h >>conftest.$ac_ext
+cat >>conftest.$ac_ext <<_ACEOF
+/* end confdefs.h.  */
+#include <$ac_header>
+_ACEOF
+if { (eval echo "$as_me:$LINENO: \"$ac_cpp conftest.$ac_ext\"") >&5
+  (eval $ac_cpp conftest.$ac_ext) 2>conftest.er1
+  ac_status=$?
+  grep -v '^ *+' conftest.er1 >conftest.err
+  rm -f conftest.er1
+  cat conftest.err >&5
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); } >/dev/null; then
+  if test -s conftest.err; then
+    ac_cpp_err=$ac_c_preproc_warn_flag
+    ac_cpp_err=$ac_cpp_err$ac_c_werror_flag
+  else
+    ac_cpp_err=
+  fi
+else
+  ac_cpp_err=yes
+fi
+if test -z "$ac_cpp_err"; then
+  ac_header_preproc=yes
+else
+  echo "$as_me: failed program was:" >&5
+sed 's/^/| /' conftest.$ac_ext >&5
+
+  ac_header_preproc=no
+fi
+rm -f conftest.err conftest.$ac_ext
+echo "$as_me:$LINENO: result: $ac_header_preproc" >&5
+echo "${ECHO_T}$ac_header_preproc" >&6
+
+# So?  What about this header?
+case $ac_header_compiler:$ac_header_preproc:$ac_c_preproc_warn_flag in
+  yes:no: )
+    { echo "$as_me:$LINENO: WARNING: $ac_header: accepted by the compiler, rejected by the preprocessor!" >&5
+echo "$as_me: WARNING: $ac_header: accepted by the compiler, rejected by the preprocessor!" >&2;}
+    { echo "$as_me:$LINENO: WARNING: $ac_header: proceeding with the compiler's result" >&5
+echo "$as_me: WARNING: $ac_header: proceeding with the compiler's result" >&2;}
+    ac_header_preproc=yes
+    ;;
+  no:yes:* )
+    { echo "$as_me:$LINENO: WARNING: $ac_header: present but cannot be compiled" >&5
+echo "$as_me: WARNING: $ac_header: present but cannot be compiled" >&2;}
+    { echo "$as_me:$LINENO: WARNING: $ac_header:     check for missing prerequisite headers?" >&5
+echo "$as_me: WARNING: $ac_header:     check for missing prerequisite headers?" >&2;}
+    { echo "$as_me:$LINENO: WARNING: $ac_header: see the Autoconf documentation" >&5
+echo "$as_me: WARNING: $ac_header: see the Autoconf documentation" >&2;}
+    { echo "$as_me:$LINENO: WARNING: $ac_header:     section \"Present But Cannot Be Compiled\"" >&5
+echo "$as_me: WARNING: $ac_header:     section \"Present But Cannot Be Compiled\"" >&2;}
+    { echo "$as_me:$LINENO: WARNING: $ac_header: proceeding with the preprocessor's result" >&5
+echo "$as_me: WARNING: $ac_header: proceeding with the preprocessor's result" >&2;}
+    { echo "$as_me:$LINENO: WARNING: $ac_header: in the future, the compiler will take precedence" >&5
+echo "$as_me: WARNING: $ac_header: in the future, the compiler will take precedence" >&2;}
+    (
+      cat <<\_ASBOX
+## --------------------------------------------------------- ##
+## Report this to https://projects.coin-or.org/Bcp/newticket ##
+## --------------------------------------------------------- ##
+_ASBOX
+    ) |
+      sed "s/^/$as_me: WARNING:     /" >&2
+    ;;
+esac
+echo "$as_me:$LINENO: checking for $ac_header" >&5
+echo $ECHO_N "checking for $ac_header... $ECHO_C" >&6
+if eval "test \"\${$as_ac_Header+set}\" = set"; then
+  echo $ECHO_N "(cached) $ECHO_C" >&6
+else
+  eval "$as_ac_Header=\$ac_header_preproc"
+fi
+echo "$as_me:$LINENO: result: `eval echo '${'$as_ac_Header'}'`" >&5
+echo "${ECHO_T}`eval echo '${'$as_ac_Header'}'`" >&6
+
+fi
+if test `eval echo '${'$as_ac_Header'}'` = yes; then
+  cat >>confdefs.h <<_ACEOF
+#define `echo "HAVE_$ac_header" | $as_tr_cpp` 1
+_ACEOF
+
+fi
+
+done
 
 
 
-for ac_func in gethostname getpid sysinfo
+
+
+for ac_func in gethostname getpid mallinfo
 do
 as_ac_var=`echo "ac_cv_func_$ac_func" | $as_tr_sh`
 echo "$as_me:$LINENO: checking for $ac_func" >&5
@@ -21166,6 +21482,71 @@ fi
 done
 
 
+# Check if sysinfo is present and does what we expect it to do
+if test x$ac_cv_header_sys_stat_h = xyes; then
+  echo "$as_me:$LINENO: checking whether we have sysinfo that we can use" >&5
+echo $ECHO_N "checking whether we have sysinfo that we can use... $ECHO_C" >&6
+  ac_ext=cc
+ac_cpp='$CXXCPP $CPPFLAGS'
+ac_compile='$CXX -c $CXXFLAGS $CPPFLAGS conftest.$ac_ext >&5'
+ac_link='$CXX -o conftest$ac_exeext $CXXFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ext $LIBS >&5'
+ac_compiler_gnu=$ac_cv_cxx_compiler_gnu
+
+  cat >conftest.$ac_ext <<_ACEOF
+
+#include <sys/sysinfo.h>
+long bla()
+{
+  struct sysinfo info;
+  sysinfo(&info);
+  return info.mem_unit*info.freeram;
+}
+_ACEOF
+rm -f conftest.$ac_objext
+if { (eval echo "$as_me:$LINENO: \"$ac_compile\"") >&5
+  (eval $ac_compile) 2>conftest.er1
+  ac_status=$?
+  grep -v '^ *+' conftest.er1 >conftest.err
+  rm -f conftest.er1
+  cat conftest.err >&5
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); } &&
+	 { ac_try='test -z "$ac_cxx_werror_flag"
+			 || test ! -s conftest.err'
+  { (eval echo "$as_me:$LINENO: \"$ac_try\"") >&5
+  (eval $ac_try) 2>&5
+  ac_status=$?
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); }; } &&
+	 { ac_try='test -s conftest.$ac_objext'
+  { (eval echo "$as_me:$LINENO: \"$ac_try\"") >&5
+  (eval $ac_try) 2>&5
+  ac_status=$?
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); }; }; then
+  echo "$as_me:$LINENO: result: yes" >&5
+echo "${ECHO_T}yes" >&6
+
+cat >>confdefs.h <<\_ACEOF
+#define HAVE_SYSINFO 1
+_ACEOF
+
+else
+  echo "$as_me: failed program was:" >&5
+sed 's/^/| /' conftest.$ac_ext >&5
+
+echo "$as_me:$LINENO: result: no" >&5
+echo "${ECHO_T}no" >&6
+fi
+rm -f conftest.err conftest.$ac_objext conftest.$ac_ext
+  ac_ext=c
+ac_cpp='$CPP $CPPFLAGS'
+ac_compile='$CC -c $CFLAGS $CPPFLAGS conftest.$ac_ext >&5'
+ac_link='$CC -o conftest$ac_exeext $CFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ext $LIBS >&5'
+ac_compiler_gnu=$ac_cv_c_compiler_gnu
+
+fi
+
 ##############################################################################
 #                   VPATH links for example input files                      #
 ##############################################################################
@@ -21195,216 +21576,380 @@ echo "${ECHO_T}$coin_vpath_config" >&6
 
 
 
-
-
-
-
-if test test/BAC = . ; then
-	updir=.
-else
-	t=`echo test/BAC | sed -e 's=/\./=/=g' -e 's=^\./==' -e 's=/\.$==' -e 's=[^/]*=..=g'`
-	if test $t = "" ; then
-		t=.
-	fi
-	updir=$t
+echo "$as_me:$LINENO: checking which command should be used to link input files" >&5
+echo $ECHO_N "checking which command should be used to link input files... $ECHO_C" >&6
+coin_link_input_cmd="$LN_S"
+if test "$enable_doscompile" = mingw; then
+  coin_link_input_cmd=cp
 fi
+case "$CC" in
+  cl* | */cl* | CL* | */CL*)
+    coin_link_input_cmd=cp ;;
+esac
+echo "$as_me:$LINENO: result: $coin_link_input_cmd" >&5
+echo "${ECHO_T}$coin_link_input_cmd" >&6
 
+
+
+echo Creating links in test/BAC ...
+cmd="$coin_link_input_cmd"
 if test -e $srcdir/examples/BAC/testfiles.txt ; then
-	echo Creating links in test/BAC ...
-	fromdir=$updir/$srcdir/`dirname examples/BAC/testfiles.txt`
-	mkdir -p test/BAC
-	cd test/BAC
-	for f in `cat $updir/$srcdir/examples/BAC/testfiles.txt` ; do
-		if test ! -e $f ; then
-		   	fdir=`dirname $f`
-		    mkdir -p $fdir
+  my_target_dir="test/BAC"
+  my_link_files=`cat $srcdir/examples/BAC/testfiles.txt`
+  my_dirname=`(dirname examples/BAC/testfiles.txt) 2>/dev/null ||
+$as_expr Xexamples/BAC/testfiles.txt : 'X\(.*[^/]\)//*[^/][^/]*/*$' \| \
+	 Xexamples/BAC/testfiles.txt : 'X\(//\)[^/]' \| \
+	 Xexamples/BAC/testfiles.txt : 'X\(//\)$' \| \
+	 Xexamples/BAC/testfiles.txt : 'X\(/\)' \| \
+	 .     : '\(.\)' 2>/dev/null ||
+echo Xexamples/BAC/testfiles.txt |
+    sed '/^X\(.*[^/]\)\/\/*[^/][^/]*\/*$/{ s//\1/; q; }
+  	  /^X\(\/\/\)[^/].*/{ s//\1/; q; }
+  	  /^X\(\/\/\)$/{ s//\1/; q; }
+  	  /^X\(\/\).*/{ s//\1/; q; }
+  	  s/.*/./; q'`
+#  if test -e $my_target_dir; then : ; else
+#    AS_MKDIR_P($my_target_dir)
+#  fi
+  for i in $my_link_files; do
+    #rm -rf $my_target_dir/$i
+    if test -e $my_target_dir/$i; then : ; else
+      dirn2=`(dirname $my_target_dir/$i) 2>/dev/null ||
+$as_expr X$my_target_dir/$i : 'X\(.*[^/]\)//*[^/][^/]*/*$' \| \
+	 X$my_target_dir/$i : 'X\(//\)[^/]' \| \
+	 X$my_target_dir/$i : 'X\(//\)$' \| \
+	 X$my_target_dir/$i : 'X\(/\)' \| \
+	 .     : '\(.\)' 2>/dev/null ||
+echo X$my_target_dir/$i |
+    sed '/^X\(.*[^/]\)\/\/*[^/][^/]*\/*$/{ s//\1/; q; }
+  	  /^X\(\/\/\)[^/].*/{ s//\1/; q; }
+  	  /^X\(\/\/\)$/{ s//\1/; q; }
+  	  /^X\(\/\).*/{ s//\1/; q; }
+  	  s/.*/./; q'`
+      if test -e $dirn2; then : ; else
+        { if $as_mkdir_p; then
+    mkdir -p $dirn2
+  else
+    as_dir=$dirn2
+    as_dirs=
+    while test ! -d "$as_dir"; do
+      as_dirs="$as_dir $as_dirs"
+      as_dir=`(dirname "$as_dir") 2>/dev/null ||
+$as_expr X"$as_dir" : 'X\(.*[^/]\)//*[^/][^/]*/*$' \| \
+	 X"$as_dir" : 'X\(//\)[^/]' \| \
+	 X"$as_dir" : 'X\(//\)$' \| \
+	 X"$as_dir" : 'X\(/\)' \| \
+	 .     : '\(.\)' 2>/dev/null ||
+echo X"$as_dir" |
+    sed '/^X\(.*[^/]\)\/\/*[^/][^/]*\/*$/{ s//\1/; q; }
+  	  /^X\(\/\/\)[^/].*/{ s//\1/; q; }
+  	  /^X\(\/\/\)$/{ s//\1/; q; }
+  	  /^X\(\/\).*/{ s//\1/; q; }
+  	  s/.*/./; q'`
+    done
+    test ! -n "$as_dirs" || mkdir $as_dirs
+  fi || { { echo "$as_me:$LINENO: error: cannot create directory $dirn2" >&5
+echo "$as_me: error: cannot create directory $dirn2" >&2;}
+   { (exit 1); exit 1; }; }; }
 
-if test $fdir = . ; then
-	uppath=.
+      fi
+      $cmd $abs_source_dir/$my_dirname/$i $my_target_dir/$i
+    fi
+  done
 else
-	t=`echo $fdir | sed -e 's=/\./=/=g' -e 's=^\./==' -e 's=/\.$==' -e 's=[^/]*=..=g'`
-	if test $t = "" ; then
-		t=.
-	fi
-	uppath=$t
-fi
-
-			cd $fdir
-		    $LN_S $uppath/$fromdir/$f `basename $f`
-			cd $uppath
-		fi
-	done
-	cd $updir
+  { echo "$as_me:$LINENO: WARNING: File list file examples/BAC/testfiles.txt missing!" >&5
+echo "$as_me: WARNING: File list file examples/BAC/testfiles.txt missing!" >&2;}
 fi
 
 
-if test $coin_vpath_config = yes ; then
 
-if test examples/BAC = . ; then
-	updir=.
+echo Creating copies in examples/BAC ...
+cmd="cp"
+if test -e $srcdir/examples/BAC/examplefiles.txt ; then
+  my_target_dir="examples/BAC"
+  my_link_files=`cat $srcdir/examples/BAC/examplefiles.txt`
+  my_dirname=`(dirname examples/BAC/examplefiles.txt) 2>/dev/null ||
+$as_expr Xexamples/BAC/examplefiles.txt : 'X\(.*[^/]\)//*[^/][^/]*/*$' \| \
+	 Xexamples/BAC/examplefiles.txt : 'X\(//\)[^/]' \| \
+	 Xexamples/BAC/examplefiles.txt : 'X\(//\)$' \| \
+	 Xexamples/BAC/examplefiles.txt : 'X\(/\)' \| \
+	 .     : '\(.\)' 2>/dev/null ||
+echo Xexamples/BAC/examplefiles.txt |
+    sed '/^X\(.*[^/]\)\/\/*[^/][^/]*\/*$/{ s//\1/; q; }
+  	  /^X\(\/\/\)[^/].*/{ s//\1/; q; }
+  	  /^X\(\/\/\)$/{ s//\1/; q; }
+  	  /^X\(\/\).*/{ s//\1/; q; }
+  	  s/.*/./; q'`
+#  if test -e $my_target_dir; then : ; else
+#    AS_MKDIR_P($my_target_dir)
+#  fi
+  for i in $my_link_files; do
+    #rm -rf $my_target_dir/$i
+    if test -e $my_target_dir/$i; then : ; else
+      dirn2=`(dirname $my_target_dir/$i) 2>/dev/null ||
+$as_expr X$my_target_dir/$i : 'X\(.*[^/]\)//*[^/][^/]*/*$' \| \
+	 X$my_target_dir/$i : 'X\(//\)[^/]' \| \
+	 X$my_target_dir/$i : 'X\(//\)$' \| \
+	 X$my_target_dir/$i : 'X\(/\)' \| \
+	 .     : '\(.\)' 2>/dev/null ||
+echo X$my_target_dir/$i |
+    sed '/^X\(.*[^/]\)\/\/*[^/][^/]*\/*$/{ s//\1/; q; }
+  	  /^X\(\/\/\)[^/].*/{ s//\1/; q; }
+  	  /^X\(\/\/\)$/{ s//\1/; q; }
+  	  /^X\(\/\).*/{ s//\1/; q; }
+  	  s/.*/./; q'`
+      if test -e $dirn2; then : ; else
+        { if $as_mkdir_p; then
+    mkdir -p $dirn2
+  else
+    as_dir=$dirn2
+    as_dirs=
+    while test ! -d "$as_dir"; do
+      as_dirs="$as_dir $as_dirs"
+      as_dir=`(dirname "$as_dir") 2>/dev/null ||
+$as_expr X"$as_dir" : 'X\(.*[^/]\)//*[^/][^/]*/*$' \| \
+	 X"$as_dir" : 'X\(//\)[^/]' \| \
+	 X"$as_dir" : 'X\(//\)$' \| \
+	 X"$as_dir" : 'X\(/\)' \| \
+	 .     : '\(.\)' 2>/dev/null ||
+echo X"$as_dir" |
+    sed '/^X\(.*[^/]\)\/\/*[^/][^/]*\/*$/{ s//\1/; q; }
+  	  /^X\(\/\/\)[^/].*/{ s//\1/; q; }
+  	  /^X\(\/\/\)$/{ s//\1/; q; }
+  	  /^X\(\/\).*/{ s//\1/; q; }
+  	  s/.*/./; q'`
+    done
+    test ! -n "$as_dirs" || mkdir $as_dirs
+  fi || { { echo "$as_me:$LINENO: error: cannot create directory $dirn2" >&5
+echo "$as_me: error: cannot create directory $dirn2" >&2;}
+   { (exit 1); exit 1; }; }; }
+
+      fi
+      $cmd $abs_source_dir/$my_dirname/$i $my_target_dir/$i
+    fi
+  done
 else
-	t=`echo examples/BAC | sed -e 's=/\./=/=g' -e 's=^\./==' -e 's=/\.$==' -e 's=[^/]*=..=g'`
-	if test $t = "" ; then
-		t=.
-	fi
-	updir=$t
+  { echo "$as_me:$LINENO: WARNING: File list file examples/BAC/examplefiles.txt missing!" >&5
+echo "$as_me: WARNING: File list file examples/BAC/examplefiles.txt missing!" >&2;}
 fi
 
-	if test -e $srcdir/examples/BAC/examplefiles.txt ; then
-		echo Copying example examples/BAC ...
-		fromdir=$updir/$srcdir/`dirname examples/BAC/examplefiles.txt`
-		mkdir -p examples/BAC
-		cd examples/BAC
-		for f in `cat $updir/$srcdir/examples/BAC/examplefiles.txt` ; do
-			if test ! -e $f ; then
-		   		fdir=`dirname $f`
-				mkdir -p $fdir
 
-if test $fdir = . ; then
-	uppath=.
+
+
+echo Creating copies in examples/MCF-1 ...
+cmd="cp"
+if test -e $srcdir/examples/MCF-1/examplefiles.txt ; then
+  my_target_dir="examples/MCF-1"
+  my_link_files=`cat $srcdir/examples/MCF-1/examplefiles.txt`
+  my_dirname=`(dirname examples/MCF-1/examplefiles.txt) 2>/dev/null ||
+$as_expr Xexamples/MCF-1/examplefiles.txt : 'X\(.*[^/]\)//*[^/][^/]*/*$' \| \
+	 Xexamples/MCF-1/examplefiles.txt : 'X\(//\)[^/]' \| \
+	 Xexamples/MCF-1/examplefiles.txt : 'X\(//\)$' \| \
+	 Xexamples/MCF-1/examplefiles.txt : 'X\(/\)' \| \
+	 .     : '\(.\)' 2>/dev/null ||
+echo Xexamples/MCF-1/examplefiles.txt |
+    sed '/^X\(.*[^/]\)\/\/*[^/][^/]*\/*$/{ s//\1/; q; }
+  	  /^X\(\/\/\)[^/].*/{ s//\1/; q; }
+  	  /^X\(\/\/\)$/{ s//\1/; q; }
+  	  /^X\(\/\).*/{ s//\1/; q; }
+  	  s/.*/./; q'`
+#  if test -e $my_target_dir; then : ; else
+#    AS_MKDIR_P($my_target_dir)
+#  fi
+  for i in $my_link_files; do
+    #rm -rf $my_target_dir/$i
+    if test -e $my_target_dir/$i; then : ; else
+      dirn2=`(dirname $my_target_dir/$i) 2>/dev/null ||
+$as_expr X$my_target_dir/$i : 'X\(.*[^/]\)//*[^/][^/]*/*$' \| \
+	 X$my_target_dir/$i : 'X\(//\)[^/]' \| \
+	 X$my_target_dir/$i : 'X\(//\)$' \| \
+	 X$my_target_dir/$i : 'X\(/\)' \| \
+	 .     : '\(.\)' 2>/dev/null ||
+echo X$my_target_dir/$i |
+    sed '/^X\(.*[^/]\)\/\/*[^/][^/]*\/*$/{ s//\1/; q; }
+  	  /^X\(\/\/\)[^/].*/{ s//\1/; q; }
+  	  /^X\(\/\/\)$/{ s//\1/; q; }
+  	  /^X\(\/\).*/{ s//\1/; q; }
+  	  s/.*/./; q'`
+      if test -e $dirn2; then : ; else
+        { if $as_mkdir_p; then
+    mkdir -p $dirn2
+  else
+    as_dir=$dirn2
+    as_dirs=
+    while test ! -d "$as_dir"; do
+      as_dirs="$as_dir $as_dirs"
+      as_dir=`(dirname "$as_dir") 2>/dev/null ||
+$as_expr X"$as_dir" : 'X\(.*[^/]\)//*[^/][^/]*/*$' \| \
+	 X"$as_dir" : 'X\(//\)[^/]' \| \
+	 X"$as_dir" : 'X\(//\)$' \| \
+	 X"$as_dir" : 'X\(/\)' \| \
+	 .     : '\(.\)' 2>/dev/null ||
+echo X"$as_dir" |
+    sed '/^X\(.*[^/]\)\/\/*[^/][^/]*\/*$/{ s//\1/; q; }
+  	  /^X\(\/\/\)[^/].*/{ s//\1/; q; }
+  	  /^X\(\/\/\)$/{ s//\1/; q; }
+  	  /^X\(\/\).*/{ s//\1/; q; }
+  	  s/.*/./; q'`
+    done
+    test ! -n "$as_dirs" || mkdir $as_dirs
+  fi || { { echo "$as_me:$LINENO: error: cannot create directory $dirn2" >&5
+echo "$as_me: error: cannot create directory $dirn2" >&2;}
+   { (exit 1); exit 1; }; }; }
+
+      fi
+      $cmd $abs_source_dir/$my_dirname/$i $my_target_dir/$i
+    fi
+  done
 else
-	t=`echo $fdir | sed -e 's=/\./=/=g' -e 's=^\./==' -e 's=/\.$==' -e 's=[^/]*=..=g'`
-	if test $t = "" ; then
-		t=.
-	fi
-	uppath=$t
-fi
-
-				cd $fdir
-				cp -p $uppath/$fromdir/$f `basename $f`
-				cd $uppath
-			fi
-		done
-		cd $updir
-	fi
+  { echo "$as_me:$LINENO: WARNING: File list file examples/MCF-1/examplefiles.txt missing!" >&5
+echo "$as_me: WARNING: File list file examples/MCF-1/examplefiles.txt missing!" >&2;}
 fi
 
 
 
-if test $coin_vpath_config = yes ; then
+echo Creating copies in examples/MCF-2 ...
+cmd="cp"
+if test -e $srcdir/examples/MCF-2/examplefiles.txt ; then
+  my_target_dir="examples/MCF-2"
+  my_link_files=`cat $srcdir/examples/MCF-2/examplefiles.txt`
+  my_dirname=`(dirname examples/MCF-2/examplefiles.txt) 2>/dev/null ||
+$as_expr Xexamples/MCF-2/examplefiles.txt : 'X\(.*[^/]\)//*[^/][^/]*/*$' \| \
+	 Xexamples/MCF-2/examplefiles.txt : 'X\(//\)[^/]' \| \
+	 Xexamples/MCF-2/examplefiles.txt : 'X\(//\)$' \| \
+	 Xexamples/MCF-2/examplefiles.txt : 'X\(/\)' \| \
+	 .     : '\(.\)' 2>/dev/null ||
+echo Xexamples/MCF-2/examplefiles.txt |
+    sed '/^X\(.*[^/]\)\/\/*[^/][^/]*\/*$/{ s//\1/; q; }
+  	  /^X\(\/\/\)[^/].*/{ s//\1/; q; }
+  	  /^X\(\/\/\)$/{ s//\1/; q; }
+  	  /^X\(\/\).*/{ s//\1/; q; }
+  	  s/.*/./; q'`
+#  if test -e $my_target_dir; then : ; else
+#    AS_MKDIR_P($my_target_dir)
+#  fi
+  for i in $my_link_files; do
+    #rm -rf $my_target_dir/$i
+    if test -e $my_target_dir/$i; then : ; else
+      dirn2=`(dirname $my_target_dir/$i) 2>/dev/null ||
+$as_expr X$my_target_dir/$i : 'X\(.*[^/]\)//*[^/][^/]*/*$' \| \
+	 X$my_target_dir/$i : 'X\(//\)[^/]' \| \
+	 X$my_target_dir/$i : 'X\(//\)$' \| \
+	 X$my_target_dir/$i : 'X\(/\)' \| \
+	 .     : '\(.\)' 2>/dev/null ||
+echo X$my_target_dir/$i |
+    sed '/^X\(.*[^/]\)\/\/*[^/][^/]*\/*$/{ s//\1/; q; }
+  	  /^X\(\/\/\)[^/].*/{ s//\1/; q; }
+  	  /^X\(\/\/\)$/{ s//\1/; q; }
+  	  /^X\(\/\).*/{ s//\1/; q; }
+  	  s/.*/./; q'`
+      if test -e $dirn2; then : ; else
+        { if $as_mkdir_p; then
+    mkdir -p $dirn2
+  else
+    as_dir=$dirn2
+    as_dirs=
+    while test ! -d "$as_dir"; do
+      as_dirs="$as_dir $as_dirs"
+      as_dir=`(dirname "$as_dir") 2>/dev/null ||
+$as_expr X"$as_dir" : 'X\(.*[^/]\)//*[^/][^/]*/*$' \| \
+	 X"$as_dir" : 'X\(//\)[^/]' \| \
+	 X"$as_dir" : 'X\(//\)$' \| \
+	 X"$as_dir" : 'X\(/\)' \| \
+	 .     : '\(.\)' 2>/dev/null ||
+echo X"$as_dir" |
+    sed '/^X\(.*[^/]\)\/\/*[^/][^/]*\/*$/{ s//\1/; q; }
+  	  /^X\(\/\/\)[^/].*/{ s//\1/; q; }
+  	  /^X\(\/\/\)$/{ s//\1/; q; }
+  	  /^X\(\/\).*/{ s//\1/; q; }
+  	  s/.*/./; q'`
+    done
+    test ! -n "$as_dirs" || mkdir $as_dirs
+  fi || { { echo "$as_me:$LINENO: error: cannot create directory $dirn2" >&5
+echo "$as_me: error: cannot create directory $dirn2" >&2;}
+   { (exit 1); exit 1; }; }; }
 
-if test examples/MCF-1 = . ; then
-	updir=.
+      fi
+      $cmd $abs_source_dir/$my_dirname/$i $my_target_dir/$i
+    fi
+  done
 else
-	t=`echo examples/MCF-1 | sed -e 's=/\./=/=g' -e 's=^\./==' -e 's=/\.$==' -e 's=[^/]*=..=g'`
-	if test $t = "" ; then
-		t=.
-	fi
-	updir=$t
+  { echo "$as_me:$LINENO: WARNING: File list file examples/MCF-2/examplefiles.txt missing!" >&5
+echo "$as_me: WARNING: File list file examples/MCF-2/examplefiles.txt missing!" >&2;}
 fi
 
-	if test -e $srcdir/examples/MCF-1/examplefiles.txt ; then
-		echo Copying example examples/MCF-1 ...
-		fromdir=$updir/$srcdir/`dirname examples/MCF-1/examplefiles.txt`
-		mkdir -p examples/MCF-1
-		cd examples/MCF-1
-		for f in `cat $updir/$srcdir/examples/MCF-1/examplefiles.txt` ; do
-			if test ! -e $f ; then
-		   		fdir=`dirname $f`
-				mkdir -p $fdir
 
-if test $fdir = . ; then
-	uppath=.
+
+echo Creating copies in examples/MCF-3 ...
+cmd="cp"
+if test -e $srcdir/examples/MCF-3/examplefiles.txt ; then
+  my_target_dir="examples/MCF-3"
+  my_link_files=`cat $srcdir/examples/MCF-3/examplefiles.txt`
+  my_dirname=`(dirname examples/MCF-3/examplefiles.txt) 2>/dev/null ||
+$as_expr Xexamples/MCF-3/examplefiles.txt : 'X\(.*[^/]\)//*[^/][^/]*/*$' \| \
+	 Xexamples/MCF-3/examplefiles.txt : 'X\(//\)[^/]' \| \
+	 Xexamples/MCF-3/examplefiles.txt : 'X\(//\)$' \| \
+	 Xexamples/MCF-3/examplefiles.txt : 'X\(/\)' \| \
+	 .     : '\(.\)' 2>/dev/null ||
+echo Xexamples/MCF-3/examplefiles.txt |
+    sed '/^X\(.*[^/]\)\/\/*[^/][^/]*\/*$/{ s//\1/; q; }
+  	  /^X\(\/\/\)[^/].*/{ s//\1/; q; }
+  	  /^X\(\/\/\)$/{ s//\1/; q; }
+  	  /^X\(\/\).*/{ s//\1/; q; }
+  	  s/.*/./; q'`
+#  if test -e $my_target_dir; then : ; else
+#    AS_MKDIR_P($my_target_dir)
+#  fi
+  for i in $my_link_files; do
+    #rm -rf $my_target_dir/$i
+    if test -e $my_target_dir/$i; then : ; else
+      dirn2=`(dirname $my_target_dir/$i) 2>/dev/null ||
+$as_expr X$my_target_dir/$i : 'X\(.*[^/]\)//*[^/][^/]*/*$' \| \
+	 X$my_target_dir/$i : 'X\(//\)[^/]' \| \
+	 X$my_target_dir/$i : 'X\(//\)$' \| \
+	 X$my_target_dir/$i : 'X\(/\)' \| \
+	 .     : '\(.\)' 2>/dev/null ||
+echo X$my_target_dir/$i |
+    sed '/^X\(.*[^/]\)\/\/*[^/][^/]*\/*$/{ s//\1/; q; }
+  	  /^X\(\/\/\)[^/].*/{ s//\1/; q; }
+  	  /^X\(\/\/\)$/{ s//\1/; q; }
+  	  /^X\(\/\).*/{ s//\1/; q; }
+  	  s/.*/./; q'`
+      if test -e $dirn2; then : ; else
+        { if $as_mkdir_p; then
+    mkdir -p $dirn2
+  else
+    as_dir=$dirn2
+    as_dirs=
+    while test ! -d "$as_dir"; do
+      as_dirs="$as_dir $as_dirs"
+      as_dir=`(dirname "$as_dir") 2>/dev/null ||
+$as_expr X"$as_dir" : 'X\(.*[^/]\)//*[^/][^/]*/*$' \| \
+	 X"$as_dir" : 'X\(//\)[^/]' \| \
+	 X"$as_dir" : 'X\(//\)$' \| \
+	 X"$as_dir" : 'X\(/\)' \| \
+	 .     : '\(.\)' 2>/dev/null ||
+echo X"$as_dir" |
+    sed '/^X\(.*[^/]\)\/\/*[^/][^/]*\/*$/{ s//\1/; q; }
+  	  /^X\(\/\/\)[^/].*/{ s//\1/; q; }
+  	  /^X\(\/\/\)$/{ s//\1/; q; }
+  	  /^X\(\/\).*/{ s//\1/; q; }
+  	  s/.*/./; q'`
+    done
+    test ! -n "$as_dirs" || mkdir $as_dirs
+  fi || { { echo "$as_me:$LINENO: error: cannot create directory $dirn2" >&5
+echo "$as_me: error: cannot create directory $dirn2" >&2;}
+   { (exit 1); exit 1; }; }; }
+
+      fi
+      $cmd $abs_source_dir/$my_dirname/$i $my_target_dir/$i
+    fi
+  done
 else
-	t=`echo $fdir | sed -e 's=/\./=/=g' -e 's=^\./==' -e 's=/\.$==' -e 's=[^/]*=..=g'`
-	if test $t = "" ; then
-		t=.
-	fi
-	uppath=$t
+  { echo "$as_me:$LINENO: WARNING: File list file examples/MCF-3/examplefiles.txt missing!" >&5
+echo "$as_me: WARNING: File list file examples/MCF-3/examplefiles.txt missing!" >&2;}
 fi
 
-				cd $fdir
-				cp -p $uppath/$fromdir/$f `basename $f`
-				cd $uppath
-			fi
-		done
-		cd $updir
-	fi
-fi
-
-
-if test $coin_vpath_config = yes ; then
-
-if test examples/MCF-2 = . ; then
-	updir=.
-else
-	t=`echo examples/MCF-2 | sed -e 's=/\./=/=g' -e 's=^\./==' -e 's=/\.$==' -e 's=[^/]*=..=g'`
-	if test $t = "" ; then
-		t=.
-	fi
-	updir=$t
-fi
-
-	if test -e $srcdir/examples/MCF-2/examplefiles.txt ; then
-		echo Copying example examples/MCF-2 ...
-		fromdir=$updir/$srcdir/`dirname examples/MCF-2/examplefiles.txt`
-		mkdir -p examples/MCF-2
-		cd examples/MCF-2
-		for f in `cat $updir/$srcdir/examples/MCF-2/examplefiles.txt` ; do
-			if test ! -e $f ; then
-		   		fdir=`dirname $f`
-				mkdir -p $fdir
-
-if test $fdir = . ; then
-	uppath=.
-else
-	t=`echo $fdir | sed -e 's=/\./=/=g' -e 's=^\./==' -e 's=/\.$==' -e 's=[^/]*=..=g'`
-	if test $t = "" ; then
-		t=.
-	fi
-	uppath=$t
-fi
-
-				cd $fdir
-				cp -p $uppath/$fromdir/$f `basename $f`
-				cd $uppath
-			fi
-		done
-		cd $updir
-	fi
-fi
-
-
-if test $coin_vpath_config = yes ; then
-
-if test examples/MCF-3 = . ; then
-	updir=.
-else
-	t=`echo examples/MCF-3 | sed -e 's=/\./=/=g' -e 's=^\./==' -e 's=/\.$==' -e 's=[^/]*=..=g'`
-	if test $t = "" ; then
-		t=.
-	fi
-	updir=$t
-fi
-
-	if test -e $srcdir/examples/MCF-3/examplefiles.txt ; then
-		echo Copying example examples/MCF-3 ...
-		fromdir=$updir/$srcdir/`dirname examples/MCF-3/examplefiles.txt`
-		mkdir -p examples/MCF-3
-		cd examples/MCF-3
-		for f in `cat $updir/$srcdir/examples/MCF-3/examplefiles.txt` ; do
-			if test ! -e $f ; then
-		   		fdir=`dirname $f`
-				mkdir -p $fdir
-
-if test $fdir = . ; then
-	uppath=.
-else
-	t=`echo $fdir | sed -e 's=/\./=/=g' -e 's=^\./==' -e 's=/\.$==' -e 's=[^/]*=..=g'`
-	if test $t = "" ; then
-		t=.
-	fi
-	uppath=$t
-fi
-
-				cd $fdir
-				cp -p $uppath/$fromdir/$f `basename $f`
-				cd $uppath
-			fi
-		done
-		cd $updir
-	fi
-fi
 
 
 # In case this is a VPATH configuration we need to make sure that the
@@ -21434,23 +21979,6 @@ fi
 
 
 # Finally, we let configure write all the output...
-
-
-
-
-echo "$as_me:$LINENO: checking which command should be used to link input files" >&5
-echo $ECHO_N "checking which command should be used to link input files... $ECHO_C" >&6
-coin_link_input_cmd="$LN_S"
-if test "$enable_doscompile" = mingw; then
-  coin_link_input_cmd=cp
-fi
-case "$CC" in
-  cl* | */cl* | CL* | */CL*)
-    coin_link_input_cmd=cp ;;
-esac
-echo "$as_me:$LINENO: result: $coin_link_input_cmd" >&5
-echo "${ECHO_T}$coin_link_input_cmd" >&6
-
 
 
 if test x$coin_skip_ac_output != xyes; then
@@ -22224,6 +22752,7 @@ s,@CDEFS@,$CDEFS,;t t
 s,@ADD_CFLAGS@,$ADD_CFLAGS,;t t
 s,@DBG_CFLAGS@,$DBG_CFLAGS,;t t
 s,@OPT_CFLAGS@,$OPT_CFLAGS,;t t
+s,@sol_cc_compiler@,$sol_cc_compiler,;t t
 s,@CC@,$CC,;t t
 s,@CFLAGS@,$CFLAGS,;t t
 s,@LDFLAGS@,$LDFLAGS,;t t
