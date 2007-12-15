@@ -3,6 +3,9 @@
 
 #include <cstdio>
 #include <cerrno>
+#ifdef _MSC_VER
+#include <process.h>
+#endif 
 
 #include "BcpConfig.h"
 #include "BCP_os.hpp"

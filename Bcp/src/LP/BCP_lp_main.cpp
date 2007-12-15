@@ -2,6 +2,9 @@
 // Corporation and others.  All Rights Reserved.
 #include <cfloat>
 #include <cerrno>
+#ifdef _MSC_VER
+#include <process.h>
+#endif 
 
 #include "CoinTime.hpp"
 
