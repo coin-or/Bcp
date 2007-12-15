@@ -4,6 +4,9 @@
 #include <cerrno>
 #include <cmath>
 #include <queue>
+#ifdef _MSC_VER
+#include <process.h>
+#endif 
 
 #include "CoinTime.hpp"
 
