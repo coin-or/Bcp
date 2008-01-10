@@ -104,6 +104,8 @@ public:
       cnt(0) {}
   ~BCP_tm_stat() {
     delete[] wait_time;
+    delete[] sumQueueLength;
+    delete[] numQueueLength;
   }
   void set_num_lp(int num) {
     delete[] wait_time;
