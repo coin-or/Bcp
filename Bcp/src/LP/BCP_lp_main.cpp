@@ -69,9 +69,10 @@ BCP_process_t BCP_lp_main(BCP_message_environment* msg_env,
    msg_env->receive(parent /*tree_manager*/,
 		    BCP_Msg_ProcessParameters, p.msg_buf, -1);
    p.par.unpack(p.msg_buf);
-   double startTimeOfDay;
-   p.msg_buf.unpack(startTimeOfDay);
-   CoinWallclockTime(startTimeOfDay);
+   double wallclockInit;
+   p.msg_buf.unpack(wallclockInit);
+   p.msg_buf.unpack(p.start_time);
+   CoinWallclockTime(wallclockInit);
 
    // Let us be nice
    setpriority(PRIO_PROCESS, 0, p.par.entry(BCP_lp_par::NiceLevel));

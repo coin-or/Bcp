@@ -132,8 +132,9 @@ BCP_tm_initialize_process_type(BCP_tm_prob& p,
 
     p.msg_buf.clear();
     par.pack(p.msg_buf);
-    double startTimeOfDay = CoinGetTimeOfDay() - CoinWallclockTime();
-    p.msg_buf.pack(startTimeOfDay);
+    const double wallclockInit = CoinWallclockTime(-1);
+    p.msg_buf.pack(wallclockInit);
+    p.msg_buf.pack(p.start_time);
     p.msg_env->multicast(num, pids, BCP_Msg_ProcessParameters, p.msg_buf);
 
     p.msg_buf.clear();
@@ -242,6 +243,7 @@ BCP_tm_rebroadcast_root_warmstart(BCP_tm_prob& p)
 		       BCP_Msg_WarmstartRoot, p.msg_buf);
 #if ! defined(BCP_ONLY_LP_PROCESS_HANDLING_WORKS)
 #endif
+  delete ws;
 }
 
 //#############################################################################
@@ -373,6 +375,7 @@ BCP_tm_prob::process_message()
 		    } else {
 		      sprintf(bdstr, "%lf", upper_bound);
 		    }
+		    sender = msg_buf.sender();
 		    printf("TM %.3lf: Sol from proc: %i  val: %f (prev best: %s)  tree size/procd: %i/%i  cand list ins/size: %i/%i\n",
 			   CoinWallclockTime() - start_time, sender,
 			   new_sol->objective_value(), bdstr,
