@@ -107,6 +107,7 @@ BCP_tm_wrapup(BCP_tm_prob* tm, BCP_lp_prob* lp,
 		   lps[i], tm->lp_scheduler.node_idle(lps[i]),
 		   tm->lp_scheduler.sb_idle(lps[i]));
 	}
+	delete[] lp_stats;
     }
 
     tm->stat.print(true /* final stat */, 0);
