@@ -1,7 +1,6 @@
-These directories contain the source code for BCP, a Branch-Cut-Price
-framework as well as a few examples and applications. BCP enables one
-to write a problem class specific branch-cut-price code that exploits
-the properties of the problem class.
+To install this package, please look at the INSTALL file.
+ 
+This package contains several subdirectories corresponding to COIN-OR
+projects (www.coin-or.org). The AUTHORS, LICENSE and README files in 
+each of the subdirectories give more information about these projects.
 
-For more information see 
-https://projects.coin-or.org/Bcp
