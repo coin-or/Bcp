@@ -88,6 +88,7 @@ Applications/Mkc/include/MKC_var.hpp -text
 Applications/Mkc/include/MKC_vargen.hpp -text
 Applications/Mkc/mkc.mps.gz -text
 Applications/Mkc/mkc.par -text
+Bcp/LICENSE -text
 Bcp/Makefile.am -text
 Bcp/Makefile.in -text
 Bcp/bcp_addlibs.txt.in -text
