@@ -1,5 +1,6 @@
 * text=auto !eol
 /AUTHORS -text
+Bcp/LICENSE -text
 Bcp/Makefile.am -text
 Bcp/Makefile.in -text
 Bcp/bcp_addlibs.txt.in -text
