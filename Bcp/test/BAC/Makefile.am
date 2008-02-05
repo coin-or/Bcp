@@ -39,11 +39,11 @@ unitTest_LDADD += $(COINUTILSOBJDIR)/src/libCoinUtils.la
 
 # List additional libraries
 LIBS += $(ADDLIBS)
-LIBS += `cat $(CGLOBJDIR)/bcp_addlibs.txt`
-LIBS += `cat $(CGLOBJDIR)/cgl_addlibs.txt`
-LIBS += `cat $(OSIOBJDIR)/osi_addlibs.txt`
-LIBS += `cat $(CLPOBJDIR)/clp_addlibs.txt`
-LIBS += `cat $(COINUTILSOBJDIR)/coinutils_addlibs.txt`
+LIBS += `cat $(CGLDOCDIR)/bcp_addlibs.txt`
+LIBS += `cat $(CGLDOCDIR)/cgl_addlibs.txt`
+LIBS += `cat $(OSIDOCDIR)/osi_addlibs.txt`
+LIBS += `cat $(CLPDOCDIR)/clp_addlibs.txt`
+LIBS += `cat $(COINUTILSDOCDIR)/coinutils_addlibs.txt`
 
 # Here list all include flags, relative to this "srcdir" directory.  This
 # "cygpath" stuff is necessary to compile with native compilers on Cygwin
