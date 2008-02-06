@@ -17,7 +17,9 @@
 //XXX
 #include "BCP_tm_functions.hpp"
 
-#define DEBUG_PRINT
+#ifndef BCP_DEBUG_PRINT
+#define BCP_DEBUG_PRINT 0
+#endif
 
 //#############################################################################
 
@@ -409,7 +411,7 @@ TM: cut in node description is neither local nor remote.\n");
 	p.packer->pack_user_data(ud, buf);
     }
 
-#ifdef DEBUG_PRINT
+#if (BCP_DEBUG_PRINT != 0)
     //    const char* compName = p.candidate_list.getTree()->compName();
     printf("TM %.3lf: Sending to proc %i  node: %i  quality: %lf  pref: %s\n",
 	   CoinWallclockTime()-p.start_time,

@@ -263,15 +263,6 @@ BCP_tm_provide_SB_processes(BCP_tm_prob& p)
 }
 
 //#############################################################################
-  
-void
-BCP_tm_process_SB_info(BCP_tm_prob& p)
-{
-  int sender = p.msg_buf.sender();
-  p.lp_scheduler.release_sb_id(sender);
-}
-
-//#############################################################################
 // This function returns T/F depending on whether an LP process was freed up
 // or not.
 
@@ -403,7 +394,8 @@ BCP_tm_prob::process_message()
 	break;
 	
     case BCP_Msg_SBnodeFinished:
-        BCP_tm_process_SB_info(*this);
+        sender = msg_buf.sender();
+	lp_scheduler.release_sb_id(sender);
 	break;
 
     case BCP_Msg_WarmstartRoot:

@@ -17,7 +17,9 @@
 #include "BCP_tm_user.hpp"
 #include "BCP_tm_functions.hpp"
 
-#define DEBUG_PRINT
+#ifndef BCP_DEBUG_PRINT
+#define BCP_DEBUG_PRINT 0
+#endif
 
 static int
 BCP_tm_unpack_node_description(BCP_tm_prob& p, BCP_buffer& buf);
@@ -507,7 +509,7 @@ TMDBG;
     const int depth = node->getDepth() + 1;
     BitVector128 nodePref = node->getPreferred();
     const double tt = CoinWallclockTime()-p.start_time;
-#ifdef DEBUG_PRINT
+#if (BCP_DEBUG_PRINT != 0)
     if (p.candidate_list.size() == 0) {
       printf("TM %.3lf: parent: %i  cand_list empty\n", tt, node->_index);
     } else {
@@ -568,7 +570,7 @@ TMDBG;
 	child->vp = node->vp;
 	child->cp = node->cp;
 	// lp, cg, vg  initialized to -1 -- OK, none assigned yet
-#ifdef DEBUG_PRINT
+#if (BCP_DEBUG_PRINT != 0)
 	printf("TM %.3lf: parent: %i  sibling: %i  siblingind: %i  depth: %i  quality: %lf  pref: %s\n",
 	       tt, node->_index, i, child->_index, depth, child->getQuality(),
 	       child->getPreferred().str().c_str());
