@@ -161,11 +161,11 @@ LIBEXT = @LIBEXT@
 LIBOBJS = @LIBOBJS@
 
 # List additional libraries
-LIBS = @LIBS@ $(ADDLIBS) `cat $(CGLDOCDIR)/bcp_addlibs.txt` `cat \
-	$(CGLDOCDIR)/cgl_addlibs.txt` `cat \
-	$(OSIDOCDIR)/osi_addlibs.txt` `cat \
-	$(CLPDOCDIR)/clp_addlibs.txt` `cat \
-	$(COINUTILSDOCDIR)/coinutils_addlibs.txt`
+LIBS = @LIBS@ $(ADDLIBS) `cat $(CGLOBJDIR)/bcp_addlibs.txt` `cat \
+	$(CGLOBJDIR)/cgl_addlibs.txt` `cat \
+	$(OSIOBJDIR)/osi_addlibs.txt` `cat \
+	$(CLPOBJDIR)/clp_addlibs.txt` `cat \
+	$(COINUTILSOBJDIR)/coinutils_addlibs.txt`
 LIBTOOL = @LIBTOOL@
 LIBTOOLM4 = @LIBTOOLM4@
 LN_S = @LN_S@
