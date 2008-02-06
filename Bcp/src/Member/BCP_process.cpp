@@ -12,7 +12,9 @@
 #include "CoinTime.hpp"
 #include "BCP_process.hpp"
 
-#define DEBUG_PRINT
+#ifndef BCP_DEBUG_PRINT
+#define BCP_DEBUG_PRINT 0
+#endif
 
 BCP_scheduler::BCP_scheduler():
     totalNumberIds_(0),
@@ -87,7 +89,7 @@ BCP_scheduler::request_sb_ids(int reqNumIds, int* ids)
   update_rates(1, 0);
 
   int numIds = CoinMin(reqNumIds, max_id_allocation(reqNumIds));
-#ifdef DEBUG_PRINT
+#if (BCP_DEBUG_PRINT != 0)
   if (static_) {
     printf("SC static:  req: %i  given: %i  total: %i  node(max): %i(%i)  free: %i  minSb: %i  maxSb: %i  rho: %lf\n",
 	   reqNumIds, numIds, totalNumberIds_, numNodeIds_, maxNodeIds_,
