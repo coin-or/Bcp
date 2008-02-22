@@ -53,11 +53,10 @@ LIBS = \
 	-lOsi \
 	-lClp \
 	-lCoinUtils \
-	`cat $(COINLIBDIR)/bcp_addlibs.txt` \
-	`cat $(COINLIBDIR)/cgl_addlibs.txt` \
-	`cat $(COINLIBDIR)/osi_addlibs.txt` \
-	`cat $(COINLIBDIR)/clp_addlibs.txt` \
-	`cat $(COINLIBDIR)/coinutils_addlibs.txt`
+	`cat @CGLDOCDIR@/cgl_addlibs.txt` \
+	`cat @OSLDOCDIR/osi_addlibs.txt` \
+	`cat @CLPDOCDIR/clp_addlibs.txt` \
+	`cat @COINUTILSDOCDIR@/coinutils_addlibs.txt`
 
 # The following is necessary under cygwin, if native compilers are used
 CYGPATH_W = @CYGPATH_W@
