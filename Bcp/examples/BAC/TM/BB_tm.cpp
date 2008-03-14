@@ -77,7 +77,7 @@ BB_tm::readInput(const char* filename)
        fi = CoinFileInput::create("bac.mps");
      }
      catch (CoinError& err) {
-       // bac.lp not found
+       // bac.mps not found
        found_file = false;
      }
      if (found_file) {
