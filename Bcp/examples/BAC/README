@@ -38,7 +38,7 @@ understanding the code.
 BCP TRAC PAGE
 =============
 
-https://projects.coin-or.org/Bcp
+   http://www.coin-or.org/projects/Bcp.xml
 
 Additional introductory material for BCP and other COIN-OR
 modules is available at:
@@ -73,7 +73,7 @@ SUPPORT
 
    BCP and BAC users should use the coin-bcpdiscuss mailing list. 
    To subscribe, go to  
-   http://list.coin-or.org/mailman/listinfo/coin-bcpdiscuss
+   http://list.coin-or.org/mailman/listinfo/bcp
 
 3. Bug Reports
 
