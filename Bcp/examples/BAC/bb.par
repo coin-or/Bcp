@@ -46,6 +46,18 @@ BCP_IntegerTolerance			1e-5 // Tolerance for a number to be
                                              // considered integer
 					     // Default: 1e-5
 
+BCP_TerminationGap_Absolute              0.0 // If optimal solution has value v
+                                             // Bcp must return a solution with
+                                             // value at most 
+                                             // v + BCP_TerminationGap_Absolute
+                                             // Default: 0.0
+
+BCP_TerminationGap_Relative              0.0 // If optimal solution has value v
+                                             // Bcp must return a solution with
+                                             // value w with
+                                             // w * (1 - BCP_TerminationGap_Relative) <= v
+                                             // Default: 0.0
+
 /***************************************************************************/
 //  TREE SEARCH STRATEGY:
 
