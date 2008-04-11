@@ -66,7 +66,6 @@ BCP_scheduler::setParams(double OverEstimationStatic,
 void
 BCP_scheduler::add_free_ids(int numIds, const int* ids)
 {
-  const int oldsize = freeIds_.size();
   freeIds_.insert(freeIds_.end(), ids, ids+numIds);
   totalNumberIds_ += numIds;
   maxNodeIds_ = CoinMin((int)floor(maxNodeIdRatio_ * totalNumberIds_),
