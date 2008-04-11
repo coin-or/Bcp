@@ -364,10 +364,10 @@ BCP_tm_prob::process_message()
 		    if (upper_bound > BCP_DBL_MAX/10) {
 		      sprintf(bdstr, "infinity");
 		    } else {
-		      sprintf(bdstr, "%lf", upper_bound);
+		      sprintf(bdstr, "%f", upper_bound);
 		    }
 		    sender = msg_buf.sender();
-		    printf("TM %.3lf: Sol from proc: %i  val: %f (prev best: %s)  tree size/procd: %i/%i  cand list ins/size: %i/%i\n",
+		    printf("TM %.3f: Sol from proc: %i  val: %f (prev best: %s)  tree size/procd: %i/%i  cand list ins/size: %i/%i\n",
 			   CoinWallclockTime() - start_time, sender,
 			   new_sol->objective_value(), bdstr,
 			   tree_size, tree_proc,
