@@ -54,8 +54,8 @@ LIBS = \
 	-lClp \
 	-lCoinUtils \
 	`cat @CGLDOCDIR@/cgl_addlibs.txt` \
-	`cat @OSLDOCDIR/osi_addlibs.txt` \
-	`cat @CLPDOCDIR/clp_addlibs.txt` \
+	`cat @OSIDOCDIR@/osi_addlibs.txt` \
+	`cat @CLPDOCDIR@/clp_addlibs.txt` \
 	`cat @COINUTILSDOCDIR@/coinutils_addlibs.txt`
 
 # The following is necessary under cygwin, if native compilers are used
