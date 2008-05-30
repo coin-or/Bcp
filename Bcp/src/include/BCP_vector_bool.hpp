@@ -1,6 +1,8 @@
 // Copyright (C) 2000, International Business Machines
 // Corporation and others.  All Rights Reserved.
 
+#include <cstring>
+
 //##############################################################################
 
 /* The methods that are commented out are sort of generic methods that do not
@@ -143,7 +145,7 @@ template<> inline void BCP_vec<bool>::keep(iterator pos)
 template<> inline void BCP_vec<bool>::keep(iterator first, iterator last)
 {
 	const size_t len = last - first;
-	memmove(start, first, len * sizeof(bool));
+	std::memmove(start, first, len * sizeof(bool));
 	finish = start + len;
 }
 //------------------------------------------------------------------------------
@@ -166,14 +168,14 @@ template<> inline void BCP_vec<bool>::keep(iterator first, iterator last)
 template<> inline void BCP_vec<bool>::erase(iterator position)
 {
 	if (position + 1 != finish)
-		memmove(position, position + 1, ((finish-position) - 1) * sizeof(bool));
+		std::memmove(position, position + 1, ((finish-position) - 1) * sizeof(bool));
 	--finish;
 }
 //------------------------------------------------------------------------------
 template<> inline void BCP_vec<bool>::erase(iterator first, iterator last)
 {
 	if (first != last && last != finish)
-		memmove(first, last, (finish - last) * sizeof(bool));
+		std::memmove(first, last, (finish - last) * sizeof(bool));
 	finish -= (last - first);
 }
 //------------------------------------------------------------------------------
