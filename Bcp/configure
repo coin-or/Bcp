@@ -21768,78 +21768,7 @@ echo "$as_me: WARNING: File list file examples/BAC/examplefiles.txt missing!" >&
 fi
 
 
-
-echo Creating copies in examples/MaxCut ...
-cmd="cp"
-if test -e $srcdir/examples/MaxCut/examplefiles.txt ; then
-  my_target_dir="examples/MaxCut"
-  my_link_files=`cat $srcdir/examples/MaxCut/examplefiles.txt`
-  my_dirname=`(dirname examples/MaxCut/examplefiles.txt) 2>/dev/null ||
-$as_expr Xexamples/MaxCut/examplefiles.txt : 'X\(.*[^/]\)//*[^/][^/]*/*$' \| \
-	 Xexamples/MaxCut/examplefiles.txt : 'X\(//\)[^/]' \| \
-	 Xexamples/MaxCut/examplefiles.txt : 'X\(//\)$' \| \
-	 Xexamples/MaxCut/examplefiles.txt : 'X\(/\)' \| \
-	 .     : '\(.\)' 2>/dev/null ||
-echo Xexamples/MaxCut/examplefiles.txt |
-    sed '/^X\(.*[^/]\)\/\/*[^/][^/]*\/*$/{ s//\1/; q; }
-  	  /^X\(\/\/\)[^/].*/{ s//\1/; q; }
-  	  /^X\(\/\/\)$/{ s//\1/; q; }
-  	  /^X\(\/\).*/{ s//\1/; q; }
-  	  s/.*/./; q'`
-#  if test -e $my_target_dir; then : ; else
-#    AS_MKDIR_P($my_target_dir)
-#  fi
-  for i in $my_link_files; do
-    #rm -rf $my_target_dir/$i
-    if test -e $my_target_dir/$i; then : ; else
-      dirn2=`(dirname $my_target_dir/$i) 2>/dev/null ||
-$as_expr X$my_target_dir/$i : 'X\(.*[^/]\)//*[^/][^/]*/*$' \| \
-	 X$my_target_dir/$i : 'X\(//\)[^/]' \| \
-	 X$my_target_dir/$i : 'X\(//\)$' \| \
-	 X$my_target_dir/$i : 'X\(/\)' \| \
-	 .     : '\(.\)' 2>/dev/null ||
-echo X$my_target_dir/$i |
-    sed '/^X\(.*[^/]\)\/\/*[^/][^/]*\/*$/{ s//\1/; q; }
-  	  /^X\(\/\/\)[^/].*/{ s//\1/; q; }
-  	  /^X\(\/\/\)$/{ s//\1/; q; }
-  	  /^X\(\/\).*/{ s//\1/; q; }
-  	  s/.*/./; q'`
-      if test -e $dirn2; then : ; else
-        { if $as_mkdir_p; then
-    mkdir -p $dirn2
-  else
-    as_dir=$dirn2
-    as_dirs=
-    while test ! -d "$as_dir"; do
-      as_dirs="$as_dir $as_dirs"
-      as_dir=`(dirname "$as_dir") 2>/dev/null ||
-$as_expr X"$as_dir" : 'X\(.*[^/]\)//*[^/][^/]*/*$' \| \
-	 X"$as_dir" : 'X\(//\)[^/]' \| \
-	 X"$as_dir" : 'X\(//\)$' \| \
-	 X"$as_dir" : 'X\(/\)' \| \
-	 .     : '\(.\)' 2>/dev/null ||
-echo X"$as_dir" |
-    sed '/^X\(.*[^/]\)\/\/*[^/][^/]*\/*$/{ s//\1/; q; }
-  	  /^X\(\/\/\)[^/].*/{ s//\1/; q; }
-  	  /^X\(\/\/\)$/{ s//\1/; q; }
-  	  /^X\(\/\).*/{ s//\1/; q; }
-  	  s/.*/./; q'`
-    done
-    test ! -n "$as_dirs" || mkdir $as_dirs
-  fi || { { echo "$as_me:$LINENO: error: cannot create directory $dirn2" >&5
-echo "$as_me: error: cannot create directory $dirn2" >&2;}
-   { (exit 1); exit 1; }; }; }
-
-      fi
-      $cmd $abs_source_dir/$my_dirname/$i $my_target_dir/$i
-    fi
-  done
-else
-  { echo "$as_me:$LINENO: WARNING: File list file examples/MaxCut/examplefiles.txt missing!" >&5
-echo "$as_me: WARNING: File list file examples/MaxCut/examplefiles.txt missing!" >&2;}
-fi
-
-
+#stefan: took out AC_COIN_COPY_FROM_FILELIST(examples/MaxCut, examples/MaxCut/examplefiles.txt) because it is not in current stable
 
 
 echo Creating copies in examples/MCF-1 ...
@@ -22077,8 +22006,9 @@ fi
 
 # Here list all the files that configure should create (except for the
 # configuration header file)
-                                                                                          ac_config_files="$ac_config_files Makefile src/Makefile test/BAC/Makefile examples/BAC/Makefile examples/MCF-1/Makefile examples/MCF-2/Makefile examples/MCF-3/Makefile examples/MaxCut/Makefile bcp_addlibs.txt"
+                                                                                ac_config_files="$ac_config_files Makefile src/Makefile test/BAC/Makefile examples/BAC/Makefile examples/MCF-1/Makefile examples/MCF-2/Makefile examples/MCF-3/Makefile bcp_addlibs.txt"
 
+#Stefan: took out examples/MaxCut/Makefile because it is not in the current stable
 
 # Here put the location and name of the configuration header file
           ac_config_headers="$ac_config_headers inc/config_bcp.h"
@@ -22758,7 +22688,6 @@ do
   "examples/MCF-1/Makefile" ) CONFIG_FILES="$CONFIG_FILES examples/MCF-1/Makefile" ;;
   "examples/MCF-2/Makefile" ) CONFIG_FILES="$CONFIG_FILES examples/MCF-2/Makefile" ;;
   "examples/MCF-3/Makefile" ) CONFIG_FILES="$CONFIG_FILES examples/MCF-3/Makefile" ;;
-  "examples/MaxCut/Makefile" ) CONFIG_FILES="$CONFIG_FILES examples/MaxCut/Makefile" ;;
   "bcp_addlibs.txt" ) CONFIG_FILES="$CONFIG_FILES bcp_addlibs.txt" ;;
   "depfiles" ) CONFIG_COMMANDS="$CONFIG_COMMANDS depfiles" ;;
   "inc/config_bcp.h" ) CONFIG_HEADERS="$CONFIG_HEADERS inc/config_bcp.h" ;;
