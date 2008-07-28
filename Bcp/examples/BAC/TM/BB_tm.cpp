@@ -12,6 +12,7 @@
 
 #include<iomanip>
 
+#include <CoinError.hpp>
 #include <CoinHelperFunctions.hpp>
 #include <CoinFileIO.hpp>
 #include <OsiClpSolverInterface.hpp>
@@ -30,8 +31,9 @@ using namespace std;
 
 int main(int argc, char* argv[])
 {
-	BB_init bb_init;
-	return bcp_main(argc, argv, &bb_init);
+   WindowsErrorPopupBlocker();
+   BB_init bb_init;
+   return bcp_main(argc, argv, &bb_init);
 }
 
 /*************************************************************************/

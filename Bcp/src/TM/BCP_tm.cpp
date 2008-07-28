@@ -60,7 +60,7 @@ BCP_tm_stat::print(bool final, double t)
     }
   }
   if (do_print) {
-    for (int i = 0; i <= num_lp; ++i) {
+    for (int i = 0; i < num_lp; ++i) {
       if ((wait_time[i] > 5e-3) ||
           (numQueueLength[i]>0 && sumQueueLength[i]/numQueueLength[i] > 5)) {
         if (numQueueLength[i] > 0) {
