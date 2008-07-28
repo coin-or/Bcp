@@ -1,4 +1,4 @@
-// Last edit: 5/5/04
+// Last edit: 5/19/07
 //
 // Name:     BB_user_data.cpp
 // Author:   Francois Margot
@@ -11,7 +11,6 @@
 
 #include "BCP_buffer.hpp"
 #include "BB_user_data.hpp"
-
 
 using namespace std;
 
@@ -104,5 +103,3 @@ real_user_data::print() const {
   }
   printf("\n");
 } /* print */
-
-

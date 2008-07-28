@@ -17,7 +17,10 @@
 #include "BCP_process.hpp"
 
 //#############################################################################
+class OsiObject;
+
 class BCP_lp_user;
+class BCP_user_pack;
 class OsiSolverInterface;
 class BCP_message_environment;
 
@@ -28,21 +31,18 @@ class BCP_problem_core_change;
 
 class BCP_var;
 class BCP_cut;
-class BCP_var_indexed;
 
 class BCP_col;
 class BCP_row;
 
 class BCP_solution;
 
-class BCP_var_set_change;
-class BCP_cut_set_change;
-
 class BCP_lp_var_pool;
 class BCP_lp_cut_pool;
 
 class BCP_lp_node;
 class BCP_lp_parent;
+class CoinWarmStart;
 
 //#############################################################################
 
@@ -113,7 +113,7 @@ public:
     /**@name Constructor and destructor */
     /*@{*/
     /** */
-    BCP_lp_prob(BCP_proc_id* my_id, BCP_proc_id* parent);
+    BCP_lp_prob(int my_id, int parent);
     /** */
     virtual ~BCP_lp_prob();
     /*@}*/
@@ -129,6 +129,8 @@ public:
     /*@{*/
     /** */
     BCP_lp_user* user;
+    /** A class that holds the methods about how to pack things. */
+    BCP_user_pack* packer;
     /** */
     OsiSolverInterface* master_lp;
     /** */
@@ -152,15 +154,24 @@ public:
     /** */
     BCP_problem_core_change* core_as_change;
     /*@}*/
+
+    //------------------------------------------------------------------------
+    /** Things that can be branched on. If not filled out then BCP scans for
+	them every time a new node is processed.*/
+    std::vector<OsiObject *> intAndSosObjects;
    
     //------------------------------------------------------------------------
     // the search tree node we are working on and its parent
     /**@name Current search tree node and its parent */
     /*@{*/
-    /** */
+    /** Description he current search tree node. */
     BCP_lp_node* node;
-    /** */
+    /** Description of the parent of the current node. */
     BCP_lp_parent* parent;
+    /** Description of the warmstart info from the end of the root node. Used
+	only if the BCP_lp_par::WarmstartInfo parameter is set to
+	BCP_WarmstartRoot. */
+    CoinWarmStart* warmstartRoot;
     /*@}*/
    
     //------------------------------------------------------------------------
@@ -197,6 +208,8 @@ public:
     /**@name Time measurement */
     /*@{*/
     /** */
+    double start_time;
+    /** */
     BCP_lp_statistics stat;
     /*@}*/
 
@@ -211,8 +224,8 @@ public:
     int phase;
     /** */
     int no_more_cuts_cnt; // a counter for how many places we got to get
-    // NO_MORE_CUTS message to know for sure not to
-    // expect more.
+                          // NO_MORE_CUTS message to know for sure not to
+                          // expect more.
     /** */
     int no_more_vars_cnt; // similar for vars
     /*@}*/
@@ -221,7 +234,7 @@ public:
     /**@name Message passing related fields */
     /*@{*/
     /** */
-    //    BCP_proc_id* tree_manager;
+    //    int tree_manager;
     /** */
     BCP_buffer  msg_buf;
     /*@}*/
@@ -243,21 +256,13 @@ public:
     /**@name Methods to pack/unpack objects */
     /*@{*/
     /** */
-    void pack_var(BCP_process_t target_proc, const BCP_var& var);
+    void pack_var(const BCP_var& var);
     /** */
     BCP_var* unpack_var();
     /** */
-    void pack_cut(BCP_process_t target_proc, const BCP_cut& cut);
+    void pack_cut(const BCP_cut& cut);
     /** */
     BCP_cut* unpack_cut();
-    /** */
-    void pack_var_set_change(const BCP_var_set_change& ch);
-    /** */
-    void unpack_var_set_change(BCP_var_set_change& ch);
-    /** */
-    void pack_cut_set_change(const BCP_cut_set_change& ch);
-    /** */
-    void unpack_cut_set_change(BCP_cut_set_change& ch);
     /*@}*/
     //-------------------------------------------------------------------------
     /**@name Query methods */

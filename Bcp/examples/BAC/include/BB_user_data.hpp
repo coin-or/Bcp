@@ -1,4 +1,4 @@
-// Last edit: 2/10/05
+// Last edit: 5/19/07
 //
 // Name:     BB_user_data.hpp
 // Author:   Francois Margot
@@ -83,6 +83,7 @@ public:
   /// Dump the fields of the class
   void print() const;
 };
+
 #endif
 
 

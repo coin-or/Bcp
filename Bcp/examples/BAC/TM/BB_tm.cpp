@@ -1,4 +1,4 @@
-// Last edit: 1/6/07
+// Last edit: 5/19/07
 //
 // Name:     BB_tm.cpp
 // Author:   Francois Margot
@@ -12,6 +12,7 @@
 
 #include<iomanip>
 
+#include <CoinError.hpp>
 #include <CoinHelperFunctions.hpp>
 #include <CoinFileIO.hpp>
 #include <OsiClpSolverInterface.hpp>
@@ -30,8 +31,9 @@ using namespace std;
 
 int main(int argc, char* argv[])
 {
-	BB_init bb_init;
-	return bcp_main(argc, argv, &bb_init);
+   WindowsErrorPopupBlocker();
+   BB_init bb_init;
+   return bcp_main(argc, argv, &bb_init);
 }
 
 /*************************************************************************/
@@ -65,6 +67,7 @@ BB_tm::readInput(const char* filename)
      }
      if (found_file) {
        solver.readLp("bac.lp");
+       printf("Problem read from file bac.lp\n");
      }
    }
 
@@ -81,7 +84,8 @@ BB_tm::readInput(const char* filename)
        found_file = false;
      }
      if (found_file) {
-	   solver.readMps("bac.mps");
+       solver.readMps("bac.mps");
+       printf("Problem read from file bac.mps\n");
      }
    }
    **********/
@@ -163,7 +167,8 @@ BB_tm::readInput(const char* filename)
      
    } else {
      // create the problem from scratch 
-     
+     printf("Problem created in memory\n");
+
      desc.colnum = 10;
      int colnum = desc.colnum;
      desc.rownum = 16;
@@ -271,25 +276,6 @@ BB_tm::pack_module_data(BCP_buffer& buf, BCP_process_t ptype)
 
 /*************************************************************************/
 void
-BB_tm::pack_cut_algo(const BCP_cut_algo* cut, BCP_buffer& buf)
-{
-  const BB_cut *bb_cut = dynamic_cast<const BB_cut*>(cut);
-  if (!bb_cut)
-    throw BCP_fatal_error("BB_lp::pack_cut_algo() : unknown cut type!\n");
-  
-  bb_cut->pack(buf);
-  return;
-}
-
-/*************************************************************************/
-BCP_cut_algo*
-BB_tm::unpack_cut_algo(BCP_buffer& buf)
-{
-  return new BB_cut(buf);
-}
-
-/*************************************************************************/
-void
 BB_tm::initialize_core(BCP_vec<BCP_var_core*>& vars,
 		       BCP_vec<BCP_cut_core*>& cuts,
 		       BCP_lp_relax*& matrix)
@@ -330,8 +316,7 @@ BB_tm::initialize_core(BCP_vec<BCP_var_core*>& vars,
 void
 BB_tm::create_root(BCP_vec<BCP_var*>& added_vars,
                    BCP_vec<BCP_cut*>& added_cuts,
-		   BCP_user_data*& user_data,
-                   BCP_pricing_status& pricing_status)
+		   BCP_user_data*& user_data)
 {
   
 #ifdef USER_DATA
@@ -378,40 +363,3 @@ BB_tm::display_feasible_solution(const BCP_solution *soln)
   
   delete[] sol;
 }
-
-/***************************************************************************/
-void
-BB_tm::pack_user_data(const BCP_user_data* ud, BCP_buffer& buf)
-{
-  // Normally, no modifications required.
-  
-  const MY_user_data *mud = dynamic_cast<const MY_user_data*> (ud);
-  if(!mud)
-    throw BCP_fatal_error("BB_lp::pack_user_data() : unknown data type!\n");
-  
-  printf("BB_tm::pack_user_data:\n");
-  mud->print();
-  mud->pack(buf);
-} /* pack_user_data */
-
-/***************************************************************************/
-BCP_user_data*
-BB_tm::unpack_user_data(BCP_buffer& buf)
-{
-  // Normally, no modifications required.
-  
-  MY_user_data *p_ud = new MY_user_data(buf);
-  
-  printf("BB_tm::unpack_user_data:\n");
-  p_ud->print();
-  
-  if(p_ud->is_processed) {
-    p_ud->p_rud = NULL;
-    delete(p_ud);
-    p_ud = NULL;
-    printf("user_data deleted\n");
-  }
-  
-  return(p_ud);
-} /* unpack_user_data */
-

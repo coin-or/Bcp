@@ -1,14 +1,18 @@
 // Copyright (C) 2000, International Business Machines
 // Corporation and others.  All Rights Reserved.
 #include <cmath>
+#include <cstdarg>
+#include <cstdio>
 
 #include "CoinHelperFunctions.hpp"
+#include "CoinTime.hpp"
 
 #include "BCP_math.hpp"
 #include "BCP_error.hpp"
 #include "BCP_USER.hpp"
 #include "BCP_var.hpp"
 #include "BCP_cut.hpp"
+#include "BCP_problem_core.hpp"
 #include "BCP_lp_user.hpp"
 #include "BCP_lp.hpp"
 #include "BCP_lp_pool.hpp"
@@ -18,15 +22,27 @@
 #include "BCP_problem_core.hpp"
 #include "BCP_solution.hpp"
 #include "BCP_functions.hpp"
+#include "BCP_lp_functions.hpp"
 
 //#############################################################################
 // Informational methods for the user
 double BCP_lp_user::upper_bound() const    { return p->ub(); }
+bool BCP_lp_user::over_ub(double lb) const { return p->over_ub(lb); }
 int BCP_lp_user::current_phase() const     { return p->phase; }
 int BCP_lp_user::current_level() const     { return p->node->level; }
 int BCP_lp_user::current_index() const     { return p->node->index; }
 int BCP_lp_user::current_iteration() const { return p->node->iteration_count; }
+double BCP_lp_user::start_time() const     { return p->start_time; }
 BCP_user_data* BCP_lp_user::get_user_data() { return p->node->user_data; }
+
+void BCP_lp_user::print(const bool ifprint, const char * format, ...) const {
+  if (ifprint) {
+    va_list valist;
+    va_start(valist, format);
+    vprintf(format, valist);
+    va_end(valist);
+  }
+}
 
 //#############################################################################
 // Informational methods for the user
@@ -67,11 +83,13 @@ BCP_lp_user::send_feasible_solution(const BCP_solution* sol)
 		     BCP_Msg_FeasibleSolution, p->msg_buf);
 
     // update the UB if necessary
-    const double objval = sol->objective_value();
-    const bool over_ub = p->ub(objval);
-    if (p->node->indexed_pricing.get_status() == BCP_PriceNothing && over_ub)
-	p->lp_solver->setDblParam(OsiDualObjectiveLimit,
-				  objval-p->granularity());
+    const double obj = sol->objective_value();
+    if (p->ub(obj) && ! p->node->colgen != BCP_GenerateColumns) {
+	// FIXME: If we had a flag in the node that indicates not to
+	// generate cols in it and in its descendants then the dual obj
+	// limit could still be set...
+	p->lp_solver->setDblParam(OsiDualObjectiveLimit, obj-p->granularity());
+    }
 }
 
 //#############################################################################
@@ -132,101 +150,41 @@ BCP_lp_user::select_fractions(const double * first, const double * last,
 void
 BCP_lp_user::unpack_module_data(BCP_buffer & buf)
 {
-    if (p->param(BCP_lp_par::ReportWhenDefaultIsExecuted)) {
-	printf(" LP: Default unpack_module_data() executed.\n");
-    }
-}
-
-//#############################################################################
-
-void
-BCP_lp_user::pack_warmstart(const BCP_warmstart* ws, BCP_buffer& buf)
-{
-    if (p->param(BCP_lp_par::ReportWhenDefaultIsExecuted)) {
-	printf(" LP: Default BCP_lp_user::pack_warmstart() executed.\n");
-    }
-    BCP_pack_warmstart(ws, buf);
-}
-
-//-----------------------------------------------------------------------------
-
-BCP_warmstart*
-BCP_lp_user::unpack_warmstart(BCP_buffer& buf)
-{
-    if (p->param(BCP_lp_par::ReportWhenDefaultIsExecuted)) {
-	printf(" LP: Default BCP_lp_user::unpack_warmstart() executed.\n");
-    }
-    return BCP_unpack_warmstart(buf);
-}
-
-//#############################################################################
-
-void
-BCP_lp_user::pack_var_algo(const BCP_var_algo* var, BCP_buffer& buf)
-{
-    throw BCP_fatal_error("\
-BCP_lp_user::pack_var_algo() invoked but not overridden!\n");
-}
-
-//-----------------------------------------------------------------------------
-BCP_var_algo*
-BCP_lp_user::unpack_var_algo(BCP_buffer& buf)
-{
-    throw BCP_fatal_error("\
-BCP_lp_user::unpack_var_algo() invoked but not overridden!\n");
-    return 0; // to satisfy aCC on HP-UX
-}
-      
-//-----------------------------------------------------------------------------
-void
-BCP_lp_user::pack_cut_algo(const BCP_cut_algo* cut, BCP_buffer& buf)
-{
-    throw BCP_fatal_error("\
-BCP_lp_user::pack_cut_algo() invoked but not overridden!\n");
-}
-
-//-----------------------------------------------------------------------------
-BCP_cut_algo*
-BCP_lp_user::unpack_cut_algo(BCP_buffer& buf)
-{
-    throw BCP_fatal_error("\
-BCP_lp_user::unpack_cut_algo() invoked but not overridden!\n");
-    return 0; // to satisfy aCC on HP-UX
-}
-
-//-----------------------------------------------------------------------------
-void
-BCP_lp_user::pack_user_data(const BCP_user_data* ud, BCP_buffer& buf)
-{
-    throw BCP_fatal_error("\
-BCP_lp_user::pack_user_data() invoked but not overridden!\n");
-}
-
-//-----------------------------------------------------------------------------
-BCP_user_data*
-BCP_lp_user::unpack_user_data(BCP_buffer& buf)
-{
-    throw BCP_fatal_error("\
-BCP_lp_user::unpack_user_data() invoked but not overridden!\n");
-    return 0; // to satisfy aCC on HP-UX
+  print(p->param(BCP_lp_par::ReportWhenDefaultIsExecuted),
+	"LP: Default unpack_module_data() executed.\n");
 }
 
 //#############################################################################
 
 /** What is the process id of the current process */
-const BCP_proc_id*
+int
 BCP_lp_user::process_id() const
 {
     return p->get_process_id();
 }
 
+/** the process id of the parent */
+int 
+BCP_lp_user::parent() const
+{
+    return p->get_parent();
+}
+
 /** Send a message to a particular process */
 void
-BCP_lp_user::send_message(const BCP_proc_id* const target,
-			  const BCP_buffer& buf)
+BCP_lp_user::send_message(const int target, const BCP_buffer& buf,
+			  BCP_message_tag tag)
 {
-    p->msg_env->send(target, BCP_Msg_User, buf);
+    p->msg_env->send(target, tag, buf);
 }    
+
+/** Wait for a message and receive it */
+void
+BCP_lp_user::receive_message(const int sender, BCP_buffer& buf,
+			     BCP_message_tag tag)
+{
+    p->msg_env->receive(sender, tag, buf, -1);
+}
 
 /** Broadcast the message to all processes of the given type */
 void
@@ -257,6 +215,14 @@ BCP_lp_user::initialize_solver_interface() invoked but not overridden!\n");
 }
 
 //#############################################################################
+
+void 
+BCP_lp_user::initialize_int_and_sos_list(std::vector<OsiObject *>& intAndSosObjects)
+{
+    return;
+}
+
+//#############################################################################
 void
 BCP_lp_user::initialize_new_search_tree_node(const BCP_vec<BCP_var*>& vars,
 					     const BCP_vec<BCP_cut*>& cuts,
@@ -267,9 +233,129 @@ BCP_lp_user::initialize_new_search_tree_node(const BCP_vec<BCP_var*>& vars,
 					     BCP_vec<int>& cut_changed_pos,
 					     BCP_vec<double>& cut_new_bd)
 {
-    if (p->param(BCP_lp_par::ReportWhenDefaultIsExecuted)) {
-	printf(" LP: Default initialize_new_search_tree_node() executed.\n");
+  print(p->param(BCP_lp_par::ReportWhenDefaultIsExecuted),
+	"LP: Default initialize_new_search_tree_node() executed.\n");
+}
+
+//#############################################################################
+
+void
+BCP_lp_user::load_problem(OsiSolverInterface& osi, BCP_problem_core* core,
+			  BCP_var_set& vars, BCP_cut_set& cuts)
+{
+  const int varnum = vars.size();
+  const int cutnum = cuts.size();
+
+  if (varnum == 0) {
+    // *FIXME* : kill all the processes
+    throw BCP_fatal_error("There are no vars in the description for node %i!\n",
+			  current_index());
+  }
+
+  if (cutnum == 0) {
+    // *FIXME* : kill all the processes
+    throw BCP_fatal_error("There are no cuts in the description for node %i!\n",
+			  current_index());
+  }
+
+  BCP_vec<BCP_col*> cols;
+  BCP_vec<BCP_row*> rows;
+
+  int bvarnum = core->varnum();
+  int bcutnum = core->cutnum();
+
+  if (varnum == 0 || cutnum == 0){
+    throw BCP_fatal_error("No rows or no cols to create a matrix from!\n");
+  }
+
+  BCP_lp_relax* m = 0;
+  if (bvarnum == 0) {
+    // no core vars. doesn't matter if there're any core cuts, the starting
+    // matrix is computed the same way
+    cols.reserve(varnum);
+    vars_to_cols(cuts, vars, cols,
+		 *p->lp_result, BCP_Object_FromTreeManager, false);
+    BCP_vec<double> RLB;
+    BCP_vec<double> RUB;
+    RLB.reserve(cutnum);
+    RUB.reserve(cutnum);
+    BCP_cut_set::const_iterator ci = cuts.begin();
+    BCP_cut_set::const_iterator lastci = cuts.end();
+    for ( ; ci != lastci; ++ci) {
+      RLB.unchecked_push_back((*ci)->lb());
+      RUB.unchecked_push_back((*ci)->ub());
     }
+    m = new BCP_lp_relax(cols, RLB, RUB);
+    purge_ptr_vector(cols);
+  } else {
+    if (bcutnum == 0) {
+      rows.reserve(cutnum);
+      cuts_to_rows(vars, cuts, rows,
+		   *p->lp_result, BCP_Object_FromTreeManager, false);
+      BCP_vec<double> CLB;
+      BCP_vec<double> CUB;
+      BCP_vec<double> OBJ;
+      CLB.reserve(varnum);
+      CUB.reserve(varnum);
+      OBJ.reserve(varnum);
+      BCP_var_set::const_iterator vi = vars.begin();
+      BCP_var_set::const_iterator lastvi = vars.end();
+      for ( ; vi != lastvi; ++vi) {
+	CLB.unchecked_push_back((*vi)->lb());
+	CUB.unchecked_push_back((*vi)->ub());
+	OBJ.unchecked_push_back((*vi)->obj());
+      }
+      m = new BCP_lp_relax(rows, CLB, CUB, OBJ);
+      purge_ptr_vector(rows);
+    } else {
+      // has core vars and cuts, the starting matrix is the core matrix
+      m = core->matrix;
+    }
+  }
+   
+  // We have the description in p.node. Load it into the lp solver.
+  // First load the core matrix
+  osi.loadProblem(*m,
+		  m->ColLowerBound().begin(), m->ColUpperBound().begin(),
+		  m->Objective().begin(),
+		  m->RowLowerBound().begin(), m->RowUpperBound().begin());
+
+  if (bvarnum > 0 && bcutnum > 0) {
+    //-----------------------------------------------------------------------
+    // We have to add the 'added' stuff only if we had a core matrix
+    //-----------------------------------------------------------------------
+    // Add the Named and Algo cols if there are any (and if we have any cols)
+    if (varnum > bvarnum && bcutnum > 0) {
+      BCP_vec<BCP_var*> added_vars(vars.entry(bvarnum), vars.end());
+      BCP_vec<BCP_cut*> core_cuts(cuts.begin(), cuts.entry(bcutnum));
+      cols.reserve(vars.size());
+      vars_to_cols(core_cuts, added_vars, cols,
+		   *p->lp_result, BCP_Object_FromTreeManager, false);
+      BCP_lp_add_cols_to_lp(cols, &osi);
+      purge_ptr_vector(cols);
+    }
+    //-----------------------------------------------------------------------
+    // Add the Named and Algo rows if there are any (and if we have any such
+    // rows AND if there are core vars)
+    if (cutnum > bcutnum) {
+      BCP_vec<BCP_cut*> added_cuts(cuts.entry(bcutnum), cuts.end());
+      rows.reserve(added_cuts.size());
+      BCP_fatal_error::abort_on_error = false;
+      try {
+	 cuts_to_rows(vars, added_cuts, rows,
+		      *p->lp_result, BCP_Object_FromTreeManager, false);
+      }
+      catch (...) {
+      }
+      BCP_fatal_error::abort_on_error = true;
+      BCP_lp_add_rows_to_lp(rows, &osi);
+      purge_ptr_vector(rows);
+    }
+  } else {
+    // Otherwise (i.e., if we had no core matrix) we just have to get rid of
+    // 'm'.
+    delete m;
+  }
 }
 
 //#############################################################################
@@ -278,9 +364,8 @@ void
 BCP_lp_user::modify_lp_parameters(OsiSolverInterface* lp,
 				  bool in_strong_branching)
 {
-    if (p->param(BCP_lp_par::ReportWhenDefaultIsExecuted)) {
-	printf(" LP: Default prepare_for_optimization() executed.\n");
-    }
+  print(p->param(BCP_lp_par::ReportWhenDefaultIsExecuted),
+	"LP: Default prepare_for_optimization() executed.\n");
 }
 
 //#############################################################################
@@ -339,9 +424,8 @@ BCP_lp_user::test_feasibility(const BCP_lp_result& lpres,
 			      const BCP_vec<BCP_var*>& vars,
 			      const BCP_vec<BCP_cut*>& cuts)
 {
-    if (p->param(BCP_lp_par::ReportWhenDefaultIsExecuted)) {
-	printf(" LP: Default test_feasibility() executed.\n");
-    }
+    print(p->param(BCP_lp_par::ReportWhenDefaultIsExecuted),
+	  "LP: Default test_feasibility() executed.\n");
 
     const double etol = p->param(BCP_lp_par::IntegerTolerance);
     BCP_feasibility_test test =
@@ -366,9 +450,9 @@ BCP_lp_user::test_binary(const BCP_lp_result& lpres,
 			 const BCP_vec<BCP_var*>& vars,
 			 const double etol) const
 {
-    if (p->param(BCP_lp_par::ReportWhenDefaultIsExecuted)) {
-	printf(" LP: Default test_binary() executed.\n");
-    }
+    print(p->param(BCP_lp_par::ReportWhenDefaultIsExecuted),
+	  "LP: Default test_binary() executed.\n");
+
     // Do anything only if the termination code is sensible
     const int tc = lpres.termcode();
     if (! (tc & BCP_ProvenOptimal))
@@ -403,9 +487,9 @@ BCP_lp_user::test_integral(const BCP_lp_result& lpres,
 			   const BCP_vec<BCP_var*>& vars,
 			   const double etol) const
 {
-    if (p->param(BCP_lp_par::ReportWhenDefaultIsExecuted)) {
-	printf(" LP: Default test_integral() executed.\n");
-    }
+    print(p->param(BCP_lp_par::ReportWhenDefaultIsExecuted),
+	  "LP: Default test_integral() executed.\n");
+
     // Do anything only if the termination code is sensible
     const int tc = lpres.termcode();
     if (! (tc & BCP_ProvenOptimal))
@@ -442,9 +526,9 @@ BCP_lp_user::test_full(const BCP_lp_result& lpres,
 		       const BCP_vec<BCP_var*>& vars,
 		       const double etol) const
 {
-    if (p->param(BCP_lp_par::ReportWhenDefaultIsExecuted)) {
-	printf(" LP: Default test_full() executed.\n");
-    }
+    print(p->param(BCP_lp_par::ReportWhenDefaultIsExecuted),
+	  "LP: Default test_full() executed.\n");
+
     // Do anything only if the termination code is sensible
     const int tc = lpres.termcode();
     if (! (tc & BCP_ProvenOptimal))
@@ -499,9 +583,8 @@ BCP_lp_user::generate_heuristic_solution(const BCP_lp_result& lpres,
 					 const BCP_vec<BCP_var*>& vars,
 					 const BCP_vec<BCP_cut*>& cuts)
 {
-    if (p->param(BCP_lp_par::ReportWhenDefaultIsExecuted)) {
-	printf(" LP: Default generate_heuristic_solution() executed.\n");
-    }
+    print(p->param(BCP_lp_par::ReportWhenDefaultIsExecuted),
+	  "LP: Default generate_heuristic_solution() executed.\n");
     return NULL;
 }
 //#############################################################################
@@ -509,9 +592,8 @@ BCP_lp_user::generate_heuristic_solution(const BCP_lp_result& lpres,
 void
 BCP_lp_user::pack_feasible_solution(BCP_buffer& buf, const BCP_solution* sol)
 {
-    if (p->param(BCP_lp_par::ReportWhenDefaultIsExecuted)) {
-	printf(" LP: Default pack_feasible_solution() executed.\n");
-    }
+    print(p->param(BCP_lp_par::ReportWhenDefaultIsExecuted),
+	  "LP: Default pack_feasible_solution() executed.\n");
 
     const BCP_solution_generic* gensol =
 	dynamic_cast<const BCP_solution_generic*>(sol);
@@ -521,8 +603,9 @@ BCP_lp_user::pack_feasible_solution(BCP_buffer& buf, const BCP_solution* sol)
     buf.pack(size);
     for (int i = 0; i < size; ++i) {
 	buf.pack(values[i]);
-	p->pack_var(BCP_ProcessType_Any, *solvars[i]);
+	p->pack_var(*solvars[i]);
     }
+    buf.pack(gensol->objective_value());
 }
 
 //#############################################################################
@@ -534,9 +617,8 @@ BCP_lp_user::pack_primal_solution(BCP_buffer& buf,
 				  const BCP_vec<BCP_var*>& vars,
 				  const BCP_vec<BCP_cut*>& cuts)
 {
-    if (p->param(BCP_lp_par::ReportWhenDefaultIsExecuted)) {
-	printf(" LP: Default pack_for_cg() executed.\n");
-    }
+    print(p->param(BCP_lp_par::ReportWhenDefaultIsExecuted),
+	  "LP: Default pack_for_cg() executed.\n");
 
     BCP_vec<int> coll;
 
@@ -571,7 +653,7 @@ BCP_lp_user::pack_primal_solution(BCP_buffer& buf,
 	const BCP_vec<int>::const_iterator last_pos = coll.end();
 	while (++pos != last_pos) {
 	    buf.pack(x[*pos]);
-	    p->pack_var(BCP_ProcessType_Any, *vars[*pos]);
+	    p->pack_var(*vars[*pos]);
 	}
     }
 }
@@ -585,9 +667,8 @@ BCP_lp_user::pack_dual_solution(BCP_buffer& buf,
 				const BCP_vec<BCP_var*>& vars,
 				const BCP_vec<BCP_cut*>& cuts)
 {
-    if (p->param(BCP_lp_par::ReportWhenDefaultIsExecuted)) {
-	printf(" LP: Default pack_for_vg() executed.\n");
-    }
+    print(p->param(BCP_lp_par::ReportWhenDefaultIsExecuted),
+	  "LP: Default pack_for_vg() executed.\n");
 
     BCP_vec<int> coll;
 
@@ -618,7 +699,7 @@ BCP_lp_user::pack_dual_solution(BCP_buffer& buf,
 	const BCP_vec<int>::const_iterator last_pos = coll.end();
 	while (++pos != last_pos) {
 	    buf.pack(pi[*pos]);
-	    p->pack_cut(BCP_ProcessType_Any, *cuts[*pos]);
+	    p->pack_cut(*cuts[*pos]);
 	}
     }
 }
@@ -631,23 +712,22 @@ BCP_lp_user::display_lp_solution(const BCP_lp_result& lpres,
 				 const BCP_vec<BCP_cut*>& cuts,
 				 const bool final_lp_solution)
 {
-    if (p->param(BCP_lp_par::ReportWhenDefaultIsExecuted)) {
-	printf(" LP: Default display_lp_solution() executed.\n");
-    }
+    print(p->param(BCP_lp_par::ReportWhenDefaultIsExecuted),
+	  "LP: Default display_lp_solution() executed.\n");
 
     if (final_lp_solution) {
 	if (! p->param(BCP_lp_par::LpVerb_FinalRelaxedSolution))
 	    return;
-	printf("  LP : Displaying LP solution (FinalRelaxedSolution) :\n");
+	print(true,"  LP : Displaying LP solution (FinalRelaxedSolution) :\n");
     } else {
 	if (! p->param(BCP_lp_par::LpVerb_RelaxedSolution))
 	    return;
-	printf("  LP : Displaying LP solution (RelaxedSolution) :\n");
+	print(true,"  LP : Displaying LP solution (RelaxedSolution) :\n");
     }
 
     const double ietol = p->param(BCP_lp_par::IntegerTolerance);
 
-    printf("  LP : Displaying solution :\n");
+    print(true, "  LP : Displaying solution :\n");
     BCP_vec<int> coll;
     const double * x = lpres.x();
     select_nonzeros(x, x+vars.size(), ietol, coll);
@@ -656,30 +736,6 @@ BCP_lp_user::display_lp_solution(const BCP_lp_result& lpres,
 	const int ind = coll[i];
 	vars[ind]->display(x[ind]);
     }
-}
-
-//#############################################################################
-
-// Functions related to indexed vars. 
-int
-BCP_lp_user::next_indexed_var(int prev_index)
-{
-    if (p->param(BCP_lp_par::ReportWhenDefaultIsExecuted)) {
-	printf(" LP: Default next_indexed_var() executed.\n");
-    }
-    return -1;
-}
-//-----------------------------------------------------------------------------
-BCP_var_indexed*
-BCP_lp_user::create_indexed_var(int index,
-				const BCP_vec<BCP_cut*>& cuts,
-				BCP_col& col)
-{
-    if (p->param(BCP_lp_par::ReportWhenDefaultIsExecuted)) {
-	printf(" LP: Default create_indexed_var() executed.\n");
-    }
-    throw BCP_fatal_error("create_indexed_var() missing.\n");
-    return 0; // to satisfy aCC on HP-UX
 }
 
 //#############################################################################
@@ -692,9 +748,8 @@ BCP_lp_user::restore_feasibility(const BCP_lp_result& lpres,
 				 BCP_vec<BCP_var*>& vars_to_add,
 				 BCP_vec<BCP_col*>& cols_to_add)
 {
-    if (p->param(BCP_lp_par::ReportWhenDefaultIsExecuted)) {
-	printf(" LP: Default restore_feasibility() executed.\n");
-    }
+    print(p->param(BCP_lp_par::ReportWhenDefaultIsExecuted),
+	  "LP: Default restore_feasibility() executed.\n");
 }
 
 //#############################################################################
@@ -709,9 +764,8 @@ BCP_lp_user::cuts_to_rows(const BCP_vec<BCP_var*>& vars, // on what to expand
 			  const BCP_lp_result& lpres,
 			  BCP_object_origin origin, bool allow_multiple)
 {
-    if (p->param(BCP_lp_par::ReportWhenDefaultIsExecuted)) {
-	printf(" LP: Default cuts_to_rows() executed.\n");
-    }
+    print(p->param(BCP_lp_par::ReportWhenDefaultIsExecuted),
+	  "LP: Default cuts_to_rows() executed.\n");
     throw BCP_fatal_error("cuts_to_rows() missing.\n");
 }
 //-----------------------------------------------------------------------------
@@ -724,9 +778,8 @@ BCP_lp_user::vars_to_cols(const BCP_vec<BCP_cut*>& cuts, // on what to expand
 			  const BCP_lp_result& lpres,
 			  BCP_object_origin origin, bool allow_multiple)
 {
-    if (p->param(BCP_lp_par::ReportWhenDefaultIsExecuted)) {
-	printf(" LP: Default vars_to_cols() executed.\n");
-    }
+    print(p->param(BCP_lp_par::ReportWhenDefaultIsExecuted),
+	"LP: Default vars_to_cols() executed.\n");
     throw BCP_fatal_error("vars_to_cols() missing.\n");
 }
 
@@ -739,9 +792,8 @@ BCP_lp_user::generate_cuts_in_lp(const BCP_lp_result& lpres,
 				 BCP_vec<BCP_cut*>& new_cuts,
 				 BCP_vec<BCP_row*>& new_rows)
 {
-    if (p->param(BCP_lp_par::ReportWhenDefaultIsExecuted)) {
-	printf(" LP: Default generate_cuts_in_lp() executed.\n");
-    }
+    print(p->param(BCP_lp_par::ReportWhenDefaultIsExecuted),
+	  "LP: Default generate_cuts_in_lp() executed.\n");
 }
 //-----------------------------------------------------------------------------
 void
@@ -752,26 +804,23 @@ BCP_lp_user::generate_vars_in_lp(const BCP_lp_result& lpres,
 				 BCP_vec<BCP_var*>& new_vars,
 				 BCP_vec<BCP_col*>& new_cols)
 {
-    if (p->param(BCP_lp_par::ReportWhenDefaultIsExecuted)) {
-	printf(" LP: Default generate_vars_in_lp() executed.\n");
-    }
+    print(p->param(BCP_lp_par::ReportWhenDefaultIsExecuted),
+	  "LP: Default generate_vars_in_lp() executed.\n");
 }
 //-----------------------------------------------------------------------------
 BCP_object_compare_result
 BCP_lp_user::compare_cuts(const BCP_cut* c0, const BCP_cut* c1)
 {
-    if (p->param(BCP_lp_par::ReportWhenDefaultIsExecuted)) {
-	printf(" LP: Default compare_cuts() executed.\n");
-    }
+    print(p->param(BCP_lp_par::ReportWhenDefaultIsExecuted),
+	  "LP: Default compare_cuts() executed.\n");
     return BCP_DifferentObjs;
 }
 //-----------------------------------------------------------------------------
 BCP_object_compare_result
 BCP_lp_user::compare_vars(const BCP_var* v0, const BCP_var* v1)
 {
-    if (p->param(BCP_lp_par::ReportWhenDefaultIsExecuted)) {
-	printf(" LP: Default compare_vars() executed.\n");
-    }
+    print(p->param(BCP_lp_par::ReportWhenDefaultIsExecuted),
+	  "LP: Default compare_vars() executed.\n");
     return BCP_DifferentObjs;
 }
 
@@ -836,9 +885,8 @@ BCP_lp_user::logical_fixing(const BCP_lp_result& lpres,
 			    BCP_vec<int>& changed_pos,
 			    BCP_vec<double>& new_bd)
 {
-    if (p->param(BCP_lp_par::ReportWhenDefaultIsExecuted)) {
-	printf(" LP: Default logical_fixing() executed.\n");
-    }
+    print(p->param(BCP_lp_par::ReportWhenDefaultIsExecuted),
+	  "LP: Default logical_fixing() executed.\n");
 }
 
 //#############################################################################
@@ -915,233 +963,236 @@ BCP_lp_user::reduced_cost_fixing(const double* dj, const double* x,
 //#############################################################################
 //#############################################################################
 
+int
+BCP_lp_user::try_to_branch(OsiBranchingInformation& branchInfo,
+			   OsiSolverInterface* solver,
+			   OsiChooseVariable* choose,
+			   OsiBranchingObject*& branchObject,
+			   bool allowVarFix)
+{
+    int returnStatus = 0;
+    int numUnsatisfied = choose->setupList(&branchInfo, true);
+    choose->setBestObjectIndex(-1);
+    if (numUnsatisfied > 0) {
+	if (choose->numberOnList() == 0) {
+	    // Nothing left for strong branching to evaluate
+	    if (choose->numberOnList() > 0 || choose->numberStrong() == 0) {
+		// There is something on the list
+		choose->setBestObjectIndex(choose->candidates()[0]);
+	    } else {
+		// There is nothing on the list
+		numUnsatisfied = choose->setupList(&branchInfo, false);
+		if (numUnsatisfied > 0) {
+		    choose->setBestObjectIndex(choose->candidates()[0]);
+		}
+	    }
+	} else {
+	    // Do the strong branching
+	    int ret = choose->chooseVariable(solver, &branchInfo, allowVarFix);
+	    /* Check if SB has fixed anything, and if so, apply the same
+	       changes to the vars */
+	    const double * clb = solver->getColLower();
+	    const double * cub = solver->getColUpper();
+	    BCP_vec<BCP_var*>& vars = p->node->vars;
+	    for (int i = numUnsatisfied - 1; i >= 0; --i) {
+	        const int ind =
+		  solver->object(choose->candidates()[i])->columnNumber();
+		if (ind >= 0) {
+		  assert(vars[ind]->lb() <= clb[ind]);
+		  assert(vars[ind]->ub() >= cub[ind]);
+		  vars[ind]->set_lb_ub(clb[ind], cub[ind]);
+		}
+	    }
+		
+	    /* update number of strong iterations etc
+	    model->incrementStrongInfo(choose->numberStrongDone(),
+				       choose->numberStrongIterations(),
+				       ret==-1 ? 0:choose->numberStrongFixed(),
+				       ret==-1);
+	    */
+	    if (ret > 1) {
+		// has fixed some
+		returnStatus = -1;
+	    } else if (ret == -1) {
+		// infeasible
+		returnStatus = -2;
+	    } else if (ret == 0) {
+		// normal
+		returnStatus = 0;
+		numUnsatisfied = 1;
+	    } else {
+		// ones on list satisfied - double check
+		numUnsatisfied = choose->setupList(&branchInfo, false);
+		if (numUnsatisfied > 0) {
+		    choose->setBestObjectIndex(choose->candidates()[0]);
+		}
+	    }
+	}
+    }
+    if (! returnStatus) {
+	if (numUnsatisfied > 0) {
+	    // create branching object
+	    /* FIXME: how the objects are created? */
+	    const OsiObject * obj = solver->object(choose->bestObjectIndex());
+	    branchObject = obj->createBranch(solver,
+					     &branchInfo,
+					     obj->whichWay());
+	}
+    }
+
+    return returnStatus;
+}
+
+//#############################################################################
+
 BCP_branching_decision BCP_lp_user::
 select_branching_candidates(const BCP_lp_result& lpres,
 			    const BCP_vec<BCP_var*>& vars,
 			    const BCP_vec<BCP_cut*>& cuts,
 			    const BCP_lp_var_pool& local_var_pool,
 			    const BCP_lp_cut_pool& local_cut_pool,
-			    BCP_vec<BCP_lp_branching_object*>& cans)
+			    BCP_vec<BCP_lp_branching_object*>& cands,
+			    bool force_branch)
 {
-    if (p->param(BCP_lp_par::ReportWhenDefaultIsExecuted)) {
-	printf(" LP: Default select_branching_candidates() executed.\n");
+    print(p->param(BCP_lp_par::ReportWhenDefaultIsExecuted),
+	  "LP: Default select_branching_candidates() executed.\n");
+
+    if (lpres.termcode() & BCP_Abandoned) {
+      // *THINK*: maybe we should branch through...
+      print(true, "\
+LP: ############ LP solver abandoned. Branching through...\n");
     }
 
     // *THINK* : this branching object selection is very primitive
     // *THINK* : should check for tail-off, could check for branching cuts, etc
-    if (local_var_pool.size() > 0 || local_cut_pool.size() > 0)
+    if (! force_branch &&
+	(local_var_pool.size() > 0 || local_cut_pool.size() > 0))
 	return BCP_DoNotBranch;
 
-    if (p->param(BCP_lp_par::StrongBranch_CloseToHalfNum) > 0)
-	branch_close_to_half(lpres, vars,
-			     p->param(BCP_lp_par::StrongBranch_CloseToHalfNum),
-			     p->param(BCP_lp_par::IntegerTolerance),
-			     cans);
-    if (p->param(BCP_lp_par::StrongBranch_CloseToOneNum) > 0)
-	branch_close_to_one(lpres, vars,
-			    p->param(BCP_lp_par::StrongBranch_CloseToOneNum),
-			    p->param(BCP_lp_par::IntegerTolerance),
-			    cans);
-    // Get rid of duplicates in cans
-    BCP_vec<int> brvars;
-    brvars.reserve(cans.size());
-    for (size_t i = 0; i < cans.size(); ) {
-	const int brvar = (*cans[i]->forced_var_pos)[0];
-	if (std::find(brvars.begin(), brvars.end(), brvar) == brvars.end()) {
-	    brvars.unchecked_push_back(brvar);
-	    ++i;
-	} else {
-	    std::swap(cans[i], cans.back());
-	    cans.pop_back();
+    OsiSolverInterface* lp = p->lp_solver;
+
+    /* The last true: make a copy in brInfo of the sol of solver
+       instead of just pointing into the solver's copy */
+    OsiBranchingInformation brInfo(lp, true, true);
+    lp->getDblParam(OsiDualObjectiveLimit, brInfo.cutoff_);
+    brInfo.integerTolerance_ = p->param(BCP_lp_par::IntegerTolerance);
+    brInfo.timeRemaining_ = get_param(BCP_lp_par::MaxRunTime) - CoinCpuTime();
+    brInfo.numberSolutions_ = 0; /*FIXME*/
+    brInfo.numberBranchingSolutions_ = 0; /*FIXME numBranchingSolutions_;*/
+    brInfo.depth_ = current_level();
+
+    OsiChooseStrong* strong = new OsiChooseStrong(lp);
+    strong->setNumberBeforeTrusted(5); // the default in Cbc
+    strong->setNumberStrong(p->param(BCP_lp_par::StrongBranchNum));
+    strong->setTrustStrongForSolution(false);
+    /** Pseudo Shadow Price mode
+	0 - off
+	1 - use and multiply by strong info
+	2 - use 
+    */
+    strong->setShadowPriceMode(0);
+
+    OsiChooseVariable * choose = strong;
+    OsiBranchingObject* brObj = NULL;
+
+    bool allowVarFix = true;
+    /*
+      <li>  0: A branching object has been installed
+      <li> -1: A monotone object was discovered
+      <li> -2: An infeasible object was discovered
+    */
+    int brResult =
+	try_to_branch(brInfo, lp, choose, brObj, allowVarFix);
+    const int bestWhichWay = choose->bestWhichWay();
+
+#if 0
+    /* FIXME:before doing anything check if we have found a new solution */
+    if (choose->goodSolution()
+	&&model->problemFeasibility()->feasible(model,-1)>=0) {
+	// yes
+	double objValue = choose->goodObjectiveValue();
+	model->setBestSolution(CBC_STRONGSOL,
+			       objValue,
+			       choose->goodSolution()) ;
+	model->setLastHeuristic(NULL);
+	model->incrementUsed(choose->goodSolution());
+	choose->clearGoodSolution();
+    }
+#endif
+
+    delete choose;
+
+    switch (brResult) {
+    case -2:
+	// when doing strong branching a candidate has proved that the
+	// problem is infeasible
+	delete brObj;
+	return BCP_DoNotBranch_Fathomed;
+    case -1:
+	// OsiChooseVariable::chooseVariable() returned 2, 3, or 4
+	if (!brObj) {
+	    // just go back and resolve
+	    return BCP_DoNotBranch;
+	}
+	// otherwise might as well branch. The forced variable is
+	// unlikely to jump up one more (though who knows...)
+	break;
+    case 0:
+	if (!brObj) {
+	    // nothing got fixed, yet couldn't find something to branch on
+	    throw BCP_fatal_error("BM: Couldn't branch!\n");
+	}
+	// we've got a branching object
+	break;
+    default:
+	throw BCP_fatal_error("\
+BCP: BCP_lp_user::try_to_branch returned with unknown return code.\n");
+    }
+
+    // If there were some fixings (brResult < 0) then propagate them where
+    // needed
+    if (allowVarFix && brResult < 0) {
+	const double* clb = lp->getColLower();
+	const double* cub = lp->getColUpper();
+	/* There may or may not have been changes, but faster to set then to
+	   test... */
+	BCP_vec<BCP_var*>& vars = p->node->vars;
+	int numvars = vars.size();
+	for (int i = 0; i < numvars; ++i) {
+	    vars[i]->change_bounds(clb[i], cub[i]);
 	}
     }
-  
-    if (cans.size() == 0) {
+    
+    // all possibilities are 2-way branches
+    int order[2] = {0, 1};
+    if (bestWhichWay == 1) {
+	order[0] = 1;
+	order[1] = 0;
+    }
+
+    // Now interpret the result (at this point we must have a brObj
+    OsiIntegerBranchingObject* intBrObj =
+	dynamic_cast<OsiIntegerBranchingObject*>(brObj);
+    if (intBrObj) {
+	BCP_lp_integer_branching_object o(intBrObj);
+	cands.push_back(new BCP_lp_branching_object(o, order));
+    }
+    OsiSOSBranchingObject* sosBrObj =
+	dynamic_cast<OsiSOSBranchingObject*>(brObj);
+    if (sosBrObj) {
+	BCP_lp_sos_branching_object o(sosBrObj);
+	cands.push_back(new BCP_lp_branching_object(lp, o, order));
+    }
+
+    delete brObj;
+    
+    if (cands.size() == 0) {
 	throw BCP_fatal_error("\
  LP : No var/cut in pool but couldn't select branching object.\n");
     }
     return BCP_DoBranch;
 }
 
-//-----------------------------------------------------------------------------
-// A helper function for select_branching_candidates()
-void
-BCP_lp_user::branch_close_to_half(const BCP_lp_result& lpres,
-				  const BCP_vec<BCP_var*>& vars,
-				  const int to_be_selected,
-				  const double etol,
-				  BCP_vec<BCP_lp_branching_object*>& cans)
-{
-    // order the variables based on their distance from a MIP feasible value
-    const double etol5 = .5 - etol;
-    BCP_vec<BCP_var*>::const_iterator vi = vars.begin();
-    const double * x = lpres.x();
-    const double * xi = x;
-    const double * lastxi = x + vars.size();
-
-    // choose 5 times the required ones (ordered primarily by closeness to half
-    // and secondarily by cost)
-    int to_select = 5*to_be_selected;
-
-    BCP_vec<int> select_pos(to_select + 1, -1);
-    BCP_vec<double> select_val(to_select + 1, 1.0);
-    BCP_vec<double> select_cost(to_select + 1, -1e20);
-
-    const double* objcoeff = p->lp_solver->getObjCoefficients();
-
-    double val;
-    int pos, i, k;
-
-    for (pos = 0, k = 0; k < to_select && xi != lastxi; ++pos, ++xi, ++vi){
-	// check if the next var violates MIP feasibility
-	if ((*vi)->var_type() == BCP_ContinuousVar)
-	    continue;
-	val = CoinAbs(*xi - .5 - floor(*xi));
-	if (val > etol5)
-	    continue;
-	// if not, insert it into the list
-	const double cost = CoinAbs(objcoeff[pos]);
-	for (i = k - 1; i >= 0; --i) {
-	    if (select_val[i] < val ||
-		(select_val[i] == val && select_cost[i] >= cost))
-		break;
-	    select_pos[i+1] = select_pos[i];
-	    select_val[i+1] = select_val[i];
-	    select_cost[i+1] = select_cost[i];
-	}
-	select_pos[i+1] = pos;
-	select_val[i+1] = val;
-	select_cost[i+1] = cost;
-	++k;
-    }
-
-    for ( ; xi != lastxi; ++pos, ++xi, ++vi) {
-	// check if the next var violates MIP feasibility
-	if ((*vi)->var_type() == BCP_ContinuousVar)
-	    continue;
-	val = CoinAbs(*xi - .5 - floor(*xi));
-	if (val > etol5)
-	    continue;
-	// if not, insert it into the list
-	const double cost = objcoeff[pos];
-	for (i = to_select - 1; i >= 0; --i) {
-	    if (select_val[i] < val ||
-		(select_val[i] == val && select_cost[i] >= cost))
-		break;
-	    select_pos[i+1] = select_pos[i];
-	    select_val[i+1] = select_val[i];
-	    select_cost[i+1] = select_cost[i];
-	}
-	if (i != to_select - 1) {
-	    select_pos[i+1] = pos;
-	    select_val[i+1] = val;
-	    select_cost[i+1] = cost;
-	}
-    }
-
-    k = select_val.index(std::upper_bound(select_val.begin(),
-					  select_val.entry(k),
-					  2 * select_val[to_be_selected - 1]));
-
-    select_pos.erase(select_pos.entry(k), select_pos.end());
-    select_cost.erase(select_cost.entry(k), select_cost.end());
-
-    // now reorder these and keep only as many as required. this time order by
-    // cost alone.
-    if (k > to_be_selected) {
-	BCP_vec<double>::iterator di;
-	BCP_vec<int> new_pos;
-	new_pos.reserve(to_be_selected);
-	BCP_vec<double>& new_cost = select_val;
-	new_cost.clear();
-	for (pos = 0; pos < to_be_selected; ++pos) {
-	    const double val = select_cost[pos];
-	    // insert the next into the list
-	    di = std::upper_bound(new_cost.begin(), new_cost.end(), val,
-				  std::greater<double>());
-	    new_pos.insert(new_pos.entry(new_cost.index(di)), select_pos[pos]);
-	    new_cost.insert(di, val);
-	}
-	for ( ; pos < k; ++pos) {
-	    const double val = select_cost[pos];
-	    // insert the next into the list
-	    di = std::upper_bound(new_cost.begin(), new_cost.end(), val,
-				  std::greater<double>());
-	    if (di != new_cost.end()) {
-		new_cost.pop_back();
-		new_pos.pop_back();
-		new_pos.insert(new_pos.entry(new_cost.index(di)),
-			       select_pos[pos]);
-		new_cost.insert(di, val);
-	    }
-	}
-	select_pos.swap(new_pos);
-    }
-
-    append_branching_vars(lpres.x(), vars, select_pos, cans);
-}
-//-----------------------------------------------------------------------------
-void
-BCP_lp_user::branch_close_to_one(const BCP_lp_result& lpres,
-				 const BCP_vec<BCP_var*>& vars,
-				 const int to_be_selected,
-				 const double etol,
-				 BCP_vec<BCP_lp_branching_object*>& cans)
-{
-    // order the variables based on their distance from a MIP feasible value
-    BCP_vec<BCP_var*>::const_iterator vi = vars.begin();
-    const double * x = lpres.x();
-    const double * xi = x;
-    const double * lastxi = x + vars.size();
-
-    BCP_vec<int> select_pos;
-    select_pos.reserve(to_be_selected);
-    BCP_vec<double> select_val;
-    select_val.reserve(to_be_selected);
-    BCP_vec<double>::iterator spv;
-
-    double val;
-    int pos;
-
-    for (pos = 0;
-	 select_pos.size() < static_cast<const size_t>(to_be_selected) &&
-	     xi != lastxi;
-	 ++pos, ++xi, ++vi) {
-	// check if the next var violates MIP feasibility
-	if ((*vi)->var_type() == BCP_ContinuousVar)
-	    continue;
-	if (*xi < etol)
-	    continue;
-	val = 1 - *xi;
-	if (val < etol)
-	    continue;
-	// if not, insert it into the list
-	spv = std::upper_bound(select_val.begin(), select_val.end(), val);
-	select_pos.insert(select_pos.entry(select_val.index(spv)), pos);
-	select_val.insert(spv, val);
-    }
-
-    for ( ; xi != lastxi; ++pos, ++xi, ++vi) {
-	// check if the next var violates MIP feasibility
-	if ((*vi)->var_type() == BCP_ContinuousVar)
-	    continue;
-	if (*xi < etol)
-	    continue;
-	val = 1 - *xi;
-	if (val < etol)
-	    continue;
-	// if not, insert it into the list
-	spv = std::upper_bound(select_val.begin(), select_val.end(), val);
-	if (spv != select_val.end()) {
-	    select_pos.pop_back();
-	    select_pos.insert(select_pos.entry(select_val.index(spv)), pos);
-	    select_val.pop_back();
-	    select_val.insert(spv, val);
-	}
-    }
-
-    append_branching_vars(lpres.x(), vars, select_pos, cans);
-}
 //-----------------------------------------------------------------------------
 void
 BCP_lp_user::append_branching_vars(const double* x,
@@ -1173,10 +1224,8 @@ BCP_branching_object_relation BCP_lp_user::
 compare_branching_candidates(BCP_presolved_lp_brobj* new_presolved,
 			     BCP_presolved_lp_brobj* old_presolved)
 {
-    if (p->param(BCP_lp_par::ReportWhenDefaultIsExecuted)) {
-	printf("\
- LP: Default compare_presolved_branching_objects() executed.\n");
-    }
+    print(p->param(BCP_lp_par::ReportWhenDefaultIsExecuted),
+	  "LP: Default compare_presolved_branching_objects() executed.\n");
 
     // change the objvals according to the termcodes (in order to be able to
     // make decisions based on objval, no matter what the termcode is).
@@ -1312,9 +1361,8 @@ Unknown branching object comparison rule.\n");
 void
 BCP_lp_user::set_actions_for_children(BCP_presolved_lp_brobj* best)
 {
-    if (p->param(BCP_lp_par::ReportWhenDefaultIsExecuted)) {
-	printf(" LP: Default set_actions_for_children() executed.\n");
-    }
+    print(p->param(BCP_lp_par::ReportWhenDefaultIsExecuted),
+	  "LP: Default set_actions_for_children() executed.\n");
 
     // by default every action is set to BCP_ReturnChild
     if (p->node->dive == BCP_DoNotDive)
@@ -1366,8 +1414,8 @@ BCP_lp_user::set_user_data_for_children(BCP_presolved_lp_brobj* best,
 {
     using_deprecated_set_user_data_for_children = true;
     set_user_data_for_children(best);
-    if (using_deprecated_set_user_data_for_children) {
-	printf("\
+    print(using_deprecated_set_user_data_for_children,
+	  "\
 *** WARNING *** WARNING *** WARNING *** WARNING *** WARNING *** WARNING ***\n\
 You have overridden\n\
   BCP_lp_user::set_user_data_for_children(BCP_presolved_lp_brobj* best)\n\
@@ -1378,7 +1426,6 @@ instead. The old version will go away, your code will still compile, but it\n\
 will not do what you intend it to be doing.\n\
 *** WARNING *** WARNING *** WARNING *** WARNING *** WARNING *** WARNING ***\n"\
 	       );
-    }
 }
 
 //#############################################################################
@@ -1387,9 +1434,8 @@ void
 BCP_lp_user::set_user_data_for_children(BCP_presolved_lp_brobj* best)
 {
     using_deprecated_set_user_data_for_children = false;
-    if (p->param(BCP_lp_par::ReportWhenDefaultIsExecuted)) {
-	printf(" LP: Default set_user_data_for_children() executed.\n");
-    }
+    print(p->param(BCP_lp_par::ReportWhenDefaultIsExecuted),
+	  "LP: Default set_user_data_for_children() executed.\n");
 }
 
 //#############################################################################
@@ -1398,9 +1444,8 @@ void
 BCP_lp_user::purge_slack_pool(const BCP_vec<BCP_cut*>& slack_pool,
 			      BCP_vec<int>& to_be_purged)
 {
-    if (p->param(BCP_lp_par::ReportWhenDefaultIsExecuted)) {
-	printf(" LP: Default purge_slack_pool() executed.\n");
-    }
+    print(p->param(BCP_lp_par::ReportWhenDefaultIsExecuted),
+	  "LP: Default purge_slack_pool() executed.\n");
 
     switch (p->param(BCP_lp_par::SlackCutDiscardingStrategy)) {
     case BCP_DiscardSlackCutsAtNewNode:

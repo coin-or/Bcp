@@ -5,6 +5,7 @@
 #include "BCP_tm_param.hpp"
 #include "BCP_parameters.hpp"
 
+#include "BCP_enum.hpp"
 #include "BCP_enum_tm.hpp"
 
 using std::make_pair;
@@ -29,15 +30,9 @@ void BCP_parameter_set<BCP_tm_par>::create_keyword_list() {
     keys.push_back(make_pair(BCP_string("BCP_DebugVpProcesses"),
 			     BCP_parameter(BCP_CharPar,
 					   DebugVpProcesses)));
-    keys.push_back(make_pair(BCP_string("BCP_AlgorithmicVariablesAreGenerated"),
+    keys.push_back(make_pair(BCP_string("BCP_GenerateVars"),
 			     BCP_parameter(BCP_CharPar,
-					   AlgorithmicVariablesAreGenerated)));
-    keys.push_back(make_pair(BCP_string("BCP_IndexedVariablesAreGenerated"),
-			     BCP_parameter(BCP_CharPar,
-					   IndexedVariablesAreGenerated)));
-    keys.push_back(make_pair(BCP_string("BCP_PriceInRootBeforePhase2"),
-			     BCP_parameter(BCP_CharPar,
-					   PriceInRootBeforePhase2)));
+					   GenerateVars)));
     keys.push_back(make_pair(BCP_string("BCP_ReportWhenDefaultIsExecuted"),
 			     BCP_parameter(BCP_CharPar,
 					   ReportWhenDefaultIsExecuted)));
@@ -92,6 +87,12 @@ void BCP_parameter_set<BCP_tm_par>::create_keyword_list() {
 
     //-------------------------------------------------------------------------
     // IntPar
+    keys.push_back(make_pair(BCP_string("BCP_WarmstartInfo"),
+			     BCP_parameter(BCP_IntPar,
+					   WarmstartInfo)));
+    keys.push_back(make_pair(BCP_string("BCP_MaxHeapSize"),
+			     BCP_parameter(BCP_IntPar,
+					   MaxHeapSize)));
     keys.push_back(make_pair(BCP_string("BCP_TmVerb_SingleLineInfoFrequency"),
 			     BCP_parameter(BCP_IntPar,
 					   TmVerb_SingleLineInfoFrequency)));
@@ -119,6 +120,15 @@ void BCP_parameter_set<BCP_tm_par>::create_keyword_list() {
     keys.push_back(make_pair(BCP_string("BCP_TmTimeout"),
 			     BCP_parameter(BCP_IntPar,
 					   TmTimeout)));
+    keys.push_back(make_pair(BCP_string("BCP_LPscheduler_MaxNodeIdNum"),
+			     BCP_parameter(BCP_IntPar,
+					   LPscheduler_MaxNodeIdNum)));
+    keys.push_back(make_pair(BCP_string("BCP_LPscheduler_MaxSbIdNum"),
+			     BCP_parameter(BCP_IntPar,
+					   LPscheduler_MaxSbIdNum)));
+    keys.push_back(make_pair(BCP_string("BCP_LPscheduler_MinSbIdNum"),
+			     BCP_parameter(BCP_IntPar,
+					   LPscheduler_MinSbIdNum)));
     //    keys.push_back(make_pair(BCP_string("BCP_"),
     // 			    BCP_parameter(BCP_IntPar,
     // 					  )));
@@ -149,6 +159,21 @@ void BCP_parameter_set<BCP_tm_par>::create_keyword_list() {
     keys.push_back(make_pair(BCP_string("BCP_TerminationGap_Relative"),
 			     BCP_parameter(BCP_DoublePar,
 					   TerminationGap_Relative)));
+    keys.push_back(make_pair(BCP_string("BCP_LPscheduler_OverEstimationStatic"),
+			     BCP_parameter(BCP_DoublePar,
+					   LPscheduler_OverEstimationStatic)));
+    keys.push_back(make_pair(BCP_string("BCP_LPscheduler_SwitchToRateThreshold"),
+			     BCP_parameter(BCP_DoublePar,
+					   LPscheduler_SwitchToRateThreshold)));
+    keys.push_back(make_pair(BCP_string("BCP_LPscheduler_FactorTimeHorizon"),
+			     BCP_parameter(BCP_DoublePar,
+					   LPscheduler_FactorTimeHorizon)));
+    keys.push_back(make_pair(BCP_string("BCP_LPscheduler_OverEstimationRate"),
+			     BCP_parameter(BCP_DoublePar,
+					   LPscheduler_OverEstimationRate)));
+    keys.push_back(make_pair(BCP_string("BCP_LPscheduler_MaxNodeIdRatio"),
+			     BCP_parameter(BCP_DoublePar,
+					   LPscheduler_MaxNodeIdRatio)));
     //    keys.push_back(make_pair(BCP_string("BCP_"),
     // 			    BCP_parameter(BCP_DoublePar,
     // 					  )));
@@ -204,10 +229,8 @@ void BCP_parameter_set<BCP_tm_par>::set_default_entries(){
     set_entry(DebugVgProcesses, false);
     set_entry(DebugCpProcesses, false);
     set_entry(DebugVpProcesses, false);
-    set_entry(AlgorithmicVariablesAreGenerated, false);
-    set_entry(IndexedVariablesAreGenerated, false);
+    set_entry(GenerateVars, false);
     set_entry(MessagePassingIsSerial, false);
-    set_entry(PriceInRootBeforePhase2, false);
     set_entry(ReportWhenDefaultIsExecuted, true);
     set_entry(TrimTreeBeforeNewPhase, false);
     set_entry(RemoveExploredBranches, false);
@@ -226,6 +249,8 @@ void BCP_parameter_set<BCP_tm_par>::set_default_entries(){
     set_entry(TmVerb_ReportDefault, true);
     //-------------------------------------------------------------------------
     // IntPar
+    set_entry(WarmstartInfo, BCP_WarmstartParent);
+    set_entry(MaxHeapSize, -1);
     set_entry(TmVerb_SingleLineInfoFrequency, 0);
     set_entry(TreeSearchStrategy, BCP_BestFirstSearch);
     set_entry(NiceLevel, 0);
@@ -235,6 +260,9 @@ void BCP_parameter_set<BCP_tm_par>::set_default_entries(){
     set_entry(VgProcessNum, 0);
     set_entry(VpProcessNum, 0);
     set_entry(TmTimeout, -1);
+    set_entry(LPscheduler_MaxNodeIdNum, 2000);
+    set_entry(LPscheduler_MaxSbIdNum, 100000);
+    set_entry(LPscheduler_MinSbIdNum, 1);
     //-------------------------------------------------------------------------
     // DoublePar
     set_entry(UnconditionalDiveProbability, 0.02);
@@ -245,6 +273,11 @@ void BCP_parameter_set<BCP_tm_par>::set_default_entries(){
     set_entry(TerminationGap_Absolute, 0.0);
     set_entry(TerminationGap_Relative, 0.0);
     set_entry(UpperBound, BCP_DBL_MAX);
+    set_entry(LPscheduler_OverEstimationStatic, 2.0);
+    set_entry(LPscheduler_SwitchToRateThreshold, 1.0); // stick to static
+    set_entry(LPscheduler_FactorTimeHorizon, 10.0);
+    set_entry(LPscheduler_OverEstimationRate, 2.0);
+    set_entry(LPscheduler_MaxNodeIdRatio, 0.2);
     //-------------------------------------------------------------------------
     // StringPar
     set_entry(ReadRootCutsFrom, "");

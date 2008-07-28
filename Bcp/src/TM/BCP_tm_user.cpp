@@ -64,13 +64,15 @@ BCP_tm_user::unpack_feasible_solution(BCP_buffer& buf)
     int bcpind;
     while (--varnum >= 0) {
 	buf.unpack(val);
-	// these vars are stored only in the solution, so noone cares if we flip
-	// negative bcpind's
+	// these vars are stored only in the solution, so noone cares if we
+	// flip negative bcpind's
 	buf.unpack(bcpind);
 	BCP_var* var = p->unpack_var_without_bcpind(buf);
 	var->set_bcpind(bcpind < 0 ? -bcpind : bcpind);
 	soln->add_entry(var, val);
     }
+    buf.unpack(val);
+    soln->set_objective_value(val);
 
     return soln;
 }
@@ -86,82 +88,8 @@ BCP_tm_user::replace_solution(const BCP_solution* old_sol,
 
 //#############################################################################
 
-void
-BCP_tm_user::pack_warmstart(const BCP_warmstart* ws, BCP_buffer& buf)
-{
-    if (p->param(BCP_tm_par::ReportWhenDefaultIsExecuted)) {
-	printf(" TM: Default BCP_tm_user::pack_warmstart() executed.\n");
-    }
-    BCP_pack_warmstart(ws, buf);
-}
-
-//-----------------------------------------------------------------------------
-
-BCP_warmstart*
-BCP_tm_user::unpack_warmstart(BCP_buffer& buf)
-{
-    if (p->param(BCP_tm_par::ReportWhenDefaultIsExecuted)) {
-	printf(" TM: Default BCP_tm_user::unpack_warmstart() executed.\n");
-    }
-    return BCP_unpack_warmstart(buf);
-}
-
-//#############################################################################
-
-void
-BCP_tm_user::pack_var_algo(const BCP_var_algo* var, BCP_buffer& buf)
-{
-    throw BCP_fatal_error("\
-BCP_tm_user::pack_var_algo() invoked but not overridden!\n");
-}
-
-//-----------------------------------------------------------------------------
-BCP_var_algo*
-BCP_tm_user::unpack_var_algo(BCP_buffer& buf)
-{
-    throw BCP_fatal_error("\
-BCP_tm_user::unpack_var_algo() invoked but not overridden!\n");
-    return 0; // to satisfy aCC on HP-UX
-}
-      
-//-----------------------------------------------------------------------------
-void
-BCP_tm_user::pack_cut_algo(const BCP_cut_algo* cut, BCP_buffer& buf)
-{
-    throw BCP_fatal_error("\
-BCP_tm_user::pack_cut_algo() invoked but not overridden!\n");
-}
-
-//-----------------------------------------------------------------------------
-BCP_cut_algo*
-BCP_tm_user::unpack_cut_algo(BCP_buffer& buf)
-{
-    throw BCP_fatal_error("\
-BCP_tm_user::unpack_cut_algo() invoked but not overridden!\n");
-    return 0; // to satisfy aCC on HP-UX
-}
-
-//-----------------------------------------------------------------------------
-void
-BCP_tm_user::pack_user_data(const BCP_user_data* ud, BCP_buffer& buf)
-{
-    throw BCP_fatal_error("\
-BCP_tm_user::pack_user_data() invoked but not overridden!\n");
-}
-
-//-----------------------------------------------------------------------------
-BCP_user_data*
-BCP_tm_user::unpack_user_data(BCP_buffer& buf)
-{
-    throw BCP_fatal_error("\
-BCP_tm_user::unpack_user_data() invoked but not overridden!\n");
-    return 0; // to satisfy aCC on HP-UX
-}
-
-//#############################################################################
-
 /** What is the process id of the current process */
-const BCP_proc_id*
+int
 BCP_tm_user::process_id() const
 {
     return p->get_process_id();
@@ -169,11 +97,10 @@ BCP_tm_user::process_id() const
 
 /** Send a message to a particular process */
 void
-BCP_tm_user::send_message(const BCP_proc_id* const target,
-			  const BCP_buffer& buf)
+BCP_tm_user::send_message(const int target, const BCP_buffer& buf)
 {
     p->msg_env->send(target, BCP_Msg_User, buf);
-}    
+}
 
 /** Broadcast the message to all processes of the given type */
 void
@@ -182,7 +109,8 @@ BCP_tm_user::broadcast_message(const BCP_process_t proc_type,
 {
     switch (proc_type) {
     case BCP_ProcessType_LP:
-	p->msg_env->multicast(p->slaves.lp, BCP_Msg_User, buf);
+        p->msg_env->multicast(p->lp_procs.size(), &p->lp_procs[0],
+			      BCP_Msg_User, buf);
 	break;
     case BCP_ProcessType_CP:
 	throw BCP_fatal_error("\
@@ -192,20 +120,30 @@ BCP_tm_user::broadcast_message: CP not yet implemented\n");
 	throw BCP_fatal_error("\
 BCP_tm_user::broadcast_message: VP not yet implemented\n");
 	break;
+#if ! defined(BCP_ONLY_LP_PROCESS_HANDLING_WORKS)
     case BCP_ProcessType_CG:
-	p->msg_env->multicast(p->slaves.cg, BCP_Msg_User, buf);
+	p->msg_env->multicast(*p->slaves.cg, BCP_Msg_User, buf);
 	break;
     case BCP_ProcessType_VG:
-	p->msg_env->multicast(p->slaves.vg, BCP_Msg_User, buf);
+	p->msg_env->multicast(*p->slaves.vg, BCP_Msg_User, buf);
 	break;
+#endif
     case BCP_ProcessType_Any:
-	p->msg_env->multicast(p->slaves.lp, BCP_Msg_User, buf);
-	p->msg_env->multicast(p->slaves.cg, BCP_Msg_User, buf);
-	p->msg_env->multicast(p->slaves.vg, BCP_Msg_User, buf);
+        p->msg_env->multicast(p->lp_procs.size(), &p->lp_procs[0],
+			      BCP_Msg_User, buf);
+#if ! defined(BCP_ONLY_LP_PROCESS_HANDLING_WORKS)
+	p->msg_env->multicast(*p->slaves.cg, BCP_Msg_User, buf);
+	p->msg_env->multicast(*p->slaves.vg, BCP_Msg_User, buf);
+#endif
 	break;
     case BCP_ProcessType_TM:
+    case BCP_ProcessType_TS:
+    case BCP_ProcessType_EndProcess:
 	throw BCP_fatal_error("\
-BCP_tm_user::broadcast_message: broadcast to TM itself?!...\n");
+BCP_tm_user::broadcast_message: broadcast to TM/TS/EndProcess...\n");
+    default:
+      throw BCP_fatal_error("BCP_tm_user::Unknown process type (%i)\n",
+			    proc_type);
     }
 }
 
@@ -236,8 +174,7 @@ BCP_tm_user::initialize_core(BCP_vec<BCP_var_core*>& vars,
 void
 BCP_tm_user::create_root(BCP_vec<BCP_var*>& added_vars,
 			 BCP_vec<BCP_cut*>& added_cuts,
-			 BCP_user_data*& user_data,
-			 BCP_pricing_status& pricing_status)
+			 BCP_user_data*& user_data)
 {
     if (p->param(BCP_tm_par::ReportWhenDefaultIsExecuted)) {
 	printf(" TM: Default BCP_tm_user::create_root() executed.\n");
@@ -279,41 +216,9 @@ void
 BCP_tm_user::display_final_information(const BCP_lp_statistics& lp_stat)
 {
     if (p->param(BCP_tm_par::TmVerb_FinalStatistics)) {
-	double runtime = CoinCpuTime() - p->start_time;
-	int processed = -1;
-	if (runtime > p->param(BCP_tm_par::MaxRunTime) && p->has_ub()) {
-	    // ran out of time... count the number of processed nodes so those
-	    // that are over ub but were not yet sent to an LP are counted as
-	    // processed
-	    processed = 0;
-	    int over_ub = 0;
-	    for (BCP_vec<BCP_tm_node*>::iterator node = p->search_tree.begin();
-		 node != p->search_tree.end();
-		 ++node) {
-		BCP_tm_node_status st = (*node)->status;
-		if (st == BCP_ProcessedNode ||
-		    st == BCP_PrunedNode_OverUB ||
-		    st == BCP_PrunedNode_Infeas ||
-		    st == BCP_PrunedNode_Discarded) {
-		    processed++;
-		    continue;
-		}
-		if ((st == BCP_ActiveNode || st == BCP_CandidateNode) &&
-		    p->over_ub((*node)->true_lower_bound())) {
-		    over_ub++;
-		    continue;
-		}
-	    }
-	    if (processed != p->search_tree.processed()) {
-		printf("WARNING! processed != p->search_tree.processed()\n");
-		printf("WARNING! Please file a bug report.\n");
-	    }
-	} else {
-	    processed = p->search_tree.processed();
-	}
-	printf("TM: Running time: %.3f\n", runtime);
+	printf("TM: Running time: %.3f\n", CoinWallclockTime() - p->start_time);
 	printf("TM: search tree size: %i   ( processed %i )   max depth: %i\n",
-	       int(p->search_tree.size()), processed,
+	       int(p->search_tree.size()), int(p->search_tree.processed()),
 	       p->search_tree.maxdepth());
 	lp_stat.display();
 
@@ -332,28 +237,39 @@ BCP_tm_user::display_final_information(const BCP_lp_statistics& lp_stat)
 //--------------------------------------------------------------------------
 // Initialize new phase 
 void
-BCP_tm_user::init_new_phase(int phase, BCP_column_generation& colgen)
+BCP_tm_user::init_new_phase(int phase,
+			    BCP_column_generation& colgen,
+			    CoinSearchTreeBase*& candidates)
 {
     if (p->param(BCP_tm_par::ReportWhenDefaultIsExecuted)) {
 	printf(" TM: Default init_new_phase() executed.\n");
     }
     colgen = BCP_DoNotGenerateColumns_Fathom;
+    switch (p->param(BCP_tm_par::TreeSearchStrategy)) {
+    case BCP_BestFirstSearch:
+	candidates = new CoinSearchTree<CoinSearchTreeCompareBest>;
+	break;
+    case BCP_BreadthFirstSearch:
+	candidates = new CoinSearchTree<CoinSearchTreeCompareBreadth>;
+	break;
+    case BCP_DepthFirstSearch:
+	candidates = new CoinSearchTree<CoinSearchTreeCompareDepth>;
+	break;
+    case BCP_PreferredFirstSearch:
+	candidates = new CoinSearchTree<CoinSearchTreeComparePreferred>;
+	break;
+    }
 }
 
 //--------------------------------------------------------------------------
 // Compare tree nodes
-bool
-BCP_tm_user::compare_tree_nodes(const BCP_tm_node* node0,
-				const BCP_tm_node* node1)
+void
+BCP_tm_user::change_candidate_heap(CoinSearchTreeManager& candidates,
+				   const bool new_solution)
 {
-    switch (p->param(BCP_tm_par::TreeSearchStrategy)) {
-    case BCP_BestFirstSearch:
-	return node0->quality() < node1->quality();
-    case BCP_BreadthFirstSearch:
-	return node0->index() < node1->index();
-    case BCP_DepthFirstSearch:
-	return node0->index() > node1->index();
+    if (new_solution) {
+	candidates.newSolution(p->ub());
+    } else {
+	candidates.reevaluateSearchStrategy();
     }
-    // fake return
-    return true;
 }

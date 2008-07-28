@@ -9,6 +9,8 @@
 
 #include "OsiSolverInterface.hpp"
 #include "OsiAuxInfo.hpp"
+#include "OsiBranchingObject.hpp"
+#include "OsiChooseVariable.hpp"
 
 #include "BCP_USER.hpp"
 
@@ -23,7 +25,7 @@
 
 #include "BCP_enum.hpp"
 #include "BCP_enum_branch.hpp"
-
+#include "BCP_enum_process_t.hpp"
 #include "BCP_lp_param.hpp"
 #include "BCP_lp_result.hpp"
 #include "BCP_lp_pool.hpp"
@@ -32,6 +34,7 @@
 //#############################################################################
 
 class BCP_lp_prob;
+class BCP_problem_core;
 
 //#############################################################################
 
@@ -63,13 +66,13 @@ class BCP_lp_prob;
 	  perform the necessary function. This behavior is correct since such
 	  methods are invoked only if the parameter settings drive the flow of
 	  the algorithm that way, in which case the user better implement those
-	  methods (e.g., create_indexed_var()).
+	  methods
      <li> A default is given. Frequently there are multiple defaults and
           parameters govern which one is selected (e.g., test_feasibility()).
    </ul>
 */
 
-class BCP_lp_user {
+class BCP_lp_user : public BCP_user_class {
 private:
     BCP_lp_user(const BCP_lp_user&);
     BCP_lp_user& operator=(const BCP_lp_user&);
@@ -99,6 +102,9 @@ public:
     /*@{*/
     /// Return what is the best known upper bound (might be BCP_DBL_MAX)
     double upper_bound() const;
+    /** Return true / false depending on whether the lb argument is over the
+	current upper bound or not. */
+    bool over_ub(double lb) const;
     /// Return the phase the algorithm is in
     int current_phase() const;
     /// Return the level of the search tree node being processed
@@ -107,10 +113,14 @@ public:
     int current_index() const;
     /// Return the iteration count within the search tree node being processed
     int current_iteration() const;
+    /// Return when the LP process started
+    double start_time() const;
     /** Return a pointer to the BCP_user_data structure the user (may have)
 	stored in this node */
     BCP_user_data* get_user_data();
     /*@}*/
+    /** A method to print a message with the process id */
+    void print(const bool ifprint, const char * format, ...) const;
 
     /**@name Methods to get/set BCP parameters on the fly */
     /*@{*/
@@ -187,51 +197,21 @@ public:
     virtual void
     unpack_module_data(BCP_buffer & buf);
 
-    /**@name Methods that pack/unpack warmstart, var_algo and cut_algo objects.
-
-       The packing methods take an object and a buffer as
-       an argument and the user is supposed to pack the object into the buffer.
-
-       The argument of the unpacking methods is just the buffer. The user
-       is supposed to return a pointer to the unpacked object.
-    */
-    /*@{*/
-    /** Pack warmstarting information */
-    virtual void
-    pack_warmstart(const BCP_warmstart* ws, BCP_buffer& buf);
-    /** Unpack warmstarting information */
-    virtual BCP_warmstart*
-    unpack_warmstart(BCP_buffer& buf);
-    
-    /** Pack an algorithmic variable */
-    virtual void
-    pack_var_algo(const BCP_var_algo* var, BCP_buffer& buf);
-    /** Unpack an algorithmic variable */
-    virtual BCP_var_algo*
-    unpack_var_algo(BCP_buffer& buf);
-      
-    /** Pack an algorithmic cut */
-    virtual void
-    pack_cut_algo(const BCP_cut_algo* cut, BCP_buffer& buf);
-    /** Unpack an algorithmic cut */
-    virtual BCP_cut_algo*
-    unpack_cut_algo(BCP_buffer& buf);
-
-    /** Pack an user data */
-    virtual void
-    pack_user_data(const BCP_user_data* ud, BCP_buffer& buf);
-    /** Unpack an user data */
-    virtual BCP_user_data*
-    unpack_user_data(BCP_buffer& buf);
-    /*@}*/
     /*@}*/
 
     //=========================================================================
     /** What is the process id of the current process */
-    const BCP_proc_id* process_id() const;
+    int process_id() const;
+    /** the process id of the parent */
+    int parent() const;
     /** Send a message to a particular process */
     void
-    send_message(const BCP_proc_id* const target, const BCP_buffer& buf);
+    send_message(const int target, const BCP_buffer& buf,
+		 BCP_message_tag tag = BCP_Msg_User);
+    /** Wait for a message and receive it */
+    void
+    receive_message(const int sender, BCP_buffer& buf,
+		    BCP_message_tag tag = BCP_Msg_User);
     /** Broadcast the message to all processes of the given type */
     void
     broadcast_message(const BCP_process_t proc_type, const BCP_buffer& buf);
@@ -252,6 +232,14 @@ public:
 	the BCP_tm_user class. */
     virtual OsiSolverInterface *
     initialize_solver_interface();
+
+    //=========================================================================
+    /** Create the list of objects that can be used for branching (simple
+	integer vars and SOS sets). If nothing is done here then for each
+	search tree node (just before starting to process the node) BCP will
+	scan the variables and the matrix for candidates. */
+    virtual void
+    initialize_int_and_sos_list(std::vector<OsiObject *>& intAndSosObjects);
     
     //=========================================================================
     /** Initializing a new search tree node.
@@ -280,6 +268,15 @@ public:
 				    BCP_vec<double>& var_new_bd,
 				    BCP_vec<int>& cut_changed_pos,
 				    BCP_vec<double>& cut_new_bd);
+
+    //=========================================================================
+    /** Load the problem specified by core, vars, and cuts into the solver
+	interface. If the solver is an LP solver then the default is fine. If
+	it's an NLP then the user has to do this herself.
+    */
+    virtual void
+    load_problem(OsiSolverInterface& osi, BCP_problem_core* core,
+		 BCP_var_set& vars, BCP_cut_set& cuts);
 
     //=========================================================================
     /** Modify parameters of the LP solver before optimization.
@@ -518,48 +515,11 @@ public:
     /*@}*/
 
     //=========================================================================
-    // Functions related to indexed vars. Must be written if BCP is supposed to
-    // track the indexed variables yet to be priced out, i.e., if the parameter
-    // MaintainIndexedVarPricingList is set to true.
-
-    /**@name
-       Methods related to indexed variables.
-
-       These methods must be overridden if and only if BCP is supposed to
-       track the indexed variables yet to be priced out, i.e., if the
-       parameter MaintainIndexedVarPricingList is set to true.
-    */
-    // *FIXME* : A link here to the description of various variable types?
-    /*@{*/
-    /** Return the index of the indexed variable following
-	<code>prev_index</code>.
-	Return -1 if there are no more indexed variables. If
-	<code>prev_index</code> is -1 then return the index of the first
-	indexed variable. <br> Default: Return -1. */
-    virtual int
-    next_indexed_var(int prev_index);
-    /** Create the variable corresponding to the given <code>index</code>. The
-	routine should return a pointer to a newly created indexed variable
-	and return the corresponding column in <code>col</code>.
-	<br>
-	Default: throw an exception.
-    */
-    virtual BCP_var_indexed*
-    create_indexed_var(int index, const BCP_vec<BCP_cut*>& cuts,
-		       BCP_col& col);
-    /*@}*/
-
-    //=========================================================================
     /** Restoring feasibility.
 
         This method is invoked before fathoming a search tree node that has
 	been found infeasible <em>and</em> the variable pricing did not
 	generate any new variables.
-
-	If the MaintainIndexedVarPricingList is set to true then BCP will take
-	care of going through the indexed variables to see if any will restore
-	feasibility and the user has to check only the algorithmic variables.
-	Otherwise the user has to check all variables here.
     */
     virtual void
     restore_feasibility(const BCP_lp_result& lpres,
@@ -794,16 +754,26 @@ public:
 	@param local_cut_pool the local pool that holds violated cuts. In case
 	of continuing with the node the best so many cuts will be added
 	to the formulation (the most violated ones).
-	@param cands the generated branching candidates. */
+	@param cands the generated branching candidates.
+	@param force_branch indicate whether to force branching regardless
+	       of the size of the local cut/var pools 
+    */
     virtual BCP_branching_decision
     select_branching_candidates(const BCP_lp_result& lpres,
 				const BCP_vec<BCP_var*>& vars,
 				const BCP_vec<BCP_cut*>& cuts,
 				const BCP_lp_var_pool& local_var_pool,
 				const BCP_lp_cut_pool& local_cut_pool,
-				BCP_vec<BCP_lp_branching_object*>& cands);
+				BCP_vec<BCP_lp_branching_object*>& cands,
+				bool force_branch = false);
     /**@name Helper functions for select_branching_candidates() */
     /*@{*/
+    virtual int
+    try_to_branch(OsiBranchingInformation& branchInfo,
+		  OsiSolverInterface* solver,
+		  OsiChooseVariable* choose,
+		  OsiBranchingObject*& branchObject,
+		  bool allowVarFix);
     /** Select the "close-to-half" variables for strong branching. Variables
 	that are at least <code>etol</code> away from integrality are
 	considered and <code>to_be_selected</code> of them will be picked up.
@@ -855,7 +825,7 @@ public:
     /** Decide what to do with the children of the selected branching object.
         Fill out the <code>_child_action</code> field in <code>best</code>.
         This will specify for every child what to do with it. Possible values
-        for each individual child are <code>BCP_PruneChild</code>,
+        for each individual child are <code>BCP_FathomChild</code>,
         <code>BCP_ReturnChild</code> and <code>BCP_KeepChild</code>. There can
         be at most child with this last action specified. It means that in case
         of diving this child will be processed by this LP process as the next

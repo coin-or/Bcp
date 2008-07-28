@@ -11,17 +11,6 @@
 #include "BCP_solution.hpp"
 #include "BCP_tm_user.hpp"
 
-static inline void
-BCP_tm_send_process_type_and_params(BCP_tm_prob& p,
-				    BCP_vec<BCP_proc_id*>::const_iterator beg,
-				    BCP_vec<BCP_proc_id*>::const_iterator end,
-				    BCP_process_t ptype);
-
-static void
-BCP_tm_distribute_info_to_new_procs(BCP_tm_prob& p,
-				    BCP_vec<BCP_proc_id*>& procs,
-				    BCP_process_t ptype);
-
 static void
 BCP_tm_change_config(BCP_tm_prob& p, BCP_buffer& buf);
 
@@ -29,14 +18,16 @@ BCP_tm_change_config(BCP_tm_prob& p, BCP_buffer& buf);
 
 void BCP_tm_idle_processes(BCP_tm_prob& p)
 {
-    p.msg_env->multicast(p.slaves.all, BCP_Msg_FinishedBCP);
+    p.msg_env->multicast(p.lp_procs.size(), &p.lp_procs[0],
+			 BCP_Msg_FinishedBCP);
 }
 
 //#############################################################################
 
 void BCP_tm_stop_processes(BCP_tm_prob& p)
 {
-    p.msg_env->multicast(p.slaves.all, BCP_Msg_FinishedBCP);
+    p.msg_env->multicast(p.lp_procs.size(), &p.lp_procs[0],
+			 BCP_Msg_FinishedBCP);
 }
 
 //#############################################################################
@@ -45,23 +36,21 @@ void BCP_tm_start_processes(BCP_tm_prob& p)
 {
     const BCP_string& exe = p.param(BCP_tm_par::ExecutableName);
 
-    p.slaves.all = new BCP_proc_array;
-   
-
     if (p.param(BCP_tm_par::LpProcessNum) > 0) {
 	const bool debug = p.param(BCP_tm_par::DebugLpProcesses) != 0;
 	const int  num = p.param(BCP_tm_par::LpProcessNum);
 	const BCP_vec<BCP_string>& machines = p.param(BCP_tm_par::LpMachines);
-	if (machines.size() == 0) {
-	    p.slaves.lp= p.msg_env->start_processes(exe, num, debug);
-	} else {
-	    p.slaves.lp= p.msg_env->start_processes(exe, num, machines, debug);
+	p.lp_procs.insert(p.lp_procs.end(), num, -1);
+	bool success = machines.size() == 0 ?
+	  p.msg_env->start_processes(exe, num, debug, &p.lp_procs[0]) :
+	  p.msg_env->start_processes(exe, num, machines, debug, &p.lp_procs[0]);
+	if (! success) {
+	  throw BCP_fatal_error("Failed to start up the LP processes\n");
 	}
-	p.slaves.all->add_procs(p.slaves.lp->procs().begin(),
-				p.slaves.lp->procs().end());
-	p.active_nodes.insert(p.active_nodes.end(), num, 0);
+	p.lp_scheduler.add_free_ids(p.lp_procs.size(), &p.lp_procs[0]);
     }
 
+#if ! defined(BCP_ONLY_LP_PROCESS_HANDLING_WORKS)
     if (p.param(BCP_tm_par::CgProcessNum) > 0) {
 	const bool debug = p.param(BCP_tm_par::DebugCgProcesses) != 0;
 	const int  num = p.param(BCP_tm_par::CgProcessNum);
@@ -113,138 +102,164 @@ void BCP_tm_start_processes(BCP_tm_prob& p)
 	p.slaves.all->add_procs(p.slaves.vp->procs().begin(),
 				p.slaves.vp->procs().end());
     }
+#endif
 }
 
 //#############################################################################
 
 void BCP_tm_notify_about_new_phase(BCP_tm_prob& p)
 {
-    p.msg_env->multicast(p.slaves.all, BCP_Msg_NextPhaseStarts);
+  p.msg_env->multicast(p.lp_procs.size(), &p.lp_procs[0],
+		       BCP_Msg_NextPhaseStarts);
 }
 
 //#############################################################################
 
-static inline void
-BCP_tm_send_process_type_and_params(BCP_tm_prob& p,
-				    BCP_vec<BCP_proc_id*>::const_iterator beg,
-				    BCP_vec<BCP_proc_id*>::const_iterator end,
-				    BCP_process_t ptype)
+template <typename T> void
+BCP_tm_initialize_process_type(BCP_tm_prob& p,
+			       BCP_process_t ptype,
+			       BCP_parameter_set<T>& par,
+			       int num, const int* pids)
 {
-    if (beg != end) {
-	p.msg_buf.clear();
-	p.msg_buf.pack(ptype);
-	p.msg_env->multicast(beg, end, BCP_Msg_ProcessType, p.msg_buf);
-
-	p.msg_buf.clear();
-	switch (ptype) {
-	case BCP_ProcessType_LP:
-	    p.slave_pars.lp.pack(p.msg_buf);
-	    p.msg_buf.pack(p.ub());
-	    break;
-	case BCP_ProcessType_CP:
-	    // p.slave_pars.cp.pack(p.msg_buf);
-	    break;
-	case BCP_ProcessType_VP:
-	    // p.slave_pars.vp.pack(p.msg_buf);
-	    break;
-	case BCP_ProcessType_CG:
-	    p.slave_pars.cg.pack(p.msg_buf);
-	    break;
-	case BCP_ProcessType_VG:
-	    p.slave_pars.vg.pack(p.msg_buf);
-	    break;
-	case BCP_ProcessType_Any:
-	    throw BCP_fatal_error("\
-Trying to send process params to BCP_ProcessType_Any!\n");
-	case BCP_ProcessType_TM:
-	    throw BCP_fatal_error("\
-Trying to send process params to BCP_ProcessType_TM!\n");
-	}
-	p.msg_env->multicast(beg, end, BCP_Msg_ProcessParameters, p.msg_buf);
-    }
-}
-
-//#############################################################################
-
-void BCP_tm_notify_processes(BCP_tm_prob& p)
-{
-    // Notify the processes what kind of process they are and also send over
-    // the appropriate parameters
-    if (p.slaves.lp) {
-	BCP_tm_send_process_type_and_params(p,
-					    p.slaves.lp->procs().begin(),
-					    p.slaves.lp->procs().end(),
-					    BCP_ProcessType_LP);
-    }
-  
-    if (p.slaves.cg) {
-	BCP_tm_send_process_type_and_params(p,
-					    p.slaves.cg->procs().begin(),
-					    p.slaves.cg->procs().end(),
-					    BCP_ProcessType_CG);
+    if (num == 0) {
+	return;
     }
 
-    if (p.slaves.vg) {
-	BCP_tm_send_process_type_and_params(p,
-					    p.slaves.vg->procs().begin(),
-					    p.slaves.vg->procs().end(),
-					    BCP_ProcessType_VG);
-    }
+    p.msg_buf.clear();
+    p.msg_buf.pack(ptype);
+    p.msg_buf.pack(p.ub());
+    p.msg_env->multicast(num, pids, BCP_Msg_ProcessType, p.msg_buf);
 
-    if (p.slaves.cp) {
-	BCP_tm_send_process_type_and_params(p,
-					    p.slaves.cp->procs().begin(),
-					    p.slaves.cp->procs().end(),
-					    BCP_ProcessType_CP);
-    }
+    p.msg_buf.clear();
+    par.pack(p.msg_buf);
+    const double wallclockInit = CoinWallclockTime(-1);
+    p.msg_buf.pack(wallclockInit);
+    p.msg_buf.pack(p.start_time);
+    p.msg_env->multicast(num, pids, BCP_Msg_ProcessParameters, p.msg_buf);
 
-    if (p.slaves.vp) {
-	BCP_tm_send_process_type_and_params(p,
-					    p.slaves.vp->procs().begin(),
-					    p.slaves.vp->procs().end(),
-					    BCP_ProcessType_VP);
-    }
-
-}
-   
-//#############################################################################
-
-void BCP_tm_distribute_core(BCP_tm_prob& p)
-{
     p.msg_buf.clear();
     p.core->pack(p.msg_buf);
-    p.msg_env->multicast(p.slaves.all, BCP_Msg_CoreDescription, p.msg_buf);
+    p.msg_env->multicast(num, pids, BCP_Msg_CoreDescription, p.msg_buf);
+
+    p.msg_buf.clear();
+    p.user->pack_module_data(p.msg_buf, ptype);
+    p.msg_env->multicast(num, pids, BCP_Msg_InitialUserInfo, p.msg_buf);
+}
+
+//-----------------------------------------------------------------------------
+
+template <typename T> void
+BCP_tm_initialize_process_type(BCP_tm_prob& p,
+			       BCP_process_t ptype,
+			       BCP_parameter_set<T>& par,
+			       const std::vector<int>& pids)
+{
+  BCP_tm_initialize_process_type(p, ptype, par, pids.size(), &pids[0]);
 }
 
 //#############################################################################
 
-void BCP_tm_distribute_user_info(BCP_tm_prob& p)
+void
+BCP_tm_notify_process_type(BCP_tm_prob& p, BCP_process_t ptype,
+			   int num, const int* pids)
 {
-    if (p.slaves.lp->size()) {
-	p.msg_buf.clear();
-	p.user->pack_module_data(p.msg_buf, BCP_ProcessType_LP);
-	p.msg_env->multicast(p.slaves.lp, BCP_Msg_InitialUserInfo, p.msg_buf);
+    switch (ptype) {
+    case BCP_ProcessType_LP:
+	BCP_tm_initialize_process_type(p, BCP_ProcessType_LP, p.slave_pars.lp,
+				       num, pids);
+	break;
+    case BCP_ProcessType_TS:
+	BCP_tm_initialize_process_type(p, BCP_ProcessType_TS, p.slave_pars.ts,
+				       num, pids);
+	break;
+#if ! defined(BCP_ONLY_LP_PROCESS_HANDLING_WORKS)
+    case BCP_ProcessType_CP:
+// 	BCP_tm_initialize_process_type(p, BCP_ProcessType_CP, p.slave_pars.cp,
+// 				       procs ? *procs : p.slaves.cp->procs());
+	break;
+    case BCP_ProcessType_VP:
+// 	BCP_tm_initialize_process_type(p, BCP_ProcessType_VP, p.slave_pars.vp,
+// 				       procs ? *procs : p.slaves.vp->procs());
+	break;
+    case BCP_ProcessType_CG:
+	BCP_tm_initialize_process_type(p, BCP_ProcessType_CG, p.slave_pars.cg,
+				       procs ? *procs : p.slaves.cg->procs());
+	break;
+    case BCP_ProcessType_VG:
+	BCP_tm_initialize_process_type(p, BCP_ProcessType_VG, p.slave_pars.vg,
+				       procs ? *procs : p.slaves.vg->procs());
+	break;
+#endif
+    default:
+	throw BCP_fatal_error("Trying to notify bad process type\n");
     }
-    if (p.slaves.cg) {
-	p.msg_buf.clear();
-	p.user->pack_module_data(p.msg_buf, BCP_ProcessType_CG);
-	p.msg_env->multicast(p.slaves.cg, BCP_Msg_InitialUserInfo, p.msg_buf);
-    }
-    if (p.slaves.cp) {
-	p.msg_buf.clear();
-	p.user->pack_module_data(p.msg_buf, BCP_ProcessType_CP);
-	p.msg_env->multicast(p.slaves.cp, BCP_Msg_InitialUserInfo, p.msg_buf);
-    }
-    if (p.slaves.vg) {
-	p.msg_buf.clear();
-	p.user->pack_module_data(p.msg_buf, BCP_ProcessType_VG);
-	p.msg_env->multicast(p.slaves.vg, BCP_Msg_InitialUserInfo, p.msg_buf);
-    }
-    if (p.slaves.vp) {
-	p.msg_buf.clear();
-	p.user->pack_module_data(p.msg_buf, BCP_ProcessType_VP);
-	p.msg_env->multicast(p.slaves.vp, BCP_Msg_InitialUserInfo, p.msg_buf);
-    }
+}
+
+//-----------------------------------------------------------------------------
+
+void
+BCP_tm_notify_process_type(BCP_tm_prob& p, BCP_process_t ptype,
+			   const std::vector<int>& pids)
+{
+  BCP_tm_notify_process_type(p, ptype, pids.size(), &pids[0]);
+}
+  
+//#############################################################################
+
+void
+BCP_tm_notify_processes(BCP_tm_prob& p)
+{
+    BCP_tm_notify_process_type(p, BCP_ProcessType_LP, p.lp_procs);
+#if ! defined(BCP_ONLY_LP_PROCESS_HANDLING_WORKS)
+    BCP_tm_notify_process_type(p, BCP_ProcessType_CG, &p.slaves.cg->procs());
+    BCP_tm_notify_process_type(p, BCP_ProcessType_VG, &p.slaves.vg->procs());
+    BCP_tm_notify_process_type(p, BCP_ProcessType_CP, &p.slaves.cp->procs());
+    BCP_tm_notify_process_type(p, BCP_ProcessType_VP, &p.slaves.vp->procs());
+#endif
+}
+
+//#############################################################################
+
+void
+BCP_tm_broadcast_ub(BCP_tm_prob& p)
+{
+  p.msg_buf.clear();
+  p.msg_buf.pack(p.ub());
+  p.msg_env->multicast(p.lp_procs.size(), &p.lp_procs[0],
+		       BCP_Msg_UpperBound, p.msg_buf);
+#if ! defined(BCP_ONLY_LP_PROCESS_HANDLING_WORKS)
+#endif
+}
+
+//#############################################################################
+
+void
+BCP_tm_rebroadcast_root_warmstart(BCP_tm_prob& p)
+{
+  BCP_warmstart* ws = p.packer->unpack_warmstart(p.msg_buf);
+  p.msg_buf.clear();
+  p.packer->pack_warmstart(ws, p.msg_buf);
+  p.msg_env->multicast(p.lp_procs.size(), &p.lp_procs[0],
+		       BCP_Msg_WarmstartRoot, p.msg_buf);
+#if ! defined(BCP_ONLY_LP_PROCESS_HANDLING_WORKS)
+#endif
+  delete ws;
+}
+
+//#############################################################################
+
+void
+BCP_tm_provide_SB_processes(BCP_tm_prob& p)
+{
+  int sender = p.msg_buf.sender();
+  int branchNum;
+  p.msg_buf.unpack(branchNum);
+  int * pids = new int[branchNum];
+  int numIds = p.lp_scheduler.request_sb_ids(branchNum, pids);
+  p.msg_buf.clear();
+  p.msg_buf.pack(pids, numIds);
+  p.msg_env->send(sender, BCP_Msg_ProcessList, p.msg_buf);
+  delete[] pids;
 }
 
 //#############################################################################
@@ -255,7 +270,10 @@ void
 BCP_tm_prob::process_message()
 {
     BCP_tm_node* node;
-    BCP_proc_id * sender;
+    int sender;
+    int id;
+    std::map<int, BCP_tm_node_to_send*>::iterator index__node;
+    BCP_tm_node_to_send* node_to_send;
 
     // msg_counter counts the number of incoming messages. Every so often
     // (always when there's no message in the buffer) we check that every
@@ -264,7 +282,7 @@ BCP_tm_prob::process_message()
     // Of course, this makes sense only if the computing environment in NOT
     // serial.
     static int msg_count = 0;
-    static const int test_frequency = 1;
+    // static const int test_frequency = 1;
 
     ++msg_count;
 
@@ -279,10 +297,6 @@ BCP_tm_prob::process_message()
 
     case BCP_Msg_UpperBound:
 	throw BCP_fatal_error("TM: Got BCP_Msg_UpperBound message!\n");
-	break;
-
-    case BCP_Msg_PricedRoot:
-	BCP_tm_unpack_priced_root(*this, msg_buf);
 	break;
 
     case BCP_Msg_NodeDescription_OverUB:
@@ -341,27 +355,33 @@ BCP_tm_prob::process_message()
 			printf("TM: Solution found at %.3f sec.\n",
 			       CoinCpuTime() - start_time);
 		    }
+		    const int tree_size = search_tree.size();
+		    const int tree_proc = search_tree.processed();
+		    const int cand_list_size = candidate_list.size();
+		    const int cand_list_ins = candidate_list.numInserted();
+		    char bdstr[1000];
+		    
 		    if (upper_bound > BCP_DBL_MAX/10) {
-			printf("\
-TM: Solution value: %f (best solution value so far: infinity)\n",
-			       new_sol->objective_value());
+		      sprintf(bdstr, "infinity");
 		    } else {
-			printf("\
-TM: Solution value: %f (best solution value so far: %f)\n",
-			       new_sol->objective_value(), upper_bound);
+		      sprintf(bdstr, "%f", upper_bound);
 		    }
+		    sender = msg_buf.sender();
+		    printf("TM %.3f: Sol from proc: %i  val: %f (prev best: %s)  tree size/procd: %i/%i  cand list ins/size: %i/%i\n",
+			   CoinWallclockTime() - start_time, sender,
+			   new_sol->objective_value(), bdstr,
+			   tree_size, tree_proc,
+			   cand_list_ins, cand_list_size);
 		    if (allsol || (bettersol && better)) {
 			user->display_feasible_solution(new_sol);
 		    }
 		}
 		if (better) {
+		    user->change_candidate_heap(candidate_list, true);
 		    ub(new_sol->objective_value());
 		    delete feas_sol;
 		    feas_sol = new_sol;
-		    msg_buf.clear();
-		    msg_buf.pack(new_sol->objective_value());
-		    msg_env->multicast(slaves.all, BCP_Msg_UpperBound,
-				       msg_buf);
+		    BCP_tm_broadcast_ub(*this);
 		} else {
 		    delete new_sol;
 		}
@@ -369,26 +389,84 @@ TM: Solution value: %f (best solution value so far: %f)\n",
 	}
 	break;
 
+    case BCP_Msg_RequestProcessList:
+        BCP_tm_provide_SB_processes(*this);
+	break;
+	
+    case BCP_Msg_SBnodeFinished:
+        sender = msg_buf.sender();
+	lp_scheduler.release_sb_id(sender);
+	break;
+
+    case BCP_Msg_WarmstartRoot:
+        BCP_tm_rebroadcast_root_warmstart(*this);
+	break;
+
     case BCP_Msg_RequestCutIndexSet:
-	sender = msg_buf.sender()->clone();
+	sender = msg_buf.sender();
 	msg_buf.clear();
 	msg_buf.pack(next_cut_index_set_start);
 	next_cut_index_set_start += 10000;
 	msg_buf.pack(next_cut_index_set_start);
 	msg_env->send(sender, BCP_Msg_CutIndexSet, msg_buf);
-	delete sender;
 	break;
       
     case BCP_Msg_RequestVarIndexSet:
-	sender = msg_buf.sender()->clone();
+	sender = msg_buf.sender();
 	msg_buf.clear();
 	msg_buf.pack(next_var_index_set_start);
 	next_var_index_set_start += 10000;
 	msg_buf.pack(next_var_index_set_start);
 	msg_env->send(sender, BCP_Msg_VarIndexSet, msg_buf);
-	delete sender;
 	break;
 
+    case BCP_Msg_NodeListRequestReply:
+      msg_buf.unpack(id);
+      index__node = BCP_tm_node_to_send::waiting.find(id);
+      if (index__node == BCP_tm_node_to_send::waiting.end()) {
+	throw BCP_fatal_error("TM: node data from TMS for node not waiting.\n");
+      }
+      node_to_send = index__node->second;
+      if (node_to_send->receive_node_desc(msg_buf)) {
+	delete node_to_send;
+	BCP_tm_node_to_send::waiting.erase(index__node);
+      }
+      break;
+
+    case BCP_Msg_VarListRequestReply:
+      msg_buf.unpack(id);
+      index__node = BCP_tm_node_to_send::waiting.find(id);
+      if (index__node == BCP_tm_node_to_send::waiting.end()) {
+	throw BCP_fatal_error("TM: var list from TMS for node not waiting.\n");
+      }
+      node_to_send = index__node->second;
+      if (node_to_send->receive_vars(msg_buf)) {
+	delete node_to_send;
+	BCP_tm_node_to_send::waiting.erase(index__node);
+      }
+      break;
+
+    case BCP_Msg_CutListRequestReply:
+      msg_buf.unpack(id);
+      index__node = BCP_tm_node_to_send::waiting.find(id);
+      if (index__node == BCP_tm_node_to_send::waiting.end()) {
+	throw BCP_fatal_error("TM: cut list from TMS for node not waiting.\n");
+      }
+      node_to_send = index__node->second;
+      if (node_to_send->receive_cuts(msg_buf)) {
+	delete node_to_send;
+	BCP_tm_node_to_send::waiting.erase(index__node);
+      }
+      break;
+
+    case BCP_Msg_NodeListDeleteReply:
+    case BCP_Msg_VarListDeleteReply:
+    case BCP_Msg_CutListDeleteReply:
+	sender = msg_buf.sender();
+        msg_buf.unpack(id); // just reuse an int variable...
+	ts_space[msg_buf.sender()] = id;
+	break;
+	
     case BCP_Msg_LpStatistics:
 	throw BCP_fatal_error("\
 Unexpected BCP_Msg_LpStatistics message in BCP_tm_prob::process_message.\n");
@@ -414,14 +492,17 @@ Unknown message in BCP_tm_prob::process_message.\n");
     const double t = CoinCpuTime() - start_time;
     const bool time_is_over = t > param(BCP_tm_par::MaxRunTime);
 
+    /* FIXME: for now we disable testing the machine... */
+#if ! defined(BCP_ONLY_LP_PROCESS_HANDLING_WORKS)
     if (! param(BCP_tm_par::MessagePassingIsSerial) &&
 	msg_count % test_frequency == 0) {
 	// run the machine testing while it returns false (i.e., it did not
 	// check out, it had to delete something)
 	while (! BCP_tm_test_machine(*this));
-	if (slaves.lp->size() == 0)
+	if (slaves.lp->procs().size() == 0)
 	    throw BCP_fatal_error("TM: No LP process left to compute with.\n");
     }
+#endif
 
     if (time_is_over) {
 	const double lb = search_tree.true_lower_bound(search_tree.root());
@@ -434,30 +515,30 @@ TM: Best lower bound in this phase: %f\n", lb);
 
 //#############################################################################
 
+/* FIXME: for now we disable testing the machine... */
+#if ! defined(BCP_ONLY_LP_PROCESS_HANDLING_WORKS)
 bool
 BCP_tm_test_machine(BCP_tm_prob& p)
 {
-    BCP_vec<BCP_proc_id*>::iterator dead_process_i =
+    BCP_vec<int>::const_iterator dead_process_i =
 	p.msg_env->alive(*p.slaves.all);
 
     if (dead_process_i == p.slaves.all->procs().end())
 	// everything is fine
 	return true;
 
-    BCP_proc_id* dead_process = *dead_process_i;
-    int i;
+    int dead_pid = *dead_process_i;
     bool continue_testing = true;
     // Oops, something has died, must write it off.
 
     if (continue_testing) {
-	i = p.slaves.lp->index_of_proc(dead_process);
-	if (i >= 0) {
-	    printf("TM: LP #%i is dead. Removing the LP/CG/VG/triplet.\n", i);
-	    BCP_tm_remove_lp(p, i);
-	    continue_testing = false;
-	}
+      printf("TM: Removing dead LP (pid: %i).\n", dead_pid);
+      BCP_tm_remove_lp(p, dead_pid);
+      continue_testing = false;
     }
 
+#if ! defined(BCP_ONLY_LP_PROCESS_HANDLING_WORKS)
+    int i;
     if (continue_testing && p.slaves.cg) {
 	i = p.slaves.cg->index_of_proc(dead_process);
 	if (i >= 0) {
@@ -475,19 +556,22 @@ BCP_tm_test_machine(BCP_tm_prob& p)
 	    continue_testing = false;
 	}
     }
+#endif
 
-    p.slaves.all->delete_proc(p.slaves.all->index_of_proc(dead_process));
-    delete dead_process;
+    p.slaves.all->delete_proc(dead_pid);
 
     return false;
 }
+#endif
 
 //#############################################################################
 
 void BCP_tm_modify_pool_counters(BCP_tm_prob& p, BCP_tm_node* node)
 {
-    if (node->cp) {
-	BCP_vec< std::pair<BCP_proc_id*, int> >::iterator proc =
+/* FIXME: we don't have pools anyway... */
+#if ! defined(BCP_ONLY_LP_PROCESS_HANDLING_WORKS)
+    if (node->cp != -1) {
+	BCP_vec< std::pair<int, int> >::iterator proc =
 	    BCP_tm_identify_process(p.leaves_per_cp, node->cp);
 #ifdef BCP_DEBUG
 	if (proc == p.leaves_per_cp.end())
@@ -495,10 +579,10 @@ void BCP_tm_modify_pool_counters(BCP_tm_prob& p, BCP_tm_node* node)
 TM: non-existing CP was assigned to a just pruned node.\n");
 #endif
 	if (--proc->second == 0)
-	    p.slaves.cp->set_proc_free(proc->first->clone());
+	    p.slaves.cp->set_proc_free(proc->first);
     }
-    if (node->vp) {
-	BCP_vec< std::pair<BCP_proc_id*, int> >::iterator proc =
+    if (node->vp != -1) {
+	BCP_vec< std::pair<int, int> >::iterator proc =
 	    BCP_tm_identify_process(p.leaves_per_vp, node->vp);
 #ifdef BCP_DEBUG
 	if (proc == p.leaves_per_vp.end())
@@ -506,43 +590,49 @@ TM: non-existing CP was assigned to a just pruned node.\n");
 TM: non-existing VP was assigned to a just pruned node.\n");
 #endif
 	if (--proc->second == 0)
-	    p.slaves.vp->set_proc_free(proc->first->clone());
+	    p.slaves.vp->set_proc_free(proc->first);
     }
+#endif
 }
 
 //#############################################################################
 
+/* FIXME: for now we disable testing the machine... */
 void
-BCP_tm_remove_lp(BCP_tm_prob& p, const int index)
+BCP_tm_remove_lp(BCP_tm_prob& p, const int dead_pid)
 {
-    BCP_tm_node* node = p.active_nodes[index];
+  printf("For now we can't remove dead processes...\n");
+  abort();
+#if ! defined(BCP_ONLY_LP_PROCESS_HANDLING_WORKS)
+    BCP_tm_node* node = p.active_nodes[dead_pid];
     if (node) {
-	if (! node->lp->is_same_process(p.slaves.lp->procs()[index]))
+	if (node->lp != dead_pid)
 	    throw BCP_fatal_error("TM: messed up active nodes... :-(.\n");
 	// Got to put back the search tree node onto the candidate list.
 	// fix the CP/VP fields
-	if (node->cp) {
-	    BCP_vec< std::pair<BCP_proc_id*, int> >::iterator proc =
+	if (node->cp != -1) {
+	    BCP_vec< std::pair<int, int> >::iterator proc =
 		BCP_tm_identify_process(p.leaves_per_cp, node->cp);
 	    if (proc == p.leaves_per_cp.end()) {
-		node->cp = 0; 
+		node->cp = -1; 
 	    }
 	}
-	if (node->vp) {
-	    BCP_vec< std::pair<BCP_proc_id*, int> >::iterator proc =
+	if (node->vp != -1) {
+	    BCP_vec< std::pair<int, int> >::iterator proc =
 		BCP_tm_identify_process(p.leaves_per_vp, node->vp);
 	    if (proc == p.leaves_per_vp.end()) {
-		node->vp = 0; 
+		node->vp = -1; 
 	    }
 	}
-	p.active_nodes.erase(p.active_nodes.entry(index));
+	p.active_nodes.erase(dead_pid);
 
-	node->lp = node->cg = node->vg = 0;
+	node->lp = node->cg = node->vg = -1;
 	node->status = BCP_CandidateNode;
-	p.candidates.insert(node);
+	p.candidate_list.push(node, false);
     }
 
-    BCP_proc_id * proc;
+#if ! defined(BCP_ONLY_LP_PROCESS_HANDLING_WORKS)
+    int proc;
     if (p.slaves.cg) {
 	proc = p.slaves.cg->procs()[index];
 	p.slaves.cg->delete_proc(index);
@@ -553,12 +643,14 @@ BCP_tm_remove_lp(BCP_tm_prob& p, const int index)
 	p.slaves.vg->delete_proc(index);
 	p.slaves.all->delete_proc(p.slaves.all->index_of_proc(proc));
     }
+#endif
 
-    proc = p.slaves.lp->procs()[index];
-    p.slaves.lp->delete_proc(index);
-    p.slaves.all->delete_proc(p.slaves.all->index_of_proc(proc));
+    p.slaves.lp->delete_proc(dead_pid);
+    p.slaves.all->delete_proc(dead_pid);
+#endif
 }
 
+#if ! defined(BCP_ONLY_LP_PROCESS_HANDLING_WORKS)
 void
 BCP_tm_remove_cg(BCP_tm_prob& p, const int index)
 {
@@ -572,21 +664,24 @@ BCP_tm_remove_vg(BCP_tm_prob& p, const int index)
     // for now this just removes the lp
     BCP_tm_remove_lp(p, index);
 }
-
+#endif
 
 //#############################################################################
 
 void
 BCP_tm_unpack_priced_root(BCP_tm_prob& p, BCP_buffer& buf)
 {
+    abort();
+    // BROKEN: multistage is BROKEN
+#if 0
     // only a BCP_named_pricing_list is sent over, unpack it.
     BCP_tm_node* root = p.search_tree.root();
 
-    root->_desc->indexed_pricing.unpack(buf);
     p.flags.root_pricing_unpacked = true;
 
     BCP_tm_free_procs_of_node(p, root);
-    p.active_nodes[p.slaves.lp->index_of_proc(root->lp)] = 0;
+    p.active_nodes.erase(root->lp);
+#endif
 }
 
 //#############################################################################
@@ -594,32 +689,15 @@ BCP_tm_unpack_priced_root(BCP_tm_prob& p, BCP_buffer& buf)
 void
 BCP_tm_free_procs_of_node(BCP_tm_prob& p, BCP_tm_node* node)
 {
-    p.slaves.lp->set_proc_free(node->lp);
-    if (node->cg)
+  p.lp_scheduler.release_node_id(node->lp);
+#if ! defined(BCP_ONLY_LP_PROCESS_HANDLING_WORKS)
+    if (node->cg != -1)
 	p.slaves.cg->set_proc_free(node->cg);
-    if (node->vg)
+    if (node->vg != -1)
 	p.slaves.vg->set_proc_free(node->vg);
+#endif
     // node's pointers are 0'd out (not deleted!)
-    node->lp = node->cg = node->vg = 0;
-}
-
-//#############################################################################
-
-static void
-BCP_tm_distribute_info_to_new_procs(BCP_tm_prob& p,
-				    BCP_vec<BCP_proc_id*>& procs,
-				    BCP_process_t ptype)
-{
-    p.slaves.all->add_procs(procs.begin(), procs.end());
-    BCP_tm_send_process_type_and_params(p, procs.begin(), procs.end(), ptype);
-    p.msg_buf.clear();
-    p.core->pack(p.msg_buf);
-    p.msg_env->multicast(procs.begin(), procs.end(),
-			 BCP_Msg_CoreDescription, p.msg_buf);
-    p.msg_buf.clear();
-    p.user->pack_module_data(p.msg_buf, ptype);
-    p.msg_env->multicast(procs.begin(), procs.end(),
-			 BCP_Msg_InitialUserInfo, p.msg_buf);
+    node->lp = node->cg = node->vg = -1;
 }
 
 //#############################################################################
@@ -627,8 +705,10 @@ BCP_tm_distribute_info_to_new_procs(BCP_tm_prob& p,
 static void
 BCP_tm_change_config(BCP_tm_prob& p, BCP_buffer& buf)
 {
+  /* FIXME: Do not allow config change for now */
+#if 0
     int i;
-    BCP_proc_id * sender = buf.sender()->clone();
+    int sender = buf.sender();
 
     int lp_num = 0;
     buf.unpack(lp_num);
@@ -662,6 +742,7 @@ BCP_tm_change_config(BCP_tm_prob& p, BCP_buffer& buf)
 
     // Check that everything works out fine
 
+#if ! defined(BCP_ONLY_LP_PROCESS_HANDLING_WORKS)
     // At least for now cg_num/vg_num must be the same as lp_num or must be 0
     if (p.slaves.cg->size() > 0) {
 	if (cg_num != lp_num) {
@@ -697,6 +778,7 @@ BCP: config change: VG's are not running thus no new VG's can be started.\
 	    return;
 	}
     }
+#endif
 
     // Spawn the jobs
     const BCP_string& exe = p.param(BCP_tm_par::ExecutableName);
@@ -706,18 +788,16 @@ BCP: config change: VG's are not running thus no new VG's can be started.\
 	    p.msg_env->start_processes(exe, lp_num, lp, debug);
 	p.slaves.lp->add_procs(new_lps->procs().begin(),
 			       new_lps->procs().end());
-	p.active_nodes.insert(p.active_nodes.end(), lp_num, 0);
-	BCP_tm_distribute_info_to_new_procs(p, new_lps->procs(),
-					    BCP_ProcessType_LP);
+	BCP_tm_notify_process_type(p, BCP_ProcessType_LP, &new_lps->procs());
     }
+#if ! defined(BCP_ONLY_LP_PROCESS_HANDLING_WORKS)
     if (cg_num > 0) {
 	const bool debug = p.param(BCP_tm_par::DebugCgProcesses) != 0;
 	BCP_proc_array* new_cgs =
 	    p.msg_env->start_processes(exe, cg_num, cg, debug);
 	p.slaves.cg->add_procs(new_cgs->procs().begin(),
 			       new_cgs->procs().end());
-	BCP_tm_distribute_info_to_new_procs(p, new_cgs->procs(),
-					    BCP_ProcessType_CG);
+	BCP_tm_notify_process_type(p, BCP_ProcessType_CG, &new_cgs->procs());
     }
     if (vg_num > 0) {
 	const bool debug = p.param(BCP_tm_par::DebugVgProcesses) != 0;
@@ -725,8 +805,7 @@ BCP: config change: VG's are not running thus no new VG's can be started.\
 	    p.msg_env->start_processes(exe, vg_num, vg, debug);
 	p.slaves.vg->add_procs(new_vgs->procs().begin(),
 			       new_vgs->procs().end());
-	BCP_tm_distribute_info_to_new_procs(p, new_vgs->procs(),
-					    BCP_ProcessType_VG);
+	BCP_tm_notify_process_type(p, BCP_ProcessType_VG, &new_vgs->procs());
     }
     if (cp_num > 0) {
 	const bool debug = p.param(BCP_tm_par::DebugCpProcesses) != 0;
@@ -734,8 +813,7 @@ BCP: config change: VG's are not running thus no new VG's can be started.\
 	    p.msg_env->start_processes(exe, cp_num, cp, debug);
 	p.slaves.cp->add_procs(new_cps->procs().begin(),
 			       new_cps->procs().end());
-	BCP_tm_distribute_info_to_new_procs(p, new_cps->procs(),
-					    BCP_ProcessType_CP);
+	BCP_tm_notify_process_type(p, BCP_ProcessType_CP, &new_cps->procs());
     }
     if (vp_num > 0) {
 	const bool debug = p.param(BCP_tm_par::DebugVpProcesses) != 0;
@@ -743,12 +821,11 @@ BCP: config change: VG's are not running thus no new VG's can be started.\
 	    p.msg_env->start_processes(exe, vp_num, vp, debug);
 	p.slaves.vp->add_procs(new_vps->procs().begin(),
 			       new_vps->procs().end());
-	BCP_tm_distribute_info_to_new_procs(p, new_vps->procs(),
-					    BCP_ProcessType_VP);
+	BCP_tm_notify_process_type(p, BCP_ProcessType_VP, &new_vps->procs());
     }
+#endif
 
     // Signal back that everything is OK.
     p.msg_env->send(sender, BCP_CONFIG_OK);
-
-    delete sender;
+#endif
 }

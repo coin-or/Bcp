@@ -7,6 +7,29 @@
 
 /****************************************************************************/
 void
+BB_indexed_cut::pack(BCP_buffer& buf) const
+{
+    buf.pack(index_).pack(lb()).pack(ub());
+}
+
+/****************************************************************************/
+BB_indexed_cut::BB_indexed_cut(BCP_buffer& buf) :
+    BCP_cut_algo(-1e40, 1e40)
+{
+    double lbound, ubound;
+    buf.unpack(index_).unpack(lbound).unpack(ubound);
+    change_bounds(lbound, ubound);
+}
+
+/****************************************************************************/
+BB_indexed_cut::BB_indexed_cut(int index, double lbound, double ubound) :
+    BCP_cut_algo(lbound, ubound), index_(index) {}
+
+/****************************************************************************/
+BCP_MemPool BB_indexed_cut::memPool(sizeof(BB_indexed_cut));
+
+/****************************************************************************/
+void
 BB_cut::pack(BCP_buffer& buf) const
 {
   buf.pack(OsiRowCut::lb())
@@ -28,8 +51,8 @@ BB_cut::BB_cut(BCP_buffer& buf) :
    OsiRowCut::setUb(ub);
 
    int numElem;
-   int* indices = NULL;
-   double* elements = NULL;
+   int* indices;
+   double* elements;
    buf.unpack(indices, numElem, true)
       .unpack(elements, numElem, true);
    OsiRowCut::setRow(numElem, indices, elements);

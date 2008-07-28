@@ -13,6 +13,8 @@ enum BCP_process_t {
    /** */
    BCP_ProcessType_TM,
    /** */
+   BCP_ProcessType_TS, // TM storage
+   /** */
    BCP_ProcessType_LP,
    /** */
    BCP_ProcessType_CG,
@@ -21,7 +23,9 @@ enum BCP_process_t {
    /** */
    BCP_ProcessType_CP,
    /** */
-   BCP_ProcessType_VP
+   BCP_ProcessType_VP,
+   /** */
+   BCP_ProcessType_EndProcess
 };
 
 #endif

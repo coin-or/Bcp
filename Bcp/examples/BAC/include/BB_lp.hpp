@@ -51,23 +51,8 @@ public:
   virtual ~BB_lp() {}
   //@}
 
-  /**@name Packing and unpacking methods */
-  //@{
   /// Unpack data sent from the tree manager
   virtual void unpack_module_data(BCP_buffer & buf);
-
-  /// Pack algorithmic cuts
-  virtual void pack_cut_algo(const BCP_cut_algo* cut, BCP_buffer& buf);
-
-  /// Unpack algorithmic cuts
-  virtual BCP_cut_algo* unpack_cut_algo(BCP_buffer& buf);
-
-  /// Pack user data
-  virtual void pack_user_data(const BCP_user_data* ud, BCP_buffer& buf);
-
-  /// Unpack user data
-  virtual MY_user_data* unpack_user_data(BCP_buffer& buf);
-  //@}  
 
   // Tell Bcp which solver to use and set parameters of solver.
   /// Called only once at the beginning, from the root node

@@ -18,23 +18,23 @@
 #include "BCP_message_mpi.hpp"
 
 bool BCP_mpi_environment::mpi_init_called = false;
+int BCP_mpi_environment::num_proc = 0;
+int BCP_mpi_environment::seqproc = 0;
 
 //#############################################################################
 
 int BCP_mpi_environment::is_mpi(int argc, char *argv[])
 {
-    int pid, num_proc;
-    MPI_Init(&argc, &argv);
-    BCP_mpi_environment::mpi_init_called = true;
-    // MPI_Init may or may not have succeeded. In any case check if we can get
-    // the number of procs
-    if (MPI_Comm_size(MPI_COMM_WORLD, &num_proc) != MPI_SUCCESS) {
-	// Now it's certain. Not an MPI environment
-	return -1;
-    }
-    if (num_proc == 1) {
-	// Might as well execute everything as a serial environment
-	return -1;
+    int pid;
+    if (! mpi_init_called) {
+	MPI_Init(&argc, &argv);
+	// MPI_Init may or may not have succeeded. In any case check if we can
+	// get the number of procs
+	if (MPI_Comm_size(MPI_COMM_WORLD, &num_proc) != MPI_SUCCESS) {
+	    // Now it's certain. Not an MPI environment
+	    return -1;
+	}
+	mpi_init_called = true;
     }
     MPI_Comm_rank(MPI_COMM_WORLD, &pid);
     return pid;
@@ -42,80 +42,26 @@ int BCP_mpi_environment::is_mpi(int argc, char *argv[])
 
 //#############################################################################
 
-int BCP_is_mpi_id(const BCP_proc_id* pid, const char* str) {
 
-    const BCP_mpi_id* id = dynamic_cast<const BCP_mpi_id*>(pid);
-
-    if (id == 0){
-	printf("Trying to use a non-mpi proc id in %s.\n", str);
-	throw BCP_fatal_error(" ERROR in MPI -- exiting.\n");
-    }
-    return id->pid();
-}
-
-//#############################################################################
-
-static int* BCP_process_array_2_int(const BCP_proc_array& parray,
-				    const char* str) {
-    int *ids = new int[parray.size()];
-    BCP_vec<BCP_proc_id*>::const_iterator first = parray.procs().begin();
-    BCP_vec<BCP_proc_id*>::const_iterator last = parray.procs().end();
-    while (first != last) {
-	*ids = BCP_is_mpi_id(*first, str);
-	++ids;
-	++first;
-    }
-    ids -= parray.size();
-    return ids;
-}
-
-static int* BCP_process_vec_2_int(BCP_vec<BCP_proc_id*>::const_iterator beg,
-				  BCP_vec<BCP_proc_id*>::const_iterator end,
-				  const char* str) {
-    const int new_num = end - beg;
-    int *ids = new int[new_num];
-    while (beg != end) {
-	*ids = BCP_is_mpi_id(*beg, str);
-	++ids;
-	++beg;
-    }
-    ids -= new_num;
-    return ids;
-}
-
-//#############################################################################
-
-bool
-BCP_mpi_id::is_same_process(const BCP_proc_id* other_process) const {
-
-    return pid() == BCP_is_mpi_id(other_process, "is_same_process()");
-}
-
-//#############################################################################
-
-
-BCP_mpi_environment::BCP_mpi_environment(int argc, char *argv[]) {
+BCP_mpi_environment::BCP_mpi_environment(int argc, char *argv[])
+{
     /* Initialize the MPI environment. */
-    seqproc = 1;
-    int pid, num_proc;
-    if (! mpi_init_called) {
-	MPI_Init(&argc, &argv);
-    }
-    MPI_Comm_size(MPI_COMM_WORLD, &num_proc);
-    MPI_Comm_rank(MPI_COMM_WORLD, &pid);
+    is_mpi(argc, argv);
 }
 
 //-----------------------------------------------------------------------------
 
-BCP_mpi_environment::~BCP_mpi_environment() {
+BCP_mpi_environment::~BCP_mpi_environment()
+{
     MPI_Finalize();
+    mpi_init_called = false;
 }
 
 //-----------------------------------------------------------------------------
 
 void
-BCP_mpi_environment::check_error(const int code, const char* str) const {
-
+BCP_mpi_environment::check_error(const int code, const char* str) const
+{
     if (code != MPI_SUCCESS){
 	printf("%s returned error code %i.\n", str, code);
 	throw BCP_fatal_error(" ERROR in mpi -- exiting.\n");
@@ -124,163 +70,104 @@ BCP_mpi_environment::check_error(const int code, const char* str) const {
 
 //-----------------------------------------------------------------------------
 
-BCP_proc_id*
-BCP_mpi_environment::register_process(USER_initialize* user_init) {
-
-    int pid, num_procs;
+int
+BCP_mpi_environment::register_process(USER_initialize* user_init)
+{
+    int pid;
     MPI_Comm_rank(MPI_COMM_WORLD, &pid);
-    MPI_Comm_size(MPI_COMM_WORLD, &num_procs);
-    BCP_proc_id* parent = parent_process();
-    delete parent;
     setvbuf(stdout, (char *)NULL, _IOLBF, 0);
-    return new BCP_mpi_id(pid);
+    return pid;
 }
 
-
-BCP_proc_id*
-BCP_mpi_environment::parent_process() {
+int
+BCP_mpi_environment::parent_process()
+{
     int pid;
     MPI_Comm_rank(MPI_COMM_WORLD, &pid);
     if (pid == 0)
-	//I am the master and I no parent
-	return 0;
+	//I am the master and I have no parent
+	return -1;
     //The master process has got always pid=0
-    pid = 0;
-    return new BCP_mpi_id(pid);
+    return 0;
 }
 
 bool
-BCP_mpi_environment::alive(const BCP_proc_id* pid)
+BCP_mpi_environment::alive(const int pid)
 {
     //In Mpi is not possible check if a process is alive
     /* FIXME */
     return true;
 }
 
-BCP_vec<BCP_proc_id*>::iterator
-BCP_mpi_environment::alive(const BCP_proc_array& parray)
+const int*
+BCP_mpi_environment::alive(int num, const int* pids)
 {
-    BCP_vec<BCP_proc_id*>::const_iterator first = parray.procs().begin();
-    BCP_vec<BCP_proc_id*>::const_iterator last = parray.procs().end();
-    while (first != last) {
-	if (! alive(*first))
-	    break;
-	++first;
-    }
-    return const_cast<BCP_vec<BCP_proc_id*>::iterator>(first);
+  //In Mpi is not possible check if a process is alive
+  return NULL;
 }
 
 //-----------------------------------------------------------------------------
 
 void
-BCP_mpi_environment::send(const BCP_proc_id* const target,
-			  const BCP_message_tag tag) {
+BCP_mpi_environment::send(const int target, const BCP_message_tag tag)
+{
     //create an empty buffer and send it with the tag
-    int pid = BCP_is_mpi_id(target, "send()");
-    void * buf;
-    int mypid;
-    MPI_Comm_rank(MPI_COMM_WORLD, &mypid);
+    void * buf = NULL;
     check_error(MPI_Send(&buf, 0, MPI_CHAR,
-			 pid, tag, MPI_COMM_WORLD),"MPI_Send");
+			 target, tag, MPI_COMM_WORLD),"MPI_Send");
 }
 
 void
-BCP_mpi_environment::send(const BCP_proc_id* const target,
-			  const BCP_message_tag tag, const BCP_buffer& buf) {
-    int pid = BCP_is_mpi_id(target, "send()");
-    int mypid;
-    MPI_Comm_rank(MPI_COMM_WORLD, &mypid);
+BCP_mpi_environment::send(const int target,
+			  const BCP_message_tag tag, const BCP_buffer& buf)
+{
     check_error(MPI_Send(const_cast<char*>(buf.data()), buf.size(), MPI_CHAR,
-			 pid, tag, MPI_COMM_WORLD),"MPI_Send");
+			 target, tag, MPI_COMM_WORLD),"MPI_Send");
 }
 
 //-----------------------------------------------------------------------------
 
 void
-BCP_mpi_environment::multicast(const BCP_proc_array* const target,
-			       const BCP_message_tag tag) {
-    int* pids = BCP_process_array_2_int(*target, "multicast() - parray_2_int");
-    void * buf;
-    int mypid;
-    MPI_Comm_rank(MPI_COMM_WORLD, &mypid);
-    for (int i=0; i<target->size(); i++) {
+BCP_mpi_environment::multicast(int num, const int* targets,
+			       const BCP_message_tag tag)
+{
+    void * buf = NULL;
+    for (int i = 0; i < num; ++i) {
 	check_error(MPI_Send(&buf, 0, MPI_CHAR,
-			     pids[i], tag, MPI_COMM_WORLD),"MPI_Send");
+			     targets[i], tag, MPI_COMM_WORLD),"MPI_Send");
     }
-    delete[] pids;
 }
 
 void
-BCP_mpi_environment::multicast(const BCP_proc_array* const target,
+BCP_mpi_environment::multicast(int num, const int* targets,
 			       const BCP_message_tag tag,
-			       const BCP_buffer& buf) {
-    int mypid;
-    MPI_Comm_rank(MPI_COMM_WORLD, &mypid);
-    int* pids = BCP_process_array_2_int(*target, "multicast() - parray_2_int");
-    for (int i=0; i<target->size(); i++) {
-	check_error(MPI_Send(const_cast<char*>(buf.data()), buf.size(), MPI_CHAR,
-			     pids[i], tag, MPI_COMM_WORLD),"MPI_Send");
+			       const BCP_buffer& buf)
+{
+    for (int i = 0; i < num; ++i) {
+	check_error(MPI_Send(const_cast<char*>(buf.data()), buf.size(),
+			     MPI_CHAR, targets[i], tag, MPI_COMM_WORLD),
+		    "MPI_Send");
     }
-    delete[] pids;
-}
-
-void
-BCP_mpi_environment::multicast(BCP_vec<BCP_proc_id*>::const_iterator beg,
-			       BCP_vec<BCP_proc_id*>::const_iterator end,
-			       const BCP_message_tag tag) {
-    int* pids = BCP_process_vec_2_int(beg, end, "multicast() - parray_2_int");
-    void * buf;
-    int mypid;
-    MPI_Comm_rank(MPI_COMM_WORLD, &mypid);
-    for (int i=0; i<(end-beg); i++) {
-	check_error(MPI_Send(&buf, 0, MPI_CHAR,
-			     pids[i], tag, MPI_COMM_WORLD),"MPI_Send");
-    }
-    delete[] pids;
-}
-
-void
-BCP_mpi_environment::multicast(BCP_vec<BCP_proc_id*>::const_iterator beg,
-			       BCP_vec<BCP_proc_id*>::const_iterator end,
-			       const BCP_message_tag tag,
-			       const BCP_buffer& buf) {
-    int* pids = BCP_process_vec_2_int(beg, end, "multicast() - parray_2_int");
-    int id;
-    MPI_Comm_rank(MPI_COMM_WORLD, &id);
-    for (int i=0; i<(end - beg); i++) {
-	check_error(MPI_Send(const_cast<char*>(buf.data()),buf.size(), MPI_CHAR,
-			     pids[i], tag, MPI_COMM_WORLD),"MPI_Send");
-    }
-    delete[] pids;
 }
 
 //-----------------------------------------------------------------------------
 
 void
-BCP_mpi_environment::receive(const BCP_proc_id* const source,
+BCP_mpi_environment::receive(const int source,
 			     const BCP_message_tag tag, BCP_buffer& buf,
-			     const double timeout) {
+			     const double timeout)
+{
     buf.clear();
-    delete buf._sender;   buf._sender = 0;
-    int pid = (source == BCP_AnyProcess ?
-	       MPI_ANY_SOURCE : BCP_is_mpi_id(source, "receive()"));
+    buf._sender = -1;
+    int pid = (source == BCP_AnyProcess ? MPI_ANY_SOURCE : source);
     int msgtag = (tag == BCP_Msg_AnyMessage ? MPI_ANY_TAG : tag);
     int flag = 0;
     MPI_Status status;
-    int myid;
-    MPI_Comm_rank(MPI_COMM_WORLD, &myid);
 
     if (timeout < 0) {
-	if (source != BCP_AnyProcess) {
-	    check_error(MPI_Probe(pid, msgtag, MPI_COMM_WORLD, &status),
-			"MPI_Probe");
-	    flag = 1;
-	} else {
-	    // waiting for anyone
-	    check_error(MPI_Probe(pid, msgtag, MPI_COMM_WORLD, &status),
-			"MPI_Probe");
-	    flag = 1;
-	}
+	check_error(MPI_Probe(pid, msgtag, MPI_COMM_WORLD, &status),
+		    "MPI_Probe");
+	flag = 1;
     } else {
 	check_error(MPI_Iprobe(pid, msgtag, MPI_COMM_WORLD, &flag, &status),
 		    "MPI_Iprobe");
@@ -296,13 +183,12 @@ BCP_mpi_environment::receive(const BCP_proc_id* const source,
     check_error(MPI_Get_count( &status, MPI_CHAR, &bytes ),"MPI_Get_Count");
     buf.make_fit(bytes);
     buf._msgtag = static_cast<BCP_message_tag>(status.MPI_TAG);
-    delete buf._sender;
-    buf._sender = new BCP_mpi_id(status.MPI_SOURCE);
+    buf._sender = status.MPI_SOURCE;
     buf._size = bytes;
 
     //Receive the content of the message
-    check_error(MPI_Recv(buf._data,bytes, MPI_CHAR,
-			 pid, msgtag, MPI_COMM_WORLD,&status),"MPI_Recv");
+    check_error(MPI_Recv(buf._data, bytes, MPI_CHAR,
+			 pid, msgtag, MPI_COMM_WORLD, &status),"MPI_Recv");
 }
 
 
@@ -310,88 +196,139 @@ BCP_mpi_environment::receive(const BCP_proc_id* const source,
 //-----------------------------------------------------------------------------
 
 bool
-BCP_mpi_environment::probe(const BCP_proc_id* const source,
-			   const BCP_message_tag tag) {
+BCP_mpi_environment::probe(const int source, const BCP_message_tag tag)
+{
     MPI_Status  status;
     // MPI_Request request;
-    int  flag=0;
-    int pid = (source == BCP_AnyProcess ?
-	       MPI_ANY_SOURCE : BCP_is_mpi_id(source, "probe()"));
-
-    // check if we have a matching message
-    int msgtag = tag == BCP_Msg_AnyMessage ? -1 : tag;
+    int  flag = 0;
+    int pid = (source == BCP_AnyProcess ? MPI_ANY_SOURCE : source);
+    int msgtag = (tag == BCP_Msg_AnyMessage ? MPI_ANY_TAG : tag);
     check_error(MPI_Iprobe(pid, msgtag, MPI_COMM_WORLD, &flag, &status),
 		"MPI_Iprobe");
-
     return flag > 0;
 }
 
 //-----------------------------------------------------------------------------
 
-BCP_proc_id*
-BCP_mpi_environment::unpack_proc_id(BCP_buffer& buf) {
-    int pid;
-    buf.unpack(pid);
-    return new BCP_mpi_id(pid);
+int
+BCP_mpi_environment::start_process(const BCP_string& exe, const bool debug)
+{
+#ifdef COIN_HAS_MPI2
+    // FIXME: implement MPI2 proces spawning
+    printf("Sorry, MPI2 process spawning is not supported yet...\n");
+    abort();
+#else
+    // Fake it...
+    return ++seqproc;
+#endif
 }
 
-void
-BCP_mpi_environment::pack_proc_id(BCP_buffer& buf, const BCP_proc_id* pid) {
-    buf.pack(BCP_is_mpi_id(pid, "pack_proc_id()"));
-}
-
-//-----------------------------------------------------------------------------
-
-BCP_proc_id*
-BCP_mpi_environment::start_process(const BCP_string& exe, const bool debug) {
-    //int pid = seqproc;
-    seqproc++;
-    return new BCP_mpi_id(seqproc);
-}
-
-BCP_proc_id*
+int
 BCP_mpi_environment::start_process(const BCP_string& exe,
 				   const BCP_string& machine,
-				   const bool debug) {
-    return new BCP_mpi_id(seqproc);
+				   const bool debug)
+{
+#ifdef COIN_HAS_MPI2
+    // FIXME: implement MPI2 proces spawning
+    printf("Sorry, MPI2 process spawning is not supported yet...\n");
+    abort();
+#else
+    // Fake it...
+    return ++seqproc;
+#endif
 }
 
-BCP_proc_array*
+bool
 BCP_mpi_environment::start_processes(const BCP_string& exe,
 				     const int proc_num,
-				     const bool debug) {
-    BCP_vec<BCP_proc_id*> procs;
-    procs.reserve(proc_num);
-    int* pids = new int[proc_num];
-
-    /*There isn't the spawn function in MPI.
-      We assign to pid consecutive number*/
-    for (int i = 0; i != proc_num; ++i) {
-	pids[i] = seqproc;
-	seqproc++;
+				     const bool debug,
+			 int* ids)
+{
+#ifdef COIN_HAS_MPI2
+    // FIXME: implement MPI2 proces spawning
+    printf("Sorry, MPI2 process spawning is not supported yet...\n");
+    abort();
+#else
+    // Fake it...
+    for (int i = 0; i < proc_num; ++i) {
+      ids[i] = ++seqproc;
     }
-
-    for (int i = 0; i != proc_num; ++i)
-	procs.push_back(new BCP_mpi_id(pids[i]));
-    delete[] pids;
-    BCP_proc_array* pa = new BCP_proc_array;
-    pa->add_procs(procs.begin(), procs.end());
-    return pa;
+    return true;
+#endif
 }
 
-BCP_proc_array*
+bool
 BCP_mpi_environment::start_processes(const BCP_string& exe,
 				     const int proc_num,
 				     const BCP_vec<BCP_string>& machines,
-				     const bool debug) {
-    //It's not possible start the process on a specified machine
-    return start_processes(exe,proc_num,debug);
+				     const bool debug,
+			 int* ids)
+{
+#ifdef COIN_HAS_MPI2
+    // FIXME: implement MPI2 proces spawning
+    printf("Sorry, MPI2 process spawning is not supported yet...\n");
+    abort();
+#else
+    // Fake it...
+    for (int i = 0; i < proc_num; ++i) {
+	ids[i] = ++seqproc;
+    }
+    return true;
+#endif
 }
 
 int BCP_mpi_environment::num_procs() {
-    int num_procs;
-    MPI_Comm_size(MPI_COMM_WORLD, &num_procs);
-    return num_procs;
+    return num_proc;
 }
+
+//#define MPID_DEV_REQUEST_DECL
+#if 0
+struct MPIDI_BGLTS_Request {
+    MPIDI_Message_match match;     /* enough information to to MPI matching */
+    MPI_Datatype        datatype;  /* data type of message */
+    struct MPID_Datatype *datatype_ptr;
+    int ca; /* completion action */
+    char *userbuf;  /* user buffer for messages */
+    unsigned userbufcount; /* count (not size) of userbuf */
+    char *uebuf; /* unexpected buffer */
+    unsigned uebuflen; /* length (bytes) of unexpected buffer */
+    MPID_Segment segment; /* segment used for non-contigouous buffers */
+    MPIDI_BGLTS_REQUEST_STATE state; /* state of request */
+    int type; /* type of request, used by gettype and settype */
+              /* one of send, rsend, recv, irecv. etc. */
+    int msgtype; /* type of associated message */
+                 /* one of self, eager, etc. */
+    BGLML_Message msgdata;
+    char slack[300];
+    struct MPID_Request *next;    /* link to next request */
+    int cancel_pending; /* Cancel State */
+    int dest_rank;
+    int dest_tag;
+    int dest_context_id;
+} bglts;
+#endif
+
+#ifdef MPID_DEV_REQUEST_DECL
+int MPIDI_BGLTS_get_num_messages()
+{
+    register MPID_Request * rreq = MPIDI_Process.recv_posted_head;
+    register int cnt = 0;
+    while (rreq != NULL) {
+	++cnt;
+	rreq = rreq->bglts.next;
+    }
+    rreq = MPIDI_Process.recv_unexpected_head;
+    while (rreq != NULL) {
+	++cnt;
+	rreq = rreq->bglts.next;
+    }
+    return cnt;
+}
+#else
+int MPIDI_BGLTS_get_num_messages()
+{
+    return -1;
+}
+#endif
 
 #endif /* COIN_HAS_MPI */

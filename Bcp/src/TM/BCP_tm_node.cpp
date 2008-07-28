@@ -7,13 +7,53 @@
 #include "BCP_tm_node.hpp"
 #include "BCP_node_change.hpp"
 
+
+int BCP_tm_node::num_local_nodes = 0;
+int BCP_tm_node::num_remote_nodes = 0;
+
 //#############################################################################
 
-BCP_tm_node::~BCP_tm_node() {
-    delete _user_data;
-    delete _desc;
-    delete lp; delete cg; delete vg; delete cp; delete vp;
+BCP_tm_node::BCP_tm_node(int level, BCP_node_change* desc) :
+  CoinTreeNode(level),
+  status(BCP_DefaultNode),
+  _index(0),
+  _parent(0),
+  _birth_index(-1),
+  _children(),
+  lp(-1), cg(-1), cp(-1), vg(-1), vp(-1),
+  _processed_leaf_num(0),
+  _pruned_leaf_num(0),
+  _tobepriced_leaf_num(0),
+  _leaf_num(0),
+  _core_storage(-1),
+  _var_storage(-1),
+  _cut_storage(-1),
+  _ws_storage(-1),
+  _locally_stored(true),
+  _data_location(-1),
+  _data(desc)
+{
+  ++num_local_nodes;
 }
+
+//#############################################################################
+
+// BCP_tm_node::BCP_tm_node(int level, BCP_node_change* desc,
+// 			 BCP_tm_node* parent, int index) :
+//   CoinTreeNode(level),
+//   status(BCP_DefaultNode),
+//   _index(0),
+//   _parent(0),
+//   _birth_index(-1),
+//   _children(),
+//   lp(-1), cg(-1), cp(-1), vg(-1), vp(-1),
+//   _processed_leaf_num(0),
+//   _pruned_leaf_num(0),
+//   _tobepriced_leaf_num(0),
+//   _leaf_num(0),
+//   _locally_stored(1),
+//   _data_location(-1),
+//   _data(desc) {}
 
 //#############################################################################
 
@@ -72,7 +112,7 @@ BCP_tree::enumerate_leaves(BCP_tm_node* node, const double obj_limit)
 				     st == BCP_NextPhaseNode_Infeas );
 	node->_tobepriced_leaf_num =
 	    ( ((st & (BCP_ProcessedNode|BCP_ActiveNode|BCP_CandidateNode)) &&
-	       node->true_lower_bound() > obj_limit) ||
+	       node->getTrueLB() > obj_limit) ||
 	      is_next_phase ) ? 1 : 0;
     } else {
 	node->_leaf_num = 0;
@@ -101,7 +141,7 @@ BCP_tree::true_lower_bound(const BCP_tm_node* node) const
     if (node->child_num() == 0) {
 	const BCP_tm_node_status st = node->status;
 	if (st == BCP_ActiveNode || st == BCP_CandidateNode)
-	    worstlb = node->true_lower_bound();
+	    worstlb = node->getTrueLB();
     } else {
 	BCP_vec<BCP_tm_node*>::const_iterator child;
 	BCP_vec<BCP_tm_node*>::const_iterator lastchild = node->_children.end();
@@ -113,72 +153,3 @@ BCP_tree::true_lower_bound(const BCP_tm_node* node) const
     }
     return worstlb;
 }
-
-//#############################################################################
-
-void
-BCP_node_queue::pop()
-{
-    BCP_tm_node* node = _pq.back();
-    _pq.pop_back();
-
-    const int size = _pq.size();
-    if (size > 0) {
-	int pos = 1;
-	int ch;
-	for (ch = 2; ch < size - 1; pos = ch, ch *= 2) {
-	    if (_p.user->compare_tree_nodes(_pq[ch+1], _pq[ch]))
-		++ch;
-	    if (_p.user->compare_tree_nodes(node, _pq[ch]))
-		break;
-	    _pq[pos] = _pq[ch];
-	}
-	if (ch == size - 1) {
-	    if (_p.user->compare_tree_nodes(_pq[ch], node)) {
-		_pq[pos] = _pq[ch];
-		pos = ch;
-	    }
-	}
-	_pq[pos] = node;
-    }
-}
-
-//=============================================================================
-
-void
-BCP_node_queue::insert(BCP_tm_node* node)
-{
-    int pos = _pq.size();
-    int ch;
-    _pq.push_back(node);
-    for (ch = pos/2; ch != 0; pos = ch, ch /= 2) {
-	if (_p.user->compare_tree_nodes(_pq[ch], node))
-	    break;
-	_pq[pos] = _pq[ch];
-    }
-    _pq[pos] = node;
-}
-
-//=============================================================================
-
-void
-BCP_node_queue::compare_to_UB(int& quality_above_UB, int& quality_below_UB)
-{
-    quality_above_UB = quality_below_UB = 0;
-    const int size = _pq.size();
-    if (! _p.has_ub()) {
-	quality_below_UB = size;
-	return;
-    }
-    const double threshold = _p.ub() - _p.granularity();
-      
-    for (int i = 1; i < size; ++i) {
-	if (_pq[i]->quality() <= threshold) {
-	    ++quality_below_UB;
-	} else {
-	    ++quality_above_UB;
-	}
-    }
-}
-
-//#############################################################################

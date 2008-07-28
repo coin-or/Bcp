@@ -3,43 +3,63 @@
 #ifndef _BCP_OS_H
 #define _BCP_OS_H
 
+#include <cstdio>
+#include "BcpConfig.h"
+
 //-----------------------------------------------------------------------------
-#if HAVE_SYS_RESOURCE_H
+#ifdef HAVE_SYS_RESOURCE_H
 #  include <sys/resource.h>
 #else
 #  define setpriority(x,y,z)
 #endif
 //-----------------------------------------------------------------------------
-#if HAVE_UNISTD_H
+#ifdef HAVE_UNISTD_H
 #  include <unistd.h>
+#endif
+
+#ifdef HAVE_PROCESS_H
+#  include <process.h>
 #endif
 
 #ifndef HAVE_GETHOSTNAME
 #  define gethostname(x,y)
 #endif
 
-#if HAVE_GETPID
+#ifdef HAVE_GETPID
 #  define GETPID (getpid())
 #else
 #  define GETPID (0)
 #endif
+//-----------------------------------------------------------------------------
 
-/** need to revive this in a platform independent way */
-#if 0
-/** Return the amount of memory left in kilobytes. Note that this works only
-    if sysinfo() is available, otherwise returns -1. */
-#ifdef HAVE_SYSINFO
+#ifdef HAVE_SYS_SYSINFO_H
 #include <sys/sysinfo.h>
-static inline int freemem() {
-    struct sysinfo info;
-    sysinfo(&info);
-    return (info.mem_unit*info.freeram)/1024;
-}
+#endif
+static inline long BCP_free_mem()
+{
+#ifdef HAVE_SYSINFO
+  struct sysinfo info;
+  sysinfo(&info);
+  return info.mem_unit*info.freeram;
 #else
-static inline int freemem() {
-    return -1;
+  return -1;
+#endif
 }
+//-----------------------------------------------------------------------------
+
+#ifdef HAVE_MALLINFO
+#include <malloc.h>
 #endif
+
+static inline long BCP_used_heap()
+{
+#ifdef HAVE_MALLINFO
+  struct mallinfo info = mallinfo();
+  return info.usmblks + info.uordblks;;
+#else
+  return -1;
 #endif
+}
+//-----------------------------------------------------------------------------
 
 #endif

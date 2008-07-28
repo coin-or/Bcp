@@ -3,6 +3,9 @@
 #include <cstdlib>
 #include <algorithm>
 
+#include "CoinTime.hpp"
+
+#include "BCP_os.hpp"
 #include "BCP_USER.hpp"
 #include "BCP_node_change.hpp"
 #include "BCP_warmstart.hpp"
@@ -13,6 +16,10 @@
 #include "BCP_tm.hpp"
 #include "BCP_tm_user.hpp"
 #include "BCP_tm_functions.hpp"
+
+#ifndef BCP_DEBUG_PRINT
+#define BCP_DEBUG_PRINT 0
+#endif
 
 static int
 BCP_tm_unpack_node_description(BCP_tm_prob& p, BCP_buffer& buf);
@@ -45,32 +52,57 @@ BCP_tm_print_info_line(BCP_tm_prob& p, BCP_tm_node& node)
 
     static int lines = 0;
 
-    if ((lines % 40) == 0) {
+    if ((lines % 41) == 0) {
+        ++lines;
 	printf("\n");
 	printf("BCP: ");
 	printf(" Nodes  ");
 	printf(" Proc'd ");
 	printf("  BestUB   ");
 	printf(" LowestQ   ");
+	/*
 	printf("AboveUB ");
 	printf("BelowUB ");
+	*/
 	printf("\n");
     }
     const int processed = p.search_tree.processed();
     if ((processed % freq) == 0 || processed == 1) {
 	++lines;
+	printf("BCP: ");                                           // 5
+	printf("%7i ", (int)p.search_tree.size());                 // 8
+	printf("%7i ", processed);                                 // 8
+	printf("%10g ", p.ub());                                   // 11
+	if (p.candidate_list.empty()) {
+	    printf("%10g ", 0.0);                                  // 11
+	} else {
+	    printf("%10g ", p.candidate_list.bestQuality());       // 11
+	}
+	/*
 	int quality_above_UB;
 	int quality_below_UB;
-	printf("BCP: ");                                // 5
-	printf("%7i ", p.search_tree.size());           // 8
-	printf("%7i ", processed);                      // 8
-	printf("%10g ", p.ub());                        // 11
-	printf("%10g ", p.candidates.top()->_quality);  // 11
 	p.candidates.compare_to_UB(quality_above_UB, quality_below_UB);
-	printf("%7i ", quality_above_UB);               // 8
-	printf("%7i ", quality_below_UB);               // 8
+	printf("%7i ", quality_above_UB);                          // 8
+	printf("%7i ", quality_below_UB);                          // 8
+	*/
 	printf("\n");
     }
+}
+
+//#############################################################################
+
+void BCP_print_memusage(BCP_tm_prob& p)
+{
+#if 0
+    static int cnt = 0;
+    ++cnt;
+    if ((cnt % 100) == 0) {
+        long usedheap = BCP_used_heap();
+	if (usedheap > 0) {
+	    printf("    mallinfo used: %li\n", usedheap);
+	}
+    }
+#endif
 }
 
 //#############################################################################
@@ -84,51 +116,114 @@ BCP_tm_unpack_node_description(BCP_tm_prob& p, BCP_buffer& buf)
     // get a pointer to this node
     BCP_tm_node* node = p.search_tree[index];
     p.search_tree.increase_processed();
+TMDBG;
 
     // XXX
-    if (node != p.active_nodes[p.slaves.lp->index_of_proc(node->lp)]) {
+    const int lp_id = node->lp;
+    if (node != p.active_nodes[lp_id]) {
 	throw BCP_fatal_error("\
 BCP_tm_unpack_node_description: received node is different from processed.\n");
     }
 
     // get the quality and new lb for this node
-    buf.unpack(node->_quality).unpack(node->_true_lower_bound);
+    double q, tlb;
+TMDBG;
+    buf.unpack(q).unpack(tlb);
+    node->setQuality(q);
+    node->setTrueLB(tlb);
+TMDBG;
 
     // wipe out any previous description of this node and create a new one if
     // the description is sent over
-    delete node->_desc;   node->_desc = 0;
+    if (node->_locally_stored) {
+	node->_data._desc = NULL;
+	node->_data._user = NULL;
+    } else {
+	BCP_buffer b;
+TMDBG;
+	BCP_vec<int> indices(1, index);
+	b.pack(indices);
+	p.msg_env->send(node->_data_location, BCP_Msg_NodeListDelete, b);
+	--BCP_tm_node::num_remote_nodes;
+	++BCP_tm_node::num_local_nodes;
+TMDBG;
+	node->_locally_stored = true;
+    }
+
     bool desc_sent = false;
     buf.unpack(desc_sent);
 
+TMDBG;
     if (desc_sent) {
 	BCP_node_change* desc = new BCP_node_change;
-	node->_desc = desc;
 
 	// unpack core_change
 	if (p.core->varnum() + p.core->cutnum() > 0)
 	    desc->core_change.unpack(buf);
 
-	// get the variables and cuts. unpack takes care of checking
-	// explicitness, and returns how many algo objects are there in ..._set
-	// that do not yet have internal index.
-	p.unpack_var_set_change(desc->var_change);
-	p.unpack_cut_set_change(desc->cut_change);
+	int cnt;
+	// get the variables. first unpack the new vars. those with negative
+	// bcpind has not yet been sent to the TM from this LP process, but
+	// they may have been sent here by another (if CP is used). those with
+	// positive bcpind have already been sent to the TM, receiving such
+	// var again is an error.
+	buf.unpack(cnt);
+	while (--cnt >= 0) {
+	    p.unpack_var();
+	}
+	// Now unpack the change data.
+TMDBG;
+	desc->var_change.unpack(buf);
 
-	// pricing status
-	desc->indexed_pricing.unpack(buf);
-
+	// same for cuts
+	buf.unpack(cnt);
+	while (--cnt >= 0) {
+	    p.unpack_cut();
+	}
+TMDBG;
+	desc->cut_change.unpack(buf);
+	    
 	// warmstart info
 	bool has_data;
-	buf.unpack(has_data);
-	if (has_data)
-	    desc->warmstart = p.user->unpack_warmstart(buf);
+TMDBG;
+	switch (p.param(BCP_tm_par::WarmstartInfo)) {
+	case BCP_WarmstartNone:
+	  break;
+	case BCP_WarmstartRoot:
+	  // nothing needs to be done even in this case as the WS has been
+	  // sent in a separate message
+	  break;
+	case BCP_WarmstartParent:
+	  buf.unpack(has_data);
+	  if (has_data) {
+	    const bool def = p.param(BCP_tm_par::ReportWhenDefaultIsExecuted);
+	    desc->warmstart = p.packer->unpack_warmstart(buf, def);
+	  }
+	  break;
+	}
+TMDBG;
 	// user data
-	delete node->_user_data;
 	buf.unpack(has_data);
-	node->_user_data = has_data ? p.user->unpack_user_data(buf) : 0;
+TMDBG;
+	BCP_user_data* udata = has_data ? p.packer->unpack_user_data(buf) : 0;
+
+	node->_data._desc = desc;
+	node->_data._user = udata;
+	node->_core_storage = desc->core_change.storage();
+	node->_var_storage = desc->var_change.storage();
+	node->_cut_storage = desc->cut_change.storage();
+	node->_ws_storage =
+	    desc->warmstart ? desc->warmstart->storage() : BCP_Storage_NoData;
+TMDBG;
+    } else {
+	node->_core_storage = BCP_Storage_NoData;
+	node->_var_storage = BCP_Storage_NoData;
+	node->_cut_storage = BCP_Storage_NoData;
+	node->_ws_storage = BCP_Storage_NoData;
     }
 
-    p.active_nodes[p.slaves.lp->index_of_proc(node->lp)] = 0;
+    p.active_nodes.erase(lp_id);
+TMDBG;
 
     return index;
 }
@@ -148,7 +243,10 @@ BCP_tm_shall_we_dive(BCP_tm_prob& p, const double quality)
     if (ratio < 0)
 	return BCP_DoNotDive;
 
-    const double topq = p.candidates.top()->quality();
+    if (p.candidate_list.empty())
+	return BCP_TestBeforeDive;
+
+    const double topq = p.candidate_list.bestQuality();
 
     if (quality <= topq)
 	return BCP_TestBeforeDive;
@@ -342,24 +440,34 @@ static void
 BCP_tm_unpack_branching_info(BCP_tm_prob& p, BCP_buffer& buf,
 			     BCP_tm_node* node)
 {
+TMDBG;
     BCP_diving_status dive; // the old diving status
 
     BCP_vec<BCP_child_action> action;
     BCP_vec<BCP_user_data*> user_data;
-    BCP_vec<double> lpobj;
+    BCP_vec<double> true_lb;
     BCP_vec<double> qualities;
 
-    buf.unpack(dive).unpack(action).unpack(qualities).unpack(lpobj);
+TMDBG;
+    buf.unpack(dive);
+TMDBG;
+    buf.unpack(action);
+TMDBG;
+    buf.unpack(qualities);
+TMDBG;
+    buf.unpack(true_lb);
+TMDBG;
 
     const int child_num = action.size();
     user_data.insert(user_data.end(), child_num, 0);
+    bool has_user_data = false;
     for (int i = 0; i < child_num; ++i) {
-	int has_user_data = 0;
 	buf.unpack(has_user_data);
-	if (has_user_data == 1) {
-	    user_data[i] = p.user->unpack_user_data(buf);
+	if (has_user_data) {
+	    user_data[i] = p.packer->unpack_user_data(buf);
 	}
     }
+TMDBG;
 
     BCP_internal_brobj* brobj = new BCP_internal_brobj;
     brobj->unpack(buf);
@@ -371,59 +479,86 @@ BCP_tm_unpack_branching_info(BCP_tm_prob& p, BCP_buffer& buf,
     int keep = -1;
     BCP_tm_node* child = 0;
     BCP_node_change* desc;
-    BCP_node_change* nodedesc = node->_desc;
+    // nodedesc exists, because when we unpack the barnching info we just
+    // received back the description of the node
+    const BCP_node_change* nodedesc = node->_data._desc.GetRawPtr();
     int i;
 
     // fix the number of leaves assigned to the CP/VP
-    if (node->cp) {
-	BCP_vec< std::pair<BCP_proc_id*, int> >::iterator proc =
+    if (node->cp != -1) {
+	BCP_vec< std::pair<int, int> >::iterator proc =
 	    BCP_tm_identify_process(p.leaves_per_cp, node->cp);
 	if (proc == p.leaves_per_cp.end()) {
-	    node->cp = 0; 
+	    node->cp = -1; 
 	} else {
 	    proc->second += node->child_num() - 1;
 	}
     }
-    if (node->vp) {
-	BCP_vec< std::pair<BCP_proc_id*, int> >::iterator proc =
+    if (node->vp != -1) {
+	BCP_vec< std::pair<int, int> >::iterator proc =
 	    BCP_tm_identify_process(p.leaves_per_vp, node->vp);
 	if (proc == p.leaves_per_vp.end()) {
-	    node->vp = 0; 
+	    node->vp = -1; 
 	} else {
 	    proc->second += node->child_num() - 1;
 	}
     }
 
+    CoinTreeNode** children = new CoinTreeNode*[child_num];
+    int numChildrenAdded = 0;
+    const int depth = node->getDepth() + 1;
+    BitVector128 nodePref = node->getPreferred();
+    const double tt = CoinWallclockTime()-p.start_time;
+#if (BCP_DEBUG_PRINT != 0)
+    if (p.candidate_list.size() == 0) {
+      printf("TM %.3lf: parent: %i  cand_list empty\n", tt, node->_index);
+    } else {
+      printf("TM %.3lf: parent: %i  cand_list top pref: %s\n",
+	     tt, node->_index,
+	     p.candidate_list.top()->getPreferred().str().c_str());
+    }
+#endif
     for (i = 0; i < child_num; ++i){
 	desc = new BCP_node_change;
-	BCP_tm_create_core_change(desc, bvarnum, bcutnum,	brobj, i);
+	BCP_tm_create_core_change(desc, bvarnum, bcutnum, brobj, i);
 	BCP_tm_create_var_change(desc, nodedesc, bvarnum, brobj, i);
 	BCP_tm_create_cut_change(desc, nodedesc, bcutnum, brobj, i);
-	desc->indexed_pricing.set_status(nodedesc->indexed_pricing.get_status());
-	if (nodedesc->indexed_pricing.get_status() & BCP_PriceIndexedVars)
-	    // in this case set storage the WrtParent (and there's no change)
-	    desc->indexed_pricing.empty(BCP_Storage_WrtParent);
 	if (nodedesc->warmstart)
 	    // If the parent has warmstart info then 
 	    desc->warmstart = nodedesc->warmstart->empty_wrt_this();
 
-	child = new BCP_tm_node(node->level() + 1, desc);
+	child = new BCP_tm_node(node->getDepth() + 1, desc);
+	child->_core_storage = desc->core_change.storage();
+	child->_var_storage = desc->var_change.storage();
+	child->_cut_storage = desc->cut_change.storage();
+	child->_ws_storage =
+	    desc->warmstart ? desc->warmstart->storage() : BCP_Storage_NoData;
+
 	p.search_tree.insert(child); // this sets _index
-	child->_quality = qualities[i];
-	child->_true_lower_bound =
-	    node->_desc->indexed_pricing.get_status() ?
-	    node->true_lower_bound(): lpobj[i];
-	child->_user_data = user_data[i];
+	child->_data._user = user_data[i];
 	child->_parent = node;
 	child->_birth_index = node->child_num();
+	/* Fill out the fields in CoinTreeNode */
+	child->setDepth(depth);
+	child->setQuality(qualities[i]);
+	child->setTrueLB(true_lb[i]);
+	if (i > 0 && depth <= 127) {
+	  BitVector128 pref = nodePref;
+	  pref.setBit(127-depth);
+	  child->setPreferred(pref);
+	} else {
+	  child->setPreferred(nodePref);
+	}
+	/* Add the child to the list of children in the parent */
 	node->new_child(child);
 	// _children  initialized to be empty -- OK
 	switch (action[i]){
 	case BCP_ReturnChild:
-	    p.candidates.insert(child);
+	    children[numChildrenAdded++] = child;
 	    child->status = BCP_CandidateNode;
 	    break;
 	case BCP_KeepChild:
+	    children[numChildrenAdded++] = child;
 	    child->status = BCP_CandidateNode; // be conservative
 	    keep = i;
 	    break;
@@ -432,56 +567,79 @@ BCP_tm_unpack_branching_info(BCP_tm_prob& p, BCP_buffer& buf,
 	    break;
 	}
 	// inherit var/cut pools
-	child->vp = node->vp ? node->vp->clone() : 0;
-	child->cp = node->cp ? node->cp->clone() : 0;
-	// lp, cg, vg  initialized to 0 -- OK, none assigned yet
+	child->vp = node->vp;
+	child->cp = node->cp;
+	// lp, cg, vg  initialized to -1 -- OK, none assigned yet
+#if (BCP_DEBUG_PRINT != 0)
+	printf("TM %.3lf: parent: %i  sibling: %i  siblingind: %i  depth: %i  quality: %lf  pref: %s\n",
+	       tt, node->_index, i, child->_index, depth, child->getQuality(),
+	       child->getPreferred().str().c_str());
+
+#endif
     }
 
-    // check the one that's proposed to be kept if there's one
-    if (keep >= 0){
+    if (numChildrenAdded > 0) {
+      CoinTreeSiblings siblings(numChildrenAdded, children);
+
+      BCP_print_memusage(p);
+      p.need_a_TS = ! BCP_tm_is_data_balanced(p);
+
+      // check the one that's proposed to be kept if there's one
+      if (keep >= 0) {
 	child = node->child(keep);
 	if (dive == BCP_DoDive || dive == BCP_TestBeforeDive){
-	    // we've got to answer
-	    buf.clear();
+	  // we've got to answer
+	  buf.clear();
+	  if (p.need_a_TS) {
+	    /* Force no diving if we need a TS process */
+	    dive = BCP_DoNotDive;
+	  } else {
 	    if (dive == BCP_TestBeforeDive)
-		dive = BCP_tm_shall_we_dive(p, child->quality());
-	    buf.pack(dive);
-	    if (dive != BCP_DoNotDive){
-		p.user->display_node_information(p.search_tree, *child);
-		child->status = BCP_ActiveNode;
-		// if diving then send the new index and var/cut_names
-		buf.pack(child->index());
-	    } else {
-		p.candidates.insert(child);
-	    }
-	    p.msg_env->send(node->lp, BCP_Msg_DivingInfo, buf);
-	}else{
-	    p.candidates.insert(child);
+	      dive = BCP_tm_shall_we_dive(p, child->getQuality());
+	  }
+	  buf.pack(dive);
+	  if (dive != BCP_DoNotDive){
+	    p.user->display_node_information(p.search_tree, *child);
+	    child->status = BCP_ActiveNode;
+	    // if diving then send the new index and var/cut_names
+	    buf.pack(child->index());
+	    siblings.advanceNode();
+	  }
+	  p.candidate_list.push(siblings);
+	  p.user->change_candidate_heap(p.candidate_list, false);
+	  p.msg_env->send(node->lp, BCP_Msg_DivingInfo, buf);
+	} else {
+	  p.candidate_list.push(siblings);
+	  p.user->change_candidate_heap(p.candidate_list, false);
 	}
-    }else{
+      } else {
+	p.candidate_list.push(siblings);
+	p.user->change_candidate_heap(p.candidate_list, false);
 	dive = BCP_DoNotDive;
-    }
+      }
 
-    if (dive == BCP_DoNotDive){
+      if (dive == BCP_DoNotDive){
 	// lp,cg,vg becomes free (zeroes out node->{lp,cg,vg})
 	BCP_tm_free_procs_of_node(p, node);
-    } else {
+      } else {
 	// if diving then the child takes over the parent's lp,cg,vg
 	// XXX
 	if (child != node->child(keep)) {
-	    throw BCP_fatal_error("\
+	  throw BCP_fatal_error("\
 BCP_tm_unpack_branching_info: the value of child is messed up!\n");
 	}
-	if (! node->lp) {
-	    throw BCP_fatal_error("\
+	if (node->lp == -1) {
+	  throw BCP_fatal_error("\
 BCP_tm_unpack_branching_info: the (old) node has no LP associated with!\n");
 	}
 	child->lp = node->lp;
 	child->cg = node->cg;
 	child->vg = node->vg;
-	p.active_nodes[p.slaves.lp->index_of_proc(node->lp)] = child;
-	node->lp = node->cg = node->vg = 0;
+	p.active_nodes[node->lp] = child;
+	node->lp = node->cg = node->vg = -1;
+      }
     }
+    delete[] children;
 
     // and the node is done
     node->status = BCP_ProcessedNode;
@@ -500,9 +658,13 @@ BCP_tm_unpack_branching_info: the (old) node has no LP associated with!\n");
 void BCP_tm_unpack_node_with_branching_info(BCP_tm_prob& p, BCP_buffer& buf)
 {
     const int index = BCP_tm_unpack_node_description(p, buf);
+    /* In the middle of BCP_tm_unpack_branching_info we check for data
+       balancing just before we (may) allow diving.*/
     BCP_tm_unpack_branching_info(p, buf, p.search_tree[index]);
     BCP_tm_print_info_line(p, *p.search_tree[index]);
     // BCP_tm_list_candidates(p);
+
+    p.need_a_TS = BCP_tm_balance_data(p);
 }
 
 //#############################################################################
@@ -512,10 +674,15 @@ BCP_tm_node* BCP_tm_unpack_node_no_branching_info(BCP_tm_prob& p,
 {
     const int index = BCP_tm_unpack_node_description(p, buf);
 
+    BCP_print_memusage(p);
+    p.need_a_TS = ! BCP_tm_is_data_balanced(p);
+
     // Mark the lp/cg/vg processes of the node as free
     BCP_tm_node* node = p.search_tree[index];
     BCP_tm_print_info_line(p, *node);
     BCP_tm_free_procs_of_node(p, node);
+
+    p.need_a_TS = BCP_tm_balance_data(p);
 
     return node;
 }

@@ -11,12 +11,6 @@ struct BCP_tm_par{
   /** Character parameters. Most of these variables are used as booleans
       (true = 1, false = 0). */
   enum chr_params{
-    /** Indicates whether algorithmic variables will be generated or not.
-	Values: 1 (true), 0 (false). Default: 0. */
-    AlgorithmicVariablesAreGenerated,
-    /** Indicates whether indexed variables will be generated or not. Values:
-	1 (true), 0 (false). Default: 0. */
-    IndexedVariablesAreGenerated,
     /** Indicates whether to debug LP processes or not. Values: 1 (true), 0
 	(false). Default: 0. */
     DebugLpProcesses,
@@ -32,28 +26,25 @@ struct BCP_tm_par{
     /** Indicates whether to debug Variable Pool processes or not. Values: 1
 	(true), 0 (false). Default: 0. */
     DebugVpProcesses,
-      /** Indicates whether to do branching or not. Values: 1 (true), 0
-	  (false). Default: 0. */
+    /** Indicates whether to variable generation will take place or not.
+	Values: 1 (true), 0 (false). Default: 0. */
+    GenerateVars,
     /** Indicates whether message passing is serial (all processes are on
 	the same processor) or not. Values: 1 (true), 0 (false). Default: 0.
     */
     MessagePassingIsSerial,
-    /** Indicates whether to do pricing (variable generation) in the root
-	before the second phase of the algorithm. Values: 1 (true), 0
-	(false). Default: 0. */
-    PriceInRootBeforePhase2,
     /** Print out a message when the default version of an overridable
 	  method is executed. Default: 1. */
     ReportWhenDefaultIsExecuted,
     /** Indicates whether to trim the search tree before a new phase.
 	Values: 1 (true), 0 (false). Default: 0. */
     TrimTreeBeforeNewPhase,
-	/** Indicates whether that part of the tree that's completely explored
-		should be freed as soon as possible. This conserves memory, but may
-		make it harder to track what's happening in the tree.
-		Values: 1 (true), 0 (false). Default: 1.
+    /** Indicates whether that part of the tree that's completely explored
+	should be freed as soon as possible. This conserves memory, but may
+	make it harder to track what's happening in the tree.
+	Values: 1 (true), 0 (false). Default: 1.
 	*/
-	RemoveExploredBranches,
+    RemoveExploredBranches,
     /** A flag that instructs BCP to be (almost) absolutely silent. It zeros
 	out all the XxVerb flags <em>even if the verbosity flag is set to 1
 	later in the parameter file</em>. Exceptions (flags whose status is
@@ -110,6 +101,19 @@ struct BCP_tm_par{
    
   /** Integer parameters. */
   enum int_params{
+    /** Specifies how warmstart information should be stored in the TM.
+	Possible valueas: BCP_WarmstartNone, BCP_WarmstartRoot,
+	BCP_WarmstartParent. The first is obvious, the second means the root
+	node's warmstart info should be sent out along with each node, the
+	last means the parent's warmstart info should be sent out.
+	Default: BCP_WarmstartParent */
+    WarmstartInfo,
+    /** The maximum size of the memory heap the TM can use. If the TM reaches
+	this limit then it converts an LP process into a TS (storage)
+	process). If positive, it's the number of megabytes. 0 indicates the
+	TM should attempt to find this out. -1 indicates that no TS process
+	should be created. Default: -1. */
+    MaxHeapSize,
     /** At every this many search tree node provide a single line info on the
 	progress of the search tree. If <= 0 then never. Default: 0. */
     TmVerb_SingleLineInfoFrequency,
@@ -134,6 +138,12 @@ struct BCP_tm_par{
     VpProcessNum,
     /** ??? */
     TmTimeout,
+    /** Parameters related to scheduling the LP processes */
+    LPscheduler_MaxNodeIdNum,
+    /** Max how many SB nodes should the scheduler give to an LP process */
+    LPscheduler_MaxSbIdNum,
+    /** Parameters related to scheduling the LP processes */
+    LPscheduler_MinSbIdNum,
     //
     end_of_int_params
   };
@@ -162,6 +172,12 @@ struct BCP_tm_par{
     TerminationGap_Relative,
     /** ??? Values: Default: */
     UpperBound,
+    /** Parameters related to scheduling the LP processes */
+    LPscheduler_OverEstimationStatic,
+    LPscheduler_SwitchToRateThreshold,
+    LPscheduler_FactorTimeHorizon,
+    LPscheduler_OverEstimationRate,
+    LPscheduler_MaxNodeIdRatio,
     //
     end_of_dbl_params
   };

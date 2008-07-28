@@ -47,9 +47,9 @@ BCP_print_brobj_stat(BCP_lp_prob& p,
     const BCP_lp_branching_object* can = best_presolved->candidate();
 
     if (p.param(BCP_lp_par::LpVerb_StrongBranchResult)) {
-	printf("\nLP:   SB selected candidate %i out of %i.\n\n",
-	       selected, candidate_num);
-	printf("LP:   The selected object is:");
+	p.user->print(true, "\nLP:   SB selected candidate %i out of %i.\n\n",
+		      selected, candidate_num);
+	p.user->print(true, "LP:   The selected object is:");
 	if (p.param(BCP_lp_par::LpVerb_StrongBranchPositions)) {
 	    can->print_branching_info(orig_varnum,
 				      p.lp_result->x(),
@@ -58,10 +58,11 @@ BCP_print_brobj_stat(BCP_lp_prob& p,
 	for (int i = 0; i < can->child_num; ++i) {
 	    const BCP_lp_result& res = best_presolved->lpres(i);
 	    const double lb = res.objval();
-	    printf((lb > BCP_DBL_MAX/10 ? " [%e,%i,%i]" : " [%.4f,%i,%i]"),
-		   lb, res.termcode(), res.iternum());
+	    p.user->print(true,
+			  (lb>BCP_DBL_MAX/10 ? " [%e,%i,%i]":" [%.4f,%i,%i]"),
+			  lb, res.termcode(), res.iternum());
 	}
-	printf("\n");
+	p.user->print(true, "\n");
     }
     // Print some statistics
     if (p.param(BCP_lp_par::LpVerb_ChildrenInfo)){
@@ -72,7 +73,7 @@ BCP_print_brobj_stat(BCP_lp_prob& p,
 	    case BCP_ReturnChild:
 		break;
 	    case BCP_FathomChild:
-		printf("LP:   Child %i is fathomed.\n", i);
+		p.user->print(true, "LP:   Child %i is fathomed.\n", i);
 		break;
 	    }
     }
@@ -302,9 +303,8 @@ BCP_lp_perform_strong_branching(BCP_lp_prob& p,
 			p.param(BCP_lp_par::MaxPresolveIter));
     }
 
-    if (p.param(BCP_lp_par::LpVerb_StrongBranchResult)) {
-	printf("\nLP: Starting strong branching:\n\n");
-    }
+    p.user->print(p.param(BCP_lp_par::LpVerb_StrongBranchResult),
+		  "\nLP: Starting strong branching:\n\n");
 
     const OsiBabSolver* babSolver = p.user->getOsiBabSolver();
 
@@ -341,7 +341,7 @@ BCP_lp_perform_strong_branching(BCP_lp_prob& p,
 				colbounds.begin());
 
 	if (p.param(BCP_lp_par::LpVerb_PresolveResult)) {
-	    printf("LP:   Presolving:");
+	    p.user->print(true, "LP:   Presolving:");
 	    if (p.param(BCP_lp_par::LpVerb_PresolvePositions)) {
 		can->print_branching_info(orig_colnum,
 					  p.lp_result->x(),
@@ -350,10 +350,11 @@ BCP_lp_perform_strong_branching(BCP_lp_prob& p,
 	    for (i = 0; i < can->child_num; ++i) {
 		const BCP_lp_result& res = tmp_presolved->lpres(i);
 		const double lb = res.objval();
-		printf((lb > BCP_DBL_MAX/10 ? " [%e,%i,%i]" : " [%.4f,%i,%i]"),
-		       lb, res.termcode(), res.iternum());
+		p.user->print(true,
+			      (lb>BCP_DBL_MAX/10 ? " [%e,%i,%i]":" [%.4f,%i,%i]"),
+			      lb, res.termcode(), res.iternum());
 	    }
-	    printf("\n");
+	    p.user->print(true, "\n");
 	}
 	// Compare the current one with the best so far
 	switch (p.user->compare_branching_candidates(tmp_presolved,
@@ -413,17 +414,40 @@ BCP_lp_select_branching_object(BCP_lp_prob& p,
     BCP_cut_set& cuts = p.node->cuts;
     BCP_vec<BCP_lp_branching_object*> candidates;
 
+    bool force_branch = (p.lp_result->termcode() & BCP_Abandoned) != 0;
+
     BCP_branching_decision do_branch = 
-	p.user->select_branching_candidates(*p.lp_result, vars, cuts,
+	p.user->select_branching_candidates(*p.lp_result,
+					    vars, cuts,
 					    *p.local_var_pool,
 					    *p.local_cut_pool,
-					    candidates);
+					    candidates,
+					    force_branch);
     switch (do_branch){
     case BCP_DoNotBranch_Fathomed:
 	return BCP_DoNotBranch_Fathomed;
     case BCP_DoNotBranch:
 	if (p.local_var_pool->size() == 0 && p.local_cut_pool->size() == 0) {
-	    printf("\
+	    /* Hmmm... check whether some magic was done and the former sol is
+	       now infeasible, so resolving is perfectly normal.
+	       NOTE: We only check whether the former primal sol and lhs
+	       values are within the bounds! */
+	    const double petol = p.lp_result->primalTolerance();
+	    const double * x = p.lp_result->x();
+	    for (int i = vars.size() - 1; i >= 0; --i) {
+		const BCP_var* v = vars[i];
+		if (x[i] + petol < v->lb() || x[i] - petol > v->ub()) {
+		    return BCP_DoNotBranch; // YES...
+		}
+	    }
+	    const double * lhs = p.lp_result->lhs();
+	    for (int i = cuts.size() - 1; i >= 0; --i) {
+		const BCP_cut* c = cuts[i];
+		if (lhs[i] + petol < c->lb() || lhs[i] - petol > c->ub()) {
+		    return BCP_DoNotBranch; // YES...
+		}
+	    }
+	    p.user->print(true, "\
 LP: ***WARNING*** : BCP_DoNotBranch, but nothing can be added! ***WARNING***\n");
 	    //throw BCP_fatal_error("BCP_DoNotBranch, but nothing can be added!\n");
 	}
@@ -442,16 +466,17 @@ BCP_lp_select_branching_object: branching forced but no candidates selected\n");
     double time0 = CoinCpuTime();
     const int orig_colnum = p.node->vars.size();
 
-    // if branching candidates are not presolved then choose the first branching
-    // candidate as the best candidate.
+    // if branching candidates are not presolved then choose the first
+    // branching candidate as the best candidate.
     int selected = 0;
     if (p.param(BCP_lp_par::MaxPresolveIter) < 0) {
 	if (candidates.size() > 1) {
-	    printf("\
+	    p.user->print(true, "\
 LP: Strong branching is disabled but more than one candidate is selected.\n\
     Deleting all candidates but the first.\n");
 	    // delete all other candidates
-	    BCP_vec<BCP_lp_branching_object*>::iterator can = candidates.begin();
+	    BCP_vec<BCP_lp_branching_object*>::iterator can =
+		candidates.begin();
 	    for (++can; can != candidates.end(); ++can) {
 		delete *can;
 	    }
@@ -459,7 +484,13 @@ LP: Strong branching is disabled but more than one candidate is selected.\n\
 	}
 	BCP_add_branching_objects(p, candidates);
 	best_presolved = new BCP_presolved_lp_brobj(candidates[0]);
-	best_presolved->initialize_lower_bound(p.node->true_lower_bound);
+	if (candidates[0]->objval_) {
+	    best_presolved->set_objective_values(*candidates[0]->objval_,
+						 *candidates[0]->termcode_,
+						 p.node->true_lower_bound);
+	} else {
+	    best_presolved->initialize_lower_bound(p.node->true_lower_bound);
+	}
     } else {
 	selected = BCP_lp_perform_strong_branching(p, candidates,
 						   best_presolved);
@@ -479,23 +510,19 @@ LP: Strong branching is disabled but more than one candidate is selected.\n\
 		needed_overriding = true;
 	    }
 	}
-	if (needed_overriding &&
-	    p.param(BCP_lp_par::LpVerb_StrongBranchResult)){
-	    printf("LP:   Every child is returned because of not diving.\n");
-	}
+	p.user->print(needed_overriding &&
+		      p.param(BCP_lp_par::LpVerb_StrongBranchResult),
+		      "LP:  Every child is returned because of not diving.\n");
     }
+
+    // We don't know what is fathomable! strong branching may give an approx
+    // sol for the children's subproblems, but it may not be a lower
+    // bound. Let the tree manager decide what to do with them.
 
     // now throw out the fathomable ones. This can be done only if nothing
     // needs to be priced, there already is an upper bound and strong branching
     // was enabled (otherwise we don't have the LPs solved)
     if (p.param(BCP_lp_par::MaxPresolveIter) >= 0) {
-	if (p.node->indexed_pricing.get_status() == BCP_PriceNothing &&
-	    p.has_ub()) {
-	    for (int i = can->child_num - 1; i >= 0; --i) {
-		if (p.over_ub(best_presolved->lpres(i).objval()))
-		    action[i] = BCP_FathomChild;
-	    }
-	}
 	BCP_print_brobj_stat(p, orig_colnum, candidates.size(), selected,
 			     best_presolved);
     }
@@ -534,45 +561,46 @@ BCP_lp_make_parent_from_node(BCP_lp_prob& p)
 
     const BCP_var_set& vars = node.vars;
     const int varnum = vars.size();
-    BCP_vec<int>& added_vindex = parent.added_vars_index;
-    BCP_vec<BCP_obj_change>& added_vdesc = parent.added_vars_desc;
-    added_vindex.clear();
-    added_vdesc.clear();
-    added_vindex.reserve(varnum - bvarnum);
-    added_vdesc.reserve(varnum - bvarnum);
+    BCP_obj_set_change var_set = parent.var_set;
+    BCP_vec<int>& var_ind = var_set._new_objs;
+    BCP_vec<BCP_obj_change>& var_ch = var_set._change;
+    var_ind.clear();
+    var_ch.clear();
+    var_ind.reserve(varnum - bvarnum);
+    var_ch.reserve(varnum - bvarnum);
     for (i = bvarnum; i < varnum; ++i) {
 	const BCP_var* var = vars[i];
-	added_vindex.unchecked_push_back(var->bcpind());
-	added_vdesc.unchecked_push_back(BCP_obj_change(var->lb(), var->ub(),
-						       var->status()));
+	assert(var->bcpind() > 0);
+	var_ind.unchecked_push_back(var->bcpind());
+	var_ch.unchecked_push_back(BCP_obj_change(var->lb(), var->ub(),
+						  var->status()));
     }
     node.tm_storage.var_change = BCP_Storage_WrtParent;
 
     const BCP_cut_set& cuts = node.cuts;
     const int cutnum = cuts.size();
-    BCP_vec<int>& added_cindex = parent.added_cuts_index;
-    BCP_vec<BCP_obj_change>& added_cdesc = parent.added_cuts_desc;
-    added_cindex.clear();
-    added_cdesc.clear();
-    added_cindex.reserve(cutnum - bcutnum);
-    added_cdesc.reserve(cutnum - bcutnum);
+    BCP_obj_set_change cut_set = parent.cut_set;
+    BCP_vec<int>& cut_ind = cut_set._new_objs;
+    BCP_vec<BCP_obj_change>& cut_ch = cut_set._change;
+    cut_ind.clear();
+    cut_ch.clear();
+    cut_ind.reserve(cutnum - bcutnum);
+    cut_ch.reserve(cutnum - bcutnum);
     for (i = bcutnum; i < cutnum; ++i) {
 	const BCP_cut* cut = cuts[i];
-	added_cindex.unchecked_push_back(cut->bcpind());
-	added_cdesc.unchecked_push_back(BCP_obj_change(cut->lb(), cut->ub(),
-						       cut->status()));
+	assert(cut->bcpind() > 0);
+	cut_ind.unchecked_push_back(cut->bcpind());
+	cut_ch.unchecked_push_back(BCP_obj_change(cut->lb(), cut->ub(),
+						  cut->status()));
     }
     node.tm_storage.cut_change = BCP_Storage_WrtParent;
-
-    parent.indexed_pricing = node.indexed_pricing;
-    node.tm_storage.indexed_pricing =
-	(node.indexed_pricing.get_status() & BCP_PriceIndexedVars ?
-	 BCP_Storage_WrtParent : BCP_Storage_Explicit);
 
     delete parent.warmstart;
     parent.warmstart = node.warmstart;
     node.warmstart = 0;
     node.tm_storage.warmstart = BCP_Storage_WrtParent;
+
+    parent.index = node.index;
 
     delete node.user_data;
     node.user_data = 0;
@@ -621,9 +649,9 @@ BCP_lp_branch(BCP_lp_prob& p)
     if (keep < 0){ // if no diving then return quickly
 	if (p.param(BCP_lp_par::LpVerb_FathomInfo)) {
 	    if (best_presolved->is_pruned())
-		printf("LP:   Forcibly Pruning node\n");
+		p.user->print(true, "LP:   Forcibly Pruning node\n");
 	    else
-		printf("LP:   Returned children to TM. Waiting for new node.\n");
+		p.user->print(true, "LP:   Returned children to TM. Waiting for new node.\n");
 	}
 	delete best_presolved->candidate();
 	delete best_presolved;

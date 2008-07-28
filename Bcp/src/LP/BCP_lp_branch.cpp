@@ -11,6 +11,7 @@
 #include "BCP_lp_branch.hpp"
 
 #include "OsiSolverInterface.hpp"
+#include "OsiBranchingObject.hpp"
 
 #include "BCP_var.hpp"
 #include "BCP_cut.hpp"
@@ -59,6 +60,86 @@ static void BCP_reorder_pos(const int child_num,
       }
    }
    bounds = new_bd;
+}
+
+//#############################################################################
+
+BCP_lp_branching_object::
+BCP_lp_branching_object(const BCP_lp_integer_branching_object& o,
+			const int* order) :
+    child_num(2),
+    vars_to_add(0), cuts_to_add(0),
+    forced_var_pos(new BCP_vec<int>(1,-1)), forced_cut_pos(0),
+    forced_var_bd(new BCP_vec<double>(4,0.0)), forced_cut_bd(0),
+    implied_var_pos(0), implied_cut_pos(0),
+    implied_var_bd(0), implied_cut_bd(0),
+    objval_(0), termcode_(0)
+{
+    BCP_vec<int>& fvp = *forced_var_pos;
+    BCP_vec<double>& fvb = *forced_var_bd;
+    fvp[0] = o.originalObject()->columnNumber();
+    memcpy(&fvb[0], o.childBounds(order[0]), 2*sizeof(double));
+    memcpy(&fvb[2], o.childBounds(order[1]), 2*sizeof(double));
+}
+
+//#############################################################################
+
+BCP_lp_branching_object::
+BCP_lp_branching_object(const OsiSolverInterface* osi,
+			const BCP_lp_sos_branching_object& o,
+			const int* order) :
+    child_num(2),
+    vars_to_add(0), cuts_to_add(0),
+    forced_var_pos(0), forced_cut_pos(0),
+    forced_var_bd(0), forced_cut_bd(0),
+    implied_var_pos(0), implied_cut_pos(0),
+    implied_var_bd(0), implied_cut_bd(0),
+    objval_(0), termcode_(0)
+{
+    const OsiSOS* sos = dynamic_cast<const OsiSOS*>(o.originalObject());
+    const int * which = sos->members();
+    const double * weights = sos->weights();
+    const double value = o.value();
+    int i;
+
+    const double* clb = osi->getColLower();
+    const double* cub = osi->getColUpper();
+
+    const int len = sos->numberMembers();
+    forced_var_pos = new BCP_vec<int>(sos->members(), sos->members()+len);
+    forced_var_bd  = new BCP_vec<double>(4*len, 0.0);
+    BCP_vec<double>& fvb = *forced_var_bd;
+    double* downchildBounds = NULL;
+    double* upchildBounds = NULL;
+    if ( order[0] == 0) {
+	downchildBounds = &fvb[0];
+	upchildBounds = &fvb[2*len];
+    } else {
+	downchildBounds = &fvb[2*len];
+	upchildBounds = &fvb[0];
+    }
+    for (i = 0; i < len; ++i) {
+	const int pos = which[i];
+	downchildBounds[2*i]   = upchildBounds[2*i]   = clb[pos];
+	downchildBounds[2*i+1] = upchildBounds[2*i+1] = cub[pos];
+    }
+    // upper bounds in child 0
+    for (i = 0; i < len; ++i) {
+	if (weights[i] > value)
+	    break;
+    }
+    assert (i < len);
+    for ( ; i < len; ++i) {
+	downchildBounds[2*i+1] = 0.0;
+    }
+    // upper bounds in child 1
+    for (i = 0 ; i < len; ++i) {
+	if (weights[i] >= value)
+	    break;
+	else
+	    upchildBounds[2*i+1] = 0.0;
+    }
+    assert ( i < len);
 }
 
 //#############################################################################
@@ -175,7 +256,27 @@ void BCP_presolved_lp_brobj::fake_objective_values(const double itlim_objval)
    }
 }
 
-const bool BCP_presolved_lp_brobj::fathomable(const double objval_limit) const
+void BCP_presolved_lp_brobj::set_objective_values(const BCP_vec<double>& obj,
+						  const BCP_vec<int>& termcode,
+						  const double itlim_objval)
+{
+   for (int i = _candidate->child_num - 1; i >= 0; --i) {
+      const int tc = termcode[i];
+      if (tc & (BCP_ProvenPrimalInf | BCP_DualObjLimReached)) {
+	 _lpres[i]->fake_objective_value(BCP_DBL_MAX);
+	 continue;
+      }
+      // *THINK* : what to do in these cases?
+      if (tc & (BCP_ProvenDualInf | BCP_PrimalObjLimReached |
+		BCP_IterationLimit | BCP_Abandoned | BCP_TimeLimit) ) {
+	 _lpres[i]->fake_objective_value(itlim_objval);
+	 continue;
+      }
+      _lpres[i]->fake_objective_value(obj[i]);
+   }
+}
+
+bool BCP_presolved_lp_brobj::fathomable(const double objval_limit) const
 {
    // If ALL descendants in cand terminated with primal infeasibility
    // or high cost, that proves that the current node can be fathomed.
@@ -189,7 +290,7 @@ const bool BCP_presolved_lp_brobj::fathomable(const double objval_limit) const
    return true;
 }
 
-const bool BCP_presolved_lp_brobj::had_numerical_problems() const
+bool BCP_presolved_lp_brobj::had_numerical_problems() const
 {
    for (int i = _candidate->child_num - 1; i >= 0; --i)
       if (_lpres[i]->termcode() == BCP_Abandoned)

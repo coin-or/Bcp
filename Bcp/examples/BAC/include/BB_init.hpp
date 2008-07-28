@@ -15,6 +15,8 @@ public:
 				 const char * const * arglist);
 
    virtual BCP_lp_user * lp_init(BCP_lp_prob& p);
+
+   virtual BCP_user_pack* packer_init(BCP_user_class* p);
 };
 
 #endif

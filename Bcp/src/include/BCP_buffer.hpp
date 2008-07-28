@@ -53,8 +53,9 @@ public:
 
        Note that:
        <ol>
-         <li>The size of the buffer never decreases. The buffer size increases
-	     when the current size is not sufficient for the message.
+         <li>The max size of the buffer never decreases. The buffer max size
+             increases when the current max size is not sufficient for the
+	     message.
 	 <li>With normal usage for incoming messages <code>_size</code> stays
 	     constant while reading out the message and <code>_pos</code> moves
 	     forward in the buffer.
@@ -69,8 +70,8 @@ public:
    BCP_message_tag _msgtag;
    /** The process id of the sender of the last <em>received</em> message.
        This member has no meaning if the buffer holds an outgoing message. */ 
-   BCP_proc_id*    _sender;
-   /** The next read/write position in the buffer. */
+   int    _sender;
+   /** The next read position in the buffer. */
    size_t _pos;
    /** The amount of memory allocated for the buffer. */
    size_t _max_size;
@@ -89,29 +90,34 @@ public:
    inline BCP_message_tag msgtag() const { return _msgtag; }
    /** Return a const pointer to the process id of the sender of the message
        in the buffer. */
-   inline const BCP_proc_id* sender() const { return _sender; }
+   inline int         sender() const { return _sender; }
    /** Return the size of the current message in the buffer. */
-   inline int                size() const { return _size; }
+   inline int         size() const { return _size; }
    /** Return a const pointer to the data stored in the buffer. */
-   inline const char*        data() const { return _data; }
+   inline const char* data() const { return _data; }
    /*@}*/
    //=========================================================================
 
    /**@name Modifying methods */
    /*@{*/
-   /** Position the read/write head in the buffer. Must be between 0 and
-       size(). */
+   /** Position the read head in the buffer. Must be between 0 and size(). */
    inline void set_position(const int pos) throw(BCP_fatal_error) {
-     if (pos < 0 || pos >= size())
+     if (pos < 0 || pos > size())
        throw BCP_fatal_error("Incorrest buffer position setting.\n");
      _pos = pos;
+   }
+   /** Cut off the end of the buffer. Must be between 0 and size(). */
+   inline void set_size(const int s) throw(BCP_fatal_error) {
+     if (s < 0 || s > size())
+       throw BCP_fatal_error("Incorrest buffer position setting.\n");
+     _size = s;
    }
    /** Set the message tag on the buffer */
    inline void set_msgtag(const BCP_message_tag tag) { _msgtag = tag; }
 
   /** Set the buffer to be a copy of the given data. Use this with care! */
   void set_content(const char* data, const size_t size,
-		   BCP_proc_id* sender, BCP_message_tag msgtag) {
+		   int sender, BCP_message_tag msgtag) {
     _sender = sender;
     _msgtag = msgtag;
     if (_max_size < size) {
@@ -129,7 +135,7 @@ public:
    /** Make an exact replica of the other buffer. */
    BCP_buffer& operator=(const BCP_buffer& buf) {
       _msgtag = buf._msgtag;
-      _sender = buf._sender ? buf._sender->clone() : 0;
+      _sender = buf._sender;
       _pos = buf._pos;
       if (_max_size < buf._max_size) {
 	 delete[] _data;
@@ -145,8 +151,11 @@ public:
        <code>add_size</code> number of additional bytes will fit into the
        buffer. */
    inline void make_fit(const int add_size){
-      if (_max_size < _size + add_size){
-	 _max_size = 2 * (_size + add_size + 0x1000/*4K*/);
+      if (_max_size < _size + add_size) {
+	 _max_size = _size + add_size;
+	 /* If > 1M then have spare space of 1/16th (~6%) of used space,
+	    if <= 1M then have 64K spare space */
+	 _max_size += (_max_size > 1<<20) ? (_max_size >> 4) : (1 << 16) ;
 	 char *new_data = new char[_max_size];
 	 if (_size)
 	    memcpy(new_data, _data, _size);
@@ -160,7 +169,7 @@ public:
       _msgtag = BCP_Msg_NoMessage;
       _size = 0;
       _pos = 0;
-      delete _sender; _sender = 0;
+      _sender = -1;
    }
 
    /** Pack a single object of type <code>T</code>. Copies
@@ -369,18 +378,18 @@ public:
    /*@{*/
    /** The default constructor creates a buffer of size 16 Kbytes with no
        message in it. */
-   BCP_buffer() : _msgtag(BCP_Msg_NoMessage), _sender(0), _pos(0),
-      _max_size(0x4000/*16K*/), _size(0), _data(new char[_max_size]) {}
+   BCP_buffer() : _msgtag(BCP_Msg_NoMessage), _sender(-1), _pos(0),
+		  _max_size(1<<16/*64K*/), _size(0),
+		  _data(new char[_max_size]) {}
    /** The copy constructor makes an exact replica of the other buffer. */
    BCP_buffer(const BCP_buffer& buf) :
-      _msgtag(BCP_Msg_NoMessage), _sender(0), _pos(0),
+      _msgtag(BCP_Msg_NoMessage), _sender(-1), _pos(0),
       _max_size(0), _size(0), _data(0){
 	 operator=(buf);
    }
    /** The desctructor deletes all data members (including freeing the
        buffer). */
    ~BCP_buffer() {
-      delete _sender;   _sender = 0;
       delete[] _data;
    }
    /*@}*/

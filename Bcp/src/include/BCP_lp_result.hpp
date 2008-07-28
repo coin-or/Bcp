@@ -6,6 +6,7 @@
 // This file is fully docified.
 
 #include <cfloat>
+#include <string>
 
 #include "BCP_math.hpp"
 #include "BCP_error.hpp"
@@ -48,6 +49,8 @@ private:
 private:
   /**@name Data members storing general information about the solver. */
   /*@{*/
+    /** The name of the LP solver used */
+    std::string _solvername;
     double _lower_bound;
     /** The zero-tolerance used by the LP solver for the primal solution. */
     double _primal_tolerance;
@@ -82,6 +85,7 @@ public:
     /** The default constructor initializes an empty solution, i.e., one 
         which holds neither an exact nor an approximate solution. */
     BCP_lp_result() :
+      _solvername(),
       _lower_bound(-BCP_DBL_MAX), _primal_tolerance(0), _dual_tolerance(0),
       _termcode(BCP_ProvenOptimal), _iternum(0), _objval(0),
       _x(0), _pi(0), _dj(0), _lhs(0)
@@ -101,26 +105,27 @@ public:
      vector members a reference to the vector is returned instead of the
      pointer. */
   /*@{*/
+    const std::string& solvername() const { return _solvername; }
     ///
-    int&          termcode()       { return _termcode; }
+  //    int&          termcode()       { return _termcode; }
     int           termcode() const { return _termcode; }
     ///
-    int&          iternum()        { return _iternum; }
+  //    int&          iternum()        { return _iternum; }
     int           iternum()  const { return _iternum; }
     ///		  
-    double&       objval()         { return _objval; }
+  //    double&       objval()         { return _objval; }
     double        objval()   const { return _objval; }
     ///
-    double* x()                    { return _x; }
+  //    double* x()                    { return _x; }
     const double* x()        const { return _x; }
     ///	  
-    double* pi()                   { return _pi; }
+  //    double* pi()                   { return _pi; }
     const double* pi()       const { return _pi; }
     ///	  
-    double* dj()                   { return _dj; }
+  //    double* dj()                   { return _dj; }
     const double* dj()       const { return _dj; }
     ///	  
-    double* lhs()                  { return _lhs; }
+  //    double* lhs()                  { return _lhs; }
     const double* lhs()      const { return _lhs; }
   /*@}*/
 

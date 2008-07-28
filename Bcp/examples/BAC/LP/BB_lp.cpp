@@ -1,4 +1,4 @@
-// Last edit: 6/23/06
+// Last edit: 5/19/07
 //
 // Name:     BB_lp.cpp
 // Author:   Francois Margot
@@ -28,25 +28,6 @@ BB_lp::unpack_module_data(BCP_buffer& buf)
 {
   buf.unpack(p_desc);
   EPS = p_desc->EPSILON;
-}
-
-/************************************************************************/
-void
-BB_lp::pack_cut_algo(const BCP_cut_algo* cut, BCP_buffer& buf)
-{
-  const BB_cut* bb_cut = dynamic_cast<const BB_cut*>(cut);
-  if (!bb_cut)
-    throw BCP_fatal_error("BB_lp::pack_cut_algo() : unknown cut type!\n");
-
-  bb_cut->pack(buf);
-  return;
-}
-
-/************************************************************************/
-BCP_cut_algo*
-BB_lp::unpack_cut_algo(BCP_buffer& buf)
-{
-  return new BB_cut(buf);
 }
 
 /************************************************************************/
@@ -226,8 +207,8 @@ BB_lp::generate_cuts_in_lp(const BCP_lp_result& lpres,
    
    for (i=violated_cuts.size()-1; i>=0; --i) {
       const int ind = violated_cuts[i];
-      new_cuts.push_back(new BCP_cut_indexed(ind, p_desc->rlb_indexed[ind], 
-					     p_desc->rub_indexed[ind]));
+      new_cuts.push_back(new BB_indexed_cut(ind, p_desc->rlb_indexed[ind], 
+					    p_desc->rub_indexed[ind]));
    }
    cout << "generate_cuts_in_lp(): found " << new_cuts.size() 
 	<< " indexed cuts" << endl;
@@ -372,8 +353,8 @@ BB_lp::cuts_to_rows(const BCP_vec<BCP_var*>& vars, // on what to expand
 {
   const int cutnum = cuts.size();
   for (int i=0; i<cutnum; ++i) {
-      const BCP_cut_indexed *icut =
-	dynamic_cast<const BCP_cut_indexed*>(cuts[i]);
+      const BB_indexed_cut *icut =
+	dynamic_cast<const BB_indexed_cut*>(cuts[i]);
       if (icut) {
 	const int ind = icut->index();
 	rows.push_back(new BCP_row(p_desc->indexed->getVector(ind),
@@ -461,35 +442,6 @@ BB_lp::select_branching_candidates(const BCP_lp_result& lpres,
 						  local_cut_pool, cands));
 #endif
 }
-
-/**************************************************************************/
-void
-BB_lp::pack_user_data(const BCP_user_data* ud, BCP_buffer& buf)
-
-  // Normally, no modifications required.
-{
-  const MY_user_data *mud = dynamic_cast<const MY_user_data*> (ud);
-  if(!mud)
-    throw BCP_fatal_error("BB_lp::pack_user_data() : unknown data type!\n");
-
-  printf("BB_lp::pack_user_data:\n");
-  mud->print();
-  mud->pack(buf);
-
-} /* pack_user_data */
-    
-/**************************************************************************/
-MY_user_data*
-BB_lp::unpack_user_data(BCP_buffer& buf)
-
-  // Normally, no modifications required.
-{
-  p_ud = new MY_user_data(buf);
-  printf("BB_lp::unpack_user_data:\n");
-  p_ud->print();
-  return(p_ud); 
-
-} /* unpack_user_data */
 
 /**************************************************************************/
 void

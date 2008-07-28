@@ -10,10 +10,10 @@
 #include "BCP_message_tag.hpp"
 #include "BCP_parameters.hpp"
 #include "BCP_enum_tm.hpp"
+#include "BCP_enum_process_t.hpp"
 
 #define BCP__DUMP_PROCINFO 0
 
-class BCP_proc_id;
 class BCP_buffer;
 class BCP_tm_prob;
 class BCP_lp_prob;
@@ -47,6 +47,11 @@ void BCP_tm_trim_tree_wrapper(BCP_tm_prob& p, const bool between_phases);
 void BCP_tm_remove_explored(BCP_tm_prob& p, BCP_tm_node* node);
 
 //-----------------------------------------------------------------------------
+// BCP_tm_nodes_to_storage.cpp
+bool BCP_tm_is_data_balanced(BCP_tm_prob& p);
+bool BCP_tm_balance_data(BCP_tm_prob& p);
+
+//-----------------------------------------------------------------------------
 // BCP_tm_msgproc.cpp
 void BCP_tm_idle_processes(BCP_tm_prob& p);
 void BCP_tm_stop_processes(BCP_tm_prob& p);
@@ -57,9 +62,9 @@ void BCP_tm_remove_lp(BCP_tm_prob& p, const int index);
 void BCP_tm_remove_cg(BCP_tm_prob& p, const int index);
 void BCP_tm_remove_vg(BCP_tm_prob& p, const int index);
 void BCP_tm_notify_about_new_phase(BCP_tm_prob& p);
+void BCP_tm_notify_process_type(BCP_tm_prob& p, BCP_process_t ptype,
+				int num, const int* pids);
 void BCP_tm_notify_processes(BCP_tm_prob& p);
-void BCP_tm_distribute_core(BCP_tm_prob& p);
-void BCP_tm_distribute_user_info(BCP_tm_prob& p);
 void BCP_tm_unpack_priced_root(BCP_tm_prob& p, BCP_buffer& buf);
 void BCP_tm_free_procs_of_node(BCP_tm_prob& p, BCP_tm_node* node);
 
@@ -70,6 +75,8 @@ void BCP_tm_send_node(BCP_tm_prob& p, const BCP_tm_node* node,
 
 //-----------------------------------------------------------------------------
 // BCP_tm_msg_node_rec.cpp
+void BCP_print_memusage(BCP_tm_prob& p);
+
 BCP_vec<int>* BCP_tm_unpack_noncore_vars(USER_packing& user,
 					 BCP_buffer& buf,
 					 BCP_var_set_change& var_ch,
@@ -84,9 +91,8 @@ BCP_tm_node* BCP_tm_unpack_node_no_branching_info(BCP_tm_prob& p,
 						  BCP_buffer& buf);
 //-----------------------------------------------------------------------------
 // BCP_tm_functions.cpp
-BCP_vec< std::pair<BCP_proc_id*, int> >::iterator
-BCP_tm_identify_process(BCP_vec< std::pair<BCP_proc_id*, int> >& proclist,
-			BCP_proc_id* proc);
+BCP_vec< std::pair<int, int> >::iterator
+BCP_tm_identify_process(BCP_vec< std::pair<int, int> >& proclist, int proc);
 bool BCP_tm_assign_processes(BCP_tm_prob& p, BCP_tm_node* node);
 BCP_node_start_result BCP_tm_start_new_nodes(BCP_tm_prob& p);
 void BCP_tm_list_candidates(BCP_tm_prob& p);

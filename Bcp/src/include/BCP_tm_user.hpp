@@ -19,6 +19,8 @@
 #include "BCP_tm_param.hpp"
 #include "BCP_tm_node.hpp"
 #include "BCP_enum_tm.hpp"
+#include "BCP_enum_process_t.hpp"
+#include "BCP_USER.hpp"
 
 class BCP_lp_statistics;
 
@@ -53,7 +55,7 @@ class BCP_lp_statistics;
    </ul>
 */
 
-class BCP_tm_user {
+class BCP_tm_user : public BCP_user_class {
 private:
   BCP_tm_prob * p;
 public:
@@ -141,51 +143,14 @@ public:
     virtual bool
     replace_solution(const BCP_solution* old_sol, const BCP_solution* new_sol);
 
-    /**@name Methods that pack/unpack warmstart, var_algo and cut_algo objects.
-
-       The packing methods take an object and a buffer as
-       an argument and the user is supposed to pack the object into the buffer.
-
-       The argument of the unpacking methods is just the buffer. The user
-       is supposed to return a pointer to the unpacked object.
-    */
-    /*@{*/
-      /** Pack warmstarting information */
-      virtual void
-      pack_warmstart(const BCP_warmstart* ws, BCP_buffer& buf);
-      /** Unpack warmstarting information */
-      virtual BCP_warmstart*
-      unpack_warmstart(BCP_buffer& buf);
-      
-      /** Pack an algorithmic variable */
-      virtual void
-      pack_var_algo(const BCP_var_algo* var, BCP_buffer& buf);
-      /** Unpack an algorithmic variable */
-      virtual BCP_var_algo*
-      unpack_var_algo(BCP_buffer& buf);
-      
-      /** Pack an algorithmic cut */
-      virtual void
-      pack_cut_algo(const BCP_cut_algo* cut, BCP_buffer& buf);
-      /** Unpack an algorithmic cut */
-      virtual BCP_cut_algo*
-      unpack_cut_algo(BCP_buffer& buf);
-
-      /** Pack an user data */
-      virtual void
-      pack_user_data(const BCP_user_data* ud, BCP_buffer& buf);
-      /** Unpack an user data */
-      virtual BCP_user_data*
-      unpack_user_data(BCP_buffer& buf);
-    /*@}*/
   /*@}*/
 
   //--------------------------------------------------------------------------
   /** What is the process id of the current process */
-  const BCP_proc_id* process_id() const;
+  int process_id() const;
   /** Send a message to a particular process */
   void
-  send_message(const BCP_proc_id* const target, const BCP_buffer& buf);
+  send_message(const int target, const BCP_buffer& buf);
   /** Broadcast the message to all processes of the given type */
   void
   broadcast_message(const BCP_process_t proc_type, const BCP_buffer& buf);
@@ -222,8 +187,7 @@ public:
      virtual void
      create_root(BCP_vec<BCP_var*>& added_vars,
 		 BCP_vec<BCP_cut*>& added_cuts,
-		 BCP_user_data*& user_data,
-		 BCP_pricing_status& pricing_status);
+		 BCP_user_data*& user_data);
   /*@}*/
 
   //--------------------------------------------------------------------------
@@ -249,21 +213,25 @@ public:
     /** Do whatever initialization is necessary before the
         <code>phase</code>-th phase. (E.g., setting the pricing strategy.) */
     virtual void
-    init_new_phase(int phase, BCP_column_generation& colgen);
+    init_new_phase(int phase,
+		   BCP_column_generation& colgen,
+		   CoinSearchTreeBase*& candidates);
   /*@}*/
 
   //---------------------------------------------------------------------------
   /**@name Search tree node comparison */
   /*@{*/
-    /**@name Compare two search tree nodes. Return true if the first node
-       should be processed before the second one.
+    /**@name If desired, change the tree (the candidate list) in the search
+       tree manager using the setTree() method. This method is invoked after
+       every insertion into the candidate list and also whenever a new
+       solution is found. In the latter case \c new_solution is \c true.
 
-       Default: The default behavior is controlled by the
-       \c TreeSearchStrategy  parameter which is set to
-       0 (\c BCP_BestFirstSearch) by default.
+       The default invokes the newSolution() and the
+       reevaluateSearchStrategy() methods from CoinSearchTreeManager.
     */
-    virtual bool compare_tree_nodes(const BCP_tm_node* node0,
-				    const BCP_tm_node* node1);
+    virtual void
+    change_candidate_heap(CoinSearchTreeManager& candidates,
+			  const bool new_solution);
   /*@}*/
 };
 

@@ -1,5 +1,6 @@
 // Copyright (C) 2000, International Business Machines
 // Corporation and others.  All Rights Reserved.
+#if 0
 #include <algorithm>
 
 #include "BCP_buffer.hpp"
@@ -98,3 +99,4 @@ BCP_indexed_pricing_list::unpack(BCP_buffer& buf) {
 	 buf.unpack(_del_pos).unpack(_indices);
    }
 }
+#endif

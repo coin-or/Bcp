@@ -5,9 +5,18 @@
 
 //#include <cfloat>
 
+#include <map>
+
+#include "CoinSearchTree.hpp"
+#include "CoinSmartPtr.hpp"
+
 #include "BCP_math.hpp"
 #include "BCP_vector.hpp"
 
+#include "BCP_message_tag.hpp"
+#include "BCP_obj_change.hpp"
+#include "BCP_node_change.hpp"
+#include "BCP_USER.hpp"
 
 /** Node status in the Tree Manager. */
 
@@ -34,18 +43,21 @@ enum BCP_tm_node_status{
 
 //#############################################################################
 
-class BCP_proc_id;
-class BCP_node_change;
-class BCP_user_data;
-
 class BCP_tm_node;
 class BCP_tm_prob;
 
 //#############################################################################
 
-/** LITTLE OLD DESC */
+class BCP_tm_node_data {
+public:
+    Coin::SmartPtr<BCP_node_change> _desc;
+    Coin::SmartPtr<BCP_user_data>   _user;
+    BCP_tm_node_data(BCP_node_change* d = NULL) : _desc(d), _user(0) {}
+};
 
-class BCP_tm_node {
+//=============================================================================
+
+class BCP_tm_node : public CoinTreeNode {
 private:
     /**@name Disabled methods */
     /*@{*/
@@ -58,6 +70,8 @@ private:
     // NOTE: deleting a tree_node deletes the whole subtree below!
 public:
     /**@name Data members */
+    static int num_local_nodes;
+    static int num_remote_nodes;
     // *FIXME* break into groups 
     /*@{*/
     /** */
@@ -65,31 +79,14 @@ public:
     /** */
     int _index;
     /** */
-    int _level;
-    /** */
-    double _quality;
-    /** */
-    double _true_lower_bound;
-    /** */
-    BCP_node_change* _desc;
-    /** */
     BCP_tm_node* _parent;
-    /** */
-    BCP_user_data* _user_data;
+
     /** */
     int _birth_index;
     /** */
     BCP_vec<BCP_tm_node*> _children;
     /** */
-    BCP_proc_id* lp;
-    /** */
-    BCP_proc_id* cg;
-    /** */
-    BCP_proc_id* cp;
-    /** */
-    BCP_proc_id* vg;
-    /** */
-    BCP_proc_id* vp;
+    int lp, cg, cp, vg, vp;
     /** */
     int _processed_leaf_num;
     /** */
@@ -98,52 +95,37 @@ public:
     int _tobepriced_leaf_num;
     /** */
     int _leaf_num;
+
+    int _core_storage:4;
+    int _var_storage:4;
+    int _cut_storage:4;
+    int _ws_storage:4;
+
+    int _locally_stored:2;
+    // Exactly one of the next two is always irrelevant */
+    int _data_location:30;
+    BCP_tm_node_data _data;
+	
     /*@}*/
 
 public:
     /**@name Constructors and destructor */
     /*@{*/
     /** */
-    BCP_tm_node(int level, BCP_node_change* desc) :
-	status(BCP_DefaultNode),
-	_index(0),
-	_level(level),
-	_quality(-BCP_DBL_MAX),
-	_true_lower_bound(-BCP_DBL_MAX),
-	_desc(desc),
-	_parent(0),
-	_user_data(0),
-	_birth_index(-1),
-	_children(),
-	lp(0), cg(0), cp(0), vg(0), vp(0),
-	_processed_leaf_num(0),
-	_pruned_leaf_num(0),
-	_tobepriced_leaf_num(0),
-	_leaf_num(0)
-    {}
+    BCP_tm_node(int level, BCP_node_change* desc);
 
     /** */
-    BCP_tm_node(int level, BCP_node_change* desc,
-		BCP_tm_node* parent, int index) :
-	status(BCP_DefaultNode),
-	_index(0),
-	_level(level),
-	_quality(-BCP_DBL_MAX),
-	_true_lower_bound(-BCP_DBL_MAX),
-	_desc(desc),
-	_parent(0),
-	_user_data(0),
-	_birth_index(-1),
-	_children(),
-	lp(0), cg(0), cp(0), vg(0), vp(0),
-	_processed_leaf_num(0),
-	_pruned_leaf_num(0),
-	_tobepriced_leaf_num(0),
-	_leaf_num(0)
-    {}
-
+//     BCP_tm_node(int level, BCP_node_change* desc,
+// 		BCP_tm_node* parent, int index);
     /** */
-    ~BCP_tm_node();
+    ~BCP_tm_node()
+    {
+      if (_locally_stored) {
+	--num_local_nodes;
+      } else {
+	--num_remote_nodes;
+      }
+    }
     /*@}*/
 
     /**@name Query methods */
@@ -151,25 +133,19 @@ public:
     /** */
     inline int index() const { return _index; }
     /** */
-    inline int level() const { return _level; }
-    /** */
     inline int child_num() const { return _children.size(); }
-    /** */
-    inline double quality() const { return _quality; }
-    /** */
-    inline double true_lower_bound() const { return _true_lower_bound; }
     /** */
     inline int birth_index() const { return _birth_index; }
 
     /** */
-    inline BCP_user_data* user_data() { return _user_data; }
+    //    inline BCP_user_data* user_data() { return _data._user; }
     /** */
     inline BCP_tm_node* child(int ind) { return _children[ind]; }
     /** */
     inline BCP_tm_node* parent() { return _parent; }
 
     /** */
-    inline const BCP_user_data* user_data() const { return _user_data; }
+    //    inline const BCP_user_data* user_data() const { return _data._user; }
     /** */
     inline const BCP_tm_node* child(int ind) const { return _children[ind]; }
     /** */
@@ -250,8 +226,8 @@ public:
     inline void insert(BCP_tm_node* node) {
 	node->_index = _tree.size();
 	_tree.push_back(node);
-	if (node->_level > maxdepth_)
-	    maxdepth_ = node->_level;
+	if (node->getDepth() > maxdepth_)
+	    maxdepth_ = node->getDepth();
     }
     inline void remove(int index) {
 	_tree[index] = 0;
@@ -260,52 +236,82 @@ public:
 };
 
 //#############################################################################
+class BCP_tm_node_to_send;
 
-class BCP_node_queue {
-private:
-    BCP_node_queue();
-    BCP_node_queue(const BCP_node_queue&);
-    BCP_node_queue& operator=(const BCP_node_queue&);
-
-private:
-    /**@name Private data members */
-    /*@{*/
-    /** A reference to the problem structure so that we can invoke the method
-	comparing two search tree nodes. */
-    BCP_tm_prob& _p;
-    /** The tree nodes in the priority queue.
-	Note that the 0-th entry is not used in the tree (the loops are much
-	nicer that way) and is always a NULL pointer.
-    */
-    BCP_vec<BCP_tm_node*> _pq;
-    /*@}*/
-  
+class BCP_tm_node_to_send
+{
 public:
-    /**@name Constructor and destructor */
-    /*@{*/
-    /** */
-    BCP_node_queue(BCP_tm_prob& p) : _p(p), _pq() { _pq.push_back(NULL); }
-    /** */
-    ~BCP_node_queue() {}
-    /*@}*/
+    static std::map<int, BCP_tm_node_to_send*> waiting;
 
-    /** Return whether the queue is empty or not */
-    inline bool empty() const { return _pq.size() == 1; }
+private:
+    BCP_tm_prob& p;
 
-    /** Return the top member of the queue */
-    BCP_tm_node* top() const { return _pq[1]; }
+    /** the message tag to be used when finally the node is sent off */
+    BCP_message_tag msgtag;
 
-    /** Delete the top member of the queue. */
-    void pop();
+    /** An identifier of this object. It is the index of the node we want to
+	send out */
+    const int ID;
 
-    /** Insert a new node into the queue. */
-    void insert(BCP_tm_node* node);
+    const BCP_tm_node* node;
+    /** the path to the root. The root is root_path[0], the node itself is in
+	root_path[level] */
+    const BCP_tm_node** root_path;
+    /** at each level the index of the child in the parent's list */
+    int* child_index;
+    /** the node data on each level (well, up to the point where we have
+	encountered an explicit description for all kind of data) */
+    BCP_tm_node_data* node_data_on_root_path;
 
-    /** Find out how many candidates are below/above the current best upper
-	bound (including the granularity!). */
-    void compare_to_UB(int& quality_above_UB, int& quality_below_UB);
+    /** the level of node to be sent */
+    int level;
+
+    /** where the various pieces start to be explicit (or wrt. root/core) */
+    int explicit_core_level;
+    int explicit_var_level;
+    int explicit_cut_level;
+    int explicit_ws_level;
+    int explicit_all_level;
+
+    /** -1/nonneg unset/value : how many desc is missing */
+    int missing_desc_num;
+    /** -1/nonneg unset/value : how many var is missing */
+    int missing_var_num;
+    /** -1/nonneg unset/value : how many cut is missing */
+    int missing_cut_num;
+
+    /** The explicit description of the vars/cuts of the parent as a
+	BCP_obj_set_change and the vars/cuts themselves (the change contains
+	only indices!) */
+    BCP_obj_set_change var_set;
+    BCP_obj_set_change cut_set;
+    /** The list of vars/cuts of the node when the changes of the node are
+	applied to \c var_set and \c cut_set */
+    BCP_vec<Coin::SmartPtr<BCP_var> > vars;
+    BCP_vec<Coin::SmartPtr<BCP_cut> > cuts;
+
+public:
+
+    BCP_tm_node_to_send(BCP_tm_prob& p, const BCP_tm_node* node,
+			const BCP_message_tag tag);
+    ~BCP_tm_node_to_send();
+
+    /** return true or false depending on whether the node was really sent out
+	or it's still waiting for some data */
+    bool send();
+
+    /** return true if has everything to send the thing off to the LP.
+	Actually, it sends it off, so if this method returns true then
+	then object can be deleted */
+    bool receive_node_desc(BCP_buffer& buf);
+    /** return true if has everything to send the thing off to the LP.
+	Actually, it sends it off, so if this method returns true then
+	then object can be deleted */
+    bool receive_vars(BCP_buffer& buf);
+    /** return true if has everything to send the thing off to the LP.
+	Actually, it sends it off, so if this method returns true then
+	then object can be deleted */
+    bool receive_cuts(BCP_buffer& buf);
 };
-
-//#############################################################################
 
 #endif

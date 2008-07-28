@@ -10,49 +10,87 @@
 
 class BCP_buffer;
 
-/** Simple representation of a cut by storing non zero coefficients only */ 
+/****************************************************************************/
+/** When doing a sprint sort of algorithm on the cuts (i.e., leave out a
+    number of cuts at the beginning and add them only as necessary) this
+    object represents one of these cuts. Only the index of the cut needs to be
+    stored. */
+
+class BB_indexed_cut : public BCP_cut_algo {
+
+private:
+
+    BB_indexed_cut();
+    BB_indexed_cut(const BB_indexed_cut&);
+    BB_indexed_cut& operator=(const BB_indexed_cut&);
+    
+private:
+
+    static BCP_MemPool memPool;
+
+    int index_;
+
+public:
+
+    static inline void * operator new(size_t size) {
+	return memPool.alloc(size);
+    }
+
+    static inline void operator delete(void *p, size_t size) {
+	memPool.free(p, size);
+    }
+
+    /// Packing cut to a buffer
+    void pack(BCP_buffer& buf) const;
+
+    /**@name Constructors and destructors */
+    //@{
+    /// Constructor from content of buffer 
+    BB_indexed_cut(BCP_buffer& buf);
+
+    /// Constructor from the index itself
+    BB_indexed_cut(int index, double lb, double ub);
+
+    /// Destructor
+    ~BB_indexed_cut() {}
+
+    inline int index() const { return index_; }
+};
+
 
 /****************************************************************************/
+/** Simple representation of a cut by storing non zero coefficients only */ 
+
 class BB_cut : public BCP_cut_algo, public OsiRowCut {
 
 private:
 
-   static BCP_MemPool memPool;
+    static BCP_MemPool memPool;
 
 public:
 
-   static inline void * operator new(size_t size) {
-      return memPool.alloc(size);
-   }
+    static inline void * operator new(size_t size) {
+	return memPool.alloc(size);
+    }
 
-   static inline void operator delete(void *p, size_t size) {
-      memPool.free(p, size);
-   }
+    static inline void operator delete(void *p, size_t size) {
+	memPool.free(p, size);
+    }
 
-  /// Packing cut to a buffer
-   void pack(BCP_buffer& buf) const;
+    /// Packing cut to a buffer
+    void pack(BCP_buffer& buf) const;
 
-  /**@name Constructors and destructors */
-  //@{
-  /// Constructor from content of buffer 
-   BB_cut(BCP_buffer& buf);
+    /**@name Constructors and destructors */
+    //@{
+    /// Constructor from content of buffer 
+    BB_cut(BCP_buffer& buf);
 
-  /// Constructor from an OsiRowCut 
-   BB_cut(const OsiRowCut& cut);
+    /// Constructor from an OsiRowCut 
+    BB_cut(const OsiRowCut& cut);
 
-  /// Destructor
-   ~BB_cut() {}
+    /// Destructor
+    ~BB_cut() {}
 };
-
-/****************************************************************************/
-static inline void
-BB_pack_cut(const BCP_cut_algo* cut, BCP_buffer& buf)
-{
-   const BB_cut* bb_cut = dynamic_cast<const BB_cut*>(cut);
-   if (!bb_cut)
-      throw BCP_fatal_error("BB_lp::pack_cut_algo() : unknown cut type!\n");
-   bb_cut->pack(buf);
-}
 
 #endif
 

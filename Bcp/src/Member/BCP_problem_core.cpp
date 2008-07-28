@@ -120,6 +120,7 @@ inline void BCP_problem_core_change::clear() {
    cut_ch.clear();
 }
 
+#if 0
 BCP_problem_core_change&
 BCP_problem_core_change::operator=(const BCP_problem_core_change& x) {
    _storage = x._storage;
@@ -129,6 +130,7 @@ BCP_problem_core_change::operator=(const BCP_problem_core_change& x) {
    cut_ch = x.cut_ch;
    return *this;
 }
+#endif
 
 //-----------------------------------------------------------------------------
 

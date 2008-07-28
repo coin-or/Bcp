@@ -47,6 +47,29 @@ enum BCP_message_tag{
    BCP_Msg_User,
    /*@}*/
 
+   /**@name Messages from the TM to TMS and back */
+   /*@{*/
+   BCP_Msg_NodeList,
+   BCP_Msg_NodeListRequest,
+   BCP_Msg_NodeListDelete,
+   BCP_Msg_VarList,
+   BCP_Msg_VarListRequest,
+   BCP_Msg_VarListDelete,
+   BCP_Msg_CutList,
+   BCP_Msg_CutListRequest,
+   BCP_Msg_CutListDelete,
+   BCP_Msg_NodeListReply,
+   BCP_Msg_NodeListRequestReply,
+   BCP_Msg_NodeListDeleteReply,
+   BCP_Msg_VarListReply,
+   BCP_Msg_VarListRequestReply,
+   BCP_Msg_VarListDeleteReply,
+   BCP_Msg_CutListReply,
+   BCP_Msg_CutListRequestReply,
+   BCP_Msg_CutListDeleteReply,
+   
+   /*@}*/
+
    /**@name Messages between any process and the Tree Manager */
    /*@{*/
    /** Any process to TM: a process has died. */
@@ -76,8 +99,8 @@ enum BCP_message_tag{
 
    /**@name Messages from the Tree Manager to an LP process */
    /*@{*/
-   /** Repricing. Does not quite work yet... */
-   BCP_Msg_RootToPrice,       // TM -> LP
+   /** The warmstart information at the end of the root */
+   BCP_Msg_WarmstartRoot,     // TM -> LP
    /** TM sends the description of a new search tree node. */   
    BCP_Msg_ActiveNodeData,    // TM -> LP
    /** TM warns an LP process that the second phase will start. (An LP
@@ -90,6 +113,9 @@ enum BCP_message_tag{
    BCP_Msg_CutIndexSet,        // TM -> LP
    /** Send index set for variables to be generated in the future. */
    BCP_Msg_VarIndexSet,        // TM -> LP
+   /** Send a list of process ids the LP can use to do distributed strong
+       branching */
+   BCP_Msg_ProcessList,        // TM -> LP
    /*@}*/
 
    /**@name Messages from an LP process to the Tree Manager */
@@ -114,8 +140,6 @@ enum BCP_message_tag{
        recreated. */
    BCP_Msg_NodeDescriptionWithBranchingInfo, // LP -> TM
    /*@}*/
-   /** Repricing??? */
-   BCP_Msg_PricedRoot,                       // LP -> TM
    /** The message contains a new MIP feasible solution. */
    BCP_Msg_FeasibleSolution,                 // LP -> TM
    /** The message contains the statistics the LP process collected. */
@@ -126,6 +150,13 @@ enum BCP_message_tag{
    /** Request an index set for variables to be genarated. Empty
        message body. */
    BCP_Msg_RequestVarIndexSet, // LP -> TM
+   /** Request a list of process ids the LP can use to do distributed strong
+       branching */
+   BCP_Msg_RequestProcessList, // LP -> TM
+   /** An LP process (that is used as a strong branching node) indicates that
+       it's finished. The message also contains data for pseudocost
+       computation. */
+   BCP_Msg_SBnodeFinished,     // LP -> TM
    /*@}*/
 
    /**@name Messages from an LP process to a Cut Generator or Cut Pool

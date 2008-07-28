@@ -3,6 +3,7 @@
 #ifndef _BCP_INDEXED_PRICING_H
 #define _BCP_INDEXED_PRICING_H
 
+#if 0
 #include "BCP_enum.hpp"
 #include "BCP_vector.hpp"
 
@@ -47,5 +48,6 @@ public:
    void pack(BCP_buffer& buf) const;      // *INLINE ?*
    void unpack(BCP_buffer& buf);      // *INLINE ?*
 };
+#endif
 
 #endif

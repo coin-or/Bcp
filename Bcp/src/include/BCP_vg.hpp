@@ -16,8 +16,8 @@
 #include "BCP_process.hpp"
 
 class BCP_vg_user;
+class BCP_user_pack;
 class BCP_message_environment;
-class BCP_proc_id;
 class BCP_problem_core;
 class BCP_var;
 class BCP_cut;
@@ -47,6 +47,10 @@ public:
        is created by a call to the appropriate member of
        \URL[<code>USER_initialize</code>]{USER_initialize.html}. */
    BCP_vg_user* user;
+
+   /** A class that holds the methods about how to pack things. */
+   BCP_user_pack* packer;
+
    /** The message passing environment. This object
        is created by a call to the appropriate member of
        \URL[<code>USER_initialize</code>]{USER_initialize.html}. */
@@ -62,7 +66,7 @@ public:
    BCP_problem_core* core;
    
    /** The proc id of the Tree Manager. */
-    //   BCP_proc_id* tree_manager;
+    //   int tree_manager;
 
    /** The best currently known upper bound. */
    double upper_bound;
@@ -79,7 +83,7 @@ public:
    /** The dual values corresponding to the cuts above. */
    BCP_vec<double>   pi;
    /** The process id of the LP process that sent the solution. */
-   BCP_proc_id*      sender;
+   int      sender;
 
    /** The phase the algorithm is in. */
    int phase;
@@ -98,7 +102,7 @@ public:
    /*@{*/
    /** The default constructor. Initializes every data member to a natural
        state. */
-   BCP_vg_prob(BCP_proc_id* my_id, BCP_proc_id* parent);
+   BCP_vg_prob(int my_id, int parent);
    /** The destructor deletes everything. */
    virtual ~BCP_vg_prob();
    /*@}*/

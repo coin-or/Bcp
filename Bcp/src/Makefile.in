@@ -75,14 +75,16 @@ am_libBcp_la_OBJECTS = BCP_cg_user.lo BCP_cg_param.lo BCP_cg.lo \
 	BCP_lp.lo BCP_lp_main.lo BCP_lp_pool.lo BCP_lp_param.lo \
 	BCP_tm_trimming.lo BCP_tm_msg_node_send.lo \
 	BCP_tm_msg_node_rec.lo BCP_tm_param.lo BCP_tm_user.lo \
-	BCP_tm_commandline.lo BCP_tm_node.lo BCP_tm_msgproc.lo \
+	BCP_tm_commandline.lo BCP_tm_node.lo \
+	BCP_tm_nodes_to_storage.lo BCP_tm_msgproc.lo \
 	BCP_tm_functions.lo BCP_tm_main.lo BCP_tm_statistics.lo \
-	BCP_tm.lo BCP_vg_param.lo BCP_vg_user.lo BCP_vg_main.lo \
-	BCP_vg.lo BCP_solution.lo BCP_node_change.lo \
+	BCP_tm.lo BCP_tmstorage.lo BCP_vg_param.lo BCP_vg_user.lo \
+	BCP_vg_main.lo BCP_vg.lo BCP_solution.lo BCP_node_change.lo \
 	BCP_indexed_pricing.lo BCP_USER.lo BCP_warmstart_basis.lo \
 	BCP_branch.lo BCP_vector_sanity.lo BCP_cut.lo \
-	BCP_obj_change.lo BCP_warmstart_dual.lo BCP_matrix.lo \
-	BCP_problem_core.lo BCP_warmstart_pack.lo BCP_matrix_pack.lo \
+	BCP_obj_change.lo BCP_warmstart_dual.lo \
+	BCP_warmstart_primaldual.lo BCP_matrix.lo BCP_problem_core.lo \
+	BCP_process.lo BCP_warmstart_pack.lo BCP_matrix_pack.lo \
 	BCP_var.lo BCP_vector_bool.lo BCP_vector_char.lo \
 	BCP_vector_double.lo BCP_vector_int.lo BCP_vector_short.lo \
 	BCP_message_single.lo BCP_message_mpi.lo BCP_message_pvm.lo
@@ -321,11 +323,13 @@ libBcp_la_SOURCES = \
 	TM/BCP_tm_user.cpp \
 	TM/BCP_tm_commandline.cpp \
 	TM/BCP_tm_node.cpp \
+	TM/BCP_tm_nodes_to_storage.cpp \
 	TM/BCP_tm_msgproc.cpp \
 	TM/BCP_tm_functions.cpp \
 	TM/BCP_tm_main.cpp \
 	TM/BCP_tm_statistics.cpp \
 	TM/BCP_tm.cpp \
+	TM/BCP_tmstorage.cpp \
 	VG/BCP_vg_param.cpp \
 	VG/BCP_vg_user.cpp \
 	VG/BCP_vg_main.cpp \
@@ -340,8 +344,10 @@ libBcp_la_SOURCES = \
 	Member/BCP_cut.cpp \
 	Member/BCP_obj_change.cpp \
 	Member/BCP_warmstart_dual.cpp \
+	Member/BCP_warmstart_primaldual.cpp \
 	Member/BCP_matrix.cpp \
 	Member/BCP_problem_core.cpp \
+	Member/BCP_process.cpp \
 	Member/BCP_warmstart_pack.cpp \
 	Member/BCP_matrix_pack.cpp \
 	Member/BCP_var.cpp \
@@ -351,7 +357,6 @@ libBcp_la_SOURCES = \
 	Member/BCP_vector_int.cpp \
 	Member/BCP_vector_short.cpp \
 	include/BCP_math.hpp \
-	include/BCP_msvc.hpp \
 	include/BCP_vg_param.hpp \
 	include/BCP_message.hpp \
 	include/BCP_solution.hpp \
@@ -380,6 +385,7 @@ libBcp_la_SOURCES = \
 	include/BCP_cg_param.hpp \
 	include/BCP_obj_change.hpp \
 	include/BCP_warmstart_dual.hpp \
+	include/BCP_warmstart_primaldual.hpp \
 	include/BCP_vector_int.hpp \
 	include/BCP_lp_node.hpp \
 	include/BCP_string.hpp \
@@ -391,30 +397,23 @@ libBcp_la_SOURCES = \
 	include/BCP_lp_functions.hpp \
 	include/BCP_functions.hpp \
 	include/BCP_vector_short.hpp \
-	include/BCP_cygwin.hpp \
 	include/BCP_problem_core.hpp \
 	include/BCP_vector_double.hpp \
 	include/BCP_lp_result.hpp \
 	include/BCP_main_fun.hpp \
 	include/BCP_tm_functions.hpp \
 	include/BCP_error.hpp \
-	include/BCP_linux.hpp \
 	include/BCP_enum_tm.hpp \
-	include/BCP_MACH.hpp \
 	include/BCP_enum_process_t.hpp \
 	include/BCP_cg.hpp \
 	include/BCP_vector_bool.hpp \
 	include/BCP_lp.hpp \
 	include/BCP_mempool.hpp \
-	include/BCP_bluegene_xlc.hpp \
 	include/BCP_var.hpp \
 	include/BCP_lp_pool.hpp \
 	include/BCP_os.hpp \
 	include/BCP_buffer.hpp \
 	include/BCP_lp_param.hpp \
-	include/BCP_sunos.hpp \
-	include/BCP_aix43.hpp \
-	include/BCP_freebsd.hpp \
 	include/BCP_tm.hpp \
 	include/BCP_vg.hpp \
 	include/BCP_vector_bool.hpp \
@@ -422,6 +421,7 @@ libBcp_la_SOURCES = \
 	include/BCP_vector_double.hpp \
 	include/BCP_vector_int.hpp \
 	include/BCP_vector_short.hpp \
+	include/BCP_tmstorage.hpp \
 	Member/BCP_message_single.cpp \
 	include/BCP_message_single.hpp \
 	Member/BCP_message_mpi.cpp \
@@ -462,69 +462,75 @@ DEFAULT_INCLUDES = -I. -I`$(CYGPATH_W) $(srcdir)/include` -I$(top_builddir)/inc
 includecoindir = $(includedir)/coin
 includecoin_HEADERS = \
 	../inc/config_bcp.h \
-	include/BCP_math.hpp \
-	include/BCP_vg_param.hpp \
-	include/BCP_message.hpp \
-	include/BCP_solution.hpp \
-	include/BCP_vector_change.hpp \
-	include/BCP_lp_branch.hpp \
-	include/BCP_message_pvm.hpp \
-	include/BCP_process.hpp \
-	include/BCP_node_change.hpp \
-	include/BCP_indexed_pricing.hpp \
-	include/BCP_vector.hpp \
-	include/BCP_vector_char.hpp \
-	include/BCP_tm_param.hpp \
-	include/BCP_USER.hpp \
-	include/BCP_vg_user.hpp \
-	include/BCP_lp_main_loop.hpp \
-	include/BCP_warmstart_basis.hpp \
-	include/BCP_tm_user.hpp \
-	include/BCP_lp_user.hpp \
 	include/BCP_branch.hpp \
-	include/BCP_warmstart.hpp \
-	include/BCP_vector_sanity.hpp \
-	include/BCP_cut.hpp \
-	include/BCP_message_tag.hpp \
-	include/BCP_tm_node.hpp \
-	include/BCP_cg_user.hpp \
-	include/BCP_set_intersects.hpp \
-	include/BCP_cg_param.hpp \
-	include/BCP_obj_change.hpp \
-	include/BCP_warmstart_dual.hpp \
-	include/BCP_vector_int.hpp \
-	include/BCP_lp_node.hpp \
-	include/BCP_string.hpp \
-	include/BCP_matrix.hpp \
-	include/BCP_parameters.hpp \
-	include/BCP_enum.hpp \
-	include/BCP_enum_branch.hpp \
-	include/BCP_vector_general.hpp \
-	include/BCP_lp_functions.hpp \
-	include/BCP_functions.hpp \
-	include/BCP_vector_short.hpp \
-	include/BCP_message_mpi.hpp \
-	include/BCP_problem_core.hpp \
-	include/BCP_message_single.hpp \
-	include/BCP_vector_double.hpp \
-	include/BCP_lp_result.hpp \
-	include/BCP_main_fun.hpp \
-	include/BCP_tm_functions.hpp \
-	include/BCP_error.hpp \
-	include/BCP_enum_tm.hpp \
-	include/BCP_enum_process_t.hpp \
-	include/BCP_cg.hpp \
-	include/BCP_vector_bool.hpp \
-	include/BCP_lp.hpp \
-	include/BCP_mempool.hpp \
-	include/BCP_var.hpp \
-	include/BCP_lp_pool.hpp \
-	include/BCP_os.hpp \
 	include/BCP_buffer.hpp \
+	include/BCP_cg.hpp \
+	include/BCP_cg_param.hpp \
+	include/BCP_cg_user.hpp \
+	include/BCP_cut.hpp \
+	include/BCP_enum_branch.hpp \
+	include/BCP_enum.hpp \
+	include/BCP_enum_process_t.hpp \
+	include/BCP_enum_tm.hpp \
+	include/BCP_error.hpp \
+	include/BCP_functions.hpp \
+	include/BCP_indexed_pricing.hpp \
+	include/BCP_lp_branch.hpp \
+	include/BCP_lp_functions.hpp \
+	include/BCP_lp.hpp \
+	include/BCP_lp_main_loop.hpp \
+	include/BCP_lp_node.hpp \
 	include/BCP_lp_param.hpp \
+	include/BCP_lp_pool.hpp \
+	include/BCP_lp_result.hpp \
+	include/BCP_lp_user.hpp \
+	include/BCP_main_fun.hpp \
+	include/BCP_math.hpp \
+	include/BCP_matrix.hpp \
+	include/BCP_mempool.hpp \
+	include/BCP_message.hpp \
+	include/BCP_message_mpi.hpp \
+	include/BCP_message_pvm.hpp \
+	include/BCP_message_single.hpp \
+	include/BCP_message_tag.hpp \
+	include/BCP_node_change.hpp \
+	include/BCP_obj_change.hpp \
+	include/BCP_os.hpp \
+	include/BCP_parameters.hpp \
+	include/BCP_problem_core.hpp \
+	include/BCP_process.hpp \
+	include/BCP_set_intersects.hpp \
+	include/BCP_solution.hpp \
+	include/BCP_string.hpp \
+	include/BCP_tm_functions.hpp \
 	include/BCP_tm.hpp \
+	include/BCP_tm_node.hpp \
+	include/BCP_tm_param.hpp \
+	include/BCP_tmstorage.hpp \
+	include/BCP_tm_user.hpp \
+	include/BCP_USER.hpp \
+	include/BCP_var.hpp \
+	include/BCP_vector_bool.hpp \
+	include/BCP_vector_bool.hpp \
+	include/BCP_vector_change.hpp \
+	include/BCP_vector_char.hpp \
+	include/BCP_vector_char.hpp \
+	include/BCP_vector_double.hpp \
+	include/BCP_vector_double.hpp \
+	include/BCP_vector_general.hpp \
+	include/BCP_vector.hpp \
+	include/BCP_vector_int.hpp \
+	include/BCP_vector_int.hpp \
+	include/BCP_vector_sanity.hpp \
+	include/BCP_vector_short.hpp \
+	include/BCP_vector_short.hpp \
 	include/BCP_vg.hpp \
-	include/BcpConfig.h
+	include/BCP_vg_param.hpp \
+	include/BCP_vg_user.hpp \
+	include/BCP_warmstart_basis.hpp \
+	include/BCP_warmstart_dual.hpp \
+	include/BCP_warmstart_primaldual.hpp \
+	include/BCP_warmstart.hpp
 
 
 #############################################################################
@@ -638,6 +644,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/BCP_node_change.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/BCP_obj_change.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/BCP_problem_core.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/BCP_process.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/BCP_solution.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/BCP_tm.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/BCP_tm_commandline.Plo@am__quote@
@@ -647,10 +654,12 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/BCP_tm_msg_node_send.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/BCP_tm_msgproc.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/BCP_tm_node.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/BCP_tm_nodes_to_storage.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/BCP_tm_param.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/BCP_tm_statistics.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/BCP_tm_trimming.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/BCP_tm_user.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/BCP_tmstorage.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/BCP_var.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/BCP_vector_bool.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/BCP_vector_char.Plo@am__quote@
@@ -665,6 +674,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/BCP_warmstart_basis.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/BCP_warmstart_dual.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/BCP_warmstart_pack.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/BCP_warmstart_primaldual.Plo@am__quote@
 
 .cpp.o:
 @am__fastdepCXX_TRUE@	if $(CXXCOMPILE) -MT $@ -MD -MP -MF "$(DEPDIR)/$*.Tpo" -c -o $@ $<; \
@@ -904,6 +914,13 @@ BCP_tm_node.lo: TM/BCP_tm_node.cpp
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(LIBTOOL) --tag=CXX --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o BCP_tm_node.lo `test -f 'TM/BCP_tm_node.cpp' || echo '$(srcdir)/'`TM/BCP_tm_node.cpp
 
+BCP_tm_nodes_to_storage.lo: TM/BCP_tm_nodes_to_storage.cpp
+@am__fastdepCXX_TRUE@	if $(LIBTOOL) --tag=CXX --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT BCP_tm_nodes_to_storage.lo -MD -MP -MF "$(DEPDIR)/BCP_tm_nodes_to_storage.Tpo" -c -o BCP_tm_nodes_to_storage.lo `test -f 'TM/BCP_tm_nodes_to_storage.cpp' || echo '$(srcdir)/'`TM/BCP_tm_nodes_to_storage.cpp; \
+@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/BCP_tm_nodes_to_storage.Tpo" "$(DEPDIR)/BCP_tm_nodes_to_storage.Plo"; else rm -f "$(DEPDIR)/BCP_tm_nodes_to_storage.Tpo"; exit 1; fi
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='TM/BCP_tm_nodes_to_storage.cpp' object='BCP_tm_nodes_to_storage.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(LIBTOOL) --tag=CXX --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o BCP_tm_nodes_to_storage.lo `test -f 'TM/BCP_tm_nodes_to_storage.cpp' || echo '$(srcdir)/'`TM/BCP_tm_nodes_to_storage.cpp
+
 BCP_tm_msgproc.lo: TM/BCP_tm_msgproc.cpp
 @am__fastdepCXX_TRUE@	if $(LIBTOOL) --tag=CXX --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT BCP_tm_msgproc.lo -MD -MP -MF "$(DEPDIR)/BCP_tm_msgproc.Tpo" -c -o BCP_tm_msgproc.lo `test -f 'TM/BCP_tm_msgproc.cpp' || echo '$(srcdir)/'`TM/BCP_tm_msgproc.cpp; \
 @am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/BCP_tm_msgproc.Tpo" "$(DEPDIR)/BCP_tm_msgproc.Plo"; else rm -f "$(DEPDIR)/BCP_tm_msgproc.Tpo"; exit 1; fi
@@ -938,6 +955,13 @@ BCP_tm.lo: TM/BCP_tm.cpp
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='TM/BCP_tm.cpp' object='BCP_tm.lo' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(LIBTOOL) --tag=CXX --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o BCP_tm.lo `test -f 'TM/BCP_tm.cpp' || echo '$(srcdir)/'`TM/BCP_tm.cpp
+
+BCP_tmstorage.lo: TM/BCP_tmstorage.cpp
+@am__fastdepCXX_TRUE@	if $(LIBTOOL) --tag=CXX --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT BCP_tmstorage.lo -MD -MP -MF "$(DEPDIR)/BCP_tmstorage.Tpo" -c -o BCP_tmstorage.lo `test -f 'TM/BCP_tmstorage.cpp' || echo '$(srcdir)/'`TM/BCP_tmstorage.cpp; \
+@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/BCP_tmstorage.Tpo" "$(DEPDIR)/BCP_tmstorage.Plo"; else rm -f "$(DEPDIR)/BCP_tmstorage.Tpo"; exit 1; fi
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='TM/BCP_tmstorage.cpp' object='BCP_tmstorage.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(LIBTOOL) --tag=CXX --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o BCP_tmstorage.lo `test -f 'TM/BCP_tmstorage.cpp' || echo '$(srcdir)/'`TM/BCP_tmstorage.cpp
 
 BCP_vg_param.lo: VG/BCP_vg_param.cpp
 @am__fastdepCXX_TRUE@	if $(LIBTOOL) --tag=CXX --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT BCP_vg_param.lo -MD -MP -MF "$(DEPDIR)/BCP_vg_param.Tpo" -c -o BCP_vg_param.lo `test -f 'VG/BCP_vg_param.cpp' || echo '$(srcdir)/'`VG/BCP_vg_param.cpp; \
@@ -1037,6 +1061,13 @@ BCP_warmstart_dual.lo: Member/BCP_warmstart_dual.cpp
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(LIBTOOL) --tag=CXX --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o BCP_warmstart_dual.lo `test -f 'Member/BCP_warmstart_dual.cpp' || echo '$(srcdir)/'`Member/BCP_warmstart_dual.cpp
 
+BCP_warmstart_primaldual.lo: Member/BCP_warmstart_primaldual.cpp
+@am__fastdepCXX_TRUE@	if $(LIBTOOL) --tag=CXX --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT BCP_warmstart_primaldual.lo -MD -MP -MF "$(DEPDIR)/BCP_warmstart_primaldual.Tpo" -c -o BCP_warmstart_primaldual.lo `test -f 'Member/BCP_warmstart_primaldual.cpp' || echo '$(srcdir)/'`Member/BCP_warmstart_primaldual.cpp; \
+@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/BCP_warmstart_primaldual.Tpo" "$(DEPDIR)/BCP_warmstart_primaldual.Plo"; else rm -f "$(DEPDIR)/BCP_warmstart_primaldual.Tpo"; exit 1; fi
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='Member/BCP_warmstart_primaldual.cpp' object='BCP_warmstart_primaldual.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(LIBTOOL) --tag=CXX --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o BCP_warmstart_primaldual.lo `test -f 'Member/BCP_warmstart_primaldual.cpp' || echo '$(srcdir)/'`Member/BCP_warmstart_primaldual.cpp
+
 BCP_matrix.lo: Member/BCP_matrix.cpp
 @am__fastdepCXX_TRUE@	if $(LIBTOOL) --tag=CXX --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT BCP_matrix.lo -MD -MP -MF "$(DEPDIR)/BCP_matrix.Tpo" -c -o BCP_matrix.lo `test -f 'Member/BCP_matrix.cpp' || echo '$(srcdir)/'`Member/BCP_matrix.cpp; \
 @am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/BCP_matrix.Tpo" "$(DEPDIR)/BCP_matrix.Plo"; else rm -f "$(DEPDIR)/BCP_matrix.Tpo"; exit 1; fi
@@ -1050,6 +1081,13 @@ BCP_problem_core.lo: Member/BCP_problem_core.cpp
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='Member/BCP_problem_core.cpp' object='BCP_problem_core.lo' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(LIBTOOL) --tag=CXX --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o BCP_problem_core.lo `test -f 'Member/BCP_problem_core.cpp' || echo '$(srcdir)/'`Member/BCP_problem_core.cpp
+
+BCP_process.lo: Member/BCP_process.cpp
+@am__fastdepCXX_TRUE@	if $(LIBTOOL) --tag=CXX --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT BCP_process.lo -MD -MP -MF "$(DEPDIR)/BCP_process.Tpo" -c -o BCP_process.lo `test -f 'Member/BCP_process.cpp' || echo '$(srcdir)/'`Member/BCP_process.cpp; \
+@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/BCP_process.Tpo" "$(DEPDIR)/BCP_process.Plo"; else rm -f "$(DEPDIR)/BCP_process.Tpo"; exit 1; fi
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='Member/BCP_process.cpp' object='BCP_process.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(LIBTOOL) --tag=CXX --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o BCP_process.lo `test -f 'Member/BCP_process.cpp' || echo '$(srcdir)/'`Member/BCP_process.cpp
 
 BCP_warmstart_pack.lo: Member/BCP_warmstart_pack.cpp
 @am__fastdepCXX_TRUE@	if $(LIBTOOL) --tag=CXX --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT BCP_warmstart_pack.lo -MD -MP -MF "$(DEPDIR)/BCP_warmstart_pack.Tpo" -c -o BCP_warmstart_pack.lo `test -f 'Member/BCP_warmstart_pack.cpp' || echo '$(srcdir)/'`Member/BCP_warmstart_pack.cpp; \
