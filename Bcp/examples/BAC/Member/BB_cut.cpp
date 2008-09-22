@@ -51,8 +51,8 @@ BB_cut::BB_cut(BCP_buffer& buf) :
    OsiRowCut::setUb(ub);
 
    int numElem;
-   int* indices;
-   double* elements;
+   int* indices = NULL;
+   double* elements = NULL;
    buf.unpack(indices, numElem, true)
       .unpack(elements, numElem, true);
    OsiRowCut::setRow(numElem, indices, elements);

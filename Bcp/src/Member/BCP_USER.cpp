@@ -14,19 +14,18 @@ bool BCP_fatal_error::abort_on_error = true;
 
 BCP_message_environment *
 USER_initialize::msgenv_init(int argc, char* argv[]) {
-    int procid = -1; // assume no parallel environment
 #if defined(COIN_HAS_MPI)
-    procid = BCP_mpi_environment::is_mpi(argc, argv);
-    if (procid >= 0) {
-	return new BCP_mpi_environment(argc, argv);
-    }
+  int mpiid = BCP_mpi_environment::is_mpi(argc, argv);
+  if (mpiid >= 0) {
+    return new BCP_mpi_environment(argc, argv);
+  }
 #endif
 #if defined(COIN_HAS_PVM)
-    procid = BCP_pvm_myid();
-    if (procid >= 0) {
-	return new BCP_pvm_environment;
-    }
+  int pvmid = BCP_pvm_myid();
+  if (pvmid >= 0) {
+    return new BCP_pvm_environment;
+  }
 #endif
-    // procid must still be -1, so execute serial environment
-    return new BCP_single_environment;
+  // execute serial environment
+  return new BCP_single_environment;
 }

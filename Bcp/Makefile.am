@@ -85,8 +85,8 @@ clean-local:
 distclean-local:
 	for t in $(TESTS); do \
 		(if test -r test/$$t/Makefile; then cd test/$$t; $(MAKE) distclean; fi); \
+		(if test -r test/$$t/testfiles.txt; then cd test/$$t; rm `cat testfiles.txt`; fi); \
 	done
-	rm -rf examples
 
 .PHONY: test unitTest
 

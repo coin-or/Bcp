@@ -508,8 +508,8 @@ TMDBG;
     int numChildrenAdded = 0;
     const int depth = node->getDepth() + 1;
     BitVector128 nodePref = node->getPreferred();
-    const double tt = CoinWallclockTime()-p.start_time;
 #if (BCP_DEBUG_PRINT != 0)
+    const double tt = CoinWallclockTime()-p.start_time;
     if (p.candidate_list.size() == 0) {
       printf("TM %.3lf: parent: %i  cand_list empty\n", tt, node->_index);
     } else {

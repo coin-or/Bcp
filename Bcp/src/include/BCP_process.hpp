@@ -44,7 +44,6 @@ public:
 #include <map>
 #include <vector>
 #include <cmath>
-#include <sys/time.h>
 #include "CoinHelperFunctions.hpp"
 
 class BCP_scheduler {
