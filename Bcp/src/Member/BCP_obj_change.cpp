@@ -97,6 +97,30 @@ BCP_obj_set_change::unpack(BCP_buffer& buf)
     buf.unpack(_new_objs);
 }
 
+//-----------------------------------------------------------------------------
+
+void
+BCP_obj_set_change::print() const
+{
+  printf("        storage: %i\n", _storage);
+  printf("        deleted_num: %i\n", _deleted_num);
+  if (_deleted_num > 0) {
+    printf("        deleted pos:\n");
+    for (int i = 0; i < _deleted_num; ++i) {
+      printf("          %i\n", _del_change_pos[i]);
+    }
+  }
+  if (_deleted_num < _del_change_pos.size()) {
+    printf("        changed pos/newval:\n");
+    const int added = added_num();
+    for (int i = 0; i < added; ++i) {
+      printf("          pos %i,  bcpind %i,  status %i,  lb %lf,  ub %lf\n",
+	     _del_change_pos[_deleted_num+i], _new_objs[i],
+	     _change[i].stat, _change[i].lb, _change[i].ub);
+    }
+  }
+}
+
 //#############################################################################
 #if 0
 //#############################################################################
