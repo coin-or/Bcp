@@ -38,6 +38,28 @@ static inline void
 BCP_lp_pack_core(BCP_lp_prob& p)
 {
    if (p.core->varnum() + p.core->cutnum() > 0){
+      const bool dumpcuts = p.param(BCP_lp_par::Lp_DumpNodeDescCuts);
+      const bool dumpvars = p.param(BCP_lp_par::Lp_DumpNodeDescVars);
+      if (dumpvars) {
+	const int bvarnum = p.core->varnum();
+	const BCP_vec<BCP_var*>& vars = p.node->vars;
+	printf("    Core Vars (bvarnum %i)\n", bvarnum);
+	for (int i = 0; i < bvarnum; ++i) {
+	  printf("        var %4i: bcpind %i,   status %i,   lb %f,   ub %f\n",
+		 i, vars[i]->bcpind(), vars[i]->status(),
+		 vars[i]->lb(), vars[i]->ub());
+	}
+      }
+      if (dumpcuts) {
+	const int bcutnum = p.core->cutnum();
+	const BCP_vec<BCP_cut*>& cuts = p.node->cuts;
+	printf("    Core Cuts (bcutnum %i)\n", bcutnum);
+	for (int i = 0; i < bcutnum; ++i) {
+	  printf("        cut %4i: bcpind %i,   status %i,   lb %f,   ub %f\n",
+		 i, cuts[i]->bcpind(), cuts[i]->status(),
+		 cuts[i]->lb(), cuts[i]->ub());
+	}
+      }
       BCP_problem_core_change exp_bc(p.core->varnum(), p.node->vars,
 				 p.core->cutnum(), p.node->cuts);
       switch (p.node->tm_storage.core_change){
@@ -89,6 +111,19 @@ BCP_lp_pack_core(BCP_lp_prob& p)
 static inline void
 BCP_lp_pack_noncore_vars(BCP_lp_prob& p, BCP_vec<int>& deleted_pos)
 {
+    const bool dumpvars = p.param(BCP_lp_par::Lp_DumpNodeDescVars);
+    if (dumpvars) {
+      const int bvarnum = p.core->varnum();
+      const int varnum = p.node->vars.size();
+      const BCP_vec<BCP_var*>& vars = p.node->vars;
+      printf("    Extra Vars (extra varnum %i)\n", varnum - bvarnum);
+      for (int i = bvarnum; i < varnum; ++i) {
+	printf("        var %4i: bcpind %i,   status %i,   lb %f,   ub %f\n",
+	       i, vars[i]->bcpind(), vars[i]->status(),
+	       vars[i]->lb(), vars[i]->ub());
+      }
+    }
+
     // No matter whether we'll use an explicit description or WrtParent, all
     // vars with negative bcpind will have to be sent to the TM. These vars
     // will be collected in this vector.
@@ -118,7 +153,27 @@ BCP_lp_pack_noncore_vars(BCP_lp_prob& p, BCP_vec<int>& deleted_pos)
 							    v->status()));
 	}
     }
-    
+
+    // Whether we'll pack the Explicit or the WrtParent description, the new
+    // vars need to be packed. Pack them first, so by the time the positive
+    // bcpind in expl (or wrtp) arrives to the TM, the var already exists in
+    // the TM.
+    int num = vars_to_tm.size();
+    p.msg_buf.pack(num);
+    for (int i = 0; i < num; ++i) {
+	assert(vars_to_tm[i]->bcpind() < 0);
+	p.pack_var(*vars_to_tm[i]);
+	vars_to_tm[i]->set_bcpind_flip();
+    }
+
+    if (p.param(BCP_lp_par::UseExplicitStorage)) {
+      if (dumpvars) {
+	expl.print();
+      }
+      expl.pack(p.msg_buf);
+      return;
+    }
+
     // Now create a WrtParent description and see which one is shorter. Also,
     // we'll need the list of deleted variable positions when we set of the
     // warmstart information to be sent.
@@ -179,25 +234,19 @@ BCP_lp_pack_noncore_vars(BCP_lp_prob& p, BCP_vec<int>& deleted_pos)
     deleted_pos.append(wrtp._del_change_pos.begin(),
 		       wrtp._del_change_pos.entry(wrtp.deleted_num()));
 
-    // Whether we'll pack the Explicit or the WrtParent description, the new
-    // vars need to be packed. Pack them first, so by the time the positive
-    // bcpind in expl (or wrtp) arrives to the TM, the var already exists in
-    // the TM.
-    int num = vars_to_tm.size();
-    p.msg_buf.pack(num);
-    for (i = 0; i < num; ++i) {
-	assert(vars_to_tm[i]->bcpind() < 0);
-	p.pack_var(*vars_to_tm[i]);
-	vars_to_tm[i]->set_bcpind_flip();
-    }
-
     // if the TM storage is WrtParent then pack the shorter
     // FIXME: why only if TM storage is WrtParent ???
     if ((p.node->tm_storage.var_change == BCP_Storage_WrtParent) &&
 	(expl.pack_size() > wrtp.pack_size())) {
-	wrtp.pack(p.msg_buf);
+      if (dumpvars) {
+	wrtp.print();
+      }
+      wrtp.pack(p.msg_buf);
     } else {
-	expl.pack(p.msg_buf);
+      if (dumpvars) {
+	expl.print();
+      }
+      expl.pack(p.msg_buf);
     }
 }
 
@@ -206,6 +255,19 @@ BCP_lp_pack_noncore_vars(BCP_lp_prob& p, BCP_vec<int>& deleted_pos)
 static inline void
 BCP_lp_pack_noncore_cuts(BCP_lp_prob& p, BCP_vec<int>& deleted_pos)
 {
+    const bool dumpcuts = p.param(BCP_lp_par::Lp_DumpNodeDescCuts);
+    if (dumpcuts) {
+      const int bcutnum = p.core->cutnum();
+      const int cutnum = p.node->cuts.size();
+      const BCP_vec<BCP_cut*>& cuts = p.node->cuts;
+      printf("    Extra Cuts (extra cutnum %i)\n", cutnum - bcutnum);
+      for (int i = bcutnum; i < cutnum; ++i) {
+	printf("        cut %4i: bcpind %i,   status %i,   lb %f,   ub %f\n",
+	       i, cuts[i]->bcpind(), cuts[i]->status(),
+	       cuts[i]->lb(), cuts[i]->ub());
+      }
+    }
+      
     // No matter whether we'll use an explicit description or WrtParent, all
     // cuts with negative bcpind will have to be sent to the TM. These cuts
     // will be collected in this vector.
@@ -236,6 +298,26 @@ BCP_lp_pack_noncore_cuts(BCP_lp_prob& p, BCP_vec<int>& deleted_pos)
 	}
     }
     
+    // Whether we'll pack the Explicit or the WrtParent description, the new
+    // cuts need to be packed. Pack them first, so by the time the positive
+    // bcpind in expl (or wrtp) arrives to the TM, the cut already exists in
+    // the TM.
+    int num = cuts_to_tm.size();
+    p.msg_buf.pack(num);
+    for (int i = 0; i < num; ++i) {
+	assert(cuts_to_tm[i]->bcpind() < 0);
+	p.pack_cut(*cuts_to_tm[i]);
+	cuts_to_tm[i]->set_bcpind_flip();
+    }
+
+    if (p.param(BCP_lp_par::UseExplicitStorage)) {
+      if (dumpcuts) {
+	expl.print();
+      }
+      expl.pack(p.msg_buf);
+      return;
+    }
+
     // Now create a WrtParent description and see which one is shorter. Also,
     // we'll need the list of deleted cutiable positions when we set of the
     // warmstart information to be sent.
@@ -296,25 +378,19 @@ BCP_lp_pack_noncore_cuts(BCP_lp_prob& p, BCP_vec<int>& deleted_pos)
     deleted_pos.append(wrtp._del_change_pos.begin(),
 		       wrtp._del_change_pos.entry(wrtp.deleted_num()));
 
-    // Whether we'll pack the Explicit or the WrtParent description, the new
-    // cuts need to be packed. Pack them first, so by the time the positive
-    // bcpind in expl (or wrtp) arrives to the TM, the cut already exists in
-    // the TM.
-    int num = cuts_to_tm.size();
-    p.msg_buf.pack(num);
-    for (i = 0; i < num; ++i) {
-	assert(cuts_to_tm[i]->bcpind() < 0);
-	p.pack_cut(*cuts_to_tm[i]);
-	cuts_to_tm[i]->set_bcpind_flip();
-    }
-
     // if the TM storage is WrtParent then pack the shorter
     // FIXME: why only if TM storage is WrtParent ???
     if ((p.node->tm_storage.cut_change == BCP_Storage_WrtParent) &&
 	(expl.pack_size() > wrtp.pack_size())) {
-	wrtp.pack(p.msg_buf);
+      if (dumpcuts) {
+	wrtp.print();
+      }
+      wrtp.pack(p.msg_buf);
     } else {
-	expl.pack(p.msg_buf);
+      if (dumpcuts) {
+	expl.print();
+      }
+      expl.pack(p.msg_buf);
     }
 }
 
@@ -422,6 +498,12 @@ int BCP_lp_send_node_description(BCP_lp_prob& p,
    buf.clear();
    buf.pack(node.index).pack(node.quality).pack(node.true_lower_bound);
 
+   const bool dumpcuts = p.param(BCP_lp_par::Lp_DumpNodeDescCuts);
+   const bool dumpvars = p.param(BCP_lp_par::Lp_DumpNodeDescVars);
+   if (dumpcuts || dumpvars) {
+     printf("LP: FINISHED NODE %i DUMP START ===========================\n",
+	    node.index);
+   }
    // Send the node description only if this node is branched on (i.e., brobj
    // is non-null) or if we got to send the description of fathomed nodes, too.
    const bool send_desc = brobj || p.param(BCP_lp_par::SendFathomedNodeDesc);
@@ -474,6 +556,10 @@ LP: there is ws info in BCP_lp_send_node_description()!\n");
 
    int keep = -1;
 
+   if (dumpcuts || dumpvars) {
+     printf("LP: FINISHED NODE %i DUMP END ===========================\n",
+	    node.index);
+   }
    if (brobj) {
       // we came here from branch()
       // pack the branching info, 'keep' will tell whether we wish to dive

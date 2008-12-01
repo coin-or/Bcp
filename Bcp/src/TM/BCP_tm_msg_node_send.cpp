@@ -71,7 +71,7 @@ BCP_tm_node_to_send::BCP_tm_node_to_send(BCP_tm_prob& prob,
 	    explicit_core_level = i;
 	    explicit_all_level = i;
 	}
-	if (n->_var_storage!=BCP_Storage_WrtParent && explicit_cut_level<0) {
+	if (n->_var_storage!=BCP_Storage_WrtParent && explicit_var_level<0) {
 	    explicit_var_level = i;
 	    explicit_all_level = i;
 	}

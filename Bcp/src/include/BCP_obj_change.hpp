@@ -93,6 +93,8 @@ public:
     int pack_size() const;
     void pack(BCP_buffer& buf) const;
     void unpack(BCP_buffer& buf);
+
+    void print() const;
 };
 
 #if 0

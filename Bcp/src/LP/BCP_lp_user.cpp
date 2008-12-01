@@ -356,6 +356,46 @@ BCP_lp_user::load_problem(OsiSolverInterface& osi, BCP_problem_core* core,
     // 'm'.
     delete m;
   }
+  const bool dumpcuts = get_param(BCP_lp_par::Lp_DumpNodeDescCuts);
+  const bool dumpvars = get_param(BCP_lp_par::Lp_DumpNodeDescVars);
+  if (dumpcuts || dumpvars) {
+    printf("LP: NEW ACTIVE NODE %i DUMP START ===========================\n",
+	   current_index());
+    if (dumpvars) {
+      printf("    Core Vars (bvarnum %i)\n", bvarnum);
+      for (int i = 0; i < bvarnum; ++i) {
+	printf("        var %4i: bcpind %i,   status %i,   lb %f,   ub %f\n",
+	       i, vars[i]->bcpind(), vars[i]->status(),
+	       vars[i]->lb(), vars[i]->ub());
+      }
+    }
+    if (dumpcuts) {
+      printf("    Core Cuts (bcutnum %i)\n", bcutnum);
+      for (int i = 0; i < bcutnum; ++i) {
+	printf("        cut %4i: bcpind %i,   status %i,   lb %f,   ub %f\n",
+	       i, cuts[i]->bcpind(), cuts[i]->status(),
+	       cuts[i]->lb(), cuts[i]->ub());
+      }
+    }
+    if (dumpvars) {
+      printf("    Extra Vars (extra varnum %i)\n", varnum - bvarnum);
+      for (int i = bvarnum; i < varnum; ++i) {
+	printf("        var %4i: bcpind %i,   status %i,   lb %f,   ub %f\n",
+	       i, vars[i]->bcpind(), vars[i]->status(),
+	       vars[i]->lb(), vars[i]->ub());
+      }
+    }
+    if (dumpcuts) {
+      printf("    Extra Cuts (extra cutnum %i)\n", cutnum - bcutnum);
+      for (int i = bcutnum; i < cutnum; ++i) {
+	printf("        cut %4i: bcpind %i,   status %i,   lb %f,   ub %f\n",
+	       i, cuts[i]->bcpind(), cuts[i]->status(),
+	       cuts[i]->lb(), cuts[i]->ub());
+      }
+    }
+    printf("LP: NEW ACTIVE NODE %i DUMP END ===========================\n",
+	   current_index());
+  }
 }
 
 //#############################################################################

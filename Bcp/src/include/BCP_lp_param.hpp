@@ -55,6 +55,10 @@ struct BCP_lp_par{
 	  Values: true (1), false (0). Default: 0. */
       NoCompressionAtFathom,
 
+      UseExplicitStorage,
+      Lp_DumpNodeDescCuts,
+      Lp_DumpNodeDescVars,
+
       /**@name Verbosity Parameters.
 
 	 These are all true/false parameters; if the parameter value is set
@@ -150,7 +154,7 @@ struct BCP_lp_par{
         LpVerb_GeneratedVarCount,
         /** Just a marker for the last LpVerb */
         LpVerb_Last,
-      /*@}*/ 
+      /*@}*/
       //
       end_of_chr_params
    };

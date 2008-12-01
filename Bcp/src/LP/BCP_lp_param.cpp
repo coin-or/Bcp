@@ -43,6 +43,12 @@ void BCP_parameter_set<BCP_lp_par>::create_keyword_list() {
     keys.push_back(make_pair(BCP_string("BCP_SendFathomedNodeDesc"),
 			     BCP_parameter(BCP_CharPar, 
 					   SendFathomedNodeDesc)));
+    keys.push_back(make_pair(BCP_string("BCP_Lp_DumpNodeDescCuts"),
+			     BCP_parameter(BCP_CharPar, 
+					   Lp_DumpNodeDescCuts)));
+    keys.push_back(make_pair(BCP_string("BCP_Lp_DumpNodeDescVars"),
+			     BCP_parameter(BCP_CharPar, 
+					   Lp_DumpNodeDescVars)));
     //-------------------------------------------------------------------------
     // BoolArrayPar
     keys.push_back(make_pair(BCP_string("BCP_LpVerb_AddedCutCount"),
@@ -302,6 +308,9 @@ void BCP_parameter_set<BCP_lp_par>::set_default_entries() {
     set_entry(ReportWhenDefaultIsExecuted, true);
     set_entry(NoCompressionAtFathom, false);
     set_entry(SendFathomedNodeDesc, true);
+    set_entry(UseExplicitStorage, false);
+    set_entry(Lp_DumpNodeDescCuts, false);
+    set_entry(Lp_DumpNodeDescVars, false);
     //-------------------------------------------------------------------------
     set_entry(LpVerb_AddedCutCount, true);
     set_entry(LpVerb_AddedVarCount, true);
