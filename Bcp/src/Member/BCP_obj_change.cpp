@@ -110,13 +110,23 @@ BCP_obj_set_change::print() const
       printf("          %i\n", _del_change_pos[i]);
     }
   }
-  if (_deleted_num < _del_change_pos.size()) {
+  int pos = _deleted_num;
+  int chpos = 0;
+  const int changed = _del_change_pos.size() - _deleted_num;
+  if (changed > 0) {
     printf("        changed pos/newval:\n");
-    const int added = added_num();
-    for (int i = 0; i < added; ++i) {
-      printf("          pos %i,  bcpind %i,  status %i,  lb %lf,  ub %lf\n",
-	     _del_change_pos[_deleted_num+i], _new_objs[i],
-	     _change[i].stat, _change[i].lb, _change[i].ub);
+    for (int chpos = 0; chpos < changed; ++chpos, ++pos) {
+      printf("          pos %i,  status %i,  lb %f,  ub %f\n",
+	     _del_change_pos[pos],
+	     _change[chpos].stat, _change[chpos].lb, _change[chpos].ub);
+    }
+  }
+  if (added_num() > 0) {
+    printf("        new bcpind/newval:\n");
+    for (int i = 0; i < added_num(); ++i, ++chpos) {
+      printf("          bcpind %i,  status %i,  lb %f,  ub %f\n",
+	     _new_objs[i],
+	     _change[chpos].stat, _change[chpos].lb, _change[chpos].ub );
     }
   }
 }
