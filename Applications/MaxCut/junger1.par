@@ -1,0 +1,219 @@
+# Parameters that are commented out would be set to the default value.
+
+########################### LP parameters ################################
+
+# whether to allow branching on cuts
+#   BCP_BranchOnCuts  0 
+
+# whether to compare newly received cuts/variables to ones already in the 
+# formulation
+BCP_CompareNewCutsToOldOnes  0  # default is 1, but we check it ourselves *****
+BCP_CompareNewVarsToOldOnes  0  # default is 1, but we check it ourselves *****
+
+# whether to allow reduced cost fixing when a variable is at 0 or at some 
+# other level
+#   BCP_DoReducedCostFixingAtZero 1
+#   BCP_DoReducedCostFixingAtAnything 1
+
+BCP_MaintainIndexedVarPricingList 0  # default 1, but we don't have ind vars **
+#   BCP_MessagePassingIsSerial 1
+#   BCP_ReportWhenDefaultIsExecuted 1
+BCP_SendFathomedNodeDesc 0 # default 1, but why bother ? **********************
+#   BCP_SolveLpToOptimality 0
+
+# Various verbosity settings
+#   BCP_LpVerb_AddedCutCount 1
+#   BCP_LpVerb_AddedVarCount 1
+#   BCP_LpVerb_ChildrenInfo 1
+#   BCP_LpVerb_ColumnGenerationInfo 1
+#   BCP_LpVerb_CutsToCutPoolCount 1
+#   BCP_LpVerb_VarsToVarPoolCount 1
+#   BCP_LpVerb_FathomInfo 1
+#   BCP_LpVerb_IterationCount 1
+BCP_LpVerb_RelaxedSolution 0 # 1 **********************************************
+BCP_LpVerb_FinalRelaxedSolution 0 # 1 *****************************************
+#   BCP_LpVerb_LpMatrixSize 1
+#   BCP_LpVerb_LpSolutionValue 1
+#   BCP_LpVerb_MatrixCompression 1
+#   BCP_LpVerb_PresolvePositions 1
+#   BCP_LpVerb_PresolveResult 1
+#   BCP_LpVerb_ProcessedNodeIndex 1
+#   BCP_LpVerb_ReportCutGenTimeout 1
+#   BCP_LpVerb_ReportVarGenTimeout 1
+#   BCP_LpVerb_ReportLocalCutPoolSize 1
+#   BCP_LpVerb_ReportLocalVarPoolSize 1
+#   BCP_LpVerb_RepricingResult 1
+#   BCP_LpVerb_RowEffectivenessCount 1
+#   BCP_LpVerb_VarTightening 1
+#   BCP_LpVerb_StrongBranchPositions 1
+#   BCP_LpVerb_StrongBranchResult 1
+#   BCP_LpVerb_GeneratedCutCount 1
+#   BCP_LpVerb_GeneratedVarCount 1
+
+# BCP_NiceLevel 0
+# BCP_ScaleMatrix 0
+# BCP_IndexedToPriceStorageSize 1000
+
+# BCP_SlackCutDiscardingStrategy BCP_DiscardSlackCutsAtNewIteration
+# BCP_CutEffectiveCountBeforePool 1000
+# BCP_CutPoolCheckFrequency 10
+# BCP_VarPoolCheckFrequency 10
+# BCP_IneffectiveConstraints BCP_IneffConstr_ZeroDualValue
+# BCP_IneffectiveBeforeDelete 1
+
+# BCP_MaxNonDualFeasToAdd_Min 5
+# BCP_MaxNonDualFeasToAdd_Max 200
+# BCP_MaxIndexedToPriceToAdd_Min 5
+# BCP_MaxIndexedToPriceToAdd_Max 200
+
+BCP_MaxCutsAddedPerIteration 2500  ********************************************
+# BCP_MaxVarsAddedPerIteration 100000
+
+BCP_MaxLeftoverCutNum 10000000  # don't leave anything for next iteration *****
+
+# BCP_DeletedColToCompress_Min 10
+# BCP_DeletedRowToCompress_Min 10
+
+# BCP_MaxPresolveIter 100000
+# BCP_StrongBranch_CloseToHalfNum 3
+# BCP_StrongBranch_CloseToOneNum 3
+BCP_BranchingObjectComparison 11 # BCP_HighestAverageObjval *******************
+# BCP_ChildPreference BCP_PreferChild_LowBound
+
+# BCP_FeasibilityTest BCP_FullTest_Feasible
+# BCP_InfoForCG BCP_PrimalSolution_Nonzeros
+# BCP_InfoForVG BCP_DualSolution_Full
+   //--------------------------------------------------------------------------
+   // DoublePar
+BCP_Granularity .99 # default is 1e-8, but obj coeffs are integer
+# BCP_DeletedColToCompress_Frac 0.0
+# BCP_DeletedRowToCompress_Frac 0.0
+# BCP_MaxNonDualFeasToAdd_Frac 0.05
+# BCP_MaxIndexedToPriceToAdd_Frac 0.05
+BCP_MaxLeftoverCutFrac 0.0 # don't leave anything for next iteration **********
+# BCP_IntegerTolerance 1e-5
+
+# BCP_FirstLP_FirstCutTimeout -1.0
+# BCP_LaterLP_FirstCutTimeout -1.0
+# BCP_FirstLP_AllCutsTimeout -1.0
+# BCP_LaterLP_AllCutsTimeout -1.0
+
+# BCP_FirstLP_FirstVarTimeout -1.0
+# BCP_LaterLP_FirstVarTimeout -1.0
+# BCP_FirstLP_AllVarsTimeout -1.0
+# BCP_LaterLP_AllVarsTimeout -1.0
+
+   //--------------------------------------------------------------------------
+   // StringPar
+# BCP_LogFileName nothing
+
+################################### TM parameters #############################
+
+BCP_DoBranchAndCut 1 **********************************************************
+#  BCP_AlgorithmicVariablesAreGenerated 0
+#  BCP_IndexedVariablesAreGenerated 0
+#  BCP_LpValueIsTrueLowerBound 1
+#  BCP_MessagePassingIsSerial 1
+#  BCP_PriceInRootBeforePhase2 0
+#  BCP_ReportWhenDefaultIsExecuted 1
+#  BCP_TrimTreeBeforeNewPhase 0
+   //--------------------------------------------------------------------------
+#  BCP_TmVerb_AllFeasibleSolutionValue 1
+#  BCP_TmVerb_AllFeasibleSolution 0
+#  BCP_TmVerb_BetterFeasibleSolutionValue 1
+#  BCP_TmVerb_BetterFeasibleSolution 0
+#  BCP_TmVerb_BestFeasibleSolutionValue 1
+BCP_TmVerb_BestFeasibleSolution 0 # default 1 *********************************
+#  BCP_TmVerb_NewPhaseStart 1
+#  BCP_TmVerb_TrimmedNum 1
+#  BCP_TmVerb_TimeOfImprovingSolution 1
+#  BCP_TmVerb_PrunedNodeInfo 1
+   //--------------------------------------------------------------------------
+   // IntPar
+#  BCP_TreeSearchStrategy BCP_BestFirstSearch
+#  BCP_NiceLevel 0
+#  BCP_TmTimeout -1
+   //--------------------------------------------------------------------------
+   // DoublePar
+#  BCP_UnconditionalDiveProbability 0.02
+#  BCP_QualityRatioToAllowDiving_HasUB 1.2
+#  BCP_QualityRatioToAllowDiving_NoUB 2.0
+BCP_Granularity .99 # default is 1e-8, but obj coeffs are integer
+BCP_MaxRunTime 10800.0 // three hours *****************************************
+#  BCP_TerminationGap_Absolute 0.0
+#  BCP_TerminationGap_Relative 0.0
+#  BCP_UpperBound DBL_MAX
+   //--------------------------------------------------------------------------
+   // StringPar
+#  BCP_ReadRootCutsFrom ""
+#  BCP_SaveRootCutsTo ""
+#  BCP_ExecutableName "bcpp"
+#  BCP_LogFileName ""
+
+################################### MC parameters #############################
+
+   MC_DisplaySolutionSignature 1
+   //--------------------------------------------------------------------------
+   // IntPar
+   //--------------------------------------------------------------------------
+   // DoublePar
+   //--------------------------------------------------------------------------
+   // StringPar
+   MC_InputFile junger1
+#  MC_SolutionFile maxcut.out
+#  MC_DoRestarting 0
+#  MC_DoEdgeSwitchHeur 1
+#  MC_ReportAllSPCycleCuts 1
+   MC_LpSolver 3  # MC_UseVol | MC_UseClp
+#  MC_LpSolver 2  # MC_UseClp
+   //--------------------------------------------------------------------------
+   // IntPar
+#  MC_MstCycleCutGeneration MC_AlwaysGenerateMstCycleCuts
+   MC_SPCycleCutGeneration 0 MC_NeverGenerateSPCycleCuts **********************
+   MC_StructureSwitchHeur 31
+   MC_MstHeurNum 15
+   MC_CycleCutHeurNum 2
+   MC_MaxCycleCutNum 10000 # 1000 *********************************************
+   MC_SB_CandidateNum 3 # 1 ***************************************************
+   MC_HeurSwitchImproveRound 100 **********************************************
+#  MC_TailoffGapRelMinItcount -1
+   MC_TailoffLbAbsMinItcount 2 # -1 *******************************************
+   MC_TailoffLbRelMinItcount -1
+   MC_SolveToOptFreqBeforeBranch 1 # 0 ****************************************
+#  MC_DigitsToLose 0
+
+Vol_ascentFirstCheck 1000000
+Vol_ascentCheckInterval 100
+Vol_printFlag 1
+Vol_printInterval 2000
+Vol_greenTestInterval 1
+Vol_yellowTestInterval 2
+Vol_redTestInterval 10
+Vol_alphaInt 200
+Vol_maxSubGradientIterations 2000
+   //--------------------------------------------------------------------------
+   // DoublePar
+#  MC_IntegerTolerance .001
+#  MC_MinIsingCutViolation .02
+#  MC_MinMstCycleCutViolation .02
+#  MC_MinSPCycleCutViolation .02
+#  MC_MaxPerturbInMstCycleCutGen .03
+   MC_MaxPerturbInMstHeur .05 *************************************************
+   MC_TailoffGapRelMinImprovement .01
+   MC_TailoffLbAbsMinImprovement .1
+   MC_TailoffLbRelMinImprovement .1
+
+Vol_lambdaInit 0.1
+Vol_alphaInit 0.01
+Vol_alphaFactor 0.5
+Vol_alphaMin 0.000005
+Vol_primalAbsPrecision 0.02
+Vol_gapAbsPrecision 1.0
+Vol_gapRelPrecision 0.01
+Vol_granularity 0.0
+Vol_minimumRelAscent 0.0001
+
+BCP_MessagePassingIsSerial 1
+BCP_LpProcessNum 1
+BCP_CgProcessNum 0
+BCP_ExecutableName "/usr/bin/valgrind --suppressions=/home/ladanyi/COIN/Examples/MaxCut/valgrind.supp --logfile=lp /home/ladanyi/COIN/Examples/MaxCut/bcpp"
