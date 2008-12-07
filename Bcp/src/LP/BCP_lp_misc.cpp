@@ -134,6 +134,8 @@ BCP_lp_prepare_for_new_node(BCP_lp_prob& p)
   p.user->initialize_new_search_tree_node(vars, cuts, vstat, cstat,
 					  vcp, vbd, ccp, cbd);
 
+  p.sol = NULL;
+
   if (2 * vcp.size() != vbd.size()) {
     throw BCP_fatal_error("new node init returned uneven var vectors\n");
   }
