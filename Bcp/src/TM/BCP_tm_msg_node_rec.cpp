@@ -30,11 +30,11 @@ BCP_tm_create_core_change(BCP_node_change* desc,
 static void
 BCP_tm_create_var_change(BCP_node_change* desc,
 			 const BCP_node_change* parentdesc, const int bvarnum,
-			 BCP_internal_brobj* brobj, const int childind);
+			 const BCP_internal_brobj* brobj, const int childind);
 static void
 BCP_tm_create_cut_change(BCP_node_change* desc,
 			 const BCP_node_change* parentdesc, const int bcutnum,
-			 BCP_internal_brobj* brobj, const int childind);
+			 const BCP_internal_brobj* brobj, const int childind);
 static void
 BCP_tm_unpack_branching_info(BCP_tm_prob& p, BCP_buffer& buf,
 			     BCP_tm_node* node);
@@ -347,7 +347,7 @@ BCP_tm_create_core_change(BCP_node_change* desc,
 static void
 BCP_tm_create_var_change(BCP_node_change* desc,
 			 const BCP_node_change* parentdesc, const int bvarnum,
-			 BCP_internal_brobj* brobj, const int childind)
+			 const BCP_internal_brobj* brobj, const int childind)
 {
     // check first how many added var has changed in brobj
     int affected_added = 0;
@@ -393,7 +393,7 @@ BCP_tm_create_var_change(BCP_node_change* desc,
 static void
 BCP_tm_create_cut_change(BCP_node_change* desc,
 			 const BCP_node_change* parentdesc, const int bcutnum,
-			 BCP_internal_brobj* brobj, const int childind)
+			 const BCP_internal_brobj* brobj, const int childind)
 {
     // check first how many added cut has changed in brobj
     int affected_added = 0;
@@ -436,6 +436,83 @@ BCP_tm_create_cut_change(BCP_node_change* desc,
 
 //#############################################################################
 
+static BCP_tm_node*
+BCP_tm_create_child(BCP_tm_prob& p, const int child_ind,
+		    BCP_tm_node* node,
+		    const BCP_internal_brobj* brobj,
+		    const BCP_vec<BCP_child_action>& action,
+		    const BCP_vec<BCP_user_data*>& user_data,
+		    const BCP_vec<double>& true_lb,
+		    const BCP_vec<double>& qualities)
+{
+    // generate the children
+    const int bvarnum = p.core->varnum();
+    const int bcutnum = p.core->cutnum();
+    const int depth = node->getDepth() + 1;
+    const BitVector128 nodePref = node->getPreferred();
+
+    // nodedesc exists, because when we unpack the barnching info we just
+    // received back the description of the node
+    const BCP_node_change* nodedesc = node->_data._desc.GetRawPtr();
+
+    BCP_node_change* desc = new BCP_node_change;
+    BCP_tm_create_core_change(desc, bvarnum, bcutnum, brobj, child_ind);
+    BCP_tm_create_var_change(desc, nodedesc, bvarnum, brobj, child_ind);
+    BCP_tm_create_cut_change(desc, nodedesc, bcutnum, brobj, child_ind);
+    if (nodedesc->warmstart)
+      // If the parent has warmstart info then 
+      desc->warmstart = nodedesc->warmstart->empty_wrt_this();
+
+    BCP_tm_node* child = new BCP_tm_node(node->getDepth() + 1, desc);
+    child->_core_storage = desc->core_change.storage();
+    child->_var_storage = desc->var_change.storage();
+    child->_cut_storage = desc->cut_change.storage();
+    child->_ws_storage =
+      desc->warmstart ? desc->warmstart->storage() : BCP_Storage_NoData;
+
+    p.search_tree.insert(child); // this sets _index
+    child->_data._user = user_data[child_ind];
+    child->_parent = node;
+    child->_birth_index = node->child_num();
+    /* Fill out the fields in CoinTreeNode */
+    child->setDepth(depth);
+    child->setQuality(qualities[child_ind]);
+    child->setTrueLB(true_lb[child_ind]);
+    if (child_ind > 0 && depth <= 127) {
+      BitVector128 pref = nodePref;
+      pref.setBit(127-depth);
+      child->setPreferred(pref);
+    } else {
+      child->setPreferred(nodePref);
+    }
+    /* Add the child to the list of children in the parent */
+    node->new_child(child);
+    // _children  initialized to be empty -- OK
+    switch (action[child_ind]){
+    case BCP_ReturnChild:
+      child->status = BCP_CandidateNode;
+      break;
+    case BCP_KeepChild:
+      child->status = BCP_CandidateNode; // be conservative
+      break;
+    case BCP_FathomChild:
+      child->status = BCP_PrunedNode_Discarded;
+      break;
+    }
+    // inherit var/cut pools
+    child->vp = node->vp;
+    child->cp = node->cp;
+    // lp, cg, vg  initialized to -1 -- OK, none assigned yet
+#if (BCP_DEBUG_PRINT != 0)
+    printf("TM %.3lf: parent: %i  sibling: %i  siblingind: %i  depth: %i  quality: %lf  pref: %s\n",
+	   tt, node->_index, i, child->_index, depth, child->getQuality(),
+	   child->getPreferred().str().c_str());
+#endif
+    return child;
+}
+
+//#############################################################################
+
 static void
 BCP_tm_unpack_branching_info(BCP_tm_prob& p, BCP_buffer& buf,
 			     BCP_tm_node* node)
@@ -472,16 +549,9 @@ TMDBG;
     BCP_internal_brobj* brobj = new BCP_internal_brobj;
     brobj->unpack(buf);
 
-    // generate the children
-    const int bvarnum = p.core->varnum();
-    const int bcutnum = p.core->cutnum();
     node->reserve_child_num(brobj->child_num());
     int keep = -1;
     BCP_tm_node* child = 0;
-    BCP_node_change* desc;
-    // nodedesc exists, because when we unpack the barnching info we just
-    // received back the description of the node
-    const BCP_node_change* nodedesc = node->_data._desc.GetRawPtr();
     int i;
 
     // fix the number of leaves assigned to the CP/VP
@@ -506,8 +576,6 @@ TMDBG;
 
     CoinTreeNode** children = new CoinTreeNode*[child_num];
     int numChildrenAdded = 0;
-    const int depth = node->getDepth() + 1;
-    BitVector128 nodePref = node->getPreferred();
 #if (BCP_DEBUG_PRINT != 0)
     const double tt = CoinWallclockTime()-p.start_time;
     if (p.candidate_list.size() == 0) {
@@ -518,64 +586,25 @@ TMDBG;
 	     p.candidate_list.top()->getPreferred().str().c_str());
     }
 #endif
-    for (i = 0; i < child_num; ++i){
-	desc = new BCP_node_change;
-	BCP_tm_create_core_change(desc, bvarnum, bcutnum, brobj, i);
-	BCP_tm_create_var_change(desc, nodedesc, bvarnum, brobj, i);
-	BCP_tm_create_cut_change(desc, nodedesc, bcutnum, brobj, i);
-	if (nodedesc->warmstart)
-	    // If the parent has warmstart info then 
-	    desc->warmstart = nodedesc->warmstart->empty_wrt_this();
-
-	child = new BCP_tm_node(node->getDepth() + 1, desc);
-	child->_core_storage = desc->core_change.storage();
-	child->_var_storage = desc->var_change.storage();
-	child->_cut_storage = desc->cut_change.storage();
-	child->_ws_storage =
-	    desc->warmstart ? desc->warmstart->storage() : BCP_Storage_NoData;
-
-	p.search_tree.insert(child); // this sets _index
-	child->_data._user = user_data[i];
-	child->_parent = node;
-	child->_birth_index = node->child_num();
-	/* Fill out the fields in CoinTreeNode */
-	child->setDepth(depth);
-	child->setQuality(qualities[i]);
-	child->setTrueLB(true_lb[i]);
-	if (i > 0 && depth <= 127) {
-	  BitVector128 pref = nodePref;
-	  pref.setBit(127-depth);
-	  child->setPreferred(pref);
-	} else {
-	  child->setPreferred(nodePref);
-	}
-	/* Add the child to the list of children in the parent */
-	node->new_child(child);
-	// _children  initialized to be empty -- OK
-	switch (action[i]){
-	case BCP_ReturnChild:
-	    children[numChildrenAdded++] = child;
-	    child->status = BCP_CandidateNode;
-	    break;
-	case BCP_KeepChild:
-	    children[numChildrenAdded++] = child;
-	    child->status = BCP_CandidateNode; // be conservative
-	    keep = i;
-	    break;
-	case BCP_FathomChild:
-	    child->status = BCP_PrunedNode_Discarded;
-	    break;
-	}
-	// inherit var/cut pools
-	child->vp = node->vp;
-	child->cp = node->cp;
-	// lp, cg, vg  initialized to -1 -- OK, none assigned yet
-#if (BCP_DEBUG_PRINT != 0)
-	printf("TM %.3lf: parent: %i  sibling: %i  siblingind: %i  depth: %i  quality: %lf  pref: %s\n",
-	       tt, node->_index, i, child->_index, depth, child->getQuality(),
-	       child->getPreferred().str().c_str());
-
-#endif
+    // First find out if the LP process should keep any of the children to
+    // dive into.
+    for (i = 0; i < child_num; ++i) {
+      if (action[i] == BCP_KeepChild) {
+	assert(keep == -1);
+	keep = i;
+      }
+    }
+    if (keep >= 0) {
+      children[numChildrenAdded++] = BCP_tm_create_child(p, keep, node, brobj,
+							 action, user_data,
+							 true_lb, qualities);
+    }
+    for (i = 0; i < child_num; ++i) {
+      if (i != keep) {
+	children[numChildrenAdded++] = BCP_tm_create_child(p, i, node, brobj,
+							   action, user_data,
+							   true_lb, qualities);
+      }
     }
 
     if (numChildrenAdded > 0) {
@@ -586,7 +615,8 @@ TMDBG;
 
       // check the one that's proposed to be kept if there's one
       if (keep >= 0) {
-	child = node->child(keep);
+	// The kept child was pushed into the node first.
+	child = node->child(0);
 	if (dive == BCP_DoDive || dive == BCP_TestBeforeDive){
 	  // we've got to answer
 	  buf.clear();
@@ -624,7 +654,7 @@ TMDBG;
       } else {
 	// if diving then the child takes over the parent's lp,cg,vg
 	// XXX
-	if (child != node->child(keep)) {
+	if (child != node->child(0)) {
 	  throw BCP_fatal_error("\
 BCP_tm_unpack_branching_info: the value of child is messed up!\n");
 	}
