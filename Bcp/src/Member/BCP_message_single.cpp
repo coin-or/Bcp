@@ -342,8 +342,6 @@ BCP_single_environment::register_process(USER_initialize* user_init)
       
     delete _tm_prob;
 
-    exit(0);
-
     return 0; //fake, just to quiet the compiler
 }
 
