@@ -9,10 +9,6 @@
 #    Usually, you only need to change the five CHANGEME entries below.   #
 ##########################################################################
 
-#CHANGEME: If you want to compile under Cygwin, uncomment the following
-# line.
-#CYGFLAG = -mno-cygwin
-
 # CHANGEME: add extra definitions here
 USER_DEFINES =
 
