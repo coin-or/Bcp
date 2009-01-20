@@ -39,6 +39,7 @@ BB_lp::initialize_solver_interface()
 {
   OsiClpSolverInterface * clp = new OsiClpSolverInterface;
   clp->messageHandler()->setLogLevel(0);
+  clp->getModelPtr()->messageHandler()->setLogLevel(0);
 
   return clp;
 }
