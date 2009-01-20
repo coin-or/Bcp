@@ -1,4 +1,4 @@
-// Last edit: 5/19/07
+// Last edit: 1/21/09
 //
 // Name:     BB_lp.cpp
 // Author:   Francois Margot
@@ -380,7 +380,8 @@ BB_lp::select_branching_candidates(const BCP_lp_result& lpres,
                                    const BCP_vec<BCP_cut*>& cuts,
                                    const BCP_lp_var_pool& local_var_pool,
                                    const BCP_lp_cut_pool& local_cut_pool,
-                                   BCP_vec<BCP_lp_branching_object*>& cands)
+                                   BCP_vec<BCP_lp_branching_object*>& cands,
+				   bool force_branch)
 {
 #ifdef CUSTOM_BRANCH
 
@@ -439,7 +440,8 @@ BB_lp::select_branching_candidates(const BCP_lp_result& lpres,
 #else 
   return(BCP_lp_user::select_branching_candidates(lpres, vars, cuts, 
 						  local_var_pool, 
-						  local_cut_pool, cands));
+						  local_cut_pool, cands,
+						  force_branch));
 #endif
 }
 
