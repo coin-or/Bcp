@@ -1,8 +1,5 @@
 These instructions are for UNIX-like systems (including Linux, Cygwin
-and MSys) only.  If Microsoft Developer Studio projects are
-maintained for this package, you can find instructions at
-
-  https://projects.coin-or.org/MSVisualStudio
+and MSys) only.  
 
 **********************************************************************
 ***                         DOWNLOAD                               ***
@@ -21,17 +18,17 @@ You can obtain the source code for the Bcp package in two ways:
 
    svn co https://projects.coin-or.org/svn/Bcp/trunk Bcp
 
-   To download stable/1.1 you'd type:
+   To download stable/1.2 you would type:
 
-   svn co https://projects.coin-or.org/svn/Bcp/stable/1.1 Bcp
+   svn co https://projects.coin-or.org/svn/Bcp/stable/1.2 Bcp
 
    etc.
 
 2. Download the tarball from http://www.coin-or.org/download/source/Bcp 
-   and extract it. For example, for the release 2.1.2 you type
+   and extract it. For example, for the release 1.2.1 you type
 
-   gunzip Bcp-1.1.2.tgz
-   tar xvf Bcp-1.1.2.tar
+   gunzip Bcp-1.2.1.tgz
+   tar xvf Bcp-1.2.1.tar
 
    More detailed download instructions can be found at
 
@@ -42,7 +39,7 @@ You can obtain the source code for the Bcp package in two ways:
 **********************************************************************
 
 Go into the directory that you just downloaded or extracted (e.g.,
-Bcp or Bcp-1.1.2).  Then create a build directory and
+Bcp or Bcp-1.2.1).  Then create a build directory and
 configure the package by typing
 
    mkdir build
