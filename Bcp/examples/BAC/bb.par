@@ -1,4 +1,4 @@
-// Last edit: 3/14/08
+// Last edit: 1/22/09
 //
 // Name:     bb.par
 // Author:   Francois Margot
@@ -95,15 +95,10 @@ BCP_MaxPresolveIter 			-1 // Perform strong branching if non
 					   // negative
 					   // Default: 100000
 
-BCP_StrongBranch_CloseToHalfNum 	1  // Number of candidates variables
+BCP_StrongBranchNum 			 1 // Number of candidates variables
 					   // with value close to 0.5
 					   // selected for strong branching
 				           // Default: 3
-
-BCP_StrongBranch_CloseToOneNum 		0  // Number of candidates variables
-					   // with value close to 1
-					   // selected for strong branching
-					   // Default: 3
 
 /***************************************************************************/
 //  CONSTRAINT MANAGEMENT:

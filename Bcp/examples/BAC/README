@@ -30,9 +30,8 @@ BAC is an illustrative example for the Branch-Cut-Price code BCP of
 COIN-OR. BAC illustrates several basic features of BCP and it is hoped
 that a study of the BAC example is an almost painless introduction
 to BCP. BAC is not an efficient code for doing anything interesting,
-besides serving as an example for BCP. The file bac.pdf (or bac_trunk.pdf,
-depending on the version of the code) in BACdir serves as main support for 
-understanding the code.
+besides serving as an example for BCP. The file bac-*.pdf in BACdir serves 
+as main support for understanding the code.
 
 
 BCP TRAC PAGE
@@ -52,10 +51,10 @@ INSTALLATION
 If you have downloaded the package BCP
 in the local directory coin-Bcp, please see the INSTALL file in 
 coin-Bcp for a guide to install this package. Alternatively, 
-the installation of BCP is covered in BACdir/bac.pdf (or BACdir/bac_trunk.pdf).
+the installation of BCP is covered in BACdir/bac-*.pdf.
 
 To install BAC itself, see the file BACdir/INSTALL. This installation 
-is also covered in the file BACdir/bac.pdf (or BACdir/bac_trunk.pdf).
+is also covered in the file BACdir/bac-*.pdf.
 
 If you have obtained BAC by downloading another package Pkg containing 
 BCP, BCP should be installed as part of the installation of Pkg. 
