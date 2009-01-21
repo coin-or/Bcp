@@ -32,7 +32,7 @@ OBJS = \
 	./Member/BB.@OBJEXT@ \
 	./Member/BB_cut.@OBJEXT@
 
-# Add access to Cplex if available (see bac.pdf for installation)
+# Add access to Cplex if available (see bac-*.pdf for installation)
 ifneq ($(ENV_CPLEX_LIB),)
   LIB_CPLEX = -L$(ENV_CPLEX_LIB) -lcplex
   CPLEX_H = $(ENV_CPLEX_H)
