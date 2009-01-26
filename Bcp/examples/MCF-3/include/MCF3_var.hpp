@@ -8,9 +8,12 @@
 /*---------------------------------------------------------------------------*/
 
 // A var describing a column of the master problem, that is a flow for a
-// commodity. The second is a "fake" variable. It simply holds information on
-// the branching decision so that in the subproblems we can make the
-// appropriate restrictions on the flow values.
+// commodity. 
+
+// For the variables the upper bound is 1, but we set it to 2 so there
+// will never be a variable out of basis at its upper bound. That would kill
+// column generation. The convexity constraint will take care of keeping these
+// variables under 1.
 
 class MCF3_var : public BCP_var_algo {
 public:
@@ -20,12 +23,10 @@ public:
 
 public:
     MCF3_var(int com, const CoinPackedVector& f, double w) :
-	BCP_var_algo(BCP_ContinuousVar, w, 0, 1),
-	commodity(com), flow(false), weight(w)
-    {
-	new (&flow) CoinPackedVector(f.getNumElements(),
-				     f.getIndices(), f.getElements(), false);
-    }
+	BCP_var_algo(BCP_ContinuousVar, w, 0, 2),
+	commodity(com),
+	flow(f.getNumElements(), f.getIndices(), f.getElements(), false),
+	weight(w) {}
     MCF3_var(BCP_buffer& buf);
     ~MCF3_var() {}
 

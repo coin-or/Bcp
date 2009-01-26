@@ -13,6 +13,11 @@
 // the branching decision so that in the subproblems we can make the
 // appropriate restrictions on the flow values.
 
+// For the real variables the upper bound is 1, but we set it to 2 so there
+// will never be a variable out of basis at its upper bound. That would kill
+// column generation. The convexity constraint will take care of keeping these
+// variables under 1.
+
 class MCF2_var : public BCP_var_algo {
 public:
     int commodity;
@@ -21,12 +26,10 @@ public:
 
 public:
     MCF2_var(int com, const CoinPackedVector& f, double w) :
-	BCP_var_algo(BCP_ContinuousVar, w, 0, 1),
-	commodity(com), flow(false), weight(w)
-    {
-	new (&flow) CoinPackedVector(f.getNumElements(),
-				     f.getIndices(), f.getElements(), false);
-    }
+	BCP_var_algo(BCP_ContinuousVar, w, 0, 2),
+	commodity(com),
+	flow(f.getNumElements(), f.getIndices(), f.getElements(), false),
+	weight(w) {}
     MCF2_var(BCP_buffer& buf);
     ~MCF2_var() {}
 
