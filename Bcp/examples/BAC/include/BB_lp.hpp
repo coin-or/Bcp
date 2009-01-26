@@ -73,6 +73,7 @@ public:
   /// Called at the beginning of the optimization of a node when
   /// the node LP is not yet solved.
   virtual void modify_lp_parameters(OsiSolverInterface* lp, 
+				    const int changeType, 
 				    bool in_strong_branching);
   
   /// Test feasibility of the LP solution.
