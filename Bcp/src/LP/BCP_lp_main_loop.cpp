@@ -50,7 +50,11 @@ void BCP_lp_main_loop(BCP_lp_prob& p)
 	// Solve the lp relaxation and get the results
 	time0 = CoinCpuTime();
 	BCP_lp_check_ub(p);
-	p.user->modify_lp_parameters(p.lp_solver, false);
+	// Whether primal/dual feasibility was affected at the end of an
+	// iteration. See doc of BCP_lp_user::modify_lp_parameters
+	const int changeType = (varset_changed ? 2:0) + (cutset_changed ? 1:0);
+
+	p.user->modify_lp_parameters(p.lp_solver, changeType, false);
 #if 0
 	char fname[1000];
 	sprintf(fname, "matrix-%i.%i.%i",
@@ -283,6 +287,7 @@ LP:   Terminating and fathoming due to proven high cost (good heur soln!).\n",
 	    // the cleanup during branching.
 	    varset_changed = true;
 	    cutset_changed = true;
+	    
 	    break;
 
 	case BCP_BranchingContinueThisNode:

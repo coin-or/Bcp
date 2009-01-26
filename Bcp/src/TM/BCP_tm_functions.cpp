@@ -205,10 +205,10 @@ TM: Moving NODE %i LEVEL %i into the next phase list \n\
     instead of sending it.\n",
 		       next_node->index(), next_node->getDepth());
 	    continue;
-	} else { // must be BCP_GenerateColumns
-	    // all right, we want to send it out anyway for pricing
-	    break;
 	}
+	// must be BCP_GenerateColumns
+	// all right, we want to send it out anyway for pricing
+	break;
     }
 
     // assign processes to the node and send it off

@@ -308,18 +308,22 @@ BCP_lp_perform_strong_branching(BCP_lp_prob& p,
 
     const OsiBabSolver* babSolver = p.user->getOsiBabSolver();
 
+    int cand_ind = -1;
     for (cani = candidates.begin(); cani != candidates.end(); ++cani){
 	// Create a temporary branching object to hold the current results
 	BCP_presolved_lp_brobj* tmp_presolved =
 	    new BCP_presolved_lp_brobj(*cani);
 	const BCP_lp_branching_object* can = *cani;
+	++cand_ind;
 	for (i = 0; i < can->child_num; ++i){
 	    can->apply_child_bd(lp, i);
-	    p.user->modify_lp_parameters(p.lp_solver, true);
+	    // bound changes always imply that primal feasibility is lost.
+	    p.user->modify_lp_parameters(p.lp_solver, 1, true);
 #if 0
 	    char fname[1000];
-	    sprintf(fname, "matrix-%i.%i.%i-child-%i",
-		    p.node->level, p.node->index, p.node->iteration_count, i);
+	    sprintf(fname, "matrix-%i.%i.%i-child-%i.%i",
+		    p.node->level, p.node->index, p.node->iteration_count,
+		    cand_ind, i);
 	    lp->writeMps(fname, "mps");
 #endif
 	    lp->solveFromHotStart();
@@ -531,7 +535,9 @@ LP: Strong branching is disabled but more than one candidate is selected.\n\
     p.user->set_user_data_for_children(best_presolved, selected);
    
     // Now just resolve the LP to get what'll be sent to the TM.
-    p.user->modify_lp_parameters(p.lp_solver, false);
+    // 2nd arg is 1, since only only bd changes happened which can afffect
+    // only primal feasibility 
+    p.user->modify_lp_parameters(p.lp_solver, 1, false);
     p.lp_solver->initialSolve();
     p.lp_result->get_results(*p.lp_solver);
     p.node->quality = p.lp_result->objval();

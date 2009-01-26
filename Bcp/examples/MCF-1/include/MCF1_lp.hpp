@@ -31,12 +31,6 @@ public:
     }
 
     virtual void unpack_module_data(BCP_buffer& buf);
-    virtual void pack_var_algo(const BCP_var_algo* var, BCP_buffer& buf) {
-	MCF1_pack_var(var, buf);
-    }
-    virtual BCP_var_algo* unpack_var_algo(BCP_buffer& buf) {
-	return MCF1_unpack_var(buf);
-    }
 
     virtual OsiSolverInterface* initialize_solver_interface();
 
@@ -77,7 +71,8 @@ public:
 				const BCP_vec<BCP_cut*>& cuts,
 				const BCP_lp_var_pool& local_var_pool,
 				const BCP_lp_cut_pool& local_cut_pool,
-				BCP_vec<BCP_lp_branching_object*>& cands);
+				BCP_vec<BCP_lp_branching_object*>& cands,
+				bool force_branch = false);
 };
 
 #endif
