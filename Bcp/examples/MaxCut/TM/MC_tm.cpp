@@ -20,20 +20,14 @@ int main(int argc, char* argv[])
 void
 MC_tm::pack_module_data(BCP_buffer& buf, BCP_process_t ptype)
 {
-   switch (ptype) {
-    case BCP_ProcessType_Any:
-    case BCP_ProcessType_TM:
-      abort();
-    case BCP_ProcessType_CG:
-    case BCP_ProcessType_VG:
-    case BCP_ProcessType_CP:
-    case BCP_ProcessType_VP:  
-      break;
-    case BCP_ProcessType_LP:
-      lp_par.pack(buf);
-      break;
-   }
-   mc.pack(buf);
+  switch (ptype) {
+  case BCP_ProcessType_LP:
+    lp_par.pack(buf);
+    break;
+  default:
+    abort();
+  }
+  mc.pack(buf);
 }
 
 //#############################################################################
@@ -46,44 +40,6 @@ MC_tm::unpack_feasible_solution(BCP_buffer& buf)
    if (new_sol->objective_value() > best_soln.objective_value())
       best_soln = *new_sol;
    return new_sol;
-}
-
-//#############################################################################
-
-void
-MC_tm::pack_cut_algo(const BCP_cut_algo* cut, BCP_buffer& buf)
-{
-   {
-      const MC_cycle_cut* mc_cut =
-	 dynamic_cast<const MC_cycle_cut*>(cut);
-      if (mc_cut) {
-	 mc_cut->pack(buf);
-	 return;
-      }
-   }
-   {
-      const MC_explicit_dense_cut* mc_cut =
-	 dynamic_cast<const MC_explicit_dense_cut*>(cut);
-      if (mc_cut) {
-	 mc_cut->pack(buf);
-	 return;
-      }
-   }
-   throw BCP_fatal_error("MC_tm::pack_cut_algo() : unknown cut type!\n");
-}
-    
-BCP_cut_algo*
-MC_tm::unpack_cut_algo(BCP_buffer& buf)
-{
-  MC_cut_t type;
-  buf.unpack(type);
-  BCP_cut_algo* cut;
-  switch (type) {
-  case MC_cut_t__cycle: cut = new MC_cycle_cut(buf); break;
-  case MC_cut_t__explicit_dense: cut = new MC_explicit_dense_cut(buf); break;
-  default: abort();
-  }
-  return cut;
 }
 
 //#############################################################################

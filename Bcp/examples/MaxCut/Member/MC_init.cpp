@@ -19,6 +19,50 @@ USER_initialize * BCP_user_init()
 
 //#############################################################################
 
+BCP_user_pack*
+MC_initialize::packer_init(BCP_user_class* p)
+{
+  return new MC_packer;
+}
+
+//-----------------------------------------------------------------------------
+
+void
+MC_packer::pack_cut_algo(const BCP_cut_algo* cut, BCP_buffer& buf)
+{
+  const MC_cycle_cut* mc_cycle_cut = dynamic_cast<const MC_cycle_cut*>(cut);
+  if (mc_cycle_cut) {
+    mc_cycle_cut->pack(buf);
+    return;
+  }
+  const MC_explicit_dense_cut* mc_dense_cut =
+    dynamic_cast<const MC_explicit_dense_cut*>(cut);
+  if (mc_dense_cut) {
+    mc_dense_cut->pack(buf);
+    return;
+  }
+  throw BCP_fatal_error("MC_packer::pack_cut_algo() : unknown cut type!\n");
+}
+
+//-----------------------------------------------------------------------------
+
+BCP_cut_algo*
+MC_packer::unpack_cut_algo(BCP_buffer& buf)
+{
+  MC_cut_t type;
+  buf.unpack(type);
+  BCP_cut_algo* cut;
+  switch (type) {
+  case MC_cut_t__cycle: cut = new MC_cycle_cut(buf); break;
+  case MC_cut_t__explicit_dense: cut = new MC_explicit_dense_cut(buf); break;
+  default: throw BCP_fatal_error("\
+MC_packer::unpack_cut_algo() : unknown cut type!\n");
+  }
+  return cut;
+}
+
+//#############################################################################
+
 void MC_read_parameters(MC_tm& tm, const char * paramfile);
 void MC_readproblem(MC_tm& tm);
 

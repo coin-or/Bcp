@@ -51,7 +51,7 @@ CXXFLAGS = @CXXFLAGS@
 CXXLINKFLAGS = @RPATH_FLAGS@
 
 # Directory with COIN header files
-COININCDIR = @abs_include_dir@
+COININCDIR = @abs_include_dir@/coin
 
 # Directory with COIN libraries
 COINLIBDIR = @abs_lib_dir@
@@ -67,8 +67,8 @@ LIBS = \
 	-lVol \
 	-lCoinUtils \
 	`cat @CGLDOCDIR@/cgl_addlibs.txt` \
-	`cat @OSLDOCDIR/osi_addlibs.txt` \
-	`cat @CLPDOCDIR/clp_addlibs.txt` \
+	`cat @OSIDOCDIR@/osi_addlibs.txt` \
+	`cat @CLPDOCDIR@/clp_addlibs.txt` \
 	`cat @VOLDOCDIR@/vol_addlibs.txt` \
 	`cat @COINUTILSDOCDIR@/coinutils_addlibs.txt`
 
