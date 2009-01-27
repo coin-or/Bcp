@@ -70,7 +70,8 @@ BB_lp::initialize_new_search_tree_node(const BCP_vec<BCP_var*>& vars,
 
 /************************************************************************/
 void
-BB_lp::modify_lp_parameters(OsiSolverInterface* lp, bool in_strong_branching)
+BB_lp::modify_lp_parameters(OsiSolverInterface* lp, const int changeType,
+			    bool in_strong_branching)
 
   // Called each time the node LP is solved
 

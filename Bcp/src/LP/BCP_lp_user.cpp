@@ -84,7 +84,7 @@ BCP_lp_user::send_feasible_solution(const BCP_solution* sol)
 
     // update the UB if necessary
     const double obj = sol->objective_value();
-    if (p->ub(obj) && ! p->node->colgen != BCP_GenerateColumns) {
+    if (p->ub(obj) && p->node->colgen != BCP_GenerateColumns) {
 	// FIXME: If we had a flag in the node that indicates not to
 	// generate cols in it and in its descendants then the dual obj
 	// limit could still be set...
@@ -401,11 +401,22 @@ BCP_lp_user::load_problem(OsiSolverInterface& osi, BCP_problem_core* core,
 //#############################################################################
 // Opportunity to reset things before optimization
 void
-BCP_lp_user::modify_lp_parameters(OsiSolverInterface* lp,
+BCP_lp_user::modify_lp_parameters(OsiSolverInterface* lp, const int changeType,
 				  bool in_strong_branching)
 {
   print(p->param(BCP_lp_par::ReportWhenDefaultIsExecuted),
 	"LP: Default prepare_for_optimization() executed.\n");
+
+  if (changeType == 1) { // primal feas was affected
+    lp->setHintParam(OsiDoDualInResolve, true, OsiHintTry);
+    return;
+  }
+  if (changeType == 2) { // dual feas was affected
+    lp->setHintParam(OsiDoDualInResolve, false, OsiHintTry);
+    return;
+  }
+  // Neither or both, so let the solver decide
+  lp->setHintParam(OsiDoDualInResolve, true, OsiHintIgnore);
 }
 
 //#############################################################################

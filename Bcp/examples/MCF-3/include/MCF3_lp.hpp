@@ -34,22 +34,6 @@ public:
     }
 
     virtual void unpack_module_data(BCP_buffer& buf);
-    virtual void pack_var_algo(const BCP_var_algo* var, BCP_buffer& buf) {
-	MCF3_pack_var(var, buf);
-    }
-    virtual BCP_var_algo* unpack_var_algo(BCP_buffer& buf) {
-	return MCF3_unpack_var(buf);
-    }
-    
-    virtual void pack_user_data(const BCP_user_data* ud, BCP_buffer& buf) {
-	const MCF3_user* u = dynamic_cast<const MCF3_user*>(ud);
-	u->pack(buf);
-    }
-    virtual BCP_user_data* unpack_user_data(BCP_buffer& buf) {
-	MCF3_user* u = new MCF3_user;
-	u->unpack(buf);
-	return u;
-    }
 
     virtual OsiSolverInterface* initialize_solver_interface();
 
@@ -90,7 +74,8 @@ public:
 				const BCP_vec<BCP_cut*>& cuts,
 				const BCP_lp_var_pool& local_var_pool,
 				const BCP_lp_cut_pool& local_cut_pool,
-				BCP_vec<BCP_lp_branching_object*>& cands);
+				BCP_vec<BCP_lp_branching_object*>& cands,
+				bool force_branch = false);
     virtual void
     set_user_data_for_children(BCP_presolved_lp_brobj* best, 
 			       const int selected);

@@ -15,7 +15,7 @@ void MCF1_var::pack(BCP_buffer& buf) const
 
 MCF1_var::MCF1_var(BCP_buffer& buf) :
     // we don't know the onj coeff (weight) yet, so temporarily set it to 0
-    BCP_var_algo(BCP_ContinuousVar, 0, 0, 1)
+    BCP_var_algo(BCP_ContinuousVar, 0, 0, 2)
 {
     buf.unpack(commodity);
     int numarcs;

@@ -279,15 +279,22 @@ public:
 		 BCP_var_set& vars, BCP_cut_set& cuts);
 
     //=========================================================================
-    /** Modify parameters of the LP solver before optimization.
-	This method provides an opportunity for the user to change parameters
-	of the LP solver before optimization in the LP solver starts. The
-	second argument indicates whether the optimization is a "regular"
-	optimization or it will take place in strong branching.
-	Default: empty method. 
+    /** Modify parameters of the LP solver before optimization. This method
+	provides an opportunity for the user to change parameters of the LP
+	solver before optimization in the LP solver starts. The second
+	argument indicates what has changed in the LP before this method is
+	called. 0: no change; 1: changes that affect primal feasibility
+	(change in column/row bounds, added cuts); 2: changes that affect dual
+	feasibility (added columns); 3: both. The last argument indicates
+	whether the optimization is a "regular" optimization or it will take
+	place in strong branching.
+
+	Default: If 1 or 2 then the appropriate simplex method will be hinted
+	to the solver.
     */
     virtual void
-    modify_lp_parameters(OsiSolverInterface* lp, bool in_strong_branching);
+    modify_lp_parameters(OsiSolverInterface* lp, const int changeType,
+			 bool in_strong_branching);
 
   //===========================================================================
     /** Process the result of an iteration. This includes:

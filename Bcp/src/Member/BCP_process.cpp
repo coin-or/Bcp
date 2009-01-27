@@ -58,7 +58,7 @@ BCP_scheduler::setParams(double OverEstimationStatic,
     maxNodeIds_ = 1;
   }
   maxSbIds_ = MaxSbIds;
-  printf("Setting max SbIds to %i",maxSbIds_);
+  // printf("Setting max SbIds to %i\n",maxSbIds_);
   minSbIds_ = MinSbIds;
 }
 
