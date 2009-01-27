@@ -36,14 +36,6 @@ public:
   BCP_solution*
   unpack_feasible_solution(BCP_buffer& buf);
   //--------------------------------------------------------------------------
-  // Pack an algorithmic cut
-  void
-  pack_cut_algo(const BCP_cut_algo* cut, BCP_buffer& buf);
-  //--------------------------------------------------------------------------
-  /** Unpack an algorithmic cut */
-  BCP_cut_algo*
-  unpack_cut_algo(BCP_buffer& buf);
-  //--------------------------------------------------------------------------
   // feasible solution displaying
   void
   display_solution(const BCP_solution* soln);
@@ -58,8 +50,7 @@ public:
   void
   create_root(BCP_vec<BCP_var*>& added_vars,
 	      BCP_vec<BCP_cut*>& added_cuts,
-	      BCP_user_data*& user_data,
-	      BCP_pricing_status& pricing_status);
+	      BCP_user_data*& user_data);
 
   //--------------------------------------------------------------------------
   // Display a feasible solution

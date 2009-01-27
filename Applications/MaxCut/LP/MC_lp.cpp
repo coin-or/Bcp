@@ -117,44 +117,6 @@ MC_lp::unpack_module_data(BCP_buffer & buf)
 }
 
 //#############################################################################
-
-void
-MC_lp::pack_cut_algo(const BCP_cut_algo* cut, BCP_buffer& buf)
-{
-   {
-      const MC_cycle_cut* mc_cut =
-	 dynamic_cast<const MC_cycle_cut*>(cut);
-      if (mc_cut) {
-	 mc_cut->pack(buf);
-	 return;
-      }
-   }
-   {
-      const MC_explicit_dense_cut* mc_cut =
-	 dynamic_cast<const MC_explicit_dense_cut*>(cut);
-      if (mc_cut) {
-	 mc_cut->pack(buf);
-	 return;
-      }
-   }
-   throw BCP_fatal_error("MC_tm::pack_cut_algo() : unknown cut type!\n");
-}
-    
-BCP_cut_algo*
-MC_lp::unpack_cut_algo(BCP_buffer& buf)
-{
-  MC_cut_t type;
-  buf.unpack(type);
-  BCP_cut_algo* cut;
-  switch (type) {
-  case MC_cut_t__cycle: cut = new MC_cycle_cut(buf); break;
-  case MC_cut_t__explicit_dense: cut = new MC_explicit_dense_cut(buf); break;
-  default: abort();
-  }
-  return cut;
-}
-
-//#############################################################################
 // Override the initializer so that we can choose between vol and simplex
 // at runtime.
 
@@ -176,7 +138,8 @@ MC_lp::initialize_solver_interface()
 //#############################################################################
 // Opportunity to reset things before optimization
 void
-MC_lp::modify_lp_parameters(OsiSolverInterface* lp, bool in_strong_branching)
+MC_lp::modify_lp_parameters(OsiSolverInterface* lp, const int changeType,
+			    bool in_strong_branching)
 {
   if (current_iteration() == 1 &&
       ( ((par.entry(MC_lp_par::LpSolver) & MC_UseClp) != 0) )
