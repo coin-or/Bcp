@@ -36,14 +36,6 @@ public:
   BCP_solution*
   unpack_feasible_solution(BCP_buffer& buf);
   //--------------------------------------------------------------------------
-  // Pack an algorithmic cut
-  void
-  pack_cut_algo(const BCP_cut_algo* cut, BCP_buffer& buf);
-  //--------------------------------------------------------------------------
-  /** Unpack an algorithmic cut */
-  BCP_cut_algo*
-  unpack_cut_algo(BCP_buffer& buf);
-  //--------------------------------------------------------------------------
   // feasible solution displaying
   void
   display_solution(const BCP_solution* soln);
