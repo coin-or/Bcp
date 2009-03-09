@@ -111,7 +111,6 @@ AC_COIN_CHECK_VPATH
 
 AC_COIN_LINK_FROM_FILELIST(test/BAC, examples/BAC/testfiles.txt)
 AC_COIN_COPY_FROM_FILELIST(examples/BAC, examples/BAC/examplefiles.txt)
-AC_COIN_COPY_FROM_FILELIST(examples/MaxCut, examples/MaxCut/examplefiles.txt)
 
 AC_COIN_COPY_FROM_FILELIST(examples/MCF-1, examples/MCF-1/examplefiles.txt)
 AC_COIN_COPY_FROM_FILELIST(examples/MCF-2, examples/MCF-2/examplefiles.txt)
@@ -156,7 +155,6 @@ AC_CONFIG_FILES([Makefile
                  examples/MCF-1/Makefile
                  examples/MCF-2/Makefile
                  examples/MCF-3/Makefile
-                 examples/MaxCut/Makefile
 		 bcp_addlibs.txt])
 
 # Here put the location and name of the configuration header file
