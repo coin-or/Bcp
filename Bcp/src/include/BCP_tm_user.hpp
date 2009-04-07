@@ -41,17 +41,17 @@ class BCP_lp_statistics;
 
    The default implementations fall into three major categories. 
    <ul>
-     <li> Empty; doesn't do anything and immediately returns. (E.g., 
-          pack_module_data().
-     <li> There is no reasonable default, so throw an exception. This happens
-          if the parameter settings drive the flow of in a way that BCP can't
-	  perform the necessary function. This behavior is correct since such
-	  methods are invoked only if the parameter settings drive the flow of
-	  the algorithm that way, in which case the user better implement those
-	  methods. (At the momemnt there is no such method in TM.)
-     <li> A default is given. Frequently there are multiple defaults and
-          parameters govern which one is selected (e.g.,
-	  compare_tree_nodes()).
+   <li> Empty; doesn't do anything and immediately returns. (E.g., 
+   pack_module_data().
+   <li> There is no reasonable default, so throw an exception. This happens
+   if the parameter settings drive the flow of in a way that BCP can't
+   perform the necessary function. This behavior is correct since such
+   methods are invoked only if the parameter settings drive the flow of
+   the algorithm that way, in which case the user better implement those
+   methods. (At the momemnt there is no such method in TM.)
+   <li> A default is given. Frequently there are multiple defaults and
+   parameters govern which one is selected (e.g.,
+   compare_tree_nodes()).
    </ul>
 */
 
@@ -65,48 +65,52 @@ public:
      total control.
   */
   /*@{*/
-    /// Set the pointer
-    void setTmProblemPointer(BCP_tm_prob * ptr) { p = ptr; }
-    /// Get the pointer
-    BCP_tm_prob * getTmProblemPointer() { return p; }
+  /// Set the pointer
+  void setTmProblemPointer(BCP_tm_prob * ptr) { p = ptr; }
+  /// Get the pointer
+  BCP_tm_prob * getTmProblemPointer() { return p; }
   /*@}*/
 
   /**@name Informational methods for the user. */
   /*@{*/
-    /// Return what is the best known upper bound (might be BCP_DBL_MAX)
-    double upper_bound() const;
+  /// Return what is the best known upper bound (might be BCP_DBL_MAX)
+  double upper_bound() const;
+  /** Return a global lower bound.
+      This value is the minimum of the true lower bounds in the candidate list
+      and the true lower bounds of the nodes currently processed */
+  double lower_bound() const;
   /*@}*/
 
   /**@name Methods to get/set BCP parameters on the fly */
   /*@{*/
-    ///
-    char              get_param(const BCP_tm_par::chr_params key) const;
-    ///
-    int               get_param(const BCP_tm_par::int_params key) const;
-    ///
-    double            get_param(const BCP_tm_par::dbl_params key) const;
-    ///
-    const BCP_string& get_param(const BCP_tm_par::str_params key) const;
+  ///
+  char              get_param(const BCP_tm_par::chr_params key) const;
+  ///
+  int               get_param(const BCP_tm_par::int_params key) const;
+  ///
+  double            get_param(const BCP_tm_par::dbl_params key) const;
+  ///
+  const BCP_string& get_param(const BCP_tm_par::str_params key) const;
 
-    ///
-    void set_param(const BCP_tm_par::chr_params key, const bool val);
-    /// 
-    void set_param(const BCP_tm_par::chr_params key, const char val);
-    ///
-    void set_param(const BCP_tm_par::int_params key, const int val);
-    ///
-    void set_param(const BCP_tm_par::dbl_params key, const double val);
-    ///
-    void set_param(const BCP_tm_par::str_params key, const char * val);
+  ///
+  void set_param(const BCP_tm_par::chr_params key, const bool val);
+  /// 
+  void set_param(const BCP_tm_par::chr_params key, const char val);
+  ///
+  void set_param(const BCP_tm_par::int_params key, const int val);
+  ///
+  void set_param(const BCP_tm_par::dbl_params key, const double val);
+  ///
+  void set_param(const BCP_tm_par::str_params key, const char * val);
   /*@}*/
 
   //===========================================================================
   /**@name Constructor, Destructor */
   /*@{*/
-    BCP_tm_user() : p(0) {}
-    /** Being virtual, the destructor invokes the destructor for the real type
-	of the object being deleted. */
-    virtual ~BCP_tm_user() {}
+  BCP_tm_user() : p(0) {}
+  /** Being virtual, the destructor invokes the destructor for the real type
+      of the object being deleted. */
+  virtual ~BCP_tm_user() {}
   /*@}*/
 
   //===========================================================================
@@ -117,31 +121,31 @@ public:
   /**@name Packing and unpacking methods */
 
   /*@{*/
-    /** Pack the initial information (info that the user wants to send over)
-	for the process specified by the last argument. The information packed
-	here will be unpacked in the <code>unpack_module_data()</code> method
-	of the user defined class in the appropriate process. <br>
-	Default: empty method.
-    */
-    virtual void
-    pack_module_data(BCP_buffer& buf, BCP_process_t ptype);
+  /** Pack the initial information (info that the user wants to send over)
+      for the process specified by the last argument. The information packed
+      here will be unpacked in the <code>unpack_module_data()</code> method
+      of the user defined class in the appropriate process. <br>
+      Default: empty method.
+  */
+  virtual void
+  pack_module_data(BCP_buffer& buf, BCP_process_t ptype);
 
-    /** Unpack a MIP feasible solution that was packed by the
-	BCP_lp_user::pack_feasible_solution() method.
+  /** Unpack a MIP feasible solution that was packed by the
+      BCP_lp_user::pack_feasible_solution() method.
 
-	Default: Unpacks a BCP_solution_generic object. The built-in default
-	should be used if and only if the built-in default was used
-	in BCP_lp_user::pack_feasible_solution().
-    */
-    virtual BCP_solution*
-    unpack_feasible_solution(BCP_buffer& buf);
+      Default: Unpacks a BCP_solution_generic object. The built-in default
+      should be used if and only if the built-in default was used
+      in BCP_lp_user::pack_feasible_solution().
+  */
+  virtual BCP_solution*
+  unpack_feasible_solution(BCP_buffer& buf);
 
-    /** Decide whether to replace old_sol with new_sol. When this method is
-	invoked it has already been tested that they have the same objective
-	function value. The purpose of the method is that the user can have a
-	secondary objective function. */
-    virtual bool
-    replace_solution(const BCP_solution* old_sol, const BCP_solution* new_sol);
+  /** Decide whether to replace old_sol with new_sol. When this method is
+      invoked it has already been tested that they have the same objective
+      function value. The purpose of the method is that the user can have a
+      secondary objective function. */
+  virtual bool
+  replace_solution(const BCP_solution* old_sol, const BCP_solution* new_sol);
 
   /*@}*/
 
@@ -161,33 +165,33 @@ public:
   //--------------------------------------------------------------------------
   /**@name Initial setup (creating core and root) */
   /*@{*/
-    /** Create the core of the problem by filling out the last three arguments.
-	These variables/cuts will always stay in the LP relaxation and the
-	corresponding matrix is described by the specified matrix. If there is
-	no core variable or cut then the returned pointer for to the matrix
-	should be a null pointer.
+  /** Create the core of the problem by filling out the last three arguments.
+      These variables/cuts will always stay in the LP relaxation and the
+      corresponding matrix is described by the specified matrix. If there is
+      no core variable or cut then the returned pointer for to the matrix
+      should be a null pointer.
 
-	Default: empty method, meaning that there are no variables/cuts in the
-	core and this the core matrix is empty (0 pointer) as well.
-    */
-     virtual void
-     initialize_core(BCP_vec<BCP_var_core*>& vars,
-		     BCP_vec<BCP_cut_core*>& cuts,
-		     BCP_lp_relax*& matrix);
-    //-------------------------------------------------------------------------
-    /** Create the set of extra variables and cuts that should be added to the
-        formulation in the root node. Also decide how variable pricing shuld be
-        done, that is, if column generation is requested in the
-        init_new_phase() method of this class then column
-        generation should be performed according to \c pricing_status.
+      Default: empty method, meaning that there are no variables/cuts in the
+      core and this the core matrix is empty (0 pointer) as well.
+  */
+  virtual void
+  initialize_core(BCP_vec<BCP_var_core*>& vars,
+		  BCP_vec<BCP_cut_core*>& cuts,
+		  BCP_lp_relax*& matrix);
+  //-------------------------------------------------------------------------
+  /** Create the set of extra variables and cuts that should be added to the
+      formulation in the root node. Also decide how variable pricing shuld be
+      done, that is, if column generation is requested in the
+      init_new_phase() method of this class then column
+      generation should be performed according to \c pricing_status.
 
-        Default: empty method, meaning that no variables/cuts are added, there
-	is no user data and no pricing should be done.
-    */
-     virtual void
-     create_root(BCP_vec<BCP_var*>& added_vars,
-		 BCP_vec<BCP_cut*>& added_cuts,
-		 BCP_user_data*& user_data);
+      Default: empty method, meaning that no variables/cuts are added, there
+      is no user data and no pricing should be done.
+  */
+  virtual void
+  create_root(BCP_vec<BCP_var*>& added_vars,
+	      BCP_vec<BCP_cut*>& added_cuts,
+	      BCP_user_data*& user_data);
   /*@}*/
 
   //--------------------------------------------------------------------------
@@ -197,41 +201,52 @@ public:
     
   //--------------------------------------------------------------------------
   /** Display user information just before a new node is sent to the LP or
-      diving into a node is acknowledged. */
+      diving into a node is acknowledged.
+      This method is deprecated in favor of the one with 3 args.
+  */
   virtual void
   display_node_information(BCP_tree& search_tree,
 			   const BCP_tm_node& node);
     
   //--------------------------------------------------------------------------
-   /** Display information after BCP finished processing the search tree. */
+  /** Display user information. This method is called just before a node is
+      sent ot for processing (or diving into the node is acknowledged) and
+      just after a node description has been received. */
+  virtual void
+  display_node_information(BCP_tree& search_tree,
+			   const BCP_tm_node& node,
+			   bool after_processing_node);
+    
+  //--------------------------------------------------------------------------
+  /** Display information after BCP finished processing the search tree. */
   virtual void
   display_final_information(const BCP_lp_statistics& lp_stat);
     
   //---------------------------------------------------------------------------
   /**@name Initialize new phase */
   /*@{*/
-    /** Do whatever initialization is necessary before the
-        <code>phase</code>-th phase. (E.g., setting the pricing strategy.) */
-    virtual void
-    init_new_phase(int phase,
-		   BCP_column_generation& colgen,
-		   CoinSearchTreeBase*& candidates);
+  /** Do whatever initialization is necessary before the
+      <code>phase</code>-th phase. (E.g., setting the pricing strategy.) */
+  virtual void
+  init_new_phase(int phase,
+		 BCP_column_generation& colgen,
+		 CoinSearchTreeBase*& candidates);
   /*@}*/
 
   //---------------------------------------------------------------------------
   /**@name Search tree node comparison */
   /*@{*/
-    /**@name If desired, change the tree (the candidate list) in the search
-       tree manager using the setTree() method. This method is invoked after
-       every insertion into the candidate list and also whenever a new
-       solution is found. In the latter case \c new_solution is \c true.
+  /**@name If desired, change the tree (the candidate list) in the search
+     tree manager using the setTree() method. This method is invoked after
+     every insertion into the candidate list and also whenever a new
+     solution is found. In the latter case \c new_solution is \c true.
 
-       The default invokes the newSolution() and the
-       reevaluateSearchStrategy() methods from CoinSearchTreeManager.
-    */
-    virtual void
-    change_candidate_heap(CoinSearchTreeManager& candidates,
-			  const bool new_solution);
+     The default invokes the newSolution() and the
+     reevaluateSearchStrategy() methods from CoinSearchTreeManager.
+  */
+  virtual void
+  change_candidate_heap(CoinSearchTreeManager& candidates,
+			const bool new_solution);
   /*@}*/
 };
 

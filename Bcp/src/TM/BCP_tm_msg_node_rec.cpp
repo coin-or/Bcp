@@ -607,6 +607,7 @@ TMDBG;
       }
     }
 
+    int reply_to_lp = -1;
     if (numChildrenAdded > 0) {
       CoinTreeSiblings siblings(numChildrenAdded, children);
 
@@ -617,7 +618,8 @@ TMDBG;
       if (keep >= 0) {
 	// The kept child was pushed into the node first.
 	child = node->child(0);
-	if (dive == BCP_DoDive || dive == BCP_TestBeforeDive){
+	if (dive == BCP_DoDive || dive == BCP_TestBeforeDive) {
+	  reply_to_lp = node->lp;
 	  // we've got to answer
 	  buf.clear();
 	  if (p.need_a_TS) {
@@ -629,7 +631,6 @@ TMDBG;
 	  }
 	  buf.pack(dive);
 	  if (dive != BCP_DoNotDive){
-	    p.user->display_node_information(p.search_tree, *child);
 	    child->status = BCP_ActiveNode;
 	    // if diving then send the new index and var/cut_names
 	    buf.pack(child->index());
@@ -637,7 +638,6 @@ TMDBG;
 	  }
 	  p.candidate_list.push(siblings);
 	  p.user->change_candidate_heap(p.candidate_list, false);
-	  p.msg_env->send(node->lp, BCP_Msg_DivingInfo, buf);
 	} else {
 	  p.candidate_list.push(siblings);
 	  p.user->change_candidate_heap(p.candidate_list, false);
@@ -669,12 +669,23 @@ BCP_tm_unpack_branching_info: the (old) node has no LP associated with!\n");
 	node->lp = node->cg = node->vg = -1;
       }
     }
+
     delete[] children;
 
     // and the node is done
     node->status = BCP_ProcessedNode;
+    p.user->display_node_information(p.search_tree, *child,
+				     true /*after processing*/);
 
     delete brobj;
+
+    if (reply_to_lp >= 0) {
+      // The user will override at most one...
+      p.user->display_node_information(p.search_tree, *child);
+      p.user->display_node_information(p.search_tree, *child,
+				       false /*before processing*/);
+      p.msg_env->send(reply_to_lp, BCP_Msg_DivingInfo, buf);
+    }
 
 #ifdef BCP__DUMP_PROCINFO
 #if (BCP__DUMP_PROCINFO == 1)

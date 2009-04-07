@@ -331,7 +331,10 @@ TM: cut in node description is neither local nor remote.\n");
     //=========================================================================
     // Great! Now we have everything. Start to pack it up.
     const bool def = p.param(BCP_tm_par::ReportWhenDefaultIsExecuted);
+    // The user will override at most one...
     p.user->display_node_information(p.search_tree, *node);
+    p.user->display_node_information(p.search_tree, *node,
+				     false /*before processing*/);
 
     BCP_diving_status dive =
 	(rand() < p.param(BCP_tm_par::UnconditionalDiveProbability)*RAND_MAX) ?
