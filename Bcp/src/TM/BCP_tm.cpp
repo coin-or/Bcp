@@ -15,6 +15,8 @@
 
 #include "BCP_warmstart.hpp"
 
+double BCP_tm_prob::lb_multiplier = 1e12;
+
 BCP_tm_prob::BCP_tm_prob() :
    BCP_process(0, -1),
    user(0),

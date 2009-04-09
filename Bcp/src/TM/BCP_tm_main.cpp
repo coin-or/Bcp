@@ -262,6 +262,7 @@ Number of process in parameter file %d > n_proc in mpirun -np %d!\n",
 
     p.next_phase_nodes.push_back(root);
     p.search_tree.insert(root);
+    p.lower_bounds.insert(root->getTrueLB());
 
     BCP_sanity_checks(p);
 

@@ -193,6 +193,10 @@ public: // Data members
   /*@}*/
 
   //-------------------------------------------------------------------------
+  /** The lower bounds of the unexplored search tree nodes. To avoid
+      rounding errors the lower bounds are stored as floor(lb*lb_multiplier) */
+  static double lb_multiplier;
+  std::multiset<double> lower_bounds;
   /** */
   double upper_bound;
   /** */

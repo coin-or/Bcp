@@ -129,6 +129,8 @@ BCP_tm_unpack_node_description: received node is different from processed.\n");
     double q, tlb;
 TMDBG;
     buf.unpack(q).unpack(tlb);
+    const double oldTrueLB = floor(node->getTrueLB()*p.lb_multiplier);
+    p.lower_bounds.erase(oldTrueLB);
     node->setQuality(q);
     node->setTrueLB(tlb);
 TMDBG;
@@ -671,6 +673,12 @@ BCP_tm_unpack_branching_info: the (old) node has no LP associated with!\n");
     }
 
     delete[] children;
+
+    // Update the lower bounds
+    for (int i = true_lb.size()-1; i >= 0; --i) {
+      true_lb[i] = floor(true_lb[i]*p.lb_multiplier);
+    }
+    p.lower_bounds.insert(true_lb.begin(), true_lb.end());
 
     // and the node is done
     node->status = BCP_ProcessedNode;

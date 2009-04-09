@@ -57,7 +57,7 @@ class BCP_lp_statistics;
 
 class BCP_tm_user : public BCP_user_class {
 private:
-  BCP_tm_prob * p;
+  mutable BCP_tm_prob * p;
 public:
   /**@name Methods to set and get the pointer to the BCP_tm_prob
      object. It is unlikely that the users would want to muck around with
@@ -68,7 +68,7 @@ public:
   /// Set the pointer
   void setTmProblemPointer(BCP_tm_prob * ptr) { p = ptr; }
   /// Get the pointer
-  BCP_tm_prob * getTmProblemPointer() { return p; }
+  BCP_tm_prob * getTmProblemPointer() const { return p; }
   /*@}*/
 
   /**@name Informational methods for the user. */

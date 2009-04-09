@@ -16,27 +16,7 @@ double BCP_tm_user::upper_bound() const { return p->ub(); }
 
 double BCP_tm_user::lower_bound() const
 {
-  // FIXME: This is a gross hack. Add methods in CoinSearchTree.hpp.
-  const std::vector<CoinTreeSiblings*>& cands = candidate_list.getCandidates();
-  double lb = COIN_DBL_MAX;
-  for (int i = cands.size()-1; i >= 0; --i) {
-    const CoinTreeSiblings& siblings = *cands[i];
-    if (siblings.toProcess() > 0) {
-      const CoinTreeNode* const* nodesToProcess = &siblings.currentNode();
-      for (int j = siblings.toProcess()-1; j >= 0; --j) {
-	lb = CoinMin(lb, nodesToProcess[j]->getTrueLB());
-      }
-    }
-  }
-
-  for (std::map<int, BCP_tm_node*>::const_iterator it = active_nodes;
-       it != active_nodes.end;
-       ++it) {
-    if (it->second != NULL) {
-      lb = CoinMin(it->second->getTrueLB(), lb);
-    }
-  }
-  return lb;
+  return *(p->lower_bounds.begin()) / p->lb_multiplier;
 }
 
 //#############################################################################
