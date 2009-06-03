@@ -12,28 +12,39 @@
 # CHANGEME: This should be the name of your executable
 EXE = maxcut@EXEEXT@
 
+# CHANGEME: Directory to the sources for the (example) problem definition
+# files
+SRCDIR = @srcdir@
+VPATH  = $(SRCDIR)/TM $(SRCDIR)/LP $(SRCDIR)/CG $(SRCDIR)/Member
+
+# CHANGEME: Additional libraries
+ADDLIBS =
+
+# CHANGEME: Additional flags for compilation (e.g., include flags)
+ADDINCFLAGS =
+
 # CHANGEME: Here is the name of all object files corresponding to the source
 #           code that you wrote in order to define the problem statement
 OBJS = \
-	CG/MC_cutgen.@OBJEXT@ \
-	CG/MC_ising_cycles.@OBJEXT@ \
-	CG/MC_shortest_path_cycle.@OBJEXT@ \
-	LP/MC_lp_branch.@OBJEXT@ \
-	LP/MC_lp_param.@OBJEXT@ \
-	LP/MC_lp.@OBJEXT@ \
-	TM/MC_tm.@OBJEXT@ \
-	TM/MC_tm_param.@OBJEXT@ \
-	Member/MC_kruskal.@OBJEXT@ \
-	Member/MC.@OBJEXT@ \
-	Member/MC_mst_heur.@OBJEXT@ \
-	Member/MC_INST.@OBJEXT@ \
-	Member/MC_cut.@OBJEXT@ \
-	Member/MC_init.@OBJEXT@ \
-	Member/MC_solution.@OBJEXT@
+	MC_cutgen.@OBJEXT@ \
+	MC_ising_cycles.@OBJEXT@ \
+	MC_shortest_path_cycle.@OBJEXT@ \
+	MC_lp_branch.@OBJEXT@ \
+	MC_lp_param.@OBJEXT@ \
+	MC_lp.@OBJEXT@ \
+	MC_tm.@OBJEXT@ \
+	MC_tm_param.@OBJEXT@ \
+	MC_kruskal.@OBJEXT@ \
+	MC.@OBJEXT@ \
+	MC_mst_heur.@OBJEXT@ \
+	MC_INST.@OBJEXT@ \
+	MC_cut.@OBJEXT@ \
+	MC_init.@OBJEXT@ \
+	MC_solution.@OBJEXT@
 
 # CHANGEME: Additional include directories for compilation. Note that no
 # include directory needs to be listed here for headers from COIN.
-USER_INCDIRS = include $(CPLEX_H) @MPIINCDIR@
+USER_INCDIRS = $(SRCDIR)/include @MPIINCDIR@
 
 ##########################################################################
 #  Usually, you don't have to change anything below.  Note that if you   #
@@ -56,6 +67,9 @@ COININCDIR = @abs_include_dir@/coin
 # Directory with COIN libraries
 COINLIBDIR = @abs_lib_dir@
 
+# Directory with COIN libraries
+COINDOCDIR = @prefix@/share/doc/coin
+
 # Libraries necessary to link with Clp
 LIBS = \
 	-L$(COINLIBDIR) \
@@ -66,12 +80,12 @@ LIBS = \
 	-lClp \
 	-lVol \
 	-lCoinUtils \
-	`cat $(COINLIBDIR)/bcp_addlibs.txt` \
-	`cat $(COINLIBDIR)/cgl_addlibs.txt` \
-	`cat $(COINLIBDIR)/osi_addlibs.txt` \
-	`cat $(COINLIBDIR)/clp_addlibs.txt` \
-	`cat $(COINLIBDIR)/vol_addlibs.txt` \
-	`cat $(COINLIBDIR)/coinutils_addlibs.txt`
+	`cat $(COINDOCDIR)/Bcp/bcp_addlibs.txt` \
+	`cat $(COINDOCDIR)/Cgl/cgl_addlibs.txt` \
+	`cat $(COINDOCDIR)/Osi/osi_addlibs.txt` \
+	`cat $(COINDOCDIR)/Clp/clp_addlibs.txt` \
+	`cat $(COINDOCDIR)/Vol/vol_addlibs.txt` \
+	`cat $(COINDOCDIR)/CoinUtils/coinutils_addlibs.txt`
 
 # The following is necessary under cygwin, if native compilers are used
 CYGPATH_W = @CYGPATH_W@
@@ -91,6 +105,8 @@ $(EXE): $(OBJS)
 
 clean:
 	rm -rf $(EXE) $(OBJS)
+
+distclean: clean
 
 .cpp.o:
 	$(CXX) $(CXXFLAGS) $(INCL) -c -o $@ `test -f '$<' || echo '$(SRCDIR)/'`$<
