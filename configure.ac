@@ -50,6 +50,7 @@ AC_COIN_MAIN_SUBDIRS(Cgl)
 AC_COIN_MAIN_SUBDIRS(Bcp)
 AC_COIN_MAIN_SUBDIRS(Applications/MaxCut)
 AC_COIN_MAIN_SUBDIRS(Applications/Mkc)
+AC_COIN_MAIN_SUBDIRS(Applications/Csp)
 
 #############################################################################
 #                             Other dependencies                            #
@@ -71,6 +72,12 @@ AC_COIN_VPATH_LINK(Applications/MaxCut/junger1)
 AC_COIN_VPATH_LINK(Applications/Mkc/mkc.par)
 AC_COIN_VPATH_LINK(Applications/Mkc/mkc.mps.gz)
 
+AC_COIN_VPATH_LINK(Applications/Csp/CSP.par)
+AC_COIN_VPATH_LINK(Applications/Csp/Data/cspdata3.dat)
+AC_COIN_VPATH_LINK(Applications/Csp/Data/cspdataJL.dat)
+AC_COIN_VPATH_LINK(Applications/Csp/Data/fiber29_9080.txt)
+AC_COIN_VPATH_LINK(Applications/Csp/Data/fiber29_9080_merged.txt)
+
 ##############################################################################
 #                   Finishing up by writing all the output                   #
 ##############################################################################
@@ -78,6 +85,7 @@ AC_COIN_VPATH_LINK(Applications/Mkc/mkc.mps.gz)
 # Here list all the files that configure should create (except for the
 # configuration header file)
 AC_CONFIG_FILES([Makefile
+		 Applications/Csp/Makefile
 		 Applications/MaxCut/Makefile
 		 Applications/Mkc/Makefile])
 

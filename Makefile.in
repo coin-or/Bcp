@@ -52,6 +52,7 @@ host_triplet = @host@
 DIST_COMMON = README $(am__configure_deps) \
 	$(srcdir)/BuildTools/Makemain.inc $(srcdir)/Makefile.am \
 	$(srcdir)/Makefile.in \
+	$(top_srcdir)/Applications/Csp/Makefile.in \
 	$(top_srcdir)/Applications/MaxCut/Makefile.in \
 	$(top_srcdir)/Applications/Mkc/Makefile.in \
 	$(top_srcdir)/configure AUTHORS INSTALL config.guess \
@@ -67,8 +68,8 @@ am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \
 am__CONFIG_DISTCLEAN_FILES = config.status config.cache config.log \
  configure.lineno configure.status.lineno
 mkinstalldirs = $(install_sh) -d
-CONFIG_CLEAN_FILES = Applications/MaxCut/Makefile \
-	Applications/Mkc/Makefile
+CONFIG_CLEAN_FILES = Applications/Csp/Makefile \
+	Applications/MaxCut/Makefile Applications/Mkc/Makefile
 SOURCES =
 DIST_SOURCES =
 RECURSIVE_TARGETS = all-recursive check-recursive dvi-recursive \
@@ -288,6 +289,8 @@ $(top_srcdir)/configure: @MAINTAINER_MODE_TRUE@ $(am__configure_deps)
 	cd $(srcdir) && $(AUTOCONF)
 $(ACLOCAL_M4): @MAINTAINER_MODE_TRUE@ $(am__aclocal_m4_deps)
 	cd $(srcdir) && $(ACLOCAL) $(ACLOCAL_AMFLAGS)
+Applications/Csp/Makefile: $(top_builddir)/config.status $(top_srcdir)/Applications/Csp/Makefile.in
+	cd $(top_builddir) && $(SHELL) ./config.status $@
 Applications/MaxCut/Makefile: $(top_builddir)/config.status $(top_srcdir)/Applications/MaxCut/Makefile.in
 	cd $(top_builddir) && $(SHELL) ./config.status $@
 Applications/Mkc/Makefile: $(top_builddir)/config.status $(top_srcdir)/Applications/Mkc/Makefile.in
@@ -438,7 +441,7 @@ distclean-tags:
 distdir: $(DISTFILES)
 	$(am__remove_distdir)
 	mkdir $(distdir)
-	$(mkdir_p) $(distdir)/Applications/MaxCut $(distdir)/Applications/Mkc $(distdir)/BuildTools $(distdir)/doxydoc
+	$(mkdir_p) $(distdir)/Applications/Csp $(distdir)/Applications/MaxCut $(distdir)/Applications/Mkc $(distdir)/BuildTools $(distdir)/doxydoc
 	@srcdirstrip=`echo "$(srcdir)" | sed 's|.|.|g'`; \
 	topsrcdirstrip=`echo "$(top_srcdir)" | sed 's|.|.|g'`; \
 	list='$(DISTFILES)'; for file in $$list; do \

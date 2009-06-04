@@ -19,7 +19,6 @@ Applications/Csp/Member/CSP_userexits.cpp -text
 Applications/Csp/README -text
 Applications/Csp/TM/CSP_tm.cpp -text
 Applications/Csp/TM/CSP_tm_param.cpp -text
-Applications/Csp/examplefiles.txt -text
 Applications/Csp/include/CSP.hpp -text
 Applications/Csp/include/CSP_colgen.hpp -text
 Applications/Csp/include/CSP_init.hpp -text
