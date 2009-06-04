@@ -1,0 +1,11 @@
+This directory contains a solver for the Mkc problem using the BCP
+framework.
+
+For more details see the paper J.J.H. Forrest, J. Kalagnanam, and L. Ladanyi
+"A Column-Generation Approach to the Multiple Knapsack Problem with
+Color Constraints", INFORMS Journal on Computing, January 1, 2006;
+18(1): 129 - 134.  
+
+For information on how to build/use the mkc code see the INSTALL file.
+
+For more information on BCP see https://projects.coin-or.org/Bcp.

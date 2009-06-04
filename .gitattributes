@@ -64,7 +64,9 @@ Applications/MaxCut/include/MC_tm.hpp -text
 Applications/MaxCut/include/MC_tm_param.hpp -text
 Applications/MaxCut/junger1 -text
 Applications/MaxCut/junger1.par -text
+Applications/Mkc/AUTHORS -text
 Applications/Mkc/INSTALL -text
+Applications/Mkc/LICENSE -text
 Applications/Mkc/LP/MKC_lp.cpp -text
 Applications/Mkc/LP/MKC_lp__branch.cpp -text
 Applications/Mkc/LP/MKC_lp__param.cpp -text
@@ -74,9 +76,9 @@ Applications/Mkc/Member/MKC_knapsack.cpp -text
 Applications/Mkc/Member/MKC_optim.cpp -text
 Applications/Mkc/Member/MKC_solution.cpp -text
 Applications/Mkc/Member/MKC_vargen.cpp -text
+Applications/Mkc/README -text
 Applications/Mkc/TM/MKC_tm.cpp -text
 Applications/Mkc/TM/MKC_tm_param.cpp -text
-Applications/Mkc/examplefiles.txt -text
 Applications/Mkc/include/MKC_init.hpp -text
 Applications/Mkc/include/MKC_knapsack.hpp -text
 Applications/Mkc/include/MKC_lp.hpp -text
