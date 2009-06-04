@@ -1,34 +1,20 @@
-
-MaxCut INSTALL FILE
-===================
-
-In this document, the following names are used:
-
-1. 'Pkg' is the name of the package containing BCP and MaxCut that you have 
-   downloaded.
-
-2. 'coin-Pkg' is the full path to the directory in which you have 
-    downloaded Pkg.
-
-3. 'build' is the directory used for the installation of Pkg. This
-   directory must have 'lib' and 'include' subdirectories containing
-   all the libraries and header files of Pkg, including all the 
-   BCP libraries and header files. The build directory can be any
-   directory of your choosing.
-
-4. 'MaxCutdir' is the main directory of the MaxCut example containing this 
-   INSTALL file. It is located in build/Bcp/examples/MaxCut.
-
-
 COMPILATION OF MaxCut
 =====================
 
-0. First install BCP.
+1. Download a version of Bcp (which contains MaxCut as an
+   application). In the rest of the this file we will use version
+   1.2.1 as an example. Suppose that the source is unpacked and now
+   resides in some_path/Bcp-1.2.1.
 
-1. In MaxCutdir, use 'make' to compile the example MaxCut.
+2. Build and install Bcp. Please refer to Bcp-1.2.1/INSTALL for
+   instructions. Suppose that Bcp is installed into BcpInstallDir
+   (if Bcp-1.2.1/INSTALL is followed exactly then BcpInstallDir is
+   Bcp-1.2.1/build). Then the Bcp headers and libs are installed in
+   BcpInstallDir/include and BcpInstallDir/lib.
 
-2. The executable 'maxcut' is created in MaxCutdir.
-
+3. Change directory into BcpInstallDir/Applications/MaxCut and use
+   'make' to compile the MaxCut example. This creates the 'maxcut'
+   executable. 
 
 DOCUMENTATION
 =============
@@ -40,13 +26,13 @@ by typing
 
 in the build directory. Then open the file 
 
-   coin-Pkg/doxydoc/html/index.html 
+   Bcp-1.2.1/doxydoc/html/index.html 
 
 with a browser. Note that this creates the documentation for all the
 projects in the package. If you prefer to generate the documentation 
 only for a subset of these projects, you can edit the file 
   
-   coin-Pkg/doxydoc/doxygen.conf 
+   Bcp-1.2.1/doxydoc/doxygen.conf 
 
 to exclude directories (using the EXCLUDE variable, for example).
 
@@ -58,13 +44,15 @@ If Doxygen is not available, the html documentation is available at:
 RUNNING MaxCut
 ==============
 
-1. In MaxCutdir, use './maxcut junger1.par' to run the example code.
+1. In BcpInstallDir/Applications/MaxCut, use './maxcut junger1.par'
+   to run the example code. 
 
 
 CREATING FURTHER INSTANCES
 ==========================
 
-In the Generators directory there are 4 generators that create graphs
-with different edge weight distributions. The first comment in the
-files describe what kind of instances they create. They are all
-standalone programs; the Makefile shows how to compile them.
+In the Bcp-1.2.1/Applications/MaxCut/Generators directory there are
+4 generators that create graphs with different edge weight
+distributions. The first comment in the files describe what kind of
+instances they create. They are all standalone programs; the
+Makefile shows how to compile them.

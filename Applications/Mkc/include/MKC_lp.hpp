@@ -46,18 +46,12 @@ public:
   virtual void
   unpack_module_data(BCP_buffer& buf);
   //---------------------------------------------------------------------------
-  virtual void
-  pack_var_algo(const BCP_var_algo* var, BCP_buffer& buf);
-  //---------------------------------------------------------------------------
-  virtual BCP_var_algo*
-  unpack_var_algo(BCP_buffer& buf);
-  
-  //---------------------------------------------------------------------------
   virtual OsiSolverInterface *
   initialize_solver_interface();
   //---------------------------------------------------------------------------
   void
-  modify_lp_parameters(OsiSolverInterface* lp, bool in_strong_branching);
+  modify_lp_parameters(OsiSolverInterface* lp, const int changeType,
+		       bool in_strong_branching);
   //---------------------------------------------------------------------------
   virtual void
   initialize_new_search_tree_node(const BCP_vec<BCP_var*>& vars,
@@ -150,7 +144,8 @@ public:
 			      const BCP_vec<BCP_cut*>& cuts,
 			      const BCP_lp_var_pool& local_var_pool,
 			      const BCP_lp_cut_pool& local_cut_pool,
-			      BCP_vec<BCP_lp_branching_object*>& candidates);
+			      BCP_vec<BCP_lp_branching_object*>& candidates,
+			      bool force_branch = false);
 };
 
 #endif

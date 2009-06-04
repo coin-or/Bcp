@@ -45,12 +45,6 @@ public:
   virtual BCP_solution*
   unpack_feasible_solution(BCP_buffer& buf);
   //---------------------------------------------------------------------------
-  virtual void
-  pack_var_algo(const BCP_var_algo* var, BCP_buffer& buf);
-  //---------------------------------------------------------------------------
-  virtual BCP_var_algo*
-  unpack_var_algo(BCP_buffer& buf);
-  //---------------------------------------------------------------------------
   // setting the base
   virtual void
   initialize_core(BCP_vec<BCP_var_core*>& vars,
@@ -61,8 +55,7 @@ public:
   virtual void
   create_root(BCP_vec<BCP_var*>& added_vars,
 	      BCP_vec<BCP_cut*>& added_cuts,
-	      BCP_user_data*& user_data,
-	      BCP_pricing_status& pricing_status);
+	      BCP_user_data*& user_data);
   //---------------------------------------------------------------------------
   // feasible solution displaying
   virtual void
@@ -70,7 +63,9 @@ public:
   //---------------------------------------------------------------------------
   // various initializations before a new phase (e.g., pricing strategy)
   virtual void
-  init_new_phase(int phase, BCP_column_generation& colgen);
+  init_new_phase(int phase,
+		 BCP_column_generation& colgen,
+		 CoinSearchTreeBase*& candidates);
 };
 
 #endif

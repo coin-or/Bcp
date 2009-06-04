@@ -22,6 +22,30 @@ BCP_user_init()
 }
 
 //#############################################################################
+
+BCP_user_pack*
+MKC_initialize::packer_init(BCP_user_class* p)
+{
+  return new MKC_packer;
+}
+
+//-----------------------------------------------------------------------------
+
+void
+MKC_packer::pack_var_algo(const BCP_var_algo* var, BCP_buffer& buf)
+{
+  MKC_var_pack(var, buf);
+}
+
+//-----------------------------------------------------------------------------
+
+BCP_var_algo*
+MKC_packer::unpack_var_algo(BCP_buffer& buf)
+{
+  return MKC_var_unpack(buf);
+}
+
+//#############################################################################
 //#############################################################################
 
 static inline bool

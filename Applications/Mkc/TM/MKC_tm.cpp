@@ -41,22 +41,6 @@ MKC_tm::unpack_feasible_solution(BCP_buffer& buf)
 //#############################################################################
 
 void
-MKC_tm::pack_var_algo(const BCP_var_algo* var, BCP_buffer& buf)
-{
-  MKC_var_pack(var, buf);
-}
-
-//#############################################################################
-
-BCP_var_algo*
-MKC_tm::unpack_var_algo(BCP_buffer& buf)
-{
-  return MKC_var_unpack(buf);
-}
-
-//#############################################################################
-
-void
 MKC_tm::initialize_core(BCP_vec<BCP_var_core*>& vars,
 			BCP_vec<BCP_cut_core*>& cuts,
 			BCP_lp_relax*& matrix)
@@ -74,8 +58,7 @@ MKC_tm::initialize_core(BCP_vec<BCP_var_core*>& vars,
 void
 MKC_tm::create_root(BCP_vec<BCP_var*>& added_vars,
 		    BCP_vec<BCP_cut*>& added_cuts,
-		    BCP_user_data*& user_data,
-		    BCP_pricing_status& pricing_status)
+		    BCP_user_data*& user_data)
 {
    const int bcutnum = kss.ks_num + kss.order_num;
 
@@ -110,7 +93,6 @@ MKC_tm::create_root(BCP_vec<BCP_var*>& added_vars,
       delete[] ks_fixings;
       delete[] dual;
    }
-   pricing_status = BCP_PriceAlgoVars;
 }
 
 //#############################################################################
@@ -244,7 +226,9 @@ MKC_tm::display_feasible_solution(const BCP_solution* soln)
 //#############################################################################
 
 void
-MKC_tm::init_new_phase(int phase, BCP_column_generation& colgen)
+MKC_tm::init_new_phase(int phase,
+		       BCP_column_generation& colgen,
+		       CoinSearchTreeBase*& candidates)
 {
    colgen = BCP_GenerateColumns;
 }

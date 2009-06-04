@@ -40,7 +40,7 @@ MKC_lp::unpack_module_data(BCP_buffer& buf)
     int type;
     for (int i = 0; i < varnum; ++i) {
       buf.unpack(type);
-      MKC_var* var = dynamic_cast<MKC_var*>(unpack_var_algo(buf));
+      MKC_var* var = dynamic_cast<MKC_var*>(MKC_var_unpack(buf));
       input_vars.unchecked_push_back(var);
     }
   }
@@ -59,22 +59,6 @@ MKC_lp::unpack_module_data(BCP_buffer& buf)
 			  par.entry(MKC_lp_par::MaxEnumeratedSize));
 
   start_time = CoinCpuTime();
-}
-
-//#############################################################################
-
-void
-MKC_lp::pack_var_algo(const BCP_var_algo * var, BCP_buffer & buf)
-{
-  MKC_var_pack(var, buf);
-}
-
-//#############################################################################
-
-BCP_var_algo *
-MKC_lp::unpack_var_algo(BCP_buffer & buf)
-{
-  return MKC_var_unpack(buf);
 }
 
 //#############################################################################
@@ -99,34 +83,33 @@ MKC_lp::initialize_solver_interface()
 //#############################################################################
 // Opportunity to reset things before optimization
 void
-MKC_lp::modify_lp_parameters(OsiSolverInterface* lp, bool in_strong_branching)
+MKC_lp::modify_lp_parameters(OsiSolverInterface* lp, const int changeType,
+			     bool in_strong_branching)
 {
-  {
-    OsiVolSolverInterface* vollp = dynamic_cast<OsiVolSolverInterface*>(lp);
-    if (vollp) {
-      VOL_parms& vpar = vollp->volprob()->parm;
-      vpar.lambdainit = par.entry(MKC_lp_par::Vol_lambdaInit); 
-      vpar.alphainit =  par.entry(MKC_lp_par::Vol_alphaInit);
-      vpar.alphamin = par.entry(MKC_lp_par::Vol_alphaMin);
-      vpar.alphafactor = par.entry(MKC_lp_par::Vol_alphaFactor);
-      vpar.primal_abs_precision = par.entry(MKC_lp_par::Vol_primalAbsPrecision);
-      vpar.gap_abs_precision = par.entry(MKC_lp_par::Vol_gapAbsPrecision);
-      vpar.gap_rel_precision = par.entry(MKC_lp_par::Vol_gapRelPrecision);
-      vpar.granularity = par.entry(MKC_lp_par::Vol_granularity);
-      vpar.minimum_rel_ascent = par.entry(MKC_lp_par::Vol_minimumRelAscent);
-      vpar.ascent_first_check = par.entry(MKC_lp_par::Vol_ascentFirstCheck);
-      vpar.ascent_check_invl = par.entry(MKC_lp_par::Vol_ascentCheckInterval);
-      vpar.maxsgriters = par.entry(MKC_lp_par::Vol_maxSubGradientIterations);
-      vpar.printflag =  par.entry(MKC_lp_par::Vol_printFlag);
-      vpar.printinvl =  par.entry(MKC_lp_par::Vol_printInterval);
-      vpar.greentestinvl = par.entry(MKC_lp_par::Vol_greenTestInterval);
-      vpar.yellowtestinvl =  par.entry(MKC_lp_par::Vol_yellowTestInterval);
-      vpar.redtestinvl = par.entry(MKC_lp_par::Vol_redTestInterval);
-      vpar.alphaint =  par.entry(MKC_lp_par::Vol_alphaInt);
-    }
-    if (in_strong_branching) {
-      // *THINK* : we might want to do fewer iterations???
-    }
+  OsiVolSolverInterface* vollp = dynamic_cast<OsiVolSolverInterface*>(lp);
+  if (vollp) {
+    VOL_parms& vpar = vollp->volprob()->parm;
+    vpar.lambdainit = par.entry(MKC_lp_par::Vol_lambdaInit); 
+    vpar.alphainit =  par.entry(MKC_lp_par::Vol_alphaInit);
+    vpar.alphamin = par.entry(MKC_lp_par::Vol_alphaMin);
+    vpar.alphafactor = par.entry(MKC_lp_par::Vol_alphaFactor);
+    vpar.primal_abs_precision = par.entry(MKC_lp_par::Vol_primalAbsPrecision);
+    vpar.gap_abs_precision = par.entry(MKC_lp_par::Vol_gapAbsPrecision);
+    vpar.gap_rel_precision = par.entry(MKC_lp_par::Vol_gapRelPrecision);
+    vpar.granularity = par.entry(MKC_lp_par::Vol_granularity);
+    vpar.minimum_rel_ascent = par.entry(MKC_lp_par::Vol_minimumRelAscent);
+    vpar.ascent_first_check = par.entry(MKC_lp_par::Vol_ascentFirstCheck);
+    vpar.ascent_check_invl = par.entry(MKC_lp_par::Vol_ascentCheckInterval);
+    vpar.maxsgriters = par.entry(MKC_lp_par::Vol_maxSubGradientIterations);
+    vpar.printflag =  par.entry(MKC_lp_par::Vol_printFlag);
+    vpar.printinvl =  par.entry(MKC_lp_par::Vol_printInterval);
+    vpar.greentestinvl = par.entry(MKC_lp_par::Vol_greenTestInterval);
+    vpar.yellowtestinvl =  par.entry(MKC_lp_par::Vol_yellowTestInterval);
+    vpar.redtestinvl = par.entry(MKC_lp_par::Vol_redTestInterval);
+    vpar.alphaint =  par.entry(MKC_lp_par::Vol_alphaInt);
+  }
+  if (in_strong_branching) {
+    // *THINK* : we might want to do fewer iterations???
   }
 }
 

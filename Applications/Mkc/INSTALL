@@ -1,13 +1,49 @@
-To build the Mkc sample code you first must have built and *installed*
-Bcp itself, see the instructions in the INSTALL file in the parent
-directory.
+COMPILATION OF Mkc
+=====================
 
-Then type 
+1. Download a version of Bcp (which contains Mkc as an
+   application). In the rest of the this file we will use version
+   1.2.1 as an example. Suppose that the source is unpacked and now
+   resides in some_path/Bcp-1.2.1.
 
-    make
+2. Build and install Bcp. Please refer to Bcp-1.2.1/INSTALL for
+   instructions. Suppose that Bcp is installed into BcpInstallDir
+   (if Bcp-1.2.1/INSTALL is followed exactly then BcpInstallDir is
+   Bcp-1.2.1/build). Then the Bcp headers and libs are installed in
+   BcpInstallDir/include and BcpInstallDir/lib.
 
-that creates an executable named 'mkc'. After uncompressing the
-problem file you can run executable:
+3. Change directory into BcpInstallDir/Applications/Mkc and use
+   'make' to compile the Mkc example. This creates the 'mkc'
+   executable. 
 
-    gunzip mkc.mps.gz
-    ./mkc mkc.par
+DOCUMENTATION
+=============
+
+If you have Doxygen available, you can create the html documentation 
+by typing
+
+   make doxydoc
+
+in the build directory. Then open the file 
+
+   Bcp-1.2.1/doxydoc/html/index.html 
+
+with a browser. Note that this creates the documentation for all the
+projects in the package. If you prefer to generate the documentation 
+only for a subset of these projects, you can edit the file 
+  
+   Bcp-1.2.1/doxydoc/doxygen.conf 
+
+to exclude directories (using the EXCLUDE variable, for example).
+
+If Doxygen is not available, the html documentation is available at:
+
+   http://www.coin-or.org/Doxygen/
+
+
+RUNNING Mkc
+==============
+
+1. cd into BcpInstallDir/Applications/Mkc and uncompress the mkc
+   instance file: 'gunzip -c mkc.mps.gz > mkc.mps'
+2. Run the code with './mkc mkc.par'
