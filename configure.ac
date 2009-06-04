@@ -48,6 +48,28 @@ AC_COIN_MAIN_SUBDIRS(Clp)
 AC_COIN_MAIN_SUBDIRS(Osi)
 AC_COIN_MAIN_SUBDIRS(Cgl)
 AC_COIN_MAIN_SUBDIRS(Bcp)
+AC_COIN_MAIN_SUBDIRS(Applications/MaxCut)
+AC_COIN_MAIN_SUBDIRS(Applications/Mkc)
+
+#############################################################################
+#                             Other dependencies                            #
+#############################################################################
+
+AC_COIN_HAS_USER_LIBRARY([Mpi], [MPI], [mpi.h], )
+# ToDo: Automatically choose MPI compiler
+
+##############################################################################
+# Copy stuff needed for the applications to build                            #
+##############################################################################
+
+# In case this is a VPATH configuration we need to make sure that the
+# input files for the examples are available in the VPATH directory.
+
+AC_COIN_VPATH_LINK(Applications/MaxCut/junger1.par)
+AC_COIN_VPATH_LINK(Applications/MaxCut/junger1)
+
+AC_COIN_VPATH_LINK(Applications/Mkc/mkc.par)
+AC_COIN_VPATH_LINK(Applications/Mkc/mkc.mps.gz)
 
 ##############################################################################
 #                   Finishing up by writing all the output                   #
@@ -55,7 +77,9 @@ AC_COIN_MAIN_SUBDIRS(Bcp)
 
 # Here list all the files that configure should create (except for the
 # configuration header file)
-AC_CONFIG_FILES([Makefile])
+AC_CONFIG_FILES([Makefile
+		 Applications/MaxCut/Makefile
+		 Applications/Mkc/Makefile])
 
 # Finally, we let configure write all the output...
 AC_COIN_FINALIZE

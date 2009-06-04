@@ -51,8 +51,11 @@ build_triplet = @build@
 host_triplet = @host@
 DIST_COMMON = README $(am__configure_deps) \
 	$(srcdir)/BuildTools/Makemain.inc $(srcdir)/Makefile.am \
-	$(srcdir)/Makefile.in $(top_srcdir)/configure AUTHORS INSTALL \
-	config.guess config.sub depcomp install-sh ltmain.sh missing
+	$(srcdir)/Makefile.in \
+	$(top_srcdir)/Applications/MaxCut/Makefile.in \
+	$(top_srcdir)/Applications/Mkc/Makefile.in \
+	$(top_srcdir)/configure AUTHORS INSTALL config.guess \
+	config.sub depcomp install-sh ltmain.sh missing
 @HAVE_EXTERNALS_TRUE@am__append_1 = Externals
 @HAVE_EXTERNALS_TRUE@am__append_2 = .Externals-stamp
 subdir = .
@@ -64,7 +67,8 @@ am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \
 am__CONFIG_DISTCLEAN_FILES = config.status config.cache config.log \
  configure.lineno configure.status.lineno
 mkinstalldirs = $(install_sh) -d
-CONFIG_CLEAN_FILES =
+CONFIG_CLEAN_FILES = Applications/MaxCut/Makefile \
+	Applications/Mkc/Makefile
 SOURCES =
 DIST_SOURCES =
 RECURSIVE_TARGETS = all-recursive check-recursive dvi-recursive \
@@ -88,9 +92,12 @@ GZIP_ENV = --best
 distuninstallcheck_listfiles = find . -type f -print
 distcleancheck_listfiles = find . -type f -print
 ACLOCAL = @ACLOCAL@
+ADDLIBS = @ADDLIBS@
 ADD_CFLAGS = @ADD_CFLAGS@
 ADD_CXXFLAGS = @ADD_CXXFLAGS@
 ADD_FFLAGS = @ADD_FFLAGS@
+ALWAYS_FALSE_FALSE = @ALWAYS_FALSE_FALSE@
+ALWAYS_FALSE_TRUE = @ALWAYS_FALSE_TRUE@
 AMDEP_FALSE = @AMDEP_FALSE@
 AMDEP_TRUE = @AMDEP_TRUE@
 AMTAR = @AMTAR@
@@ -105,6 +112,8 @@ CC = @CC@
 CCDEPMODE = @CCDEPMODE@
 CDEFS = @CDEFS@
 CFLAGS = @CFLAGS@
+COIN_HAS_MPI_FALSE = @COIN_HAS_MPI_FALSE@
+COIN_HAS_MPI_TRUE = @COIN_HAS_MPI_TRUE@
 COIN_SKIP_PROJECTS = @COIN_SKIP_PROJECTS@
 CPP = @CPP@
 CPPFLAGS = @CPPFLAGS@
@@ -126,6 +135,7 @@ ECHO_T = @ECHO_T@
 EGREP = @EGREP@
 EXEEXT = @EXEEXT@
 F77 = @F77@
+FADDLIBS = @FADDLIBS@
 FFLAGS = @FFLAGS@
 HAVE_EXTERNALS_FALSE = @HAVE_EXTERNALS_FALSE@
 HAVE_EXTERNALS_TRUE = @HAVE_EXTERNALS_TRUE@
@@ -149,6 +159,8 @@ MAKEINFO = @MAKEINFO@
 MPICC = @MPICC@
 MPICXX = @MPICXX@
 MPIF77 = @MPIF77@
+MPIINCDIR = @MPIINCDIR@
+MPILIB = @MPILIB@
 OBJEXT = @OBJEXT@
 OPT_CFLAGS = @OPT_CFLAGS@
 OPT_CXXFLAGS = @OPT_CXXFLAGS@
@@ -276,6 +288,10 @@ $(top_srcdir)/configure: @MAINTAINER_MODE_TRUE@ $(am__configure_deps)
 	cd $(srcdir) && $(AUTOCONF)
 $(ACLOCAL_M4): @MAINTAINER_MODE_TRUE@ $(am__aclocal_m4_deps)
 	cd $(srcdir) && $(ACLOCAL) $(ACLOCAL_AMFLAGS)
+Applications/MaxCut/Makefile: $(top_builddir)/config.status $(top_srcdir)/Applications/MaxCut/Makefile.in
+	cd $(top_builddir) && $(SHELL) ./config.status $@
+Applications/Mkc/Makefile: $(top_builddir)/config.status $(top_srcdir)/Applications/Mkc/Makefile.in
+	cd $(top_builddir) && $(SHELL) ./config.status $@
 
 mostlyclean-libtool:
 	-rm -f *.lo
@@ -422,7 +438,7 @@ distclean-tags:
 distdir: $(DISTFILES)
 	$(am__remove_distdir)
 	mkdir $(distdir)
-	$(mkdir_p) $(distdir)/BuildTools $(distdir)/doxydoc
+	$(mkdir_p) $(distdir)/Applications/MaxCut $(distdir)/Applications/Mkc $(distdir)/BuildTools $(distdir)/doxydoc
 	@srcdirstrip=`echo "$(srcdir)" | sed 's|.|.|g'`; \
 	topsrcdirstrip=`echo "$(top_srcdir)" | sed 's|.|.|g'`; \
 	list='$(DISTFILES)'; for file in $$list; do \
