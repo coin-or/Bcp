@@ -30,6 +30,7 @@ Applications/Csp/include/CSP_tm_param.hpp -text
 Applications/Csp/include/CSP_userexits.hpp -text
 Applications/Csp/include/CSP_var.hpp -text
 Applications/Csp/include/KS.hpp -text
+Applications/MaxCut/AUTHORS -text
 Applications/MaxCut/CG/MC_cutgen.cpp -text
 Applications/MaxCut/CG/MC_ising_cycles.cpp -text
 Applications/MaxCut/CG/MC_shortest_path_cycle.cpp -text
@@ -39,6 +40,7 @@ Applications/MaxCut/Generators/gen2.cpp -text
 Applications/MaxCut/Generators/gen3.cpp -text
 Applications/MaxCut/Generators/gen4.cpp -text
 Applications/MaxCut/INSTALL -text
+Applications/MaxCut/LICENSE -text
 Applications/MaxCut/LP/MC_lp.cpp -text
 Applications/MaxCut/LP/MC_lp_branch.cpp -text
 Applications/MaxCut/LP/MC_lp_param.cpp -text
@@ -52,7 +54,6 @@ Applications/MaxCut/Member/MC_mst_heur.cpp -text
 Applications/MaxCut/Member/MC_solution.cpp -text
 Applications/MaxCut/TM/MC_tm.cpp -text
 Applications/MaxCut/TM/MC_tm_param.cpp -text
-Applications/MaxCut/examplefiles.txt -text
 Applications/MaxCut/include/MC.hpp -text
 Applications/MaxCut/include/MC_cut.hpp -text
 Applications/MaxCut/include/MC_init.hpp -text
