@@ -52,6 +52,7 @@ Applications/MaxCut/Member/MC_init.cpp -text
 Applications/MaxCut/Member/MC_kruskal.cpp -text
 Applications/MaxCut/Member/MC_mst_heur.cpp -text
 Applications/MaxCut/Member/MC_solution.cpp -text
+Applications/MaxCut/README -text
 Applications/MaxCut/TM/MC_tm.cpp -text
 Applications/MaxCut/TM/MC_tm_param.cpp -text
 Applications/MaxCut/include/MC.hpp -text

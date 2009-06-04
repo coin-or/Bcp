@@ -1,0 +1,12 @@
+This directory contains a solver for the MaxCut problem using the BCP
+framework.
+
+For more details see the paper F. Barahona and L. Ladanyi, "Branch
+and Cut based on the volume algorithm: Steiner trees in graphs and
+Max-Cut," RAIRO Operations Research 40 (2006) 53-73.
+
+For information on how to build/use the maxcut code see the INSTALL file.
+
+For more information on BCP see https://projects.coin-or.org/Bcp.
+
+
