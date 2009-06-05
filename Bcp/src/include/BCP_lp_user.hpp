@@ -745,7 +745,7 @@ public:
 	selected, i.e., those that are close to half. If there are too many
 	such variables then those with higher objective value have priority.
 
-	"Close-to-on" is interpreted in a more literal sense. It should be used
+	"Close-to-one" is interpreted in a more literal sense. It should be used
 	only if the integer variables are binary as it select those fractional
 	variables which are away from 1 but are still close. If there are too
 	many such variables then those with lower objective value have
