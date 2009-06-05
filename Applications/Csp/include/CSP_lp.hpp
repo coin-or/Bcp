@@ -57,52 +57,38 @@ public:
    virtual void
    unpack_module_data(BCP_buffer & buf);
 
-   /** Pack an algorithmic variable */
-   virtual void
-   pack_var_algo(const BCP_var_algo* var, BCP_buffer& buf) {
-      CSP_var_pack(var, buf);
-   }
-
-   /** Unpack an algorithmic variable */
-   virtual BCP_var_algo*
-   unpack_var_algo(BCP_buffer& buf) {
-      return CSP_var_unpack(buf);
-   }
-      
    //==========================================================================
-   /** Create a ptr to an 
-       OsiSolverInterface object that will be used for solving the LP
-       relaxations. The default implementation uses Clp.
-       This is probably OK for most users. The only reason to override this
-       method is to be able to choose at runtime which lp solver to
-       instantiate (maybe even different solvers on different processors).
-       In this case she should probably also override the
-       pack_warmstart() and unpack_warmstart() methods in this class and in
-       the BCP_tm_user class. */
+    /** Create LP solver environment.
+	Create the LP solver class that will be used for solving the LP
+	relaxations. The default implementation picks up which
+	\c COIN_USE_XXX is defined and initializes an lp solver of that type.
+	This is probably OK for most users. The only reason to override this
+	method is to be able to choose at runtime which lp solver to
+	instantiate (maybe even different solvers on different processors).
+	In this case she should probably also override the
+	pack_warmstart() and unpack_warmstart() methods in this class and in
+	the BCP_tm_user class. */
    virtual OsiSolverInterface *
    initialize_solver_interface();
 
    //==========================================================================
-   /** This method serves as hook for the user to do some preprocessing on a
-       search tree node before the node is processed. Also, logical fixing
-       results can be returned in the last four parameters. This might be very
-       useful if the branching implies significant tightening.<br>
-       Default: empty method. 
-       @param vars       (IN) The variables in the current formulation 
-       @param cuts       (IN) The cuts in the current formulation
-       @param var_status (IN) The stati of the variables
-       @param cut_status (IN) The stati of the cuts
-       @param var_changed_pos (OUT) The positions of the variables whose
-       bounds should be tightened
-       @param var_new_bd      (OUT) The new lb/ub of those variables
-       @param cut_changed_pos (OUT) The positions of the cuts whose bounds
-       should be tightened
-       @param cut_new_bd (OUT) The new lb/ub of those cuts
-   */
-   // *LL* : needs to be written if when we'll do real column generation. Then
-   // *LL* : we'll need to figure out the previous branching decisions. For
-   // *LL* : now we just do B&B, so we don't need this.
-   
+    /** Initializing a new search tree node.
+	This method serves as hook for the user to do some preprocessing on a
+	search tree node before the node is processed. Also, logical fixing
+	results can be returned in the last four parameters. This might be very
+	useful if the branching implies significant tightening.<br>
+	Default: empty method. 
+	@param vars       (IN) The variables in the current formulation 
+	@param cuts       (IN) The cuts in the current formulation
+	@param var_status (IN) The stati of the variables
+	@param cut_status (IN) The stati of the cuts
+	@param var_changed_pos (OUT) The positions of the variables whose
+	                             bounds should be tightened
+	@param var_new_bd      (OUT) The new lb/ub of those variables
+	@param cut_changed_pos (OUT) The positions of the cuts whose bounds
+	                             should be tightened
+	@param cut_new_bd (OUT) The new lb/ub of those cuts
+    */
    virtual void
    initialize_new_search_tree_node(const BCP_vec<BCP_var*>& vars,
 				   const BCP_vec<BCP_cut*>& cuts,
@@ -113,7 +99,7 @@ public:
 				   BCP_vec<int>& cut_changed_pos,
 				   BCP_vec<double>& cut_new_bd);
 
-   //==========================================================================
+  //==========================================================================
    /** This method provides an opportunity for the user to change parameters
        of the LP solver before optimization in the LP solver starts. The
        second argument indicates whether the optimization is a "regular"
@@ -121,18 +107,21 @@ public:
        Default: empty method. 
    */
    virtual void
-   modify_lp_parameters(OsiSolverInterface* lp, bool in_strong_branching);
+   modify_lp_parameters(OsiSolverInterface* lp, const int changeType,
+			bool in_strong_branching);
 
    //==========================================================================
-   /** Compute a true lower bound for the subproblem.
-       In case column generation is done the lower bound for the subproblem
-       might not be the same as the objective value of the current LP
-       relaxation. Here the user has an option to return a true lower
-       bound.<br>
-       The default implementation returns the objective value of the current
-       LP relaxation if no column generation is done, otherwise returns the
-       current (somehow previously computed) true lower bound.
-   */
+    /** Compute a true lower bound for the
+	subproblem.
+
+	In case column generation is done the lower bound for the subproblem
+	might not be the same as the objective value of the current LP
+	relaxation. Here the user has an option to return a true lower
+	bound.<br>
+	The default implementation returns the objective value of the current
+	LP relaxation if no column generation is done, otherwise returns the
+	current (somehow previously computed) true lower bound.
+    */
    virtual double
    compute_lower_bound(const double old_lower_bound,
 		       const BCP_lp_result& lpres,
@@ -140,22 +129,25 @@ public:
 		       const BCP_vec<BCP_cut*>& cuts);
    //==========================================================================
 
-   /** Evaluate and return MIP feasibility of the current solution. If the
-       solution is MIP feasible, return a solution object otherwise return a
-       NULL pointer. The user is also welcome to heuristically generate a
-       solution and return a pointer to that solution (although the user will
-       have another chance (after cuts and variables are generated) to
-       return/create heuristically generated solutions. (After all, it's
-       quite possible that solutions are generated during cut/variable
-       generation.)
+    /** Evaluate and return MIP feasibility of the current
+	solution.
 
-       Default: test feasibility based on the \c FeeasibilityTest
-       parameter in BCP_lp_par	which defults to \c BCP_FullTest_Feasible.
+	If the solution is MIP feasible, return a solution object otherwise
+	return a NULL pointer. The useris also welcome to heuristically
+	generate a solution and return a pointer to that solution (although
+	the user will have another chance (after cuts and variables are
+	generated) to return/create heuristically generated solutions. (After
+	all, it's quite possible that solutions are generated during
+	cut/variable generation.)
 
-       @param lpres  the result of the most recent LP optimization
-       @param vars   variables currently in the formulation
-   */
-   // *LL* : sufficient to test binary-ness, 
+	Default: test feasibility based on the \c FeeasibilityTest
+	parameter in BCP_lp_par	which defults to \c BCP_FullTest_Feasible.
+
+	@param lp_result the result of the most recent LP optimization
+	@param vars      variables currently in the formulation
+	@param cuts      variables currently in the formulation
+    */
+   // *LL* : sufficient to test binary-ness 
 #if 0
    virtual BCP_solution*
    test_feasibility(const BCP_lp_result& lpres,
@@ -167,19 +159,6 @@ public:
        cut/variable generation. Return a pointer to the generated solution or
        return a NULL pointer.
    */
-   // *LL* : should be written even for B&B (to find good soln's quickly) and
-   // *LL* : definitely for column generation, but for now it's not an
-   // *LL* : absolute necessity.
-
-  // This code invokes the default (do nothing) function in BCP
-  //   virtual BCP_solution*
-  // generate_heuristic_solution(const BCP_lp_result& lpres,
-  //			       const BCP_vec<BCP_var*>& vars,
-  //			       const BCP_vec<BCP_cut*>& cuts) {
-  //   return BCP_lp_user::generate_heuristic_solution(lpres, vars, cuts);
-  // }
-
-
   virtual BCP_solution*
   generate_heuristic_solution(const BCP_lp_result& lpres,
 			      const BCP_vec<BCP_var*>& vars,
@@ -192,9 +171,8 @@ public:
        any new variables.
 
        The user has to check all variables here. */
-  // get one dual ray from the solver, and try to generate columns that cut
-  // off the  dual ray. 
-  // RLH: need to write.
+   // get one dual ray from the solver, and try to generate columns that cut
+   // off the  dual ray. 
    virtual void
    restore_feasibility(const BCP_lp_result& lpres,
 		       const std::vector<double*> dual_rays,
@@ -251,14 +229,14 @@ public:
        @param new_rows the correspontding rows(OUT)
    */
    // *LL* : for now we don't have cuts, so the default is fine.
+#if 0
    virtual void
    generate_cuts_in_lp(const BCP_lp_result& lpres,
 		       const BCP_vec<BCP_var*>& vars,
 		       const BCP_vec<BCP_cut*>& cuts,
 		       BCP_vec<BCP_cut*>& new_cuts,
-		       BCP_vec<BCP_row*>& new_rows) {
-      BCP_lp_user::generate_cuts_in_lp(lpres, vars, cuts, new_cuts, new_rows);
-   }
+		       BCP_vec<BCP_row*>& new_rows);
+#endif
 
    //==========================================================================
    /** Generate variables within the LP process. Sometimes too much
@@ -294,10 +272,10 @@ public:
        Default: Return \c BCP_DifferentObjs.
    */
    // *LL* : for now we don't have cuts, so the default is fine.
+#if 0
    virtual BCP_object_compare_result
-   compare_cuts(const BCP_cut* c0, const BCP_cut* c1) {
-      return BCP_lp_user::compare_cuts(c0, c1);
-   }
+   compare_cuts(const BCP_cut* c0, const BCP_cut* c1);
+#endif
 
    //==========================================================================
    /** Compare two generated variables. Variables are generated in different
@@ -308,12 +286,13 @@ public:
        decide which one to keep if not both.<br>
        Default: Return \c BCP_DifferentObjs.
    */
-   // *LL* : for now we have included every var in the formulation at the root
-   // *LL* : node, so default is fine. Later we need to write this one.
+   // *LL* : We just assume that every generated var is different, so default
+   // *LL* : is fine. The worst that can happen is a minimal performance
+   // *LL* : penalty.
+#if 0
    virtual BCP_object_compare_result
-   compare_vars(const BCP_var* v0, const BCP_var* v1) {
-      return BCP_lp_user::compare_vars(v0, v1);
-   }
+   compare_vars(const BCP_var* v0, const BCP_var* v1);
+#endif
 
    //==========================================================================
    /** This method provides an opportunity for the user to tighten the bounds
@@ -333,6 +312,7 @@ public:
    */
    // *LL* : This is not a must, but would be nice to add setpacking matrix
    // *LL* : reduction techniques eventually. For now use the default.
+#if 0
    virtual void
    logical_fixing(const BCP_lp_result& lpres,
 		  const BCP_vec<BCP_var*>& vars,
@@ -340,11 +320,8 @@ public:
 		  const BCP_vec<BCP_obj_status>& var_status,
 		  const BCP_vec<BCP_obj_status>& cut_status,
 		  const int var_bound_changes_since_logical_fixing,
-		  BCP_vec<int>& changed_pos, BCP_vec<double>& new_bd) {
-      BCP_lp_user::logical_fixing(lpres, vars, cuts, var_status, cut_status,
-				  var_bound_changes_since_logical_fixing,
-				  changed_pos, new_bd);
-   }
+		  BCP_vec<int>& changed_pos, BCP_vec<double>& new_bd);
+#endif
 
    //==========================================================================
    /** Decide whether to branch or not and select a set of branching
@@ -355,7 +332,8 @@ public:
 			       const BCP_vec<BCP_cut*>& cuts,
 			       const BCP_lp_var_pool& local_var_pool,
 			       const BCP_lp_cut_pool& local_cut_pool,
-			       BCP_vec<BCP_lp_branching_object*>& cands);
+			       BCP_vec<BCP_lp_branching_object*>& cands,
+			       bool force_branch = false);
    BCP_lp_branching_object*
    branch_on_half(const BCP_lp_result& lpres,
 		  const BCP_vec<BCP_var*>& vars);
@@ -376,12 +354,11 @@ public:
    */
    // *LL* : Use default for now
    // *LL* : Later we can play with integrality based branching
+#if 0
    virtual BCP_branching_object_relation
    compare_branching_candidates(BCP_presolved_lp_brobj* new_solved,
-				BCP_presolved_lp_brobj* old_solved) {
-      return BCP_lp_user::compare_branching_candidates(new_solved, old_solved);
-   }
-
+				BCP_presolved_lp_brobj* old_solved);
+#endif
 
    //==========================================================================
    /** Decide what to do with the children of the selected branching object.
@@ -403,8 +380,6 @@ public:
        *THINK*: Should those children be sent back for processing in the next
        phase? 
    */
-   // *LL* : The THINK comment above will definitely
-   // *LL* : apply when we'll do column generation
    virtual void
    set_actions_for_children(BCP_presolved_lp_brobj* best);
       
@@ -428,12 +403,11 @@ public:
        @param to_be_purged the indices of the cuts to be purged. (OUT) */
    // *LL* : Used only when branching on dynamically generated cuts is
    // *LL* : allowed, but we don't generate cuts...
+#if 0
    virtual void
    purge_slack_pool(const BCP_vec<BCP_cut*>& slack_pool,
-		    BCP_vec<int>& to_be_purged) {
-      BCP_lp_user::purge_slack_pool(slack_pool, to_be_purged);
-   }
-
+		    BCP_vec<int>& to_be_purged);
+#endif
 
    //==========================================================================
 

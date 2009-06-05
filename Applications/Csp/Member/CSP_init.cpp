@@ -18,6 +18,30 @@ BCP_user_init()
 }
 
 //#############################################################################
+
+BCP_user_pack*
+CSP_initialize::packer_init(BCP_user_class* p)
+{
+  return new CSP_packer;
+}
+
+//-----------------------------------------------------------------------------
+
+void
+CSP_packer::pack_var_algo(const BCP_var_algo* var, BCP_buffer& buf)
+{
+  CSP_var_pack(var, buf);
+}
+
+//-----------------------------------------------------------------------------
+
+BCP_var_algo*
+CSP_packer::unpack_var_algo(BCP_buffer& buf)
+{
+  return CSP_var_unpack(buf);
+}
+
+//#############################################################################
 //#############################################################################
 
 BCP_lp_user *

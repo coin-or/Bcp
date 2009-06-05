@@ -10,7 +10,7 @@
 ##########################################################################
 
 # CHANGEME: This should be the name of your executable
-EXE = mkc@EXEEXT@
+EXE = csp@EXEEXT@
 
 # CHANGEME: Directory to the sources for the (example) problem definition
 # files

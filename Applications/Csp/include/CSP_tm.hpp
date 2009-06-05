@@ -63,32 +63,6 @@ public:
     return BCP_tm_user::unpack_feasible_solution(buf);
   }
   
-  /** Pack an algorithmic variable */
-  // *LL* : done
-  virtual void
-  pack_var_algo(const BCP_var_algo* var, BCP_buffer& buf) {
-    CSP_var_pack(var, buf);
-  }
-  /** Unpack an algorithmic variable */
-  // *LL* : done
-  virtual BCP_var_algo*
-  unpack_var_algo(BCP_buffer& buf) {
-    return CSP_var_unpack(buf);
-  }
-  
-  /** Pack an algorithmic cut */
-  // *LL* : needs to be written when we start to add cuts. Not for now.
-  virtual void
-  pack_cut_algo(const BCP_cut_algo* cut, BCP_buffer& buf) {
-    BCP_tm_user::pack_cut_algo(cut, buf);
-  }
-  /** Unpack an algorithmic cut */
-  // *LL* : needs to be written when we start to add cuts. Not for now.
-  virtual BCP_cut_algo*
-  unpack_cut_algo(BCP_buffer& buf) {
-    return BCP_tm_user::unpack_cut_algo(buf);
-  }
-  
   //--------------------------------------------------------------------------
   /** Create the core of the problem by filling out the last three arguments.
       These variables/cuts will always stay in the LP relaxation and the
@@ -115,13 +89,11 @@ public:
       Default: empty method, meaning that no variables/cuts are added and no
       pricing should be done.
   */
-  // *LL* : the enumerated vars are the added vars, and since now we
-  // *LL* : enumerate everything, the pricing status is price nothing.
+  // *LL* : the enumerated vars are the added vars
   virtual void
   create_root(BCP_vec<BCP_var*>& added_vars,
 			  BCP_vec<BCP_cut*>& added_cuts,
-			  BCP_user_data*& user_data,
-			  BCP_pricing_status& pricing_status);
+			  BCP_user_data*& user_data);
   
   //--------------------------------------------------------------------------
   /** Display a feasible solution */
@@ -131,9 +103,10 @@ public:
   //--------------------------------------------------------------------------
   /** Do whatever initialization is necessary before the
        <code>phase</code>-th phase. (E.g., setting the pricing strategy.) */
-  // *LL* : default is fine, there's just one phase
+  // *LL* : there's just one phase and we want to generate algo vars.
   virtual void
-  init_new_phase(int phase, BCP_column_generation& colgen);
+  init_new_phase(int phase, BCP_column_generation& colgen,
+		 CoinSearchTreeBase*& candidates);
   
   //--------------------------------------------------------------------------
   /**@name Compare two search tree nodes. Return true if the first node
@@ -144,10 +117,10 @@ public:
      0 (\c BCP_BestFirstSearch) by default.
   */
   // *LL* : default is fine
+#if 0
   virtual bool compare_tree_nodes(const BCP_tm_node* node0,
-				  const BCP_tm_node* node1) {
-    return BCP_tm_user::compare_tree_nodes(node0, node1);
-  }
+				  const BCP_tm_node* node1);
+#endif
 };
 
 #endif
