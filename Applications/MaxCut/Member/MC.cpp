@@ -103,8 +103,8 @@ MC_problem::unpack(BCP_buffer& buf)
   bool has_feas_sol;
   buf.unpack(has_feas_sol);
   if (has_feas_sol) {
-     int n, m, *s;
-     double c, *v;
+     int n, m, *s=NULL;
+     double c, *v=NULL;
      buf.unpack(s, n).unpack(v, m).unpack(c);
      feas_sol = new MC_feas_sol(c, n, s, m, v);
   }
