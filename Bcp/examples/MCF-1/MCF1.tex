@@ -52,6 +52,11 @@ constrints on each arc for each flow individually and for all flows combined.
 Constrints (\ref{flow-conv}) are the flow conservation constraints. Finally,
 we require integrality.
 
+Note: to make sure that the problem is always feasible, for each commodity we
+introduce an arc from the source of the commodity to its sink. The capacity of
+this arc is the demand on the commodity and its cost is high enough to make
+certain that the ac is used of there is no feasible solution without it.
+
 \section{Column generation}
 The solution method is column generation. The columns will correspond to flows
 in the network. For each commodity we will generate integral flows. The flows

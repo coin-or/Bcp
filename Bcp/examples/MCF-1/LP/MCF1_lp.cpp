@@ -1,6 +1,5 @@
 #include "CoinHelperFunctions.hpp"
 #include "OsiClpSolverInterface.hpp"
-#include "BCP_lp.hpp"
 #include "MCF1_lp.hpp"
 
 //#############################################################################
@@ -319,7 +318,7 @@ vars_to_cols(const BCP_vec<BCP_cut*>& cuts,
       // argument, since the column corresponding to the var is exactly
       // the flow (plus the entry in the appropriate convexity
       // constraint)
-      BCP_col* col = new BCP_col(v->flow, v->weight, 0.0, 1.0);
+      BCP_col* col = new BCP_col(v->flow, v->weight, v->lb(), v->ub());
       col->insert(data.numarcs + v->commodity, 1.0);
       cols.push_back(col);
       // Excercise: if we had generated cuts, then the coefficients for
@@ -375,6 +374,7 @@ select_branching_candidates(const BCP_lp_result& lpres,
       }
     }
     if (most_frac_ind >= 0) {
+      size_t pos;
       BCP_vec<BCP_var*> new_vars;
       BCP_vec<int> fvp;
       BCP_vec<double> fvb;
@@ -409,15 +409,15 @@ select_branching_candidates(const BCP_lp_result& lpres,
       fvb.push_back(0.0);
       fvb.push_back(0.0);
       fvb.append(child0_bd);
-      for (j = child1_pos.size() - 1; j >= 0; --j) {
-	fvb.push_back(0.0);
-	fvb.push_back(1.0);
+      for (pos = 0; pos < child1_pos.size(); ++pos) {
+	fvb.push_back(vars[child1_pos[pos]]->lb());
+	fvb.push_back(vars[child1_pos[pos]]->ub());
       }
       fvb.push_back(1.0);
       fvb.push_back(1.0);
-      for (j = child0_pos.size() - 1; j >= 0; --j) {
-	fvb.push_back(0.0);
-	fvb.push_back(1.0);
+      for (pos = 0; pos < child0_pos.size(); ++pos) {
+	fvb.push_back(vars[child0_pos[pos]]->lb());
+	fvb.push_back(vars[child0_pos[pos]]->ub());
       }
       fvb.append(child1_bd);
       cands.push_back(new BCP_lp_branching_object(2, // num of children

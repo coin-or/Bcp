@@ -1,2 +1,84 @@
-MCF2_AddDummySourceSinkArcs 1
-MCF2_InputFilename small
+// For 0/1 parameters, only the default is listed
+
+/***************************************************************************/
+// MCF2 parameters
+
+MCF2_AddDummySourceSinkArcs             1  // 1: Add summy arcs
+
+MCF2_InputFilename                  small  // small : input file
+ 
+/***************************************************************************/
+// VERBOSITY:
+
+BCP_VerbosityShutUp			0  // 0: regular output
+
+BCP_ReportWhenDefaultIsExecuted 	1  // 1: print a message when default
+                                           // functions are called
+
+BCP_TmVerb_SingleLineInfoFrequency 	1  // k: print the info line every
+                                           // k nodes 
+                                           // Default : 0 (disabled)
+
+BCP_LpVerb_RelaxedSolution              1  // 1: display LP sol at each iter
+
+BCP_LpVerb_FinalRelaxedSolution         1  // 1: display LP sol of final iter
+
+BCP_TmVerb_BestFeasibleSolution         1  // 1: display best sol at the end
+
+/***************************************************************************/
+//  MAX CPU TIME:
+
+BCP_MaxRunTime                        3600 // Max cpu time (in sec)
+			                   // Default : 3600
+
+/***************************************************************************/
+//  NUMERICAL ACCURACY:
+
+BCP_Granularity 		       1e-8 // Lower bound on the minimum 
+					    // difference between two feasible 
+					    // solutions
+					    // Default: 1e-8
+
+BCP_IntegerTolerance		       1e-5 // Tolerance for a number to be 
+                                            // considered integer
+				            // Default: 1e-5
+
+/***************************************************************************/
+//  TREE SEARCH STRATEGY:
+
+BCP_TreeSearchStrategy 			1  // 0: Best Bound 
+					   // 1: BFS 
+					   // 2: DFS
+				   	   // Default: 1
+
+BCP_ChildPreference 			0  // 0 : lowest lp bound
+					   // 1: highest lp bnd 
+					   // 2: most fractional
+					   // 3: least fractional
+					   // Default : 0
+
+BCP_UnconditionalDiveProbability      0.02 // Diving probability
+                                           // -1: no diving
+                                           // Default: 0.02
+
+BCP_QualityRatioToAllowDiving_HasUB    1.2 // Ratio to allow diving when UB
+                                           // -1: No diving
+                                           // Default: 1.2 
+
+BCP_QualityRatioToAllowDiving_NoUB     2.0 // Ratio to allow diving when no UB
+                                           // -1: No diving
+                                           // Default: 2.0 
+
+BCP_RemoveExploredBranches               0 // Cleanup memory
+                                           // Default: 0
+
+/***************************************************************************/
+//  VARIABLE FIXING:
+
+BCP_DoReducedCostFixingAtZero 		1  // 1: reduced cost fixing for 
+					   // variables with value 0
+
+BCP_DoReducedCostFixingAtAnything 	1  // 1: red cost fixing for all
+					   // variables
+
+
