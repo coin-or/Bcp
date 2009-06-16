@@ -173,15 +173,27 @@ BCP_delete_unwanted_candidates(const int num, const int added_num,
 {
    deletable.erase(std::lower_bound(deletable.begin(), deletable.end(),
 				    num-added_num), deletable.end());
-   for (int i = num - added_num; i < num; ++i) {
-      deletable.push_back(i);
-   }
    if (pos && !pos->empty()) {
-      BCP_vec<int>::iterator ifirst = 
-	 std::lower_bound(deletable.begin(), deletable.end(), (*pos)[0]);
-      BCP_vec<int>::iterator ilast = 
-	 std::upper_bound(ifirst, deletable.end(), pos->back());
-      deletable.erase(ifirst, ilast);
+     BCP_vec<int> ordered_pos(*pos);
+     std::sort(ordered_pos.begin(), ordered_pos.end());
+     const int size = ordered_pos.size();
+     int i=num-added_num, j=0;
+     while (i < num && j < size) {
+       if (i < ordered_pos[j]) {
+	 deletable.push_back(i);
+	 ++i;
+	 continue;
+       }
+       if (i > ordered_pos[j]) {
+	 ++j;
+	 continue;
+       }
+       ++i;
+       ++j;
+     }
+     for ( ; i < num; ++i) {
+       deletable.push_back(i);
+     }
    }
 }
 
