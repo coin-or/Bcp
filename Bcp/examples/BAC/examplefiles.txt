@@ -8,7 +8,7 @@ Member/BB_cut.cpp
 bb.par
 bac.lp
 bac.mps
-bac-1.2.1.pdf
+bac-1.2.2.pdf
 include/BB_user_data.hpp
 include/BB_packer.hpp
 include/BB_lp.hpp
