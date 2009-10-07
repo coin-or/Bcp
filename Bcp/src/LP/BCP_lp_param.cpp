@@ -278,7 +278,6 @@ void BCP_parameter_set<BCP_lp_par>::create_keyword_list() {
 			     BCP_parameter(BCP_DoublePar, 
 					   MaxRunTime)));
     /** Maximum allowed running time */
-    MaxRunTime,
     //    keys.push_back(make_pair(BCP_string("BCP_"),
     // 			      BCP_parameter(BCP_DoublePar, 
     // 					    )));
