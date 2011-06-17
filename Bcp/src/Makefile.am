@@ -163,24 +163,16 @@ libBcp_la_LDFLAGS = $(LT_LDFLAGS)
 
 # Here list all include flags, relative to this "srcdir" directory.  This
 # "cygpath" stuff is necessary to compile with native compilers on Windows.
-AM_CPPFLAGS = 
-AM_CPPFLAGS += -I`$(CYGPATH_W) $(COINUTILSSRCDIR)/src`
-AM_CPPFLAGS += -I`$(CYGPATH_W) $(COINUTILSOBJDIR)/inc`
-AM_CPPFLAGS += -I`$(CYGPATH_W) $(OSISRCDIR)/src`
+AM_CPPFLAGS = $(BCPLIB_CFLAGS)
 
 # Include MPI header directory if MPI is used
 if COIN_HAS_MPI
 AM_CPPFLAGS +=  -I`$(CYGPATH_W) $(MPIINCDIR)`
 endif
 
-# Include PVM header directory if PVM is used
-#if COIN_HAS_PVM
-#AM_CPPFLAGS +=  -I`$(CYGPATH_W) $(PVMINCDIR)`
-#endif
-
 # This line is necessary to allow VPATH compilation with MS compilers
 # on Cygwin
-DEFAULT_INCLUDES = -I. -I`$(CYGPATH_W) $(srcdir)/include` -I$(top_builddir)/inc
+DEFAULT_INCLUDES = -I. -I`$(CYGPATH_W) $(srcdir)/include` 
 
 ########################################################################
 #                Headers that need to be installed                     #
@@ -190,7 +182,7 @@ DEFAULT_INCLUDES = -I. -I`$(CYGPATH_W) $(srcdir)/include` -I$(top_builddir)/inc
 # and that therefore should be installed in 'install'
 includecoindir = $(includedir)/coin
 includecoin_HEADERS = \
-	../inc/config_bcp.h \
+	../src/include/config_bcp.h \
 	include/BCP_branch.hpp \
 	include/BCP_buffer.hpp \
 	include/BCP_cg.hpp \
@@ -265,16 +257,8 @@ includecoin_HEADERS = \
 # Create the Config.h file that always defines HAVE_CONFIG_H and install it #
 #############################################################################
 
-# You only need to adapt the following line
-ConfigHeader = BcpConfig.h
-
 install-exec-local:
-	echo "#ifndef HAVE_CONFIG_H" >bla
-	echo "#define HAVE_CONFIG_H" >>bla
-	echo "#endif" >> bla
-	cat $(srcdir)/include/$(ConfigHeader) >> bla
-	$(install_sh_DATA) bla $(DESTDIR)$(includecoindir)/$(ConfigHeader)
-	rm -f bla
+	$(install_sh_DATA) include/config_bcp.h $(DESTDIR)$(includecoindir)/BcpConfig.h
 
 uninstall-local:
-	rm -f $(DESTDIR)$(includecoindir)/$(ConfigHeader)
+	rm -f $(DESTDIR)$(includecoindir)/BcpConfig.h

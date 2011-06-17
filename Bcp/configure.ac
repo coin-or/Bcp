@@ -41,7 +41,7 @@ AC_CANONICAL_BUILD
 # the source root directory contains definition of where to find those
 # externals.  The following macro ensures that those externals are
 # retrieved by svn if they are not there yet.
-AC_COIN_PROJECTDIR_INIT
+AC_COIN_PROJECTDIR_INIT(Bcp)
 
 # Check if user wants to produce debugging code
 AC_COIN_DEBUG_COMPILE(Bcp)
@@ -64,20 +64,19 @@ AC_COIN_INIT_AUTO_TOOLS
 #                              COIN components                              #
 #############################################################################
 
-AC_COIN_HAS_PROJECT(Bcp)
-AC_COIN_HAS_PROJECT(CoinUtils)
-AC_COIN_HAS_PROJECT(Vol)
-AC_COIN_HAS_PROJECT(Clp)
-AC_COIN_HAS_PROJECT(Cgl)
-AC_COIN_HAS_PROJECT(Osi)
+AC_COIN_CHECK_PACKAGE(Clp, [osi-clp], [BcpLib])
+if test $coin_has_clp != yes ; then
+  AC_MSG_ERROR([Required package Clp not available.])
+fi
+AC_COIN_CHECK_PACKAGE(Vol, [osi-vol], [BcpLib])
+AC_COIN_CHECK_PACKAGE(Cgl, [cgl], [Bac])
 
 #############################################################################
 #                             Other dependencies                            #
 #############################################################################
 
-AC_COIN_HAS_USER_LIBRARY([Mpi], [MPI], [mpi.h], )
+AC_COIN_CHECK_USER_LIBRARY([Mpi], [MPI], [mpi.h], [MPI_Irecv], [], [BcpLib])
 # ToDo: Automatically choose MPI compiler
-# AC_COIN_HAS_USER_LIBRARY([Pvm], [PVM], [pvm3.h], [???])
 
 AC_COIN_CHECK_HEADER(sys/resource.h)
 AC_COIN_CHECK_HEADER(sys/sysinfo.h)
@@ -157,10 +156,11 @@ AC_CONFIG_FILES([Makefile
                  examples/MCF-2/Makefile
                  examples/MCF-3/Makefile
                  examples/MaxCut/Makefile
-		 bcp_addlibs.txt])
+		 bcp.pc
+		 bcp-uninstalled.pc])
 
 # Here put the location and name of the configuration header file
-AC_CONFIG_HEADER([inc/config_bcp.h])
+AC_CONFIG_HEADER([src/include/config.h src/include/config_bcp.h])
 
 # Finally, we let configure write all the output...
 AC_COIN_FINALIZE

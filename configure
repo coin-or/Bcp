@@ -474,12 +474,12 @@ ac_includes_default="\
 #endif"
 
 ac_subdirs_all="$ac_subdirs_all CoinUtils"
+ac_subdirs_all="$ac_subdirs_all Osi"
 ac_subdirs_all="$ac_subdirs_all Vol"
 ac_subdirs_all="$ac_subdirs_all Clp"
-ac_subdirs_all="$ac_subdirs_all Osi"
 ac_subdirs_all="$ac_subdirs_all Cgl"
 ac_subdirs_all="$ac_subdirs_all Bcp"
-ac_subst_vars='SHELL PATH_SEPARATOR PACKAGE_NAME PACKAGE_TARNAME PACKAGE_VERSION PACKAGE_STRING PACKAGE_BUGREPORT exec_prefix prefix program_transform_name bindir sbindir libexecdir datadir sysconfdir sharedstatedir localstatedir libdir includedir oldincludedir infodir mandir build_alias host_alias target_alias DEFS ECHO_C ECHO_N ECHO_T LIBS build build_cpu build_vendor build_os CDEFS ADD_CFLAGS DBG_CFLAGS OPT_CFLAGS sol_cc_compiler CC CFLAGS LDFLAGS CPPFLAGS ac_ct_CC EXEEXT OBJEXT MPICC CXXDEFS ADD_CXXFLAGS DBG_CXXFLAGS OPT_CXXFLAGS CXX CXXFLAGS ac_ct_CXX MPICXX ADD_FFLAGS DBG_FFLAGS OPT_FFLAGS F77 FFLAGS ac_ct_F77 MPIF77 EGREP INSTALL_PROGRAM INSTALL_SCRIPT INSTALL_DATA CYGPATH_W PACKAGE VERSION ACLOCAL AUTOCONF AUTOMAKE AUTOHEADER MAKEINFO install_sh STRIP ac_ct_STRIP INSTALL_STRIP_PROGRAM mkdir_p AWK SET_MAKE am__leading_dot AMTAR am__tar am__untar DEPDIR am__include am__quote AMDEP_TRUE AMDEP_FALSE AMDEPBACKSLASH CCDEPMODE am__fastdepCC_TRUE am__fastdepCC_FALSE CXXDEPMODE am__fastdepCXX_TRUE am__fastdepCXX_FALSE MAINTAINER_MODE_TRUE MAINTAINER_MODE_FALSE MAINT LIBTOOLM4 have_autoconf have_automake have_svn BUILDTOOLSDIR AUX_DIR abs_source_dir abs_lib_dir abs_include_dir abs_bin_dir HAVE_EXTERNALS_TRUE HAVE_EXTERNALS_FALSE host host_cpu host_vendor host_os LN_S ECHO AR ac_ct_AR RANLIB ac_ct_RANLIB CPP CXXCPP LIBTOOL ac_c_preproc_warn_flag ac_cxx_preproc_warn_flag RPATH_FLAGS LT_LDFLAGS COIN_SKIP_PROJECTS subdirs LIBEXT VPATH_DISTCLEANFILES LIBOBJS LTLIBOBJS'
+ac_subst_vars='SHELL PATH_SEPARATOR PACKAGE_NAME PACKAGE_TARNAME PACKAGE_VERSION PACKAGE_STRING PACKAGE_BUGREPORT exec_prefix prefix program_transform_name bindir sbindir libexecdir datadir sysconfdir sharedstatedir localstatedir libdir includedir oldincludedir infodir mandir build_alias host_alias target_alias DEFS ECHO_C ECHO_N ECHO_T LIBS build build_cpu build_vendor build_os CDEFS ADD_CFLAGS DBG_CFLAGS OPT_CFLAGS sol_cc_compiler CC CFLAGS LDFLAGS CPPFLAGS ac_ct_CC EXEEXT OBJEXT COIN_CC_IS_CL_TRUE COIN_CC_IS_CL_FALSE MPICC CXXDEFS ADD_CXXFLAGS DBG_CXXFLAGS OPT_CXXFLAGS CXX CXXFLAGS ac_ct_CXX COIN_CXX_IS_CL_TRUE COIN_CXX_IS_CL_FALSE MPICXX ADD_FFLAGS DBG_FFLAGS OPT_FFLAGS F77 FFLAGS ac_ct_F77 MPIF77 EGREP LN_S INSTALL_PROGRAM INSTALL_SCRIPT INSTALL_DATA CYGPATH_W PACKAGE VERSION ACLOCAL AUTOCONF AUTOMAKE AUTOHEADER MAKEINFO install_sh STRIP ac_ct_STRIP INSTALL_STRIP_PROGRAM mkdir_p AWK SET_MAKE am__leading_dot AMTAR am__tar am__untar DEPDIR am__include am__quote AMDEP_TRUE AMDEP_FALSE AMDEPBACKSLASH CCDEPMODE am__fastdepCC_TRUE am__fastdepCC_FALSE CXXDEPMODE am__fastdepCXX_TRUE am__fastdepCXX_FALSE MAINTAINER_MODE_TRUE MAINTAINER_MODE_FALSE MAINT LIBTOOLM4 have_autoconf have_automake have_svn BUILDTOOLSDIR AUX_DIR abs_source_dir abs_lib_dir abs_include_dir abs_bin_dir HAVE_EXTERNALS_TRUE HAVE_EXTERNALS_FALSE host host_cpu host_vendor host_os ECHO AR ac_ct_AR RANLIB ac_ct_RANLIB CPP CXXCPP LIBTOOL ac_c_preproc_warn_flag ac_cxx_preproc_warn_flag RPATH_FLAGS LT_LDFLAGS COIN_SKIP_PROJECTS subdirs LIBEXT VPATH_DISTCLEANFILES ABSBUILDDIR LIBOBJS LTLIBOBJS'
 ac_subst_files=''
 
 # Initialize some variables set by options.
@@ -1102,6 +1102,7 @@ Optional Features:
   --disable-FEATURE       do not include FEATURE (same as --enable-FEATURE=no)
   --enable-FEATURE[=ARG]  include FEATURE [ARG=yes]
   --enable-debug          compile all projects with debug options tests
+                          (implies --disable-shared)
   --enable-doscompile     Under Cygwin, compile so that executables run under
                           DOS. Set to mingw to use gcc/g++/ld with
                           -mno-cygwin. Set to msvc to use cl/link (or
@@ -1127,6 +1128,28 @@ Optional Packages:
                           both]
   --with-tags[=TAGS]
                           include additional configurations [automatic]
+
+  --with-coinutils-lib linker flags for using project CoinUtils
+  --with-coinutils-incdir directory with header files for using project
+                          CoinUtils
+  --with-coinutils-datadir
+                          directory with data files for using project
+                          CoinUtils
+  --with-osi-lib linker flags for using project Osi
+  --with-osi-incdir directory with header files for using project Osi
+  --with-osi-datadir directory with data files for using project Osi
+  --with-vol-lib linker flags for using project Vol
+  --with-vol-incdir directory with header files for using project Vol
+  --with-vol-datadir directory with data files for using project Vol
+  --with-clp-lib linker flags for using project Clp
+  --with-clp-incdir directory with header files for using project Clp
+  --with-clp-datadir directory with data files for using project Clp
+  --with-cgl-lib linker flags for using project Cgl
+  --with-cgl-incdir directory with header files for using project Cgl
+  --with-cgl-datadir directory with data files for using project Cgl
+  --with-bcp-lib linker flags for using project Bcp
+  --with-bcp-incdir directory with header files for using project Bcp
+  --with-bcp-datadir directory with data files for using project Bcp
 
 Some influential environment variables:
   CDEFS       Additional -D flags to be used when compiling C code.
@@ -1888,6 +1911,7 @@ fi
 	       comps="xlc gcc pgcc icc cc"
 	     fi
 	     ;;
+  *-linux-gnu*) comps="gcc cc pgcc icc xlc" ;;
   *-linux-*) comps="xlc gcc cc pgcc icc" ;;
   *)         comps="xlc_r xlc cc gcc pgcc icc" ;;
 esac
@@ -2625,6 +2649,24 @@ echo "$as_me: Overruling autoconf; cl does not recognise -g." >&6;}
 esac
 CFLAGS="$save_cflags"
 
+# add automake conditional so we can recognize cl compiler in makefile
+coin_cc_is_cl=false
+case "$CC" in
+  cl* | */cl* | CL* | */CL* | icl* | */icl* | ICL* | */ICL*)
+    coin_cc_is_cl=true
+    ;;
+esac
+
+
+if test $coin_cc_is_cl = true; then
+  COIN_CC_IS_CL_TRUE=
+  COIN_CC_IS_CL_FALSE='#'
+else
+  COIN_CC_IS_CL_TRUE='#'
+  COIN_CC_IS_CL_FALSE=
+fi
+
+
 # Check if a project specific CFLAGS variable has been set
 if test x$COIN_PRJCT != x; then
   eval coin_tmp=\${${COIN_PRJCT}_CFLAGS+set}
@@ -2645,10 +2687,10 @@ if test x"$CFLAGS" = x; then
       icc* | */icc*)
         ;;
       *)
-        coin_opt_cflags="-O3 -fomit-frame-pointer"
+        coin_opt_cflags="-O3"
         coin_add_cflags="-pipe"
-        coin_dbg_cflags="-g"
-        coin_warn_cflags="-Wimplicit -Wparentheses -Wsequence-point -Wreturn-type -Wcast-qual -Wall -Wno-unknown-pragmas"
+        coin_dbg_cflags="-g -O0"
+        coin_warn_cflags="-Wimplicit -Wparentheses -Wsequence-point -Wreturn-type -Wcast-qual -Wall -Wno-unknown-pragmas -Wno-long-long"
         case $build in
           *-darwin*)
             ;;
@@ -2913,6 +2955,11 @@ case "$CFLAGS" in
     fi ;;
 esac
 
+# add -DPROJECT_BUILD to signal compiler preprocessor which config header file to include
+if test x$COIN_PRJCT != x; then
+  CFLAGS="$CFLAGS -D${COIN_PRJCT}_BUILD"
+fi
+
 # Try if CFLAGS works
 save_CFLAGS="$CFLAGS"
 cat >conftest.$ac_ext <<_ACEOF
@@ -3027,10 +3074,9 @@ echo "$as_me: Will use MPI C compiler $MPICC" >&6;}
   CC="$MPICC"
 fi
 
-# Correct ADDLIBS initialization if we are using the MS compiler
+# Correct the LD variable if we are using the MS or Intel-windows compiler
 case "$CC" in
   cl* | */cl* | CL* | */CL* | icl* | */icl* | ICL* | */ICL*)
-    ADDLIBS=
     case $build in
   *-mingw*)
     if test "${LD+set}" = set; then :; else
@@ -3087,6 +3133,8 @@ case $build in
   *-*-solaris*)
   	     comps="CC xlC_r aCC g++ c++ pgCC icpc gpp cxx cc++ cl FCC KCC RCC" ;;
   *-darwin*) comps="g++ c++ CC" ;;
+  *-linux-gnu*)
+             comps="g++ c++ pgCC icpc gpp cxx cc++ cl FCC KCC RCC xlC_r aCC CC" ;;
           *) comps="xlC_r aCC CC g++ c++ pgCC icpc gpp cxx cc++ cl FCC KCC RCC" ;;
 esac
 
@@ -3518,13 +3566,27 @@ ac_link='$CXX -o conftest$ac_exeext $CXXFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ex
 ac_compiler_gnu=$ac_cv_cxx_compiler_gnu
 
 
+coin_cxx_is_cl=false
 # It seems that we need to cleanup something here for the Windows
 case "$CXX" in
   cl* | */cl* | CL* | */CL* | icl* | */icl* | ICL* | */ICL*)
     sed -e 's/^void exit (int);//' confdefs.h >> confdefs.hh
     mv confdefs.hh confdefs.h
+    coin_cxx_is_cl=true
     ;;
 esac
+
+# add automake conditional so we can recognize cl compiler in makefile
+
+
+if test $coin_cxx_is_cl = true; then
+  COIN_CXX_IS_CL_TRUE=
+  COIN_CXX_IS_CL_FALSE='#'
+else
+  COIN_CXX_IS_CL_TRUE='#'
+  COIN_CXX_IS_CL_FALSE=
+fi
+
 
 # Autoconf incorrectly concludes that cl recognises -g. It doesn't.
 case "$CXX" in
@@ -3559,10 +3621,10 @@ if test x"$CXXFLAGS" = x; then
         ;;
       *)
 # ToDo decide about unroll-loops
-        coin_opt_cxxflags="-O3 -fomit-frame-pointer"
+        coin_opt_cxxflags="-O3"
         coin_add_cxxflags="-pipe"
-        coin_dbg_cxxflags="-g"
-        coin_warn_cxxflags="-Wimplicit -Wparentheses -Wreturn-type -Wcast-qual -Wall -Wpointer-arith -Wwrite-strings -Wconversion -Wno-unknown-pragmas"
+        coin_dbg_cxxflags="-g -O0"
+        coin_warn_cxxflags="-Wparentheses -Wreturn-type -Wcast-qual -Wall -Wpointer-arith -Wwrite-strings -Wconversion -Wno-unknown-pragmas -Wno-long-long"
         case $build in
           *-darwin*)
             ;;
@@ -3839,6 +3901,11 @@ case "$CXXFLAGS" in
     fi ;;
 esac
 
+# add -DPROJECT_BUILD to signal compiler preprocessor which config header file to include
+if test x$COIN_PRJCT != x; then
+  CXXFLAGS="$CXXFLAGS -D${COIN_PRJCT}_BUILD"
+fi
+
 # Try if CXXFLAGS works
 save_CXXFLAGS="$CXXFLAGS"
 cat >conftest.$ac_ext <<_ACEOF
@@ -3953,8 +4020,9 @@ echo "$as_me: Will use MPI C++ compiler $MPICXX" >&6;}
   CXX="$MPICXX"
 fi
 
+# correct the LD variable in a mingw build with MS or intel compiler
 case "$CXX" in
-  cl* | */cl* | CL* | */CL* )
+  cl* | */cl* | CL* | */CL* | icl* | */icl* | ICL* | */ICL*)
     case $build in
   *-mingw*)
     if test "${LD+set}" = set; then :; else
@@ -3987,11 +4055,13 @@ case $build in
      if test "$enable_doscompile" = msvc ; then
        coin_f77_comps="ifort fl32 compile_f2c"
      else
-       coin_f77_comps="gfortran g77 ifort fl32 compile_f2c"
+       coin_f77_comps="gfortran ifort g95 g77 fl32 compile_f2c"
      fi ;;
   *-*-solaris*)
-     coin_f77_comps="f95 f90 f77 xlf_r fort77 gfortran g77 pgf90 pgf77 ifort ifc frt af77" ;;
-  *) coin_f77_comps="xlf_r fort77 gfortran f77 g77 pgf90 pgf77 ifort ifc frt af77" ;;
+     coin_f77_comps="f95 f90 g95 f77 xlf_r fort77 gfortran g77 pgf90 pgf77 ifort ifc frt af77" ;;
+  *-linux-gnu*)
+     coin_f77_comps="gfortran ifort g95 fort77 f77 g77 pgf90 pgf77 ifc frt af77 xlf_r" ;;
+  *) coin_f77_comps="xlf_r fort77 gfortran ifort g95 f77 g77 pgf90 pgf77 ifc frt af77" ;;
  esac
 
 
@@ -4162,7 +4232,7 @@ fi
 
 
 # Provide some information about the compiler.
-echo "$as_me:4165:" \
+echo "$as_me:4235:" \
      "checking for Fortran 77 compiler version" >&5
 ac_compiler=`set X $ac_compile; echo $2`
 { (eval echo "$as_me:$LINENO: \"$ac_compiler --version </dev/null >&5\"") >&5
@@ -4328,9 +4398,9 @@ if test "$F77" != "unavailable" && test x"$FFLAGS" = x ; then
   coin_warn_fflags=
 
   if test "$G77" = "yes"; then
-    coin_opt_fflags="-O3 -fomit-frame-pointer"
+    coin_opt_fflags="-O3"
     coin_add_fflags="-pipe"
-    coin_dbg_fflags="-g"
+    coin_dbg_fflags="-g -O0"
     case $enable_doscompile in
       mingw)
 	FFLAGS="-mno-cygwin"
@@ -4650,6 +4720,7 @@ echo "$as_me: Will use MPI Fortran compiler $MPIF77" >&6;}
   F77="$MPIF77"
 fi
 
+# correct the LD variable if we use the intel fortran compiler in windows
 case "$F77" in
   ifort* | */ifort* | IFORT* | */IFORT*)
     case $build in
@@ -4767,6 +4838,17 @@ echo "$as_me:$LINENO: result: $ac_cv_prog_egrep" >&5
 echo "${ECHO_T}$ac_cv_prog_egrep" >&6
  EGREP=$ac_cv_prog_egrep
 
+
+echo "$as_me:$LINENO: checking whether ln -s works" >&5
+echo $ECHO_N "checking whether ln -s works... $ECHO_C" >&6
+LN_S=$as_ln_s
+if test "$LN_S" = "ln -s"; then
+  echo "$as_me:$LINENO: result: yes" >&5
+echo "${ECHO_T}yes" >&6
+else
+  echo "$as_me:$LINENO: result: no, using $LN_S" >&5
+echo "${ECHO_T}no, using $LN_S" >&6
+fi
 
 am__api_version="1.9"
 # Find a good install program.  We prefer a C program (faster),
@@ -5092,6 +5174,7 @@ else
   AMDEP_TRUE='#'
   AMDEP_FALSE=
 fi
+
 
 
 
@@ -5739,8 +5822,8 @@ echo "$as_me: error: I cannot find the libtool.m4 file." >&2;}
 fi
 
 
-  # Check if we have an Externals file
-  if test -r $srcdir/Externals; then
+  # Check if we have an Dependencies file
+  if test -r $srcdir/Dependencies; then
     coin_have_externals=yes
   fi
   # Check if subversion is installed and understands https
@@ -5813,11 +5896,16 @@ echo "${ECHO_T}$ac_cv_svn_understands_https" >&6
       else
         { { echo "$as_me:$LINENO: error: Cannot find the BuildTools directory" >&5
 echo "$as_me: error: Cannot find the BuildTools directory" >&2;}
-   { (exit 1); exit 1; }; }
+   { (exit better disable maintainer mode.); exit better disable maintainer mode.; }; }
       fi
     fi
   fi
 
+
+  # for running automake by make, we need to have Makemain.inc available at the place where it usually can be found during run_autotools
+  if test "$BUILDTOOLSDIR" != "$srcdir/BuildTools" ; then
+    $LN_S `cd $BUILDTOOLSDIR; pwd` "$srcdir/BuildTools"
+  fi
 
   # The following variable is set to the name of the directory where
   # the autotool scripts are located
@@ -6185,17 +6273,6 @@ echo "$as_me:$LINENO: result: $lt_cv_path_NM" >&5
 echo "${ECHO_T}$lt_cv_path_NM" >&6
 NM="$lt_cv_path_NM"
 
-echo "$as_me:$LINENO: checking whether ln -s works" >&5
-echo $ECHO_N "checking whether ln -s works... $ECHO_C" >&6
-LN_S=$as_ln_s
-if test "$LN_S" = "ln -s"; then
-  echo "$as_me:$LINENO: result: yes" >&5
-echo "${ECHO_T}yes" >&6
-else
-  echo "$as_me:$LINENO: result: no, using $LN_S" >&5
-echo "${ECHO_T}no, using $LN_S" >&6
-fi
-
 echo "$as_me:$LINENO: checking how to recognise dependent libraries" >&5
 echo $ECHO_N "checking how to recognise dependent libraries... $ECHO_C" >&6
 if test "${lt_cv_deplibs_check_method+set}" = set; then
@@ -6421,7 +6498,7 @@ ia64-*-hpux*)
   ;;
 *-*-irix6*)
   # Find out which ABI we are using.
-  echo '#line 6424 "configure"' > conftest.$ac_ext
+  echo '#line 6501 "configure"' > conftest.$ac_ext
   if { (eval echo "$as_me:$LINENO: \"$ac_compile\"") >&5
   (eval $ac_compile) 2>&5
   ac_status=$?
@@ -8385,11 +8462,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:8388: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:8465: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>conftest.err)
    ac_status=$?
    cat conftest.err >&5
-   echo "$as_me:8392: \$? = $ac_status" >&5
+   echo "$as_me:8469: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s "$ac_outfile"; then
      # The compiler can only warn and ignore the option if not recognized
      # So say no if there are warnings other than the usual output.
@@ -8653,11 +8730,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:8656: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:8733: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>conftest.err)
    ac_status=$?
    cat conftest.err >&5
-   echo "$as_me:8660: \$? = $ac_status" >&5
+   echo "$as_me:8737: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s "$ac_outfile"; then
      # The compiler can only warn and ignore the option if not recognized
      # So say no if there are warnings other than the usual output.
@@ -8757,11 +8834,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:8760: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:8837: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>out/conftest.err)
    ac_status=$?
    cat out/conftest.err >&5
-   echo "$as_me:8764: \$? = $ac_status" >&5
+   echo "$as_me:8841: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s out/conftest2.$ac_objext
    then
      # The compiler can only warn and ignore the option if not recognized
@@ -11102,7 +11179,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<EOF
-#line 11105 "configure"
+#line 11182 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -11202,7 +11279,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<EOF
-#line 11205 "configure"
+#line 11282 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -13546,11 +13623,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:13549: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:13626: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>conftest.err)
    ac_status=$?
    cat conftest.err >&5
-   echo "$as_me:13553: \$? = $ac_status" >&5
+   echo "$as_me:13630: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s "$ac_outfile"; then
      # The compiler can only warn and ignore the option if not recognized
      # So say no if there are warnings other than the usual output.
@@ -13650,11 +13727,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:13653: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:13730: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>out/conftest.err)
    ac_status=$?
    cat out/conftest.err >&5
-   echo "$as_me:13657: \$? = $ac_status" >&5
+   echo "$as_me:13734: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s out/conftest2.$ac_objext
    then
      # The compiler can only warn and ignore the option if not recognized
@@ -15220,11 +15297,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:15223: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:15300: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>conftest.err)
    ac_status=$?
    cat conftest.err >&5
-   echo "$as_me:15227: \$? = $ac_status" >&5
+   echo "$as_me:15304: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s "$ac_outfile"; then
      # The compiler can only warn and ignore the option if not recognized
      # So say no if there are warnings other than the usual output.
@@ -15324,11 +15401,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:15327: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:15404: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>out/conftest.err)
    ac_status=$?
    cat out/conftest.err >&5
-   echo "$as_me:15331: \$? = $ac_status" >&5
+   echo "$as_me:15408: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s out/conftest2.$ac_objext
    then
      # The compiler can only warn and ignore the option if not recognized
@@ -17531,11 +17608,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:17534: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:17611: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>conftest.err)
    ac_status=$?
    cat conftest.err >&5
-   echo "$as_me:17538: \$? = $ac_status" >&5
+   echo "$as_me:17615: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s "$ac_outfile"; then
      # The compiler can only warn and ignore the option if not recognized
      # So say no if there are warnings other than the usual output.
@@ -17799,11 +17876,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:17802: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:17879: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>conftest.err)
    ac_status=$?
    cat conftest.err >&5
-   echo "$as_me:17806: \$? = $ac_status" >&5
+   echo "$as_me:17883: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s "$ac_outfile"; then
      # The compiler can only warn and ignore the option if not recognized
      # So say no if there are warnings other than the usual output.
@@ -17903,11 +17980,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:17906: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:17983: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>out/conftest.err)
    ac_status=$?
    cat out/conftest.err >&5
-   echo "$as_me:17910: \$? = $ac_status" >&5
+   echo "$as_me:17987: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s out/conftest2.$ac_objext
    then
      # The compiler can only warn and ignore the option if not recognized
@@ -20788,6 +20865,19 @@ fi
 # to comile DLLs under Windows.
 LT_LDFLAGS=
 
+# Check if we want to set the library version
+echo "$as_me:$LINENO: checking if library version is set" >&5
+echo $ECHO_N "checking if library version is set... $ECHO_C" >&6
+if test x"$coin_libversion" != x; then
+  LT_LDFLAGS="$LT_LDFLAGS -version-info $coin_libversion"
+  echo "$as_me:$LINENO: result: $coin_libversion" >&5
+echo "${ECHO_T}$coin_libversion" >&6
+else
+  echo "$as_me:$LINENO: result: no" >&5
+echo "${ECHO_T}no" >&6
+fi
+
+
 
 #END
 }
@@ -20799,232 +20889,676 @@ LT_LDFLAGS=
 #############################################################################
 
 
+echo "$as_me:$LINENO: checking whether source of project CoinUtils is available and should be compiled" >&5
+echo $ECHO_N "checking whether source of project CoinUtils is available and should be compiled... $ECHO_C" >&6
 
-echo "$as_me:$LINENO: checking whether directory CoinUtils is available" >&5
-echo $ECHO_N "checking whether directory CoinUtils is available... $ECHO_C" >&6
-                coin_skip=no
-                if test x"$COIN_SKIP_PROJECTS" != x; then
-                  for dir in $COIN_SKIP_PROJECTS; do
-                    if test $dir = CoinUtils; then
-                      coin_skip=yes
-                    fi
-                  done
-                fi
-                if test $coin_skip = yes; then
-                  echo "$as_me:$LINENO: result: skipping" >&5
-echo "${ECHO_T}skipping" >&6
-                elif test -r $srcdir/CoinUtils/configure; then
-                  coin_subdirs="$coin_subdirs CoinUtils"
-                  echo "$as_me:$LINENO: result: yes" >&5
-echo "${ECHO_T}yes" >&6
+coin_has_coinutils=notGiven
+coin_reason=
+
+# check if user wants to skip project in any case
+
+if test x"$COIN_SKIP_PROJECTS" != x; then
+  for dir in $COIN_SKIP_PROJECTS; do
+    if test $dir = "CoinUtils"; then
+      coin_has_coinutils="no"
+      coin_reason="CoinUtils has been specified in COIN_SKIP_PROJECTS"
+    fi
+
+  done
+fi
+
+if test "$coin_has_coinutils" != no; then
+
+# Check whether --with-m4_tolower(CoinUtils) or --without-m4_tolower(CoinUtils) was given.
+if test "${with_coinutils+set}" = set; then
+  withval="$with_coinutils"
+  if test "$withval" = no ; then
+       coin_has_coinutils="no"
+       coin_reason="--without-coinutils has been specified"
+     fi
+
+fi;
+fi
+
+if test "$coin_has_coinutils" != no; then
+
+# Check whether --with-m4_tolower(CoinUtils)-lib or --without-m4_tolower(CoinUtils)-lib was given.
+if test "${with_coinutils_lib+set}" = set; then
+  withval="$with_coinutils_lib"
+  if test "$withval" = no ; then
+       coin_has_coinutils="no"
+       coin_reason="--without-coinutils-lib has been specified"
+     else
+       coin_has_coinutils="no"
+       coin_reason="--with-coinutils-lib has been specified"
+     fi
+fi;
+fi
+
+if test "$coin_has_coinutils" != no; then
+
+# Check whether --with-m4_tolower(CoinUtils)-incdir or --without-m4_tolower(CoinUtils)-incdir was given.
+if test "${with_coinutils_incdir+set}" = set; then
+  withval="$with_coinutils_incdir"
+  if test "$withval" = no ; then
+       coin_has_coinutils="no"
+       coin_reason="--without-coinutils-incdir has been specified"
+     else
+       coin_has_coinutils="no"
+       coin_reason="--with-coinutils-incdir has been specified"
+     fi
+fi;
+fi
+
+if test "$coin_has_coinutils" != no; then
+
+# Check whether --with-m4_tolower(CoinUtils)-datadir or --without-m4_tolower(CoinUtils)-datadir was given.
+if test "${with_coinutils_datadir+set}" = set; then
+  withval="$with_coinutils_datadir"
+  if test "$withval" = no ; then
+       coin_has_coinutils="no"
+       coin_reason="--without-coinutils-datadir has been specified"
+     else
+       coin_has_coinutils="no"
+       coin_reason="--with-coinutils-datadir has been specified"
+     fi
+fi;
+fi
+
+
+
+
+
+# check if project is available in present directory
+if test "$coin_has_coinutils" = notGiven; then
+  coin_has_coinutils=no
+  if test -d $srcdir/CoinUtils; then
+    coin_reason="source in CoinUtils"
+    # If a third argument is given, then we have to check if one one the files given in that third argument is present.
+    # If none of the files in the third argument is available, then we consider the project directory as non-existing.
+    # However, if no third argument is given, then this means that there should be no check, and existence of the directory is sufficient.
+     coin_has_coinutils="yes"
+
+  fi
+fi
+
+if test -z "$coin_reason" ; then
+  echo "$as_me:$LINENO: result: $coin_has_coinutils" >&5
+echo "${ECHO_T}$coin_has_coinutils" >&6
+else
+  echo "$as_me:$LINENO: result: $coin_has_coinutils, $coin_reason" >&5
+echo "${ECHO_T}$coin_has_coinutils, $coin_reason" >&6
+fi
+
+if test "$coin_has_coinutils" = yes ; then
+  if test -r $srcdir/CoinUtils/configure; then
+    coin_subdirs="$coin_subdirs CoinUtils"
 
 
 subdirs="$subdirs CoinUtils"
 
-                else
-                  echo "$as_me:$LINENO: result: no" >&5
-echo "${ECHO_T}no" >&6
-                fi
+  fi
+fi
+
+
+echo "$as_me:$LINENO: checking whether source of project Osi is available and should be compiled" >&5
+echo $ECHO_N "checking whether source of project Osi is available and should be compiled... $ECHO_C" >&6
+
+coin_has_osi=notGiven
+coin_reason=
+
+# check if user wants to skip project in any case
+
+if test x"$COIN_SKIP_PROJECTS" != x; then
+  for dir in $COIN_SKIP_PROJECTS; do
+    if test $dir = "Osi"; then
+      coin_has_osi="no"
+      coin_reason="Osi has been specified in COIN_SKIP_PROJECTS"
+    fi
+
+  done
+fi
+
+if test "$coin_has_osi" != no; then
+
+# Check whether --with-m4_tolower(Osi) or --without-m4_tolower(Osi) was given.
+if test "${with_osi+set}" = set; then
+  withval="$with_osi"
+  if test "$withval" = no ; then
+       coin_has_osi="no"
+       coin_reason="--without-osi has been specified"
+     fi
+
+fi;
+fi
+
+if test "$coin_has_osi" != no; then
+
+# Check whether --with-m4_tolower(Osi)-lib or --without-m4_tolower(Osi)-lib was given.
+if test "${with_osi_lib+set}" = set; then
+  withval="$with_osi_lib"
+  if test "$withval" = no ; then
+       coin_has_osi="no"
+       coin_reason="--without-osi-lib has been specified"
+     else
+       coin_has_osi="no"
+       coin_reason="--with-osi-lib has been specified"
+     fi
+fi;
+fi
+
+if test "$coin_has_osi" != no; then
+
+# Check whether --with-m4_tolower(Osi)-incdir or --without-m4_tolower(Osi)-incdir was given.
+if test "${with_osi_incdir+set}" = set; then
+  withval="$with_osi_incdir"
+  if test "$withval" = no ; then
+       coin_has_osi="no"
+       coin_reason="--without-osi-incdir has been specified"
+     else
+       coin_has_osi="no"
+       coin_reason="--with-osi-incdir has been specified"
+     fi
+fi;
+fi
+
+if test "$coin_has_osi" != no; then
+
+# Check whether --with-m4_tolower(Osi)-datadir or --without-m4_tolower(Osi)-datadir was given.
+if test "${with_osi_datadir+set}" = set; then
+  withval="$with_osi_datadir"
+  if test "$withval" = no ; then
+       coin_has_osi="no"
+       coin_reason="--without-osi-datadir has been specified"
+     else
+       coin_has_osi="no"
+       coin_reason="--with-osi-datadir has been specified"
+     fi
+fi;
+fi
 
 
 
 
 
+# check if project is available in present directory
+if test "$coin_has_osi" = notGiven; then
+  coin_has_osi=no
+  if test -d $srcdir/Osi; then
+    coin_reason="source in Osi"
+    # If a third argument is given, then we have to check if one one the files given in that third argument is present.
+    # If none of the files in the third argument is available, then we consider the project directory as non-existing.
+    # However, if no third argument is given, then this means that there should be no check, and existence of the directory is sufficient.
+     coin_has_osi="yes"
 
+  fi
+fi
 
+if test -z "$coin_reason" ; then
+  echo "$as_me:$LINENO: result: $coin_has_osi" >&5
+echo "${ECHO_T}$coin_has_osi" >&6
+else
+  echo "$as_me:$LINENO: result: $coin_has_osi, $coin_reason" >&5
+echo "${ECHO_T}$coin_has_osi, $coin_reason" >&6
+fi
 
-
-
-
-
-
-echo "$as_me:$LINENO: checking whether directory Vol is available" >&5
-echo $ECHO_N "checking whether directory Vol is available... $ECHO_C" >&6
-                coin_skip=no
-                if test x"$COIN_SKIP_PROJECTS" != x; then
-                  for dir in $COIN_SKIP_PROJECTS; do
-                    if test $dir = Vol; then
-                      coin_skip=yes
-                    fi
-                  done
-                fi
-                if test $coin_skip = yes; then
-                  echo "$as_me:$LINENO: result: skipping" >&5
-echo "${ECHO_T}skipping" >&6
-                elif test -r $srcdir/Vol/configure; then
-                  coin_subdirs="$coin_subdirs Vol"
-                  echo "$as_me:$LINENO: result: yes" >&5
-echo "${ECHO_T}yes" >&6
-
-
-subdirs="$subdirs Vol"
-
-                else
-                  echo "$as_me:$LINENO: result: no" >&5
-echo "${ECHO_T}no" >&6
-                fi
-
-
-
-
-
-
-
-
-
-
-
-
-
-echo "$as_me:$LINENO: checking whether directory Clp is available" >&5
-echo $ECHO_N "checking whether directory Clp is available... $ECHO_C" >&6
-                coin_skip=no
-                if test x"$COIN_SKIP_PROJECTS" != x; then
-                  for dir in $COIN_SKIP_PROJECTS; do
-                    if test $dir = Clp; then
-                      coin_skip=yes
-                    fi
-                  done
-                fi
-                if test $coin_skip = yes; then
-                  echo "$as_me:$LINENO: result: skipping" >&5
-echo "${ECHO_T}skipping" >&6
-                elif test -r $srcdir/Clp/configure; then
-                  coin_subdirs="$coin_subdirs Clp"
-                  echo "$as_me:$LINENO: result: yes" >&5
-echo "${ECHO_T}yes" >&6
-
-
-subdirs="$subdirs Clp"
-
-                else
-                  echo "$as_me:$LINENO: result: no" >&5
-echo "${ECHO_T}no" >&6
-                fi
-
-
-
-
-
-
-
-
-
-
-
-
-
-echo "$as_me:$LINENO: checking whether directory Osi is available" >&5
-echo $ECHO_N "checking whether directory Osi is available... $ECHO_C" >&6
-                coin_skip=no
-                if test x"$COIN_SKIP_PROJECTS" != x; then
-                  for dir in $COIN_SKIP_PROJECTS; do
-                    if test $dir = Osi; then
-                      coin_skip=yes
-                    fi
-                  done
-                fi
-                if test $coin_skip = yes; then
-                  echo "$as_me:$LINENO: result: skipping" >&5
-echo "${ECHO_T}skipping" >&6
-                elif test -r $srcdir/Osi/configure; then
-                  coin_subdirs="$coin_subdirs Osi"
-                  echo "$as_me:$LINENO: result: yes" >&5
-echo "${ECHO_T}yes" >&6
+if test "$coin_has_osi" = yes ; then
+  if test -r $srcdir/Osi/configure; then
+    coin_subdirs="$coin_subdirs Osi"
 
 
 subdirs="$subdirs Osi"
 
-                else
-                  echo "$as_me:$LINENO: result: no" >&5
-echo "${ECHO_T}no" >&6
-                fi
+  fi
+fi
+
+
+echo "$as_me:$LINENO: checking whether source of project Vol is available and should be compiled" >&5
+echo $ECHO_N "checking whether source of project Vol is available and should be compiled... $ECHO_C" >&6
+
+coin_has_vol=notGiven
+coin_reason=
+
+# check if user wants to skip project in any case
+
+if test x"$COIN_SKIP_PROJECTS" != x; then
+  for dir in $COIN_SKIP_PROJECTS; do
+    if test $dir = "Vol"; then
+      coin_has_vol="no"
+      coin_reason="Vol has been specified in COIN_SKIP_PROJECTS"
+    fi
+
+  done
+fi
+
+if test "$coin_has_vol" != no; then
+
+# Check whether --with-m4_tolower(Vol) or --without-m4_tolower(Vol) was given.
+if test "${with_vol+set}" = set; then
+  withval="$with_vol"
+  if test "$withval" = no ; then
+       coin_has_vol="no"
+       coin_reason="--without-vol has been specified"
+     fi
+
+fi;
+fi
+
+if test "$coin_has_vol" != no; then
+
+# Check whether --with-m4_tolower(Vol)-lib or --without-m4_tolower(Vol)-lib was given.
+if test "${with_vol_lib+set}" = set; then
+  withval="$with_vol_lib"
+  if test "$withval" = no ; then
+       coin_has_vol="no"
+       coin_reason="--without-vol-lib has been specified"
+     else
+       coin_has_vol="no"
+       coin_reason="--with-vol-lib has been specified"
+     fi
+fi;
+fi
+
+if test "$coin_has_vol" != no; then
+
+# Check whether --with-m4_tolower(Vol)-incdir or --without-m4_tolower(Vol)-incdir was given.
+if test "${with_vol_incdir+set}" = set; then
+  withval="$with_vol_incdir"
+  if test "$withval" = no ; then
+       coin_has_vol="no"
+       coin_reason="--without-vol-incdir has been specified"
+     else
+       coin_has_vol="no"
+       coin_reason="--with-vol-incdir has been specified"
+     fi
+fi;
+fi
+
+if test "$coin_has_vol" != no; then
+
+# Check whether --with-m4_tolower(Vol)-datadir or --without-m4_tolower(Vol)-datadir was given.
+if test "${with_vol_datadir+set}" = set; then
+  withval="$with_vol_datadir"
+  if test "$withval" = no ; then
+       coin_has_vol="no"
+       coin_reason="--without-vol-datadir has been specified"
+     else
+       coin_has_vol="no"
+       coin_reason="--with-vol-datadir has been specified"
+     fi
+fi;
+fi
 
 
 
 
 
+# check if project is available in present directory
+if test "$coin_has_vol" = notGiven; then
+  coin_has_vol=no
+  if test -d $srcdir/Vol; then
+    coin_reason="source in Vol"
+    # If a third argument is given, then we have to check if one one the files given in that third argument is present.
+    # If none of the files in the third argument is available, then we consider the project directory as non-existing.
+    # However, if no third argument is given, then this means that there should be no check, and existence of the directory is sufficient.
+     coin_has_vol="yes"
+
+  fi
+fi
+
+if test -z "$coin_reason" ; then
+  echo "$as_me:$LINENO: result: $coin_has_vol" >&5
+echo "${ECHO_T}$coin_has_vol" >&6
+else
+  echo "$as_me:$LINENO: result: $coin_has_vol, $coin_reason" >&5
+echo "${ECHO_T}$coin_has_vol, $coin_reason" >&6
+fi
+
+if test "$coin_has_vol" = yes ; then
+  if test -r $srcdir/Vol/configure; then
+    coin_subdirs="$coin_subdirs Vol"
+
+
+subdirs="$subdirs Vol"
+
+  fi
+fi
+
+
+echo "$as_me:$LINENO: checking whether source of project Clp is available and should be compiled" >&5
+echo $ECHO_N "checking whether source of project Clp is available and should be compiled... $ECHO_C" >&6
+
+coin_has_clp=notGiven
+coin_reason=
+
+# check if user wants to skip project in any case
+
+if test x"$COIN_SKIP_PROJECTS" != x; then
+  for dir in $COIN_SKIP_PROJECTS; do
+    if test $dir = "Clp"; then
+      coin_has_clp="no"
+      coin_reason="Clp has been specified in COIN_SKIP_PROJECTS"
+    fi
+
+  done
+fi
+
+if test "$coin_has_clp" != no; then
+
+# Check whether --with-m4_tolower(Clp) or --without-m4_tolower(Clp) was given.
+if test "${with_clp+set}" = set; then
+  withval="$with_clp"
+  if test "$withval" = no ; then
+       coin_has_clp="no"
+       coin_reason="--without-clp has been specified"
+     fi
+
+fi;
+fi
+
+if test "$coin_has_clp" != no; then
+
+# Check whether --with-m4_tolower(Clp)-lib or --without-m4_tolower(Clp)-lib was given.
+if test "${with_clp_lib+set}" = set; then
+  withval="$with_clp_lib"
+  if test "$withval" = no ; then
+       coin_has_clp="no"
+       coin_reason="--without-clp-lib has been specified"
+     else
+       coin_has_clp="no"
+       coin_reason="--with-clp-lib has been specified"
+     fi
+fi;
+fi
+
+if test "$coin_has_clp" != no; then
+
+# Check whether --with-m4_tolower(Clp)-incdir or --without-m4_tolower(Clp)-incdir was given.
+if test "${with_clp_incdir+set}" = set; then
+  withval="$with_clp_incdir"
+  if test "$withval" = no ; then
+       coin_has_clp="no"
+       coin_reason="--without-clp-incdir has been specified"
+     else
+       coin_has_clp="no"
+       coin_reason="--with-clp-incdir has been specified"
+     fi
+fi;
+fi
+
+if test "$coin_has_clp" != no; then
+
+# Check whether --with-m4_tolower(Clp)-datadir or --without-m4_tolower(Clp)-datadir was given.
+if test "${with_clp_datadir+set}" = set; then
+  withval="$with_clp_datadir"
+  if test "$withval" = no ; then
+       coin_has_clp="no"
+       coin_reason="--without-clp-datadir has been specified"
+     else
+       coin_has_clp="no"
+       coin_reason="--with-clp-datadir has been specified"
+     fi
+fi;
+fi
 
 
 
 
 
+# check if project is available in present directory
+if test "$coin_has_clp" = notGiven; then
+  coin_has_clp=no
+  if test -d $srcdir/Clp; then
+    coin_reason="source in Clp"
+    # If a third argument is given, then we have to check if one one the files given in that third argument is present.
+    # If none of the files in the third argument is available, then we consider the project directory as non-existing.
+    # However, if no third argument is given, then this means that there should be no check, and existence of the directory is sufficient.
+     coin_has_clp="yes"
+
+  fi
+fi
+
+if test -z "$coin_reason" ; then
+  echo "$as_me:$LINENO: result: $coin_has_clp" >&5
+echo "${ECHO_T}$coin_has_clp" >&6
+else
+  echo "$as_me:$LINENO: result: $coin_has_clp, $coin_reason" >&5
+echo "${ECHO_T}$coin_has_clp, $coin_reason" >&6
+fi
+
+if test "$coin_has_clp" = yes ; then
+  if test -r $srcdir/Clp/configure; then
+    coin_subdirs="$coin_subdirs Clp"
+
+
+subdirs="$subdirs Clp"
+
+  fi
+fi
+
+
+echo "$as_me:$LINENO: checking whether source of project Cgl is available and should be compiled" >&5
+echo $ECHO_N "checking whether source of project Cgl is available and should be compiled... $ECHO_C" >&6
+
+coin_has_cgl=notGiven
+coin_reason=
+
+# check if user wants to skip project in any case
+
+if test x"$COIN_SKIP_PROJECTS" != x; then
+  for dir in $COIN_SKIP_PROJECTS; do
+    if test $dir = "Cgl"; then
+      coin_has_cgl="no"
+      coin_reason="Cgl has been specified in COIN_SKIP_PROJECTS"
+    fi
+
+  done
+fi
+
+if test "$coin_has_cgl" != no; then
+
+# Check whether --with-m4_tolower(Cgl) or --without-m4_tolower(Cgl) was given.
+if test "${with_cgl+set}" = set; then
+  withval="$with_cgl"
+  if test "$withval" = no ; then
+       coin_has_cgl="no"
+       coin_reason="--without-cgl has been specified"
+     fi
+
+fi;
+fi
+
+if test "$coin_has_cgl" != no; then
+
+# Check whether --with-m4_tolower(Cgl)-lib or --without-m4_tolower(Cgl)-lib was given.
+if test "${with_cgl_lib+set}" = set; then
+  withval="$with_cgl_lib"
+  if test "$withval" = no ; then
+       coin_has_cgl="no"
+       coin_reason="--without-cgl-lib has been specified"
+     else
+       coin_has_cgl="no"
+       coin_reason="--with-cgl-lib has been specified"
+     fi
+fi;
+fi
+
+if test "$coin_has_cgl" != no; then
+
+# Check whether --with-m4_tolower(Cgl)-incdir or --without-m4_tolower(Cgl)-incdir was given.
+if test "${with_cgl_incdir+set}" = set; then
+  withval="$with_cgl_incdir"
+  if test "$withval" = no ; then
+       coin_has_cgl="no"
+       coin_reason="--without-cgl-incdir has been specified"
+     else
+       coin_has_cgl="no"
+       coin_reason="--with-cgl-incdir has been specified"
+     fi
+fi;
+fi
+
+if test "$coin_has_cgl" != no; then
+
+# Check whether --with-m4_tolower(Cgl)-datadir or --without-m4_tolower(Cgl)-datadir was given.
+if test "${with_cgl_datadir+set}" = set; then
+  withval="$with_cgl_datadir"
+  if test "$withval" = no ; then
+       coin_has_cgl="no"
+       coin_reason="--without-cgl-datadir has been specified"
+     else
+       coin_has_cgl="no"
+       coin_reason="--with-cgl-datadir has been specified"
+     fi
+fi;
+fi
 
 
 
-echo "$as_me:$LINENO: checking whether directory Cgl is available" >&5
-echo $ECHO_N "checking whether directory Cgl is available... $ECHO_C" >&6
-                coin_skip=no
-                if test x"$COIN_SKIP_PROJECTS" != x; then
-                  for dir in $COIN_SKIP_PROJECTS; do
-                    if test $dir = Cgl; then
-                      coin_skip=yes
-                    fi
-                  done
-                fi
-                if test $coin_skip = yes; then
-                  echo "$as_me:$LINENO: result: skipping" >&5
-echo "${ECHO_T}skipping" >&6
-                elif test -r $srcdir/Cgl/configure; then
-                  coin_subdirs="$coin_subdirs Cgl"
-                  echo "$as_me:$LINENO: result: yes" >&5
-echo "${ECHO_T}yes" >&6
+
+
+# check if project is available in present directory
+if test "$coin_has_cgl" = notGiven; then
+  coin_has_cgl=no
+  if test -d $srcdir/Cgl; then
+    coin_reason="source in Cgl"
+    # If a third argument is given, then we have to check if one one the files given in that third argument is present.
+    # If none of the files in the third argument is available, then we consider the project directory as non-existing.
+    # However, if no third argument is given, then this means that there should be no check, and existence of the directory is sufficient.
+     coin_has_cgl="yes"
+
+  fi
+fi
+
+if test -z "$coin_reason" ; then
+  echo "$as_me:$LINENO: result: $coin_has_cgl" >&5
+echo "${ECHO_T}$coin_has_cgl" >&6
+else
+  echo "$as_me:$LINENO: result: $coin_has_cgl, $coin_reason" >&5
+echo "${ECHO_T}$coin_has_cgl, $coin_reason" >&6
+fi
+
+if test "$coin_has_cgl" = yes ; then
+  if test -r $srcdir/Cgl/configure; then
+    coin_subdirs="$coin_subdirs Cgl"
 
 
 subdirs="$subdirs Cgl"
 
-                else
-                  echo "$as_me:$LINENO: result: no" >&5
-echo "${ECHO_T}no" >&6
-                fi
+  fi
+fi
+
+
+echo "$as_me:$LINENO: checking whether source of project Bcp is available and should be compiled" >&5
+echo $ECHO_N "checking whether source of project Bcp is available and should be compiled... $ECHO_C" >&6
+
+coin_has_bcp=notGiven
+coin_reason=
+
+# check if user wants to skip project in any case
+
+if test x"$COIN_SKIP_PROJECTS" != x; then
+  for dir in $COIN_SKIP_PROJECTS; do
+    if test $dir = "Bcp"; then
+      coin_has_bcp="no"
+      coin_reason="Bcp has been specified in COIN_SKIP_PROJECTS"
+    fi
+
+  done
+fi
+
+if test "$coin_has_bcp" != no; then
+
+# Check whether --with-m4_tolower(Bcp) or --without-m4_tolower(Bcp) was given.
+if test "${with_bcp+set}" = set; then
+  withval="$with_bcp"
+  if test "$withval" = no ; then
+       coin_has_bcp="no"
+       coin_reason="--without-bcp has been specified"
+     fi
+
+fi;
+fi
+
+if test "$coin_has_bcp" != no; then
+
+# Check whether --with-m4_tolower(Bcp)-lib or --without-m4_tolower(Bcp)-lib was given.
+if test "${with_bcp_lib+set}" = set; then
+  withval="$with_bcp_lib"
+  if test "$withval" = no ; then
+       coin_has_bcp="no"
+       coin_reason="--without-bcp-lib has been specified"
+     else
+       coin_has_bcp="no"
+       coin_reason="--with-bcp-lib has been specified"
+     fi
+fi;
+fi
+
+if test "$coin_has_bcp" != no; then
+
+# Check whether --with-m4_tolower(Bcp)-incdir or --without-m4_tolower(Bcp)-incdir was given.
+if test "${with_bcp_incdir+set}" = set; then
+  withval="$with_bcp_incdir"
+  if test "$withval" = no ; then
+       coin_has_bcp="no"
+       coin_reason="--without-bcp-incdir has been specified"
+     else
+       coin_has_bcp="no"
+       coin_reason="--with-bcp-incdir has been specified"
+     fi
+fi;
+fi
+
+if test "$coin_has_bcp" != no; then
+
+# Check whether --with-m4_tolower(Bcp)-datadir or --without-m4_tolower(Bcp)-datadir was given.
+if test "${with_bcp_datadir+set}" = set; then
+  withval="$with_bcp_datadir"
+  if test "$withval" = no ; then
+       coin_has_bcp="no"
+       coin_reason="--without-bcp-datadir has been specified"
+     else
+       coin_has_bcp="no"
+       coin_reason="--with-bcp-datadir has been specified"
+     fi
+fi;
+fi
 
 
 
 
 
+# check if project is available in present directory
+if test "$coin_has_bcp" = notGiven; then
+  coin_has_bcp=no
+  if test -d $srcdir/Bcp; then
+    coin_reason="source in Bcp"
+    # If a third argument is given, then we have to check if one one the files given in that third argument is present.
+    # If none of the files in the third argument is available, then we consider the project directory as non-existing.
+    # However, if no third argument is given, then this means that there should be no check, and existence of the directory is sufficient.
+     coin_has_bcp="yes"
 
+  fi
+fi
 
+if test -z "$coin_reason" ; then
+  echo "$as_me:$LINENO: result: $coin_has_bcp" >&5
+echo "${ECHO_T}$coin_has_bcp" >&6
+else
+  echo "$as_me:$LINENO: result: $coin_has_bcp, $coin_reason" >&5
+echo "${ECHO_T}$coin_has_bcp, $coin_reason" >&6
+fi
 
-
-
-
-
-
-echo "$as_me:$LINENO: checking whether directory Bcp is available" >&5
-echo $ECHO_N "checking whether directory Bcp is available... $ECHO_C" >&6
-                coin_skip=no
-                if test x"$COIN_SKIP_PROJECTS" != x; then
-                  for dir in $COIN_SKIP_PROJECTS; do
-                    if test $dir = Bcp; then
-                      coin_skip=yes
-                    fi
-                  done
-                fi
-                if test $coin_skip = yes; then
-                  echo "$as_me:$LINENO: result: skipping" >&5
-echo "${ECHO_T}skipping" >&6
-                elif test -r $srcdir/Bcp/configure; then
-                  coin_subdirs="$coin_subdirs Bcp"
-                  echo "$as_me:$LINENO: result: yes" >&5
-echo "${ECHO_T}yes" >&6
+if test "$coin_has_bcp" = yes ; then
+  if test -r $srcdir/Bcp/configure; then
+    coin_subdirs="$coin_subdirs Bcp"
 
 
 subdirs="$subdirs Bcp"
 
-                else
-                  echo "$as_me:$LINENO: result: no" >&5
-echo "${ECHO_T}no" >&6
-                fi
-
-
-
-
-
-
-
-
-
-
+  fi
+fi
 
 
 ##############################################################################
@@ -21058,11 +21592,6 @@ echo "${ECHO_T}$coin_link_input_cmd" >&6
 
 if test x$coin_skip_ac_output != xyes; then
 
-  FADDLIBS="$ADDLIBS"
-  if test x"$coin_need_flibs" = xyes; then
-    ADDLIBS="$ADDLIBS $FLIBS"
-  fi
-
   # library extension
 
   case "$CC" in
@@ -21092,6 +21621,16 @@ if test x$coin_skip_ac_output != xyes; then
       fi
     done
     subdirs="$new_subdirs"
+  fi
+
+  # need to come before AC_OUTPUT
+  if test x$coin_projectdir != xyes; then
+    # write coin_subdirs to a file so that project configuration knows where to find uninstalled projects
+    echo $coin_subdirs > coin_subdirs.txt
+  else
+    # substitute for OBJDIR, needed to setup .pc file for uninstalled project
+    ABSBUILDDIR="`pwd`"
+
   fi
 
   cat >confcache <<\_ACEOF
@@ -21216,6 +21755,20 @@ LIBOBJS=$ac_libobjs
 LTLIBOBJS=$ac_ltlibobjs
 
 
+if test -z "${COIN_CC_IS_CL_TRUE}" && test -z "${COIN_CC_IS_CL_FALSE}"; then
+  { { echo "$as_me:$LINENO: error: conditional \"COIN_CC_IS_CL\" was never defined.
+Usually this means the macro was only invoked conditionally." >&5
+echo "$as_me: error: conditional \"COIN_CC_IS_CL\" was never defined.
+Usually this means the macro was only invoked conditionally." >&2;}
+   { (exit 1); exit 1; }; }
+fi
+if test -z "${COIN_CXX_IS_CL_TRUE}" && test -z "${COIN_CXX_IS_CL_FALSE}"; then
+  { { echo "$as_me:$LINENO: error: conditional \"COIN_CXX_IS_CL\" was never defined.
+Usually this means the macro was only invoked conditionally." >&5
+echo "$as_me: error: conditional \"COIN_CXX_IS_CL\" was never defined.
+Usually this means the macro was only invoked conditionally." >&2;}
+   { (exit 1); exit 1; }; }
+fi
 if test -z "${AMDEP_TRUE}" && test -z "${AMDEP_FALSE}"; then
   { { echo "$as_me:$LINENO: error: conditional \"AMDEP\" was never defined.
 Usually this means the macro was only invoked conditionally." >&5
@@ -21792,6 +22345,8 @@ s,@CPPFLAGS@,$CPPFLAGS,;t t
 s,@ac_ct_CC@,$ac_ct_CC,;t t
 s,@EXEEXT@,$EXEEXT,;t t
 s,@OBJEXT@,$OBJEXT,;t t
+s,@COIN_CC_IS_CL_TRUE@,$COIN_CC_IS_CL_TRUE,;t t
+s,@COIN_CC_IS_CL_FALSE@,$COIN_CC_IS_CL_FALSE,;t t
 s,@MPICC@,$MPICC,;t t
 s,@CXXDEFS@,$CXXDEFS,;t t
 s,@ADD_CXXFLAGS@,$ADD_CXXFLAGS,;t t
@@ -21800,6 +22355,8 @@ s,@OPT_CXXFLAGS@,$OPT_CXXFLAGS,;t t
 s,@CXX@,$CXX,;t t
 s,@CXXFLAGS@,$CXXFLAGS,;t t
 s,@ac_ct_CXX@,$ac_ct_CXX,;t t
+s,@COIN_CXX_IS_CL_TRUE@,$COIN_CXX_IS_CL_TRUE,;t t
+s,@COIN_CXX_IS_CL_FALSE@,$COIN_CXX_IS_CL_FALSE,;t t
 s,@MPICXX@,$MPICXX,;t t
 s,@ADD_FFLAGS@,$ADD_FFLAGS,;t t
 s,@DBG_FFLAGS@,$DBG_FFLAGS,;t t
@@ -21809,6 +22366,7 @@ s,@FFLAGS@,$FFLAGS,;t t
 s,@ac_ct_F77@,$ac_ct_F77,;t t
 s,@MPIF77@,$MPIF77,;t t
 s,@EGREP@,$EGREP,;t t
+s,@LN_S@,$LN_S,;t t
 s,@INSTALL_PROGRAM@,$INSTALL_PROGRAM,;t t
 s,@INSTALL_SCRIPT@,$INSTALL_SCRIPT,;t t
 s,@INSTALL_DATA@,$INSTALL_DATA,;t t
@@ -21862,7 +22420,6 @@ s,@host@,$host,;t t
 s,@host_cpu@,$host_cpu,;t t
 s,@host_vendor@,$host_vendor,;t t
 s,@host_os@,$host_os,;t t
-s,@LN_S@,$LN_S,;t t
 s,@ECHO@,$ECHO,;t t
 s,@AR@,$AR,;t t
 s,@ac_ct_AR@,$ac_ct_AR,;t t
@@ -21879,6 +22436,7 @@ s,@COIN_SKIP_PROJECTS@,$COIN_SKIP_PROJECTS,;t t
 s,@subdirs@,$subdirs,;t t
 s,@LIBEXT@,$LIBEXT,;t t
 s,@VPATH_DISTCLEANFILES@,$VPATH_DISTCLEANFILES,;t t
+s,@ABSBUILDDIR@,$ABSBUILDDIR,;t t
 s,@LIBOBJS@,$LIBOBJS,;t t
 s,@LTLIBOBJS@,$LTLIBOBJS,;t t
 CEOF
@@ -22583,6 +23141,8 @@ echo "$as_me: error: cannot create directory $dir" >&2;}
     done
   fi
 
+  { echo "$as_me:$LINENO: In case of trouble, first consult the troubleshooting page at https://projects.coin-or.org/BuildTools/wiki/user-troubleshooting" >&5
+echo "$as_me: In case of trouble, first consult the troubleshooting page at https://projects.coin-or.org/BuildTools/wiki/user-troubleshooting" >&6;}
   if test x$coin_projectdir = xyes; then
     { echo "$as_me:$LINENO: Configuration of $PACKAGE_NAME successful" >&5
 echo "$as_me: Configuration of $PACKAGE_NAME successful" >&6;}

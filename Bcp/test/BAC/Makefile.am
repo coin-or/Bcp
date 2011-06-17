@@ -29,42 +29,18 @@ nodist_unitTest_SOURCES += include/BB.hpp
 nodist_unitTest_SOURCES += include/BB_cut.hpp
 
 # List libraries of COIN projects
-unitTest_LDADD =
-unitTest_LDADD += ../../src/libBcp.la
-unitTest_LDADD += $(CGLOBJDIR)/src/libCgl.la
-unitTest_LDADD += $(OSIOBJDIR)/src/OsiClp/libOsiClp.la
-unitTest_LDADD += $(OSIOBJDIR)/src/libOsi.la
-unitTest_LDADD += $(CLPOBJDIR)/src/libClp.la
-unitTest_LDADD += $(COINUTILSOBJDIR)/src/libCoinUtils.la
-
-# List additional libraries
-LIBS += $(ADDLIBS)
-LIBS += `cat $(BCPOBJDIR)/bcp_addlibs.txt`
-LIBS += `cat $(CGLOBJDIR)/cgl_addlibs.txt`
-LIBS += `cat $(OSIOBJDIR)/osi_addlibs.txt`
-LIBS += `cat $(CLPOBJDIR)/clp_addlibs.txt`
-LIBS += `cat $(COINUTILSOBJDIR)/coinutils_addlibs.txt`
+unitTest_LDADD        = ../../src/libBcp.la $(BCPLIB_LIBS) $(BAC_LIBS)
+unitTest_DEPENDENCIES = ../../src/libBcp.la $(BCPLIB_DEPENDENCIES) $(BAC_DEPENDENCIES)
 
 # Here list all include flags, relative to this "srcdir" directory.  This
 # "cygpath" stuff is necessary to compile with native compilers on Cygwin
-AM_CPPFLAGS =
-AM_CPPFLAGS += -I`$(CYGPATH_W) $(BCPSRCDIR)/src/include`
-AM_CPPFLAGS += -I`$(CYGPATH_W) $(CGLSRCDIR)/src`
-AM_CPPFLAGS += -I`$(CYGPATH_W) $(CGLSRCDIR)/src/CglFlowCover`
-AM_CPPFLAGS += -I`$(CYGPATH_W) $(CGLSRCDIR)/src/CglGomory`
-AM_CPPFLAGS += -I`$(CYGPATH_W) $(CGLSRCDIR)/src/CglKnapsackCover`
-AM_CPPFLAGS += -I`$(CYGPATH_W) $(CGLSRCDIR)/src/CglOddHole`
-AM_CPPFLAGS += -I`$(CYGPATH_W) $(CGLSRCDIR)/src/CglProbing`
-AM_CPPFLAGS += -I`$(CYGPATH_W) $(OSISRCDIR)/src`
-AM_CPPFLAGS += -I`$(CYGPATH_W) $(OSISRCDIR)/src/OsiClp`
-AM_CPPFLAGS += -I`$(CYGPATH_W) $(CLPSRCDIR)/src`
-AM_CPPFLAGS += -I`$(CYGPATH_W) $(CLPOBJDIR)/inc`
-AM_CPPFLAGS += -I`$(CYGPATH_W) $(COINUTILSSRCDIR)/src`
-AM_CPPFLAGS += -I`$(CYGPATH_W) $(COINUTILSOBJDIR)/inc`
+AM_CPPFLAGS = -I`$(CYGPATH_W) $(srcdir)/../../src/include` \
+	$(BCPLIB_CFLAGS) \
+	$(BAC_CFLAGS) 
 
 # This line is necessary to allow VPATH compilation with MS compilers
 # on Cygwin
-DEFAULT_INCLUDES  = -I. -Iinclude -I$(top_builddir)/inc
+DEFAULT_INCLUDES = -I. -Iinclude 
 
 test: unitTest$(EXEEXT)
 	./unitTest$(EXEEXT) -param bb.par

@@ -1,0 +1,19 @@
+#ifndef __CONFIG_BCP_H__
+#define __CONFIG_BCP_H__
+
+/* Version number of project */
+#undef BCP_VERSION
+
+/* Major Version number of project */
+#undef BCP_VERSION_MAJOR
+
+/* Minor Version number of project */
+#undef BCP_VERSION_MINOR
+
+/* Release Version number of project */
+#undef BCP_VERSION_RELEASE
+
+/* Define to 1 if the Mpi package is available */
+#undef COIN_HAS_MPI
+
+#endif

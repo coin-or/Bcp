@@ -33,13 +33,16 @@ OBJS = \
 
 # CHANGEME: Additional include directories for compilation. Note that no
 # include directory needs to be listed here for headers from COIN.
-USER_INCDIRS = include $(CPLEX_H) @MPIINCDIR@
+USER_INCDIRS = include 
 
 ##########################################################################
 #  Usually, you don't have to change anything below.  Note that if you   #
 #  change certain compiler options, you might have to recompile the      #
 #  COIN package.                                                         #
 ##########################################################################
+
+COIN_HAS_PKGCONFIG = @COIN_HAS_PKGCONFIG_TRUE@TRUE
+COIN_CXX_IS_CL = @COIN_CXX_IS_CL_TRUE@TRUE
 
 # C++ Compiler command
 CXX = @CXX@
@@ -50,34 +53,31 @@ CXXFLAGS = @CXXFLAGS@
 # additional C++ Compiler options for linking
 CXXLINKFLAGS = @RPATH_FLAGS@
 
-# Directory with COIN header files
-COININCDIR = @abs_include_dir@/coin
+# Include directories (we use the CYGPATH_W variables to allow compilation with Windows compilers)
+ifeq ($(COIN_HAS_PKGCONFIG), TRUE)
+  INCL = `PKG_CONFIG_PATH=@COIN_PKG_CONFIG_PATH@ @PKG_CONFIG@ --cflags bcp`
+else
+  INCL = @BCPLIB_CFLAGS_INSTALLED@
+endif
+INCL += $(ADDINCFLAGS)
 
-# Directory with COIN libraries
-COINLIBDIR = @abs_lib_dir@
-
-# Libraries necessary to link with Clp
-LIBS = \
-	-L$(COINLIBDIR) \
-	-lBcp \
-	-lOsiClp \
-	-lOsiVol \
-	-lOsi \
-	-lClp \
-	-lVol \
-	-lCoinUtils \
-	`cat @CGLDOCDIR@/cgl_addlibs.txt` \
-	`cat @OSIDOCDIR@/osi_addlibs.txt` \
-	`cat @CLPDOCDIR@/clp_addlibs.txt` \
-	`cat @VOLDOCDIR@/vol_addlibs.txt` \
-	`cat @COINUTILSDOCDIR@/coinutils_addlibs.txt`
+# Linker flags
+ifeq ($(COIN_HAS_PKGCONFIG), TRUE)
+  LIBS = `PKG_CONFIG_PATH=@COIN_PKG_CONFIG_PATH@ @PKG_CONFIG@ --libs bcp`
+else
+  ifeq ($(COIN_CXX_IS_CL), TRUE)
+    LIBS = /link /libpath:`$(CYGPATH_W) @abs_lib_dir@` libBcp.lib @BCPLIB_LIBS_INSTALLED@
+  else
+    LIBS = -L@abs_lib_dir@ -lBcp @BCPLIB_LIBS_INSTALLED@
+  endif
+endif
 
 # The following is necessary under cygwin, if native compilers are used
 CYGPATH_W = @CYGPATH_W@
 
 # Necessary Include dirs (we use the CYGPATH_W variables to allow
 # compilation with Windows compilers)
-INCL = `for i in $(USER_INCDIRS) $(COININCDIR); do $(CYGPATH_W) $$i | sed -e 's/^/-I/'; done`
+INCL += `for i in $(USER_INCDIRS); do $(CYGPATH_W) $$i | sed -e 's/^/-I/'; done`
 
 all: $(EXE)
 

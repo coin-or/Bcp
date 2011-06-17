@@ -1,4 +1,19 @@
-/* inc/config_bcp.h.in.  Generated from configure.ac by autoheader.  */
+/* src/include/config.h.in.  Generated from configure.ac by autoheader.  */
+
+/* SVN revision number of project */
+#undef BCP_SVN_REV
+
+/* Version number of project */
+#undef BCP_VERSION
+
+/* Major Version number of project */
+#undef BCP_VERSION_MAJOR
+
+/* Minor Version number of project */
+#undef BCP_VERSION_MINOR
+
+/* Release Version number of project */
+#undef BCP_VERSION_RELEASE
 
 /* Define to the debug sanity check level (0 is no test) */
 #undef COIN_BCP_CHECKLEVEL
@@ -6,25 +21,16 @@
 /* Define to the debug verbosity level (0 is no output) */
 #undef COIN_BCP_VERBOSITY
 
-/* Define to 1 if the Bcp package is used */
-#undef COIN_HAS_BCP
-
-/* Define to 1 if the Cgl package is used */
+/* Define to 1 if the Cgl package is available */
 #undef COIN_HAS_CGL
 
-/* Define to 1 if the Clp package is used */
+/* Define to 1 if the Clp package is available */
 #undef COIN_HAS_CLP
-
-/* Define to 1 if the CoinUtils package is used */
-#undef COIN_HAS_COINUTILS
 
 /* Define to 1 if the Mpi package is available */
 #undef COIN_HAS_MPI
 
-/* Define to 1 if the Osi package is used */
-#undef COIN_HAS_OSI
-
-/* Define to 1 if the Vol package is used */
+/* Define to 1 if the Vol package is available */
 #undef COIN_HAS_VOL
 
 /* Define to 1 if you have the <dlfcn.h> header file. */
