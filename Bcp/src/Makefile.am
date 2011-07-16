@@ -154,7 +154,7 @@ libBcp_la_SOURCES = \
 	include/BCP_message_pvm.hpp \
 	include/BcpConfig.h
 
-# This is for libtool (on Windows)
+# This is for libtool
 libBcp_la_LDFLAGS = $(LT_LDFLAGS)
 
 ########################################################################
@@ -170,8 +170,7 @@ if COIN_HAS_MPI
 AM_CPPFLAGS +=  -I`$(CYGPATH_W) $(MPIINCDIR)`
 endif
 
-# This line is necessary to allow VPATH compilation with MS compilers
-# on Cygwin
+# This line is necessary to allow VPATH compilation
 DEFAULT_INCLUDES = -I. -I`$(CYGPATH_W) $(srcdir)/include` 
 
 ########################################################################
@@ -179,10 +178,9 @@ DEFAULT_INCLUDES = -I. -I`$(CYGPATH_W) $(srcdir)/include`
 ########################################################################
 
 # Here list all the header files that are required by a user of the library,
-# and that therefore should be installed in 'install'
+# and that therefore should be installed in 'include/coin'
 includecoindir = $(includedir)/coin
 includecoin_HEADERS = \
-	../src/include/config_bcp.h \
 	include/BCP_branch.hpp \
 	include/BCP_buffer.hpp \
 	include/BCP_cg.hpp \
@@ -252,10 +250,6 @@ includecoin_HEADERS = \
 	include/BCP_warmstart_dual.hpp \
 	include/BCP_warmstart_primaldual.hpp \
 	include/BCP_warmstart.hpp
-
-#############################################################################
-# Create the Config.h file that always defines HAVE_CONFIG_H and install it #
-#############################################################################
 
 install-exec-local:
 	$(install_sh_DATA) include/config_bcp.h $(DESTDIR)$(includecoindir)/BcpConfig.h
