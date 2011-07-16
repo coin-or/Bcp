@@ -12,7 +12,7 @@
 
 AC_PREREQ(2.59)
 
-AC_INIT([Bcp],[0.1],[https://projects.coin-or.org/Bcp/newticket])
+AC_INIT([Bcp],[trunk],[https://projects.coin-or.org/Bcp/newticket])
 
 AC_COPYRIGHT([
 Copyright 2006 International Business Machines and others.
