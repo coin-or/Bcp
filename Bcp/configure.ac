@@ -96,9 +96,9 @@ long bla()
   sysinfo(&info);
   return info.mem_unit*info.freeram;
 }],
-                    [AC_MSG_RESULT([yes])
-                     AC_DEFINE([HAVE_SYSINFO], [1], [Define to 1 if sysinfo function exists and runs with Bcp code])],
-                    [AC_MSG_RESULT([no])])
+    [AC_MSG_RESULT([yes])
+     AC_DEFINE([HAVE_SYSINFO], [1], [Define to 1 if sysinfo function exists and runs with Bcp code])],
+    [AC_MSG_RESULT([no])])
   AC_LANG_POP(C++)
 fi
 

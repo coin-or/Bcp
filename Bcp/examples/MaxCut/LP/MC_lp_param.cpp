@@ -3,6 +3,8 @@
 #include "MC_lp_param.hpp"
 #include "BCP_parameters.hpp"
 
+#include "CoinFinite.hpp"
+
 using std::make_pair;
 
 template <>
@@ -209,7 +211,7 @@ void BCP_parameter_set<MC_lp_par>::set_default_entries(){
    set_entry(MaxDepth, 10000000);
    set_entry(MstCycleCutGeneration, MC_AlwaysGenerateMstCycleCuts);
    set_entry(SPCycleCutGeneration, MC_AlwaysGenerateSPCycleCuts);
-   set_entry(StructureSwitchHeur, INT_MAX);
+   set_entry(StructureSwitchHeur, COIN_INT_MAX);
    set_entry(MstHeurNum, 3);
    set_entry(CycleCutHeurNum, 3);
    set_entry(MaxCycleCutNum, 1000);
