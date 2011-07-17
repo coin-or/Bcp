@@ -289,7 +289,7 @@ AM_CPPFLAGS = -I`$(CYGPATH_W) $(srcdir)/../../src/include` \
 
 
 # This line is necessary to allow VPATH compilation
-DEFAULT_INCLUDES = -I. -Iinclude -I`$(CYGPATH_W) $(srcdir)/include` 
+DEFAULT_INCLUDES = -I. -Iinclude -I`$(CYGPATH_W) $(top_builddir)/src/include`
 all: all-am
 
 .SUFFIXES:

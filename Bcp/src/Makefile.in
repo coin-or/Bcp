@@ -466,7 +466,7 @@ libBcp_la_LDFLAGS = $(LT_LDFLAGS)
 AM_CPPFLAGS = $(BCPLIB_CFLAGS) $(am__append_1)
 
 # This line is necessary to allow VPATH compilation
-DEFAULT_INCLUDES = -I. -I`$(CYGPATH_W) $(srcdir)/include` 
+DEFAULT_INCLUDES = -I. -I`$(CYGPATH_W) $(srcdir)/include` -Iinclude
 
 ########################################################################
 #                Headers that need to be installed                     #

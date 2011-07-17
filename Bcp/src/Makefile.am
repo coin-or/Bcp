@@ -171,7 +171,7 @@ AM_CPPFLAGS +=  -I`$(CYGPATH_W) $(MPIINCDIR)`
 endif
 
 # This line is necessary to allow VPATH compilation
-DEFAULT_INCLUDES = -I. -I`$(CYGPATH_W) $(srcdir)/include` 
+DEFAULT_INCLUDES = -I. -I`$(CYGPATH_W) $(srcdir)/include` -Iinclude
 
 ########################################################################
 #                Headers that need to be installed                     #

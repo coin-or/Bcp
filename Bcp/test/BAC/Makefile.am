@@ -39,7 +39,7 @@ AM_CPPFLAGS = -I`$(CYGPATH_W) $(srcdir)/../../src/include` \
 	$(BAC_CFLAGS) 
 
 # This line is necessary to allow VPATH compilation
-DEFAULT_INCLUDES = -I. -Iinclude -I`$(CYGPATH_W) $(srcdir)/include` 
+DEFAULT_INCLUDES = -I. -Iinclude -I`$(CYGPATH_W) $(top_builddir)/src/include`
 
 test: unitTest$(EXEEXT)
 	./unitTest$(EXEEXT) -param bb.par
