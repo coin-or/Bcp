@@ -55,9 +55,7 @@ host_triplet = @host@
 # specified.  But we need to list it as subdirectory to make sure that it is
 # included in the tarball
 @ALWAYS_FALSE@am__append_1 = test/BAC
-DIST_COMMON = README $(am__configure_deps) $(srcdir)/../config.guess \
-	$(srcdir)/../config.sub $(srcdir)/../install-sh \
-	$(srcdir)/../ltmain.sh $(srcdir)/../missing \
+DIST_COMMON = README $(am__configure_deps) \
 	$(srcdir)/BuildTools/Makemain.inc $(srcdir)/Makefile.am \
 	$(srcdir)/Makefile.in $(srcdir)/bcp-uninstalled.pc.in \
 	$(srcdir)/bcp.pc.in $(top_srcdir)/configure \
@@ -67,7 +65,8 @@ DIST_COMMON = README $(am__configure_deps) $(srcdir)/../config.guess \
 	$(top_srcdir)/examples/MCF-3/Makefile.in \
 	$(top_srcdir)/examples/MaxCut/Makefile.in \
 	$(top_srcdir)/src/include/config.h.in \
-	$(top_srcdir)/src/include/config_bcp.h.in AUTHORS INSTALL TODO
+	$(top_srcdir)/src/include/config_bcp.h.in AUTHORS INSTALL TODO \
+	config.guess config.sub depcomp install-sh ltmain.sh missing
 @HAVE_EXTERNALS_TRUE@am__append_2 = Dependencies
 @HAVE_EXTERNALS_TRUE@am__append_3 = .Dependencies-stamp
 subdir = .
@@ -659,7 +658,7 @@ check-TESTS: $(TESTS)
 distdir: $(DISTFILES)
 	$(am__remove_distdir)
 	mkdir $(distdir)
-	$(mkdir_p) $(distdir)/. $(distdir)/.. $(distdir)/BuildTools $(distdir)/doc $(distdir)/examples/BAC $(distdir)/examples/MCF-1 $(distdir)/examples/MCF-2 $(distdir)/examples/MCF-3 $(distdir)/examples/MaxCut $(distdir)/src/include
+	$(mkdir_p) $(distdir)/. $(distdir)/BuildTools $(distdir)/doc $(distdir)/examples/BAC $(distdir)/examples/MCF-1 $(distdir)/examples/MCF-2 $(distdir)/examples/MCF-3 $(distdir)/examples/MaxCut $(distdir)/src/include
 	@srcdirstrip=`echo "$(srcdir)" | sed 's|.|.|g'`; \
 	topsrcdirstrip=`echo "$(top_srcdir)" | sed 's|.|.|g'`; \
 	list='$(DISTFILES)'; for file in $$list; do \

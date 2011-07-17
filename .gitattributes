@@ -93,8 +93,11 @@ Bcp/Makefile.am -text
 Bcp/Makefile.in -text
 Bcp/bcp-uninstalled.pc.in -text
 Bcp/bcp.pc.in -text
+Bcp/config.guess -text
+Bcp/config.sub -text
 Bcp/configure -text
 Bcp/configure.ac -text
+Bcp/depcomp -text
 Bcp/doc/man.pdf svneol=native#unset
 Bcp/examples/BAC/AUTHORS -text
 Bcp/examples/BAC/INSTALL -text
@@ -209,6 +212,9 @@ Bcp/examples/MaxCut/include/MC_tm.hpp -text
 Bcp/examples/MaxCut/include/MC_tm_param.hpp -text
 Bcp/examples/MaxCut/junger1 -text
 Bcp/examples/MaxCut/junger1.par -text
+Bcp/install-sh -text
+Bcp/ltmain.sh -text
+Bcp/missing -text
 Bcp/src/Makefile.am -text
 Bcp/src/Makefile.in -text
 Bcp/src/Member/BCP_warmstart_primaldual.cpp -text
