@@ -105,7 +105,7 @@ MC_tm::create_root(BCP_vec<BCP_var*>& added_vars,
     sol = MC_mst_cutgen(mc, x, NULL, 1.0, 0.0,
 			MC_MstEdgeOrderingPreferExtreme,
 			improve_round, edge_switch, struct_switch,
-			0.9, INT_MAX, added_cuts, new_rows);
+			0.9, COIN_INT_MAX, added_cuts, new_rows);
   }
 
   // update best upper bound
