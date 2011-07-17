@@ -90,7 +90,7 @@ am_libBcp_la_OBJECTS = BCP_cg_user.lo BCP_cg_param.lo BCP_cg.lo \
 	BCP_vector_double.lo BCP_vector_int.lo BCP_vector_short.lo \
 	BCP_message_single.lo BCP_message_mpi.lo BCP_message_pvm.lo
 libBcp_la_OBJECTS = $(am_libBcp_la_OBJECTS)
-depcomp = $(SHELL) $(top_srcdir)/../depcomp
+depcomp = $(SHELL) $(top_srcdir)/depcomp
 am__depfiles_maybe = depfiles
 CXXCOMPILE = $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) \
 	$(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS)
