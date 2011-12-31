@@ -32,8 +32,18 @@ OBJS = \
 	./Member/BB.@OBJEXT@ \
 	./Member/BB_cut.@OBJEXT@
 
+LIB_CPLEX = 
+LIB_OsiCpx = 
+# Add access to Cplex if available (see bac.pdf for installation)
+ifneq ($(ENV_CPLEX_LIB),)
+  LIB_CPLEX = -L$(ENV_CPLEX_LIB) -lcplex -lpthread
+  LIB_OsiCpx = -lOsiCpx
+endif
+
 # CHANGEME: Additional include directories for compilation. Note that no
 # include directory needs to be listed here for headers from COIN.
+USER_OSI_LIBS = $(LIB_OsiCpx)
+USER_SOLVER_LIBS = $(LIB_CPLEX)
 USER_INCDIRS = include
 
 ##########################################################################
@@ -72,6 +82,8 @@ else
     LIBS = -L@abs_lib_dir@ -lBcp @BAC_LIBS_INSTALLED@ @BCPLIB_LIBS_INSTALLED@
   endif
 endif
+
+LIBS += $(USER_OSI_LIBS) $(USER_SOLVER_LIBS) 
 
 # The following is necessary under cygwin, if native compilers are used
 CYGPATH_W = @CYGPATH_W@
