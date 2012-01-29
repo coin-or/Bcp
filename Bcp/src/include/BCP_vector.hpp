@@ -8,6 +8,7 @@
 
 #include <memory>
 #include <cstddef>
+#include <cstring>
 
 /**
    The class BCP_vec serves the same purpose as the vector class in the
