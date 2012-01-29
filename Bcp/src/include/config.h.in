@@ -27,6 +27,9 @@
 /* Define to 1 if the Clp package is available */
 #undef COIN_HAS_CLP
 
+/* Define to 1 if the Cpx package is available */
+#undef COIN_HAS_CPX
+
 /* Define to 1 if the Mpi package is available */
 #undef COIN_HAS_MPI
 
