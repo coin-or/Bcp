@@ -41,6 +41,9 @@ BB_lp::initialize_solver_interface()
   clp->messageHandler()->setLogLevel(0);
   clp->getModelPtr()->messageHandler()->setLogLevel(0);
 
+  // Important if using Cplex
+  clp->setHintParam(OsiDoDualInResolve, true, OsiHintTry);
+
   return clp;
 }
 
