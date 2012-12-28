@@ -39,6 +39,8 @@ BB_lp::initialize_solver_interface()
 {
   OsiClpSolverInterface * clp = new OsiClpSolverInterface;
   clp->messageHandler()->setLogLevel(0);
+
+  // Comment out following line if using Cplex
   clp->getModelPtr()->messageHandler()->setLogLevel(0);
 
   // Important if using Cplex
