@@ -1,4 +1,4 @@
-// Last edit: 1/22/09
+// Last edit: 1/1/13
 //
 // Name:     bb.par
 // Author:   Francois Margot
@@ -64,6 +64,7 @@ BCP_TerminationGap_Relative              0.0 // If optimal solution has value v
 BCP_TreeSearchStrategy 			2  // 0: Best Bound 
 					   // 1: BFS 
 					   // 2: DFS
+					   // 3: PreferredFirstSearch
 				   	   // Default: 1
 
 BCP_ChildPreference 			0  // 0 : lowest lp bound
