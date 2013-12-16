@@ -65,8 +65,9 @@ AC_COIN_INIT_AUTO_TOOLS
 #############################################################################
 
 AC_COIN_CHECK_PACKAGE(Clp, [osi-clp], [BcpLib])
-if test $coin_has_clp != yes ; then
-  AC_MSG_ERROR([Required package Clp not available.])
+AC_COIN_CHECK_PACKAGE(Cpx,  [osi-cplex],  [BcpLib])
+if [test $coin_has_clp != yes && test $coin_has_cpx != yes]; then
+  AC_MSG_ERROR([No LP solver available. Bcp requires an LP solver])
 fi
 AC_COIN_CHECK_PACKAGE(Vol, [osi-vol], [BcpLib])
 AC_COIN_CHECK_PACKAGE(Cgl, [cgl], [Bac])

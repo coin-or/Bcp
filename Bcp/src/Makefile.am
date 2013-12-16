@@ -154,6 +154,11 @@ libBcp_la_SOURCES = \
 	include/BCP_message_pvm.hpp \
 	include/BcpConfig.h
 
+# List all additionally required libraries
+if DEPENDENCY_LINKING
+libBcp_la_LIBADD = $(BCPLIB_LIBS)
+endif
+
 # This is for libtool
 libBcp_la_LDFLAGS = $(LT_LDFLAGS)
 
