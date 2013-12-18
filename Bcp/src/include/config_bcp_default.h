@@ -4,7 +4,7 @@
 /***************************************************************************/
 
 /* Version number of project */
-#define BCP_VERSION "1.3"
+#define BCP_VERSION "1.3.8"
 
 /* Major Version number of project */
 #define BCP_VERSION_MAJOR 1
@@ -13,7 +13,7 @@
 #define BCP_VERSION_MINOR 3
 
 /* Release Version number of project */
-#define BCP_VERSION_RELEASE 9999
+#define BCP_VERSION_RELEASE 8
 
 /* Define to 1 if the Mpi package is used */
 /* #define COIN_HAS_MPI 1 */
