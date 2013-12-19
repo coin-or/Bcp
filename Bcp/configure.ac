@@ -41,7 +41,7 @@ AC_CANONICAL_BUILD
 # the source root directory contains definition of where to find those
 # externals.  The following macro ensures that those externals are
 # retrieved by svn if they are not there yet.
-AC_COIN_PROJECTDIR_INIT(Bcp,4:8:3)
+AC_COIN_PROJECTDIR_INIT(Bcp)
 
 # Check if user wants to produce debugging code
 AC_COIN_DEBUG_COMPILE(Bcp)
