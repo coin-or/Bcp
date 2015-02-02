@@ -4,13 +4,13 @@
 /***************************************************************************/
 
 /* Version number of project */
-#define BCP_VERSION      "trunk"
+#define BCP_VERSION "1.4"
 
 /* Major Version number of project */
-#define BCP_VERSION_MAJOR   9999
+#define BCP_VERSION_MAJOR 1
 
 /* Minor Version number of project */
-#define BCP_VERSION_MINOR   9999
+#define BCP_VERSION_MINOR 4
 
 /* Release Version number of project */
 #define BCP_VERSION_RELEASE 9999
