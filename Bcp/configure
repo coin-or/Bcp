@@ -20444,7 +20444,7 @@ fi;
 if test "$dependency_linking" = auto; then
   # On Cygwin and AIX, building DLLs doesn't work
   dependency_linking=no
-  if test x"$enable_shared" = xyes; then
+  if test x"$coin_disable_shared" = xno; then
     case $build in
       *-cygwin* | *-mingw*)
         case "$CC" in
@@ -24236,7 +24236,7 @@ fi
 
 # Here list all the files that configure should create (except for the
 # configuration header file)
-                                                                                                    ac_config_files="$ac_config_files Makefile src/Makefile test/BAC/Makefile examples/BAC/Makefile examples/MCF-1/Makefile examples/MCF-2/Makefile examples/MCF-3/Makefile examples/MaxCut/Makefile bcp.pc bcp-uninstalled.pc"
+                                                                                                              ac_config_files="$ac_config_files Makefile src/Makefile test/BAC/Makefile examples/BAC/Makefile examples/MCF-1/Makefile examples/MCF-2/Makefile examples/MCF-3/Makefile examples/MaxCut/Makefile bcp.pc bcp-uninstalled.pc doxydoc/doxygen.conf"
 
 
 # Here put the location and name of the configuration header file
@@ -24969,6 +24969,7 @@ do
   "examples/MaxCut/Makefile" ) CONFIG_FILES="$CONFIG_FILES examples/MaxCut/Makefile" ;;
   "bcp.pc" ) CONFIG_FILES="$CONFIG_FILES bcp.pc" ;;
   "bcp-uninstalled.pc" ) CONFIG_FILES="$CONFIG_FILES bcp-uninstalled.pc" ;;
+  "doxydoc/doxygen.conf" ) CONFIG_FILES="$CONFIG_FILES doxydoc/doxygen.conf" ;;
   "depfiles" ) CONFIG_COMMANDS="$CONFIG_COMMANDS depfiles" ;;
   "src/include/config.h" ) CONFIG_HEADERS="$CONFIG_HEADERS src/include/config.h" ;;
   "src/include/config_bcp.h" ) CONFIG_HEADERS="$CONFIG_HEADERS src/include/config_bcp.h" ;;

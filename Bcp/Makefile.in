@@ -59,6 +59,7 @@ DIST_COMMON = README $(am__configure_deps) \
 	$(srcdir)/BuildTools/Makemain.inc $(srcdir)/Makefile.am \
 	$(srcdir)/Makefile.in $(srcdir)/bcp-uninstalled.pc.in \
 	$(srcdir)/bcp.pc.in $(top_srcdir)/configure \
+	$(top_srcdir)/doxydoc/doxygen.conf.in \
 	$(top_srcdir)/examples/BAC/Makefile.in \
 	$(top_srcdir)/examples/MCF-1/Makefile.in \
 	$(top_srcdir)/examples/MCF-2/Makefile.in \
@@ -82,7 +83,8 @@ CONFIG_HEADER = $(top_builddir)/src/include/config.h \
 	$(top_builddir)/src/include/config_bcp.h
 CONFIG_CLEAN_FILES = examples/BAC/Makefile examples/MCF-1/Makefile \
 	examples/MCF-2/Makefile examples/MCF-3/Makefile \
-	examples/MaxCut/Makefile bcp.pc bcp-uninstalled.pc
+	examples/MaxCut/Makefile bcp.pc bcp-uninstalled.pc \
+	doxydoc/doxygen.conf
 SOURCES =
 DIST_SOURCES =
 RECURSIVE_TARGETS = all-recursive check-recursive dvi-recursive \
@@ -433,6 +435,8 @@ bcp.pc: $(top_builddir)/config.status $(srcdir)/bcp.pc.in
 	cd $(top_builddir) && $(SHELL) ./config.status $@
 bcp-uninstalled.pc: $(top_builddir)/config.status $(srcdir)/bcp-uninstalled.pc.in
 	cd $(top_builddir) && $(SHELL) ./config.status $@
+doxydoc/doxygen.conf: $(top_builddir)/config.status $(top_srcdir)/doxydoc/doxygen.conf.in
+	cd $(top_builddir) && $(SHELL) ./config.status $@
 
 mostlyclean-libtool:
 	-rm -f *.lo
@@ -669,7 +673,7 @@ check-TESTS: $(TESTS)
 distdir: $(DISTFILES)
 	$(am__remove_distdir)
 	mkdir $(distdir)
-	$(mkdir_p) $(distdir)/. $(distdir)/BuildTools $(distdir)/doc $(distdir)/examples/BAC $(distdir)/examples/MCF-1 $(distdir)/examples/MCF-2 $(distdir)/examples/MCF-3 $(distdir)/examples/MaxCut $(distdir)/src/include
+	$(mkdir_p) $(distdir)/. $(distdir)/BuildTools $(distdir)/doc $(distdir)/doxydoc $(distdir)/examples/BAC $(distdir)/examples/MCF-1 $(distdir)/examples/MCF-2 $(distdir)/examples/MCF-3 $(distdir)/examples/MaxCut $(distdir)/src/include
 	@srcdirstrip=`echo "$(srcdir)" | sed 's|.|.|g'`; \
 	topsrcdirstrip=`echo "$(top_srcdir)" | sed 's|.|.|g'`; \
 	list='$(DISTFILES)'; for file in $$list; do \

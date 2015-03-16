@@ -158,7 +158,8 @@ AC_CONFIG_FILES([Makefile
                  examples/MCF-3/Makefile
                  examples/MaxCut/Makefile
 		 bcp.pc
-		 bcp-uninstalled.pc])
+		 bcp-uninstalled.pc
+		 doxydoc/doxygen.conf])
 
 # Here put the location and name of the configuration header file
 AC_CONFIG_HEADER([src/include/config.h src/include/config_bcp.h])
