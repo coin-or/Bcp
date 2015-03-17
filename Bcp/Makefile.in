@@ -288,6 +288,12 @@ build_alias = @build_alias@
 build_cpu = @build_cpu@
 build_os = @build_os@
 build_vendor = @build_vendor@
+coin_doxy_excludes = @coin_doxy_excludes@
+coin_doxy_logname = @coin_doxy_logname@
+coin_doxy_tagfiles = @coin_doxy_tagfiles@
+coin_doxy_tagname = @coin_doxy_tagname@
+coin_doxy_usedot = @coin_doxy_usedot@
+coin_have_doxygen = @coin_have_doxygen@
 datadir = @datadir@
 exec_prefix = @exec_prefix@
 have_autoconf = @have_autoconf@
@@ -870,7 +876,7 @@ install-data-am: install-pkgconfiglibDATA
 	@$(NORMAL_INSTALL)
 	$(MAKE) $(AM_MAKEFLAGS) install-data-hook
 
-install-exec-am:
+install-exec-am: install-exec-local
 
 install-info: install-info-recursive
 
@@ -896,7 +902,8 @@ ps: ps-recursive
 
 ps-am:
 
-uninstall-am: uninstall-info-am uninstall-pkgconfiglibDATA
+uninstall-am: uninstall-info-am uninstall-local \
+	uninstall-pkgconfiglibDATA
 	@$(NORMAL_INSTALL)
 	$(MAKE) $(AM_MAKEFLAGS) uninstall-hook
 
@@ -911,14 +918,14 @@ uninstall-info: uninstall-info-recursive
 	distclean-tags distcleancheck distdir distuninstallcheck dvi \
 	dvi-am html html-am info info-am install install-am \
 	install-data install-data-am install-data-hook install-exec \
-	install-exec-am install-info install-info-am install-man \
-	install-pkgconfiglibDATA install-strip installcheck \
-	installcheck-am installdirs installdirs-am maintainer-clean \
-	maintainer-clean-generic maintainer-clean-recursive \
-	mostlyclean mostlyclean-generic mostlyclean-libtool \
-	mostlyclean-recursive pdf pdf-am ps ps-am tags tags-recursive \
-	uninstall uninstall-am uninstall-hook uninstall-info-am \
-	uninstall-pkgconfiglibDATA
+	install-exec-am install-exec-local install-info \
+	install-info-am install-man install-pkgconfiglibDATA \
+	install-strip installcheck installcheck-am installdirs \
+	installdirs-am maintainer-clean maintainer-clean-generic \
+	maintainer-clean-recursive mostlyclean mostlyclean-generic \
+	mostlyclean-libtool mostlyclean-recursive pdf pdf-am ps ps-am \
+	tags tags-recursive uninstall uninstall-am uninstall-hook \
+	uninstall-info-am uninstall-local uninstall-pkgconfiglibDATA
 
 
 test: all
@@ -928,7 +935,15 @@ test: all
 
 unitTest: test
 
-clean-local:
+# Doxygen documentation
+
+doxydoc:
+	doxygen doxydoc/doxygen.conf
+
+clean-doxydoc:
+	( cd doxydoc ; rm -rf html *.log *.tag )
+
+clean-local: clean-doxydoc
 	for t in $(TESTS); do \
 		(if test -r test/$$t/Makefile; then cd test/$$t; $(MAKE) clean; fi); \
 	done
@@ -944,7 +959,11 @@ distclean-local:
 		(if test -r test/$$t/testfiles.txt; then cd test/$$t; rm `cat testfiles.txt`; fi); \
 	done
 
-.PHONY: test unitTest
+install-exec-local: install-doc
+
+uninstall-local: uninstall-doc
+
+.PHONY: test unitTest doxydoc
 
 install-data-hook:
 	@$(mkdir_p) "$(addlibsdir)"

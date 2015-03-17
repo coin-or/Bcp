@@ -72,7 +72,15 @@ test: all
 
 unitTest: test
 
-clean-local:
+# Doxygen documentation
+
+doxydoc:
+	doxygen doxydoc/doxygen.conf
+
+clean-doxydoc:
+	( cd doxydoc ; rm -rf html *.log *.tag )
+
+clean-local: clean-doxydoc
 	for t in $(TESTS); do \
 		(if test -r test/$$t/Makefile; then cd test/$$t; $(MAKE) clean; fi); \
 	done
@@ -88,7 +96,11 @@ distclean-local:
 		(if test -r test/$$t/testfiles.txt; then cd test/$$t; rm `cat testfiles.txt`; fi); \
 	done
 
-.PHONY: test unitTest
+install-exec-local: install-doc
+
+uninstall-local: uninstall-doc
+
+.PHONY: test unitTest doxydoc
 
 ########################################################################
 #                  Installation of the addlibs file                    #
