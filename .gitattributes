@@ -99,6 +99,7 @@ Bcp/configure -text
 Bcp/configure.ac -text
 Bcp/depcomp -text
 Bcp/doc/man.pdf svneol=native#unset
+Bcp/doxydoc/doxygen.conf.in -text
 Bcp/examples/BAC/AUTHORS -text
 Bcp/examples/BAC/INSTALL -text
 Bcp/examples/BAC/LICENSE -text

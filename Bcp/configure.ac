@@ -143,6 +143,12 @@ AC_DEFUN([AC_COPY_FROM_FILE],
 	fi
 ])
 
+#############################################################################
+#                  Check for doxygen                                        #
+#############################################################################
+
+AC_COIN_DOXYGEN(CoinUtils Osi Vol Clp Cgl)
+
 ##############################################################################
 #                   Finishing up by writing all the output                   #
 ##############################################################################
@@ -158,7 +164,8 @@ AC_CONFIG_FILES([Makefile
                  examples/MCF-3/Makefile
                  examples/MaxCut/Makefile
 		 bcp.pc
-		 bcp-uninstalled.pc])
+		 bcp-uninstalled.pc
+		 doxydoc/doxygen.conf])
 
 # Here put the location and name of the configuration header file
 AC_CONFIG_HEADER([src/include/config.h src/include/config_bcp.h])
