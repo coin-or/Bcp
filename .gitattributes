@@ -1,4 +1,5 @@
 * text=auto !eol
+/.travis.yml -text
 /AUTHORS -text
 Applications/Csp/AUTHORS -text
 Applications/Csp/CG/CSP_colgen.cpp -text
