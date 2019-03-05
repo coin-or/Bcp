@@ -1,0 +1,128 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?xml-stylesheet type = "text/xsl" href = "http://www.coin-or.org/projects/autoGen.xsl"?>
+<projectData xmlns="coin-or.org" 
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="coin-or.org http://www.coin-or.org/projects/autoGen.xsd">
+
+	<projectBasics>
+
+		<projectName>BCP</projectName>
+		<projectRepo>Bcp</projectRepo>
+
+		<projectDescription>BCP is a parallel framework for
+		implementing branch, cut, and price algorithms for solving
+		mixed integer programs (MIPs). BCP provides the user with an
+		object-oriented framework that can be used to develop an
+		efficient problem class specific MIP solver without all the
+		implementational effort. involved with implementing a branch
+		and bound framework from scratch.</projectDescription>
+
+		<projectShortDescription>
+		  A framework for constructing parallel branch-cut-price
+		  algorithms for mixed-integer linear programs.
+		</projectShortDescription>
+
+		<projectManager>ladanyi at us dot ibm dot com </projectManager>
+
+		<projectHomePage>https://projects.coin-or.org/Bcp</projectHomePage>
+
+		<projectLicense> Common Public License 1.0 </projectLicense>
+		<projectLicenseURL>
+		    http://www.opensource.org/licenses/cpl1.0.php
+		</projectLicenseURL>
+
+                <coinLinkedProjects>
+                     <coinProject>
+                           <repoName>BuildTools</repoName>
+                     </coinProject>
+                     <coinProject>
+                           <repoName>CoinUtils</repoName>
+                     </coinProject>
+                     <coinProject>
+                           <repoName>Cgl</repoName>
+                     </coinProject>
+                     <coinProject>
+                           <repoName>Osi</repoName>
+                     </coinProject>
+                     <coinProject>
+                           <repoName>Clp</repoName>
+                     </coinProject>
+                </coinLinkedProjects>
+
+		<otherLinkedPackages></otherLinkedPackages>
+
+		<projectLanguage>C++</projectLanguage>
+
+		<developmentStatus>
+
+			<activityStatus>Active</activityStatus>
+
+			<maturityLevel>5</maturityLevel>
+
+		</developmentStatus>
+
+		<testedPlatforms>
+
+                     <platform>
+                           <operatingSystem>Microsoft Windows</operatingSystem>
+                           <compiler>MSVC++/cl</compiler>
+                     </platform>
+                     <platform>
+                           <operatingSystem>Microsoft Windows</operatingSystem>
+                           <compiler>CYGWIN/cl</compiler>
+                     </platform>
+                     <platform>
+                           <operatingSystem>Microsoft Windows</operatingSystem>
+                           <compiler>CYGWIN/gcc</compiler>
+                     </platform>
+                     <platform>
+                           <operatingSystem>Microsoft Windows</operatingSystem>
+                           <compiler>MSys/gcc</compiler>
+                     </platform>
+                     <platform>
+                           <operatingSystem>Linux</operatingSystem>
+                           <compiler>gcc</compiler>
+                     </platform>
+                     <platform>
+                          <operatingSystem>OSX</operatingSystem>
+                          <compiler>gcc</compiler>
+                     </platform>
+                     <platform>
+                          <operatingSystem>Solarix X86</operatingSystem>
+                          <compiler>gcc</compiler>
+                     </platform>
+                     <platform>
+                          <operatingSystem>Solarix X86</operatingSystem>
+                          <compiler>sunpro</compiler>
+                      </platform>
+
+                </testedPlatforms>
+
+                <projectCategories>
+
+                      <category>
+                           Optimization deterministic linear discrete
+                      </category>
+                </projectCategories>
+
+	</projectBasics>
+
+	<leftMenuLinks>
+
+		<documentation>https://projects.coin-or.org/Bcp</documentation>
+
+		<sourceCodeDownload>
+		http://www.coin-or.org/download/source/Bcp
+		</sourceCodeDownload>
+
+		<binaryDownload>
+		http://www.coin-or.org/download/binary/Bcp
+		</binaryDownload>
+
+		<mailingList>
+		http://list.coin-or.org/mailman/listinfo/bcp
+		</mailingList>
+
+	</leftMenuLinks>
+
+</projectData>
