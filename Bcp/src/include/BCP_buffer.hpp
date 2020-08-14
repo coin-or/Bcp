@@ -101,13 +101,13 @@ public:
    /**@name Modifying methods */
    /*@{*/
    /** Position the read head in the buffer. Must be between 0 and size(). */
-   inline void set_position(const int pos) throw(BCP_fatal_error) {
+   inline void set_position(const int pos) {
      if (pos < 0 || pos > size())
        throw BCP_fatal_error("Incorrest buffer position setting.\n");
      _pos = pos;
    }
    /** Cut off the end of the buffer. Must be between 0 and size(). */
-   inline void set_size(const int s) throw(BCP_fatal_error) {
+   inline void set_size(const int s) {
      if (s < 0 || s > size())
        throw BCP_fatal_error("Incorrest buffer position setting.\n");
      _size = s;
@@ -221,7 +221,7 @@ public:
    */
    template <class T> BCP_buffer& unpack(T*& values, int& length,
 					 bool allocate = true)
-     throw(BCP_fatal_error) {
+   {
      if (allocate) {
 #ifdef PARANOID
        if (_pos + sizeof(int) > _size)
