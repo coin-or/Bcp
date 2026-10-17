@@ -5,6 +5,20 @@
 
 #include <cstdio>
 #include "BcpConfig.h"
+#include "CoinTime.hpp"
+
+//-----------------------------------------------------------------------------
+// Wallclock time since the first call. A negative argument returns the time of
+// the first call; a positive one, in the first call, sets it. The processes of
+// a parallel run use this to measure time from the start of the tree manager.
+// This is what CoinWallclockTime(double) did up to CoinUtils 2.11; newer
+// versions of CoinUtils take no argument.
+inline double BCP_wallclock_time(double callType = 0)
+{
+  double callTime = CoinGetTimeOfDay();
+  static const double firstCall = callType > 0 ? callType : callTime;
+  return callType < 0 ? firstCall : callTime - firstCall;
+}
 
 //-----------------------------------------------------------------------------
 #ifdef HAVE_SYS_RESOURCE_H

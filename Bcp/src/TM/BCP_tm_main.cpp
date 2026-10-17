@@ -182,7 +182,7 @@ Number of process in parameter file %d > n_proc in mpirun -np %d!\n",
 
     p.stat.set_num_lp(p.param(BCP_tm_par::LpProcessNum));
 
-    p.start_time = CoinWallclockTime();
+    p.start_time = BCP_wallclock_time();
 
     FILE* logfile = 0;
 
@@ -321,11 +321,11 @@ bool BCP_tm_do_one_phase(BCP_tm_prob& p)
 	// Process incoming messages. If there are no active nodes left then
 	// timeout is set to 0, so we just check the queue, but not wait.
 	const int numNodeIds = p.lp_scheduler.numNodeIds();
-	const double t0 = CoinWallclockTime();
+	const double t0 = BCP_wallclock_time();
 	const double timeout = (p.lp_scheduler.numNodeIds() == 0 ?
 				0 : p.param(BCP_tm_par::TmTimeout));
 	p.msg_env->receive(BCP_AnyProcess, BCP_Msg_AnyMessage, buf, timeout);
-	const double t1 = CoinWallclockTime();
+	const double t1 = BCP_wallclock_time();
 	p.stat.update_wait_time(numNodeIds, t1-t0);
 #ifdef COIN_HAS_MPI
 	p.stat.update_queue_length(numNodeIds, MPIDI_BGLTS_get_num_messages());
