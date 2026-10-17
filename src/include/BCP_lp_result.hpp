@@ -3,6 +3,8 @@
 #ifndef _BCP_LP_RESULT_H
 #define _BCP_LP_RESULT_H
 
+#include "BcpConfig.h"
+
 // This file is fully docified.
 
 #include <cfloat>
@@ -36,7 +38,7 @@ enum BCP_termcode {
 /** This class holds the results after solving an LP relaxation. There may be
     an exact and/or an approximate solution. */
 
-class BCP_lp_result {
+class BCPLIB_EXPORT BCP_lp_result {
 private:
   /**@name Disabled methods */
   /*@{*/

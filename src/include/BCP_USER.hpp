@@ -3,6 +3,8 @@
 #ifndef _BCP_USER_H
 #define _BCP_USER_H
 
+#include "BcpConfig.h"
+
 // This file is prepared for doxygen.
 
 #include "CoinSmartPtr.hpp"
@@ -16,14 +18,14 @@ class BCP_warmstart;
 
 //#############################################################################
 
-class BCP_user_data : public Coin::ReferencedObject {
+class BCPLIB_EXPORT BCP_user_data : public Coin::ReferencedObject {
 public:
     virtual ~BCP_user_data() {}
 };
 
 //#############################################################################
 
-class BCP_user_class {
+class BCPLIB_EXPORT BCP_user_class {
 public:
     virtual ~BCP_user_class() {}
 };
@@ -45,7 +47,7 @@ public:
    access to the other methods of that class.
 */
 
-class BCP_user_pack {
+class BCPLIB_EXPORT BCP_user_pack {
 public:
     /** A pointer ot the usr class of the process from which the methods of
 	this class are invoked from. The user can try to dynamic cast \c
@@ -157,7 +159,7 @@ class BCP_message_environment;
     function is invoked. The member methods of that instance will be invoked
     to create the various objects (well, pointers to them) that are
     used/controlled by the user during the course of a run. */
-class USER_initialize {
+class BCPLIB_EXPORT USER_initialize {
 public:
    /**@name Destructor */
    /*@{*/
@@ -236,6 +238,6 @@ public:
     derived from the USER_initialize class. Its member methods will be invoked
     to initialize the user controlled parts of the branch-and-cut-and-price
     procedure. */
-int bcp_main(int argc, char* argv[], USER_initialize* user_init);
+BCPLIB_EXPORT int bcp_main(int argc, char* argv[], USER_initialize* user_init);
 
 #endif

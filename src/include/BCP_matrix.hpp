@@ -3,6 +3,8 @@
 #ifndef _BCP_MATRIX_H
 #define _BCP_MATRIX_H
 
+#include "BcpConfig.h"
+
 // This file is fully docified.
 
 // #include <cmath>
@@ -23,7 +25,7 @@ class BCP_buffer;
 /** This class holds a column in a compressed form. That is, it is a packed
     vector with an objective coefficient, lower and upper bound. */
 
-class BCP_col : public CoinPackedVector {
+class BCPLIB_EXPORT BCP_col : public CoinPackedVector {
    
 protected:
    /**@name Data members */
@@ -149,7 +151,7 @@ public:
 /** This class holds a row in a compressed form. That is, it is a packed
     vector with a lower and upper bound. */
 
-class BCP_row : public CoinPackedVector {
+class BCPLIB_EXPORT BCP_row : public CoinPackedVector {
 protected:
    /**@name Data members */
    /*@{*/
@@ -264,7 +266,7 @@ public:
 /** An object of type <code>BCP_lp_relax</code> holds the description of an lp
     relaxation. The matrix, lower/upper bounds on the variables and cuts and
     objective coefficients for the variables. */
-class BCP_lp_relax : public CoinPackedMatrix {
+class BCPLIB_EXPORT BCP_lp_relax : public CoinPackedMatrix {
 private:
    /**@name Data members */
    /*@{*/

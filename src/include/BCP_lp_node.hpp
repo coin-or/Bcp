@@ -3,6 +3,8 @@
 #ifndef _BCP_LP_NODE_H
 #define _BCP_LP_NODE_H
 
+#include "BcpConfig.h"
+
 #include "BCP_math.hpp"
 #include "BCP_enum_branch.hpp"
 #include "BCP_problem_core.hpp"
@@ -22,7 +24,7 @@ class BCP_user_data;
 This structure describes the ways various pieces of the current node's
 description are stored in the Tree Manager. */
 
-struct BCP_node_storage_in_tm {
+struct BCPLIB_EXPORT BCP_node_storage_in_tm {
     /** */
     BCP_storage_t core_change;
     /** */
@@ -39,7 +41,7 @@ struct BCP_node_storage_in_tm {
     
 This class holds the description of the parent of the current node. */
 
-class BCP_lp_parent {
+class BCPLIB_EXPORT BCP_lp_parent {
 private:
     /**@name Disabled methods */
     /*@{*/
@@ -89,7 +91,7 @@ public:
 
 This class holds the description of the current node itself. */
 
-class BCP_lp_node {
+class BCPLIB_EXPORT BCP_lp_node {
 private:
     /**@name Disabled methods */
     /*@{*/

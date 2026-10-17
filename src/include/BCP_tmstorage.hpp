@@ -3,6 +3,8 @@
 #ifndef _BCP_TMSTORAGE_H
 #define _BCP_TMSTORAGE_H
 
+#include "BcpConfig.h"
+
 #include <map>
 
 #include "BCP_enum_process_t.hpp"
@@ -27,7 +29,7 @@ class BCP_ts_user;
 
 //#############################################################################
 
-struct BCP_ts_par {
+struct BCPLIB_EXPORT BCP_ts_par {
 
     enum chr_params {
 	MessagePassingIsSerial,
@@ -64,14 +66,14 @@ struct BCP_ts_par {
 
 /** Same as BCP_tm_node_data, just there's no need to use smart pointers in
     this process */
-struct BCP_ts_node_data {
+struct BCPLIB_EXPORT BCP_ts_node_data {
     BCP_node_change* _desc;
     BCP_user_data*   _user;
 };
 
 //#############################################################################
 
-class BCP_ts_prob : public BCP_process {
+class BCPLIB_EXPORT BCP_ts_prob : public BCP_process {
 private:
     /**@name Disabled methods */
     /*@{*/
@@ -122,7 +124,7 @@ public:
 
 //#############################################################################
 
-class BCP_ts_user : public BCP_user_class {
+class BCPLIB_EXPORT BCP_ts_user : public BCP_user_class {
 private:
     BCP_ts_prob * p;
 public:

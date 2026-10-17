@@ -3,6 +3,8 @@
 #ifndef _BCP_WARMSTART_BASIS_H
 #define _BCP_WARMSTART_BASIS_H
 
+#include "BcpConfig.h"
+
 #include "BCP_warmstart.hpp"
 #include "BCP_vector_change.hpp"
 
@@ -21,7 +23,7 @@
     Only the added methods are documented in details on this page, for the
     inherited methods see the description of the base class. */
 
-class BCP_warmstart_basis : public BCP_warmstart {
+class BCPLIB_EXPORT BCP_warmstart_basis : public BCP_warmstart {
 private:
   /** The assignment operator is declared but not defined to disable it. */
   BCP_warmstart_basis& operator=(const BCP_warmstart_basis&);

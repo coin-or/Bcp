@@ -3,9 +3,11 @@
 #ifndef _BCP_MEMPOOL_H
 #define _BCP_MEMPOOL_H
 
+#include "BcpConfig.h"
+
 // #define BCP_MEMPOOL_SAVE_BLOCKHEADS
 
-class BCP_MemPool {
+class BCPLIB_EXPORT BCP_MemPool {
 private:
    const size_t BLOCK_SIZE;
    size_t entry_size;

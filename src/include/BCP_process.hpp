@@ -3,6 +3,8 @@
 #ifndef _BCP_PROCESS_H
 #define _BCP_PROCESS_H
 
+#include "BcpConfig.h"
+
 #if 1
    #define TMDBG  
    #define LPDBG 
@@ -13,7 +15,7 @@
 
 class BCP_buffer;
 
-class BCP_process {
+class BCPLIB_EXPORT BCP_process {
 private:
     const int me;
     const int parent;
@@ -46,7 +48,7 @@ public:
 #include <cmath>
 #include "CoinHelperFunctions.hpp"
 
-class BCP_scheduler {
+class BCPLIB_EXPORT BCP_scheduler {
 public:
   /** Default constructor.*/
   BCP_scheduler();

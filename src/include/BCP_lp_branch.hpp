@@ -3,6 +3,8 @@
 #ifndef _BCP_LP_BRANCH_H
 #define _BCP_LP_BRANCH_H
 
+#include "BcpConfig.h"
+
 // This file is fully docified.
 
 #include "BCP_math.hpp"
@@ -22,7 +24,7 @@ class OsiSolverInterface;
 
 /** This class exist only so that we can extract information from
     OsiIntegerBranchingObject */
-class BCP_lp_integer_branching_object : public OsiIntegerBranchingObject
+class BCPLIB_EXPORT BCP_lp_integer_branching_object : public OsiIntegerBranchingObject
 {
 public:
     BCP_lp_integer_branching_object(const OsiIntegerBranchingObject* o) :
@@ -35,7 +37,7 @@ public:
 
 /** This class exist only so that we can extract information from
     OsiIntegerBranchingObject */
-class BCP_lp_sos_branching_object : public OsiSOSBranchingObject
+class BCPLIB_EXPORT BCP_lp_sos_branching_object : public OsiSOSBranchingObject
 {
 public:
     BCP_lp_sos_branching_object(const OsiSOSBranchingObject* o) :
@@ -67,7 +69,7 @@ public:
    rest is internal to BCP.
 */
 
-class BCP_lp_branching_object {
+class BCPLIB_EXPORT BCP_lp_branching_object {
 private:
     /**@name Disabled methods */
     /*@{*/
@@ -318,7 +320,7 @@ are stored in an object of this type as well as the instructions what to
 do with each child in case this object is selected for branching.
 */
 
-class BCP_presolved_lp_brobj {
+class BCPLIB_EXPORT BCP_presolved_lp_brobj {
 private:
     /**@name Disabled methods */
     /*@{*/

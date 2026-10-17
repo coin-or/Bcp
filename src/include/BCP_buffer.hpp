@@ -3,6 +3,8 @@
 #ifndef _BCP_BUFFER_H
 #define _BCP_BUFFER_H
 
+#include "BcpConfig.h"
+
 #include <memory>
 #include <vector>
 
@@ -36,7 +38,7 @@
    <code>pack()</code> member method.
 */
 
-class BCP_buffer{
+class BCPLIB_EXPORT BCP_buffer{
 public:
    /* The data members are public for efficiency reasons. The message
        environment's receiving function should be able to directly manipulate

@@ -3,6 +3,8 @@
 #ifndef _BCP_LP_H
 #define _BCP_LP_H
 
+#include "BcpConfig.h"
+
 #include <cfloat>
 
 #include "BCP_math.hpp"
@@ -53,7 +55,7 @@ class CoinWarmStart;
 
 */
 
-class BCP_lp_statistics {
+class BCPLIB_EXPORT BCP_lp_statistics {
 public:
     /** */
     double time_feas_testing;
@@ -99,7 +101,7 @@ public:
 
 */
 
-class BCP_lp_prob : public BCP_process {
+class BCPLIB_EXPORT BCP_lp_prob : public BCP_process {
 private:
     /**@name Disabled methods */
     /*@{*/

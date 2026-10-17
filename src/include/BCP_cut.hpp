@@ -3,6 +3,8 @@
 #ifndef _BCP_CUT_H
 #define _BCP_CUT_H
 
+#include "BcpConfig.h"
+
 // This file is fully docified.
 
 //#############################################################################
@@ -26,7 +28,7 @@
    restriction).  
  */
 
-class BCP_cut : public Coin::ReferencedObject {
+class BCPLIB_EXPORT BCP_cut : public Coin::ReferencedObject {
 private:
   /**@name Disabled methods */
   /*@{*/
@@ -192,7 +194,7 @@ public:
    method obj_type().
 */
 
-class BCP_cut_core : public BCP_cut {
+class BCPLIB_EXPORT BCP_cut_core : public BCP_cut {
 
 private:
    /**@name Disabled methods */
@@ -239,7 +241,7 @@ public:
    either directly by the user or by the unpacking functions of the
    \c BCP_xx_user classes. */
 
-class BCP_cut_algo : public BCP_cut {
+class BCPLIB_EXPORT BCP_cut_algo : public BCP_cut {
 private:
    /**@name Disabled methods */
    /*@{*/
@@ -276,7 +278,7 @@ public:
    This class is just a collection of pointers to cuts with a number of
    methods to manipulate these cuts and/or select certain entries. */
 
-class BCP_cut_set : public BCP_vec<BCP_cut*> {
+class BCPLIB_EXPORT BCP_cut_set : public BCP_vec<BCP_cut*> {
 private:
    /**@name Disabled methods */
    /*@{*/

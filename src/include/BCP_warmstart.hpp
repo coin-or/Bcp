@@ -3,6 +3,8 @@
 #ifndef _BCP_WARMSTART_H
 #define _BCP_WARMSTART_H
 
+#include "BcpConfig.h"
+
 // This file is fully docified.
 
 #include "BCP_error.hpp"
@@ -21,7 +23,7 @@ class CoinWarmStart;
     relative to another warmstarting information.
 */
 
-class BCP_warmstart {
+class BCPLIB_EXPORT BCP_warmstart {
 public:
    /** The destructor is pure virtual. (There are no data members here.) */
    virtual ~BCP_warmstart() {}

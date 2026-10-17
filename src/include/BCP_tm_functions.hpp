@@ -3,6 +3,8 @@
 #ifndef _BCP_TM_FUNCTIONS_H
 #define _BCP_TM_FUNCTIONS_H
 
+#include "BcpConfig.h"
+
 #include <utility> // for pair
 
 #include "BCP_string.hpp"
@@ -31,42 +33,42 @@ class USER_packing;
 
 //-----------------------------------------------------------------------------
 // BCP_tm_commandline.cpp
-void
+BCPLIB_EXPORT void
 BCP_tm_parse_command_line(BCP_tm_prob& p,
 			  const int argnum, const char* const * arglist);
 //-----------------------------------------------------------------------------
 // BCP_tm_main.cpp
-bool BCP_tm_do_one_phase(BCP_tm_prob& p);
-BCP_problem_core* BCP_tm_create_core(BCP_tm_prob& p);
-BCP_tm_node* BCP_tm_create_root(BCP_tm_prob& p);
-void BCP_tm_tasks_before_new_phase(BCP_tm_prob& p);
+BCPLIB_EXPORT bool BCP_tm_do_one_phase(BCP_tm_prob& p);
+BCPLIB_EXPORT BCP_problem_core* BCP_tm_create_core(BCP_tm_prob& p);
+BCPLIB_EXPORT BCP_tm_node* BCP_tm_create_root(BCP_tm_prob& p);
+BCPLIB_EXPORT void BCP_tm_tasks_before_new_phase(BCP_tm_prob& p);
 
 //-----------------------------------------------------------------------------
 // BCP_tm_trimming.cpp
-void BCP_tm_trim_tree_wrapper(BCP_tm_prob& p, const bool between_phases);
-void BCP_tm_remove_explored(BCP_tm_prob& p, BCP_tm_node* node);
+BCPLIB_EXPORT void BCP_tm_trim_tree_wrapper(BCP_tm_prob& p, const bool between_phases);
+BCPLIB_EXPORT void BCP_tm_remove_explored(BCP_tm_prob& p, BCP_tm_node* node);
 
 //-----------------------------------------------------------------------------
 // BCP_tm_nodes_to_storage.cpp
-bool BCP_tm_is_data_balanced(BCP_tm_prob& p);
-bool BCP_tm_balance_data(BCP_tm_prob& p);
+BCPLIB_EXPORT bool BCP_tm_is_data_balanced(BCP_tm_prob& p);
+BCPLIB_EXPORT bool BCP_tm_balance_data(BCP_tm_prob& p);
 
 //-----------------------------------------------------------------------------
 // BCP_tm_msgproc.cpp
-void BCP_tm_idle_processes(BCP_tm_prob& p);
-void BCP_tm_stop_processes(BCP_tm_prob& p);
-void BCP_tm_start_processes(BCP_tm_prob& p);
+BCPLIB_EXPORT void BCP_tm_idle_processes(BCP_tm_prob& p);
+BCPLIB_EXPORT void BCP_tm_stop_processes(BCP_tm_prob& p);
+BCPLIB_EXPORT void BCP_tm_start_processes(BCP_tm_prob& p);
 bool BCP_tm_test_machine(BCP_tm_prob& p);
-void BCP_tm_modify_pool_counters(BCP_tm_prob& p, BCP_tm_node* node);
-void BCP_tm_remove_lp(BCP_tm_prob& p, const int index);
+BCPLIB_EXPORT void BCP_tm_modify_pool_counters(BCP_tm_prob& p, BCP_tm_node* node);
+BCPLIB_EXPORT void BCP_tm_remove_lp(BCP_tm_prob& p, const int index);
 void BCP_tm_remove_cg(BCP_tm_prob& p, const int index);
 void BCP_tm_remove_vg(BCP_tm_prob& p, const int index);
-void BCP_tm_notify_about_new_phase(BCP_tm_prob& p);
-void BCP_tm_notify_process_type(BCP_tm_prob& p, BCP_process_t ptype,
+BCPLIB_EXPORT void BCP_tm_notify_about_new_phase(BCP_tm_prob& p);
+BCPLIB_EXPORT void BCP_tm_notify_process_type(BCP_tm_prob& p, BCP_process_t ptype,
 				int num, const int* pids);
-void BCP_tm_notify_processes(BCP_tm_prob& p);
-void BCP_tm_unpack_priced_root(BCP_tm_prob& p, BCP_buffer& buf);
-void BCP_tm_free_procs_of_node(BCP_tm_prob& p, BCP_tm_node* node);
+BCPLIB_EXPORT void BCP_tm_notify_processes(BCP_tm_prob& p);
+BCPLIB_EXPORT void BCP_tm_unpack_priced_root(BCP_tm_prob& p, BCP_buffer& buf);
+BCPLIB_EXPORT void BCP_tm_free_procs_of_node(BCP_tm_prob& p, BCP_tm_node* node);
 
 //-----------------------------------------------------------------------------
 // BCP_tm_msg_node_send.cpp
@@ -75,7 +77,7 @@ void BCP_tm_send_node(BCP_tm_prob& p, const BCP_tm_node* node,
 
 //-----------------------------------------------------------------------------
 // BCP_tm_msg_node_rec.cpp
-void BCP_print_memusage(BCP_tm_prob& p);
+BCPLIB_EXPORT void BCP_print_memusage(BCP_tm_prob& p);
 
 BCP_vec<int>* BCP_tm_unpack_noncore_vars(USER_packing& user,
 					 BCP_buffer& buf,
@@ -86,23 +88,23 @@ BCP_vec<int>* BCP_tm_unpack_noncore_cuts(USER_packing& user,
 					 BCP_cut_set_change& cut_ch,
 					 BCP_vec<BCP_cut*>& cutlist);
 
-void BCP_tm_unpack_node_with_branching_info(BCP_tm_prob& p, BCP_buffer& buf);
-BCP_tm_node* BCP_tm_unpack_node_no_branching_info(BCP_tm_prob& p,
+BCPLIB_EXPORT void BCP_tm_unpack_node_with_branching_info(BCP_tm_prob& p, BCP_buffer& buf);
+BCPLIB_EXPORT BCP_tm_node* BCP_tm_unpack_node_no_branching_info(BCP_tm_prob& p,
 						  BCP_buffer& buf);
 //-----------------------------------------------------------------------------
 // BCP_tm_functions.cpp
-BCP_vec< std::pair<int, int> >::iterator
+BCPLIB_EXPORT BCP_vec< std::pair<int, int> >::iterator
 BCP_tm_identify_process(BCP_vec< std::pair<int, int> >& proclist, int proc);
-bool BCP_tm_assign_processes(BCP_tm_prob& p, BCP_tm_node* node);
-BCP_node_start_result BCP_tm_start_new_nodes(BCP_tm_prob& p);
-void BCP_tm_list_candidates(BCP_tm_prob& p);
-void BCP_check_parameters(BCP_tm_prob& p);
-void BCP_sanity_checks(BCP_tm_prob& p);
+BCPLIB_EXPORT bool BCP_tm_assign_processes(BCP_tm_prob& p, BCP_tm_node* node);
+BCPLIB_EXPORT BCP_node_start_result BCP_tm_start_new_nodes(BCP_tm_prob& p);
+BCPLIB_EXPORT void BCP_tm_list_candidates(BCP_tm_prob& p);
+BCPLIB_EXPORT void BCP_check_parameters(BCP_tm_prob& p);
+BCPLIB_EXPORT void BCP_sanity_checks(BCP_tm_prob& p);
 
 //-----------------------------------------------------------------------------
 // BCP_tm_statistics.cpp
-void BCP_tm_save_root_cuts(BCP_tm_prob* tm);
-void BCP_tm_wrapup(BCP_tm_prob* tm, BCP_lp_prob* lp,
+BCPLIB_EXPORT void BCP_tm_save_root_cuts(BCP_tm_prob* tm);
+BCPLIB_EXPORT void BCP_tm_wrapup(BCP_tm_prob* tm, BCP_lp_prob* lp,
 		   BCP_cg_prob* cg, BCP_vg_prob* vg, bool final_stat);
 
 #ifdef BCP__DUMP_PROCINFO

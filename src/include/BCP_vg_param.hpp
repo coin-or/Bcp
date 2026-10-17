@@ -3,7 +3,9 @@
 #ifndef _BCP_VG_PARAM_H
 #define _BCP_VG_PARAM_H
 
-struct BCP_vg_par{
+#include "BcpConfig.h"
+
+struct BCPLIB_EXPORT BCP_vg_par{
    enum chr_params{
       /** Indicates whether message passing is serial (all processes are on
 	  the same processor) or not. <br>

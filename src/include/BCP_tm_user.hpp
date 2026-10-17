@@ -3,6 +3,8 @@
 #ifndef _BCP_TM_USER_FUN_H
 #define _BCP_TM_USER_FUN_H
 
+#include "BcpConfig.h"
+
 // This file is fully docified.
 
 #include "BCP_math.hpp"
@@ -55,7 +57,7 @@ class BCP_lp_statistics;
    </ul>
 */
 
-class BCP_tm_user : public BCP_user_class {
+class BCPLIB_EXPORT BCP_tm_user : public BCP_user_class {
 private:
   mutable BCP_tm_prob * p;
 public:

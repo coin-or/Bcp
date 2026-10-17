@@ -3,6 +3,8 @@
 #ifndef _BCP_WARMSTART_DUAL_H
 #define _BCP_WARMSTART_DUAL_H
 
+#include "BcpConfig.h"
+
 #include "BCP_warmstart.hpp"
 #include "BCP_vector_change.hpp"
 
@@ -17,7 +19,7 @@
 /** This class describes a warmstart information that consists solely of the
     dual vector. */
 
-class BCP_warmstart_dual : public BCP_warmstart {
+class BCPLIB_EXPORT BCP_warmstart_dual : public BCP_warmstart {
 private:
   /** The assignment operator is declared but not defined to disable it. */
   BCP_warmstart_dual& operator=(const BCP_warmstart_dual&);

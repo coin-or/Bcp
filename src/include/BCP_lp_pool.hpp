@@ -3,6 +3,8 @@
 #ifndef _BCP_LP_POOL_H
 #define _BCP_LP_POOL_H
 
+#include "BcpConfig.h"
+
 #include "BCP_error.hpp"
 #include "BCP_vector.hpp"
 #include "BCP_lp_result.hpp"
@@ -12,7 +14,7 @@
 
 //#############################################################################
 
-class BCP_lp_waiting_row {
+class BCPLIB_EXPORT BCP_lp_waiting_row {
 private:
    BCP_lp_waiting_row(const BCP_lp_waiting_row&);
    BCP_lp_waiting_row& operator=(const BCP_lp_waiting_row&);
@@ -44,7 +46,7 @@ public:
 
 //-----------------------------------------------------------------------------
 
-class BCP_lp_cut_pool : public BCP_vec<BCP_lp_waiting_row*> {
+class BCPLIB_EXPORT BCP_lp_cut_pool : public BCP_vec<BCP_lp_waiting_row*> {
 private:
    static bool _rows_are_valid;
    // disable the default copy constructor and assignment operator
@@ -75,7 +77,7 @@ BCP_lp_cut_pool::compute_violations() : rows are not valid\n");
 
 //#############################################################################
 
-class BCP_lp_waiting_col {
+class BCPLIB_EXPORT BCP_lp_waiting_col {
 private:
    BCP_lp_waiting_col(const BCP_lp_waiting_col&);
    BCP_lp_waiting_col& operator=(const BCP_lp_waiting_col&);
@@ -106,7 +108,7 @@ public:
 
 //-----------------------------------------------------------------------------
 
-class BCP_lp_var_pool : public BCP_vec<BCP_lp_waiting_col*> {
+class BCPLIB_EXPORT BCP_lp_var_pool : public BCP_vec<BCP_lp_waiting_col*> {
 private:
    static bool _cols_are_valid;
    // disable the default copy constructor and assignment operator

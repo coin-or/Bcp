@@ -3,6 +3,8 @@
 #ifndef _BCP_TM_NODE
 #define _BCP_TM_NODE
 
+#include "BcpConfig.h"
+
 //#include <cfloat>
 
 #include <map>
@@ -48,7 +50,7 @@ class BCP_tm_prob;
 
 //#############################################################################
 
-class BCP_tm_node_data {
+class BCPLIB_EXPORT BCP_tm_node_data {
 public:
     Coin::SmartPtr<BCP_node_change> _desc;
     Coin::SmartPtr<BCP_user_data>   _user;
@@ -57,7 +59,7 @@ public:
 
 //=============================================================================
 
-class BCP_tm_node : public CoinTreeNode {
+class BCPLIB_EXPORT BCP_tm_node : public CoinTreeNode {
 private:
     /**@name Disabled methods */
     /*@{*/
@@ -175,7 +177,7 @@ public:
 
 /** NO OLD DOC */
 
-class BCP_tree {
+class BCPLIB_EXPORT BCP_tree {
 private:
     /** */
     BCP_vec<BCP_tm_node*> _tree;
@@ -238,7 +240,7 @@ public:
 //#############################################################################
 class BCP_tm_node_to_send;
 
-class BCP_tm_node_to_send
+class BCPLIB_EXPORT BCP_tm_node_to_send
 {
 public:
     static std::map<int, BCP_tm_node_to_send*> waiting;

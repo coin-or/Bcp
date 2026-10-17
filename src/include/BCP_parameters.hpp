@@ -3,6 +3,8 @@
 #ifndef _BCP_PARAMETERS_H
 #define _BCP_PARAMETERS_H
 
+#include "BcpConfig.h"
+
 // This file is fully docified.
 
 
@@ -49,7 +51,7 @@ enum BCP_parameter_t {
 
 /** This parameter indeintifies a single parameter entry. */
 
-class BCP_parameter {
+class BCPLIB_EXPORT BCP_parameter {
 
 private:
   /**@name Data members */

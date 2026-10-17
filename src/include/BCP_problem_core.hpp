@@ -3,6 +3,8 @@
 #ifndef _BCP_PROBLEM_CORE_H
 #define _BCP_PROBLEM_CORE_H
 
+#include "BcpConfig.h"
+
 // This file is fully docified.
 
 #include "BCP_vector.hpp"
@@ -28,7 +30,7 @@ class BCP_internal_brobj;
   as well as the matrix corresponding the core variables and cuts. Core cuts
   and variables never leave the formulation. */
 
-class BCP_problem_core{
+class BCPLIB_EXPORT BCP_problem_core{
 private:
   /**@name Private and disabled methods */
   /*@{*/
@@ -113,7 +115,7 @@ public:
    This class is internal to the framework, the user shouldn't worry about it. 
 */
 
-class BCP_problem_core_change{
+class BCPLIB_EXPORT BCP_problem_core_change{
 private:
   /**@name Private and disabled methods */
   /*@{*/

@@ -3,11 +3,13 @@
 #ifndef _BCP_TM_PARAM_H
 #define _BCP_TM_PARAM_H
 
+#include "BcpConfig.h"
+
 /** Parameters used in the Tree Manager process. These parameters can be set
     in the original parameter file by including the following line: <br>
     <code>BCP_{parameter name}  {parameter value}</code> */
 
-struct BCP_tm_par{
+struct BCPLIB_EXPORT BCP_tm_par{
   /** Character parameters. Most of these variables are used as booleans
       (true = 1, false = 0). */
   enum chr_params{
