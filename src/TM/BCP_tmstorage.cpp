@@ -485,3 +485,7 @@ TS: BCP_ts_prob::process_message(): Unexpected message tag (%i) arrived\n",
 
 //=============================================================================
 
+void
+BCP_ts_user::unpack_module_data(BCP_buffer& buf)
+{
+}
