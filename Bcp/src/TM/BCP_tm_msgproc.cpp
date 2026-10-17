@@ -1,5 +1,6 @@
 // Copyright (C) 2000, International Business Machines
 // Corporation and others.  All Rights Reserved.
+#include "BCP_os.hpp"
 #include "CoinTime.hpp"
 
 #include "BCP_math.hpp"
@@ -132,7 +133,7 @@ BCP_tm_initialize_process_type(BCP_tm_prob& p,
 
     p.msg_buf.clear();
     par.pack(p.msg_buf);
-    const double wallclockInit = CoinWallclockTime(-1);
+    const double wallclockInit = BCP_wallclock_time(-1);
     p.msg_buf.pack(wallclockInit);
     p.msg_buf.pack(p.start_time);
     p.msg_env->multicast(num, pids, BCP_Msg_ProcessParameters, p.msg_buf);
@@ -368,7 +369,7 @@ BCP_tm_prob::process_message()
 		    }
 		    sender = msg_buf.sender();
 		    printf("TM %.3f: Sol from proc: %i  val: %f (prev best: %s)  tree size/procd: %i/%i  cand list ins/size: %i/%i\n",
-			   CoinWallclockTime() - start_time, sender,
+			   BCP_wallclock_time() - start_time, sender,
 			   new_sol->objective_value(), bdstr,
 			   tree_size, tree_proc,
 			   cand_list_ins, cand_list_size);

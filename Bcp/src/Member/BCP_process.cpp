@@ -9,6 +9,7 @@
 //
 // Date : 10/03/2007
 
+#include "BCP_os.hpp"
 #include "CoinTime.hpp"
 #include "BCP_process.hpp"
 
@@ -70,7 +71,7 @@ BCP_scheduler::add_free_ids(int numIds, const int* ids)
   totalNumberIds_ += numIds;
   maxNodeIds_ = CoinMin((int)floor(maxNodeIdRatio_ * totalNumberIds_),
 			maxNodeIdNum_);
-  const double t = CoinWallclockTime();
+  const double t = BCP_wallclock_time();
   for (int i = 0; i < numIds; ++i) {
     sb_idle_time_[ids[i]] = 0.0;
     node_idle_time_[ids[i]] = 0.0;
@@ -105,7 +106,7 @@ BCP_scheduler::request_sb_ids(int reqNumIds, int* ids)
   const int newsize = freeIds_.size() - numIds;
   CoinDisjointCopyN(&freeIds_[newsize], numIds, ids);
   freeIds_.erase(freeIds_.begin()+newsize, freeIds_.end()); 
-  const double t = CoinWallclockTime();
+  const double t = BCP_wallclock_time();
   for (int i = 0; i < numIds; ++i) {
     const int id = ids[i];
     if (last_release_type_[id] != 2) {
@@ -123,7 +124,7 @@ BCP_scheduler::release_sb_id(int id)
   // increase the count for releases by one
   update_rates(0, 1);
   freeIds_.push_back(id);
-  last_release_time_[id] = CoinWallclockTime();
+  last_release_time_[id] = BCP_wallclock_time();
   last_release_type_[id] = 1;
 }
 
@@ -147,7 +148,7 @@ BCP_scheduler::release_node_id(int id)
   // increase the count for releases by one
   update_rates(0, 1);
   freeIds_.push_back(id);
-  last_release_time_[id] = CoinWallclockTime();
+  last_release_time_[id] = BCP_wallclock_time();
   last_release_type_[id] = 2;
   numNodeIds_--;
 }
@@ -157,7 +158,7 @@ BCP_scheduler::release_node_id(int id)
 void
 BCP_scheduler::update_idle_times()
 {
-  const double t = CoinWallclockTime();
+  const double t = BCP_wallclock_time();
   for (int i = freeIds_.size()-1; i >= 0; --i) {
     const int id = freeIds_[i];
     if (last_release_type_[id] != 2) {

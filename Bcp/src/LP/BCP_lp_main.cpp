@@ -72,7 +72,7 @@ BCP_process_t BCP_lp_main(BCP_message_environment* msg_env,
    double wallclockInit;
    p.msg_buf.unpack(wallclockInit);
    p.msg_buf.unpack(p.start_time);
-   CoinWallclockTime(wallclockInit);
+   BCP_wallclock_time(wallclockInit);
 
    // Let us be nice
    setpriority(PRIO_PROCESS, 0, p.par.entry(BCP_lp_par::NiceLevel));

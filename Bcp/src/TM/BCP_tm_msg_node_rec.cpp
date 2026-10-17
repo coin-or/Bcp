@@ -579,7 +579,7 @@ TMDBG;
     CoinTreeNode** children = new CoinTreeNode*[child_num];
     int numChildrenAdded = 0;
 #if (BCP_DEBUG_PRINT != 0)
-    const double tt = CoinWallclockTime()-p.start_time;
+    const double tt = BCP_wallclock_time()-p.start_time;
     if (p.candidate_list.size() == 0) {
       printf("TM %.3lf: parent: %i  cand_list empty\n", tt, node->_index);
     } else {
