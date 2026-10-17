@@ -68,7 +68,7 @@ int bcp_main(int argc, char* argv[], USER_initialize* user_init)
     } else {
 	// In MPI all processes get the argument list, so we must not check
 	// this
-#if defined(COIN_HAS_MPI)
+#if defined(BCP_HAS_MPI)
 	BCP_mpi_environment* mpi_env =
 	    dynamic_cast<BCP_mpi_environment*>(msg_env);
 	if (!mpi_env && argc != 1) {
@@ -163,7 +163,7 @@ BCP_tm_main(BCP_message_environment* msg_env,
     p.msg_env = msg_env;
 
     //We check if the number of BCP processes is the same as in MPI
-#if defined(COIN_HAS_MPI)
+#if defined(BCP_HAS_MPI)
     BCP_mpi_environment* mpi_env = dynamic_cast<BCP_mpi_environment*>(msg_env);
     if (mpi_env) {
 	const int n_proc =
@@ -327,7 +327,7 @@ bool BCP_tm_do_one_phase(BCP_tm_prob& p)
 	p.msg_env->receive(BCP_AnyProcess, BCP_Msg_AnyMessage, buf, timeout);
 	const double t1 = BCP_wallclock_time();
 	p.stat.update_wait_time(numNodeIds, t1-t0);
-#ifdef COIN_HAS_MPI
+#ifdef BCP_HAS_MPI
 	p.stat.update_queue_length(numNodeIds, MPIDI_BGLTS_get_num_messages());
 #endif
 	p.stat.print(false /* not final */, t1 - p.start_time);

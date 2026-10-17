@@ -3,7 +3,7 @@
 // All Rights Reserved.
 
 #include "BcpConfig.h"
-#if defined(COIN_HAS_MPI)
+#if defined(BCP_HAS_MPI)
 
 #include <cstdio>
 #include <cmath>
@@ -213,7 +213,7 @@ BCP_mpi_environment::probe(const int source, const BCP_message_tag tag)
 int
 BCP_mpi_environment::start_process(const BCP_string& exe, const bool debug)
 {
-#ifdef COIN_HAS_MPI2
+#ifdef BCP_HAS_MPI2
     // FIXME: implement MPI2 proces spawning
     printf("Sorry, MPI2 process spawning is not supported yet...\n");
     abort();
@@ -228,7 +228,7 @@ BCP_mpi_environment::start_process(const BCP_string& exe,
 				   const BCP_string& machine,
 				   const bool debug)
 {
-#ifdef COIN_HAS_MPI2
+#ifdef BCP_HAS_MPI2
     // FIXME: implement MPI2 proces spawning
     printf("Sorry, MPI2 process spawning is not supported yet...\n");
     abort();
@@ -244,7 +244,7 @@ BCP_mpi_environment::start_processes(const BCP_string& exe,
 				     const bool debug,
 			 int* ids)
 {
-#ifdef COIN_HAS_MPI2
+#ifdef BCP_HAS_MPI2
     // FIXME: implement MPI2 proces spawning
     printf("Sorry, MPI2 process spawning is not supported yet...\n");
     abort();
@@ -264,7 +264,7 @@ BCP_mpi_environment::start_processes(const BCP_string& exe,
 				     const bool debug,
 			 int* ids)
 {
-#ifdef COIN_HAS_MPI2
+#ifdef BCP_HAS_MPI2
     // FIXME: implement MPI2 proces spawning
     printf("Sorry, MPI2 process spawning is not supported yet...\n");
     abort();
@@ -331,4 +331,4 @@ int MPIDI_BGLTS_get_num_messages()
 }
 #endif
 
-#endif /* COIN_HAS_MPI */
+#endif /* BCP_HAS_MPI */

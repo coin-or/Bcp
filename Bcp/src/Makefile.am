@@ -4,7 +4,7 @@
 
 ## $Id$
 
-AUTOMAKE_OPTIONS = foreign
+include $(top_srcdir)/BuildTools/Makemain.inc
 
 ########################################################################
 #                               libBcp                                 #
@@ -155,28 +155,18 @@ libBcp_la_SOURCES = \
 	include/BcpConfig.h
 
 # List all additionally required libraries
-if DEPENDENCY_LINKING
-libBcp_la_LIBADD = $(BCPLIB_LIBS)
-endif
+libBcp_la_LIBADD = $(BCPLIB_LFLAGS)
 
 # This is for libtool
-libBcp_la_LDFLAGS = $(LT_LDFLAGS)
+AM_LDFLAGS = $(LT_LDFLAGS)
 
 ########################################################################
 #                            Additional flags                          #
 ########################################################################
 
-# Here list all include flags, relative to this "srcdir" directory.  This
-# "cygpath" stuff is necessary to compile with native compilers on Windows.
-AM_CPPFLAGS = $(BCPLIB_CFLAGS)
-
-# Include MPI header directory if MPI is used
-if COIN_HAS_MPI
-AM_CPPFLAGS +=  -I`$(CYGPATH_W) $(MPIINCDIR)`
-endif
-
-# This line is necessary to allow VPATH compilation
-DEFAULT_INCLUDES = -I. -I`$(CYGPATH_W) $(srcdir)/include` -Iinclude
+# Here list all include flags. The configuration header is created in
+# include/ of the build directory.
+AM_CPPFLAGS = -I$(srcdir)/include -Iinclude $(BCPLIB_CFLAGS)
 
 ########################################################################
 #                Headers that need to be installed                     #
@@ -184,7 +174,7 @@ DEFAULT_INCLUDES = -I. -I`$(CYGPATH_W) $(srcdir)/include` -Iinclude
 
 # Here list all the header files that are required by a user of the library,
 # and that therefore should be installed in 'include/coin'
-includecoindir = $(includedir)/coin
+includecoindir = $(pkgincludedir)
 includecoin_HEADERS = \
 	include/BCP_branch.hpp \
 	include/BCP_buffer.hpp \
@@ -235,18 +225,13 @@ includecoin_HEADERS = \
 	include/BCP_USER.hpp \
 	include/BCP_var.hpp \
 	include/BCP_vector_bool.hpp \
-	include/BCP_vector_bool.hpp \
 	include/BCP_vector_change.hpp \
 	include/BCP_vector_char.hpp \
-	include/BCP_vector_char.hpp \
-	include/BCP_vector_double.hpp \
 	include/BCP_vector_double.hpp \
 	include/BCP_vector_general.hpp \
 	include/BCP_vector.hpp \
 	include/BCP_vector_int.hpp \
-	include/BCP_vector_int.hpp \
 	include/BCP_vector_sanity.hpp \
-	include/BCP_vector_short.hpp \
 	include/BCP_vector_short.hpp \
 	include/BCP_vg.hpp \
 	include/BCP_vg_param.hpp \

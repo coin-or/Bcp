@@ -1,64 +1,70 @@
 /* src/include/config.h.in.  Generated from configure.ac by autoheader.  */
 
-/* SVN revision number of project */
-#undef BCP_SVN_REV
+/* Library Visibility Attribute */
+#undef BAC_EXPORT
+
+/* Library Visibility Attribute */
+#undef BCPLIB_EXPORT
+
+/* Define to 1 if Cgl is available. */
+#undef BCP_HAS_CGL
+
+/* Define to 1 if Clp is available. */
+#undef BCP_HAS_CLP
+
+/* Define to 1 if CoinUtils is available. */
+#undef BCP_HAS_COINUTILS
+
+/* Define to 1 if Cpx is available. */
+#undef BCP_HAS_CPX
+
+/* Define to 1 if the MPI package is available */
+#undef BCP_HAS_MPI
+
+/* Define to 1 if Osi is available. */
+#undef BCP_HAS_OSI
+
+/* Define to 1 if Vol is available. */
+#undef BCP_HAS_VOL
 
 /* Version number of project */
 #undef BCP_VERSION
 
-/* Major Version number of project */
+/* Major version number of project. */
 #undef BCP_VERSION_MAJOR
 
-/* Minor Version number of project */
+/* Minor version number of project. */
 #undef BCP_VERSION_MINOR
 
-/* Release Version number of project */
+/* Release version number of project. */
 #undef BCP_VERSION_RELEASE
 
-/* Define to the debug sanity check level (0 is no test) */
-#undef COIN_BCP_CHECKLEVEL
-
-/* Define to the debug verbosity level (0 is no output) */
-#undef COIN_BCP_VERBOSITY
-
-/* Define to 1 if the Cgl package is available */
-#undef COIN_HAS_CGL
-
-/* Define to 1 if the Clp package is available */
-#undef COIN_HAS_CLP
-
-/* Define to 1 if the Cpx package is available */
-#undef COIN_HAS_CPX
-
-/* Define to 1 if the Mpi package is available */
-#undef COIN_HAS_MPI
-
-/* Define to 1 if the Vol package is available */
-#undef COIN_HAS_VOL
+/* Define to 1 if your C++ compiler doesn't accept -c and -o together. */
+#undef CXX_NO_MINUS_C_MINUS_O
 
 /* Define to 1 if you have the <dlfcn.h> header file. */
 #undef HAVE_DLFCN_H
 
-/* Define to 1 if you have the `gethostname' function. */
+/* Define to 1 if you have the 'gethostname' function. */
 #undef HAVE_GETHOSTNAME
 
-/* Define to 1 if you have the `getpid' function. */
+/* Define to 1 if you have the 'getpid' function. */
 #undef HAVE_GETPID
 
 /* Define to 1 if you have the <inttypes.h> header file. */
 #undef HAVE_INTTYPES_H
 
-/* Define to 1 if you have the `mallinfo' function. */
+/* Define to 1 if you have the 'mallinfo' function. */
 #undef HAVE_MALLINFO
-
-/* Define to 1 if you have the <memory.h> header file. */
-#undef HAVE_MEMORY_H
 
 /* Define to 1 if you have the <process.h> header file. */
 #undef HAVE_PROCESS_H
 
 /* Define to 1 if you have the <stdint.h> header file. */
 #undef HAVE_STDINT_H
+
+/* Define to 1 if you have the <stdio.h> header file. */
+#undef HAVE_STDIO_H
 
 /* Define to 1 if you have the <stdlib.h> header file. */
 #undef HAVE_STDLIB_H
@@ -87,8 +93,8 @@
 /* Define to 1 if you have the <unistd.h> header file. */
 #undef HAVE_UNISTD_H
 
-/* Name of package */
-#undef PACKAGE
+/* Define to the sub-directory where libtool stores uninstalled libraries. */
+#undef LT_OBJDIR
 
 /* Define to the address where bug reports for this package should be sent. */
 #undef PACKAGE_BUGREPORT
@@ -102,11 +108,13 @@
 /* Define to the one symbol short name of this package. */
 #undef PACKAGE_TARNAME
 
+/* Define to the home page for this package. */
+#undef PACKAGE_URL
+
 /* Define to the version of this package. */
 #undef PACKAGE_VERSION
 
-/* Define to 1 if you have the ANSI C header files. */
+/* Define to 1 if all of the C89 standard headers exist (not just the ones
+   required in a freestanding environment). This macro is provided for
+   backward compatibility; new code need not use it. */
 #undef STDC_HEADERS
-
-/* Version number of package */
-#undef VERSION

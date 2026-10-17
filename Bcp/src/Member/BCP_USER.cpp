@@ -14,7 +14,7 @@ bool BCP_fatal_error::abort_on_error = true;
 
 BCP_message_environment *
 USER_initialize::msgenv_init(int argc, char* argv[]) {
-#if defined(COIN_HAS_MPI)
+#if defined(BCP_HAS_MPI)
   int mpiid = BCP_mpi_environment::is_mpi(argc, argv);
   if (mpiid >= 0) {
     return new BCP_mpi_environment(argc, argv);
