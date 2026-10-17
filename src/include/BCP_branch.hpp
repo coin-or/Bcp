@@ -3,6 +3,8 @@
 #ifndef _BCP_BRANCH_H
 #define _BCP_BRANCH_H
 
+#include "BcpConfig.h"
+
 // This file is fully docified.
 
 #include "BCP_vector.hpp"
@@ -28,7 +30,7 @@ class BCP_lp_branching_object;
    buffer.
 */
 
-class BCP_internal_brobj {
+class BCPLIB_EXPORT BCP_internal_brobj {
 private:
    /**@name Disabled methods */
    /*@{*/

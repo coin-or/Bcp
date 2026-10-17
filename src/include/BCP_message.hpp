@@ -3,6 +3,8 @@
 #ifndef _BCP_MESSAGE_H
 #define _BCP_MESSAGE_H
 
+#include "BcpConfig.h"
+
 // This file is fully docified.
 
 #include <utility>
@@ -27,7 +29,7 @@ const int BCP_AnyProcess = -1;
     All methods are pure virtual, enforcing the correct overriding of
     the methods. */
 
-class BCP_message_environment{
+class BCPLIB_EXPORT BCP_message_environment{
 public:
     /**@name Destructor */
     /*@{*/

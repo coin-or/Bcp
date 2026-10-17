@@ -13,7 +13,7 @@ class BCP_process;
 
 //#############################################################################
 
-class BCP_single_environment : public BCP_message_environment {
+class BCPLIB_EXPORT BCP_single_environment : public BCP_message_environment {
 private:
     BCP_single_environment(const BCP_single_environment&);
     BCP_single_environment& operator=(const BCP_single_environment&);

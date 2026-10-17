@@ -3,6 +3,8 @@
 #ifndef _BCP_CG_H
 #define _BCP_CG_H
 
+#include "BcpConfig.h"
+
 // This file is fully docified.
 
 #include <cfloat>
@@ -29,7 +31,7 @@ class BCP_cut;
    (or member method) that's invoked within the CG process. 
 */
 
-class BCP_cg_prob : public BCP_process {
+class BCPLIB_EXPORT BCP_cg_prob : public BCP_process {
 private:
    /**@name Disabled members */
    /*@{*/
@@ -137,7 +139,7 @@ public:
 };
 
 // This function is used only internally. 
-bool
+BCPLIB_EXPORT bool
 BCP_cg_process_message(BCP_cg_prob& p, BCP_buffer& buf);
 
 #endif

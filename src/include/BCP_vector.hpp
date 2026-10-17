@@ -6,6 +6,8 @@
 // This file is fully docified.
 
 
+#include "BcpConfig.h"
+
 #include <memory>
 #include <cstddef>
 #include <cstring>

@@ -13,7 +13,7 @@
 
 //#############################################################################
 
-class BCP_mpi_environment : public BCP_message_environment {
+class BCPLIB_EXPORT BCP_mpi_environment : public BCP_message_environment {
 private:
     static int seqproc;
     static int num_proc;

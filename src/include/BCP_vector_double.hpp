@@ -38,7 +38,7 @@ template<> inline void BCP_vec<double>::deallocate() {
 	}
 }
 //------------------------------------------------------------------------------
-template<> void BCP_vec<double>::insert_aux(iterator position, const_reference x);
+template<> BCPLIB_EXPORT void BCP_vec<double>::insert_aux(iterator position, const_reference x);
 
 //##############################################################################
 
@@ -46,33 +46,33 @@ template<> void BCP_vec<double>::insert_aux(iterator position, const_reference x
 //------------------------------------------------------------------------------
 // template<> void BCP_vec<double>::BCP_vec(const BCP_vec<double>& x);
 //------------------------------------------------------------------------------
-template<> BCP_vec<double>::BCP_vec(const size_t n, const_reference value);
+template<> BCPLIB_EXPORT BCP_vec<double>::BCP_vec(const size_t n, const_reference value);
 //------------------------------------------------------------------------------
-template<> BCP_vec<double>::BCP_vec(const_iterator first, const_iterator last);
+template<> BCPLIB_EXPORT BCP_vec<double>::BCP_vec(const_iterator first, const_iterator last);
 //------------------------------------------------------------------------------
-template<> BCP_vec<double>::BCP_vec(const double* x, const size_t num);
+template<> BCPLIB_EXPORT BCP_vec<double>::BCP_vec(const double* x, const size_t num);
 
 //##############################################################################
 
-template<> void BCP_vec<double>::reserve(const size_t n);
+template<> BCPLIB_EXPORT void BCP_vec<double>::reserve(const size_t n);
 //------------------------------------------------------------------------------
 // template<> inline void BCP_vec<double>::swap(BCP_vec<double>& x);
 //------------------------------------------------------------------------------
-template<> BCP_vec<double>& BCP_vec<double>::operator=(const BCP_vec<double>& x);
+template<> BCPLIB_EXPORT BCP_vec<double>& BCP_vec<double>::operator=(const BCP_vec<double>& x);
 
 //##############################################################################
 // these two members serve to copy out entries from a buffer.
 
-template<> void BCP_vec<double>::assign(const void* x, const size_t num);
+template<> BCPLIB_EXPORT void BCP_vec<double>::assign(const void* x, const size_t num);
 //------------------------------------------------------------------------------
-template<> void BCP_vec<double>::insert(double* position,
+template<> BCPLIB_EXPORT void BCP_vec<double>::insert(double* position,
 									  const void* first, const size_t n);
 //------------------------------------------------------------------------------
-template<> void BCP_vec<double>::insert(iterator position,
+template<> BCPLIB_EXPORT void BCP_vec<double>::insert(iterator position,
 									  const_iterator first,
 									  const_iterator last);
 //------------------------------------------------------------------------------
-template<> void BCP_vec<double>::insert(iterator position, const size_t n,
+template<> BCPLIB_EXPORT void BCP_vec<double>::insert(iterator position, const size_t n,
 									  const_reference x);
 //------------------------------------------------------------------------------
 template<> inline BCP_vec<double>::iterator

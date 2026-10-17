@@ -3,6 +3,8 @@
 #ifndef _BCP_SOLUTION_H
 #define _BCP_SOLUTION_H
 
+#include "BcpConfig.h"
+
 #include "BCP_vector.hpp"
 #include "BCP_var.hpp"
 
@@ -11,7 +13,7 @@
 /** This is the abstract base class for a solution to a Mixed Integer
     Programming problem. */
 
-class BCP_solution {
+class BCPLIB_EXPORT BCP_solution {
 public:
   /** The virtual destructor ensures that the correct destructor is invoked. */
   virtual ~BCP_solution() {}
@@ -30,7 +32,7 @@ public:
     example, the dual values are of importance as well.) The virtual
     destructor and virtual member functions make this easy. */
 
-class BCP_solution_generic : public BCP_solution { 
+class BCPLIB_EXPORT BCP_solution_generic : public BCP_solution { 
 public:
   /**@name Data members */
   /*@{*/

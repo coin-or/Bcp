@@ -3,13 +3,15 @@
 #ifndef _BCP_INDEXED_PRICING_H
 #define _BCP_INDEXED_PRICING_H
 
+#include "BcpConfig.h"
+
 #if 0
 #include "BCP_enum.hpp"
 #include "BCP_vector.hpp"
 
 class BCP_buffer;
 
-class BCP_indexed_pricing_list {
+class BCPLIB_EXPORT BCP_indexed_pricing_list {
 private:
    inline void clean() { _del_pos.clear(); _indices.clear(); }
 private:

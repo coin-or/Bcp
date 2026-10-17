@@ -3,6 +3,8 @@
 #ifndef _BCP_VECTOR_SANITY_H
 #define _BCP_VECTOR_SANITY_H
 
+#include "BcpConfig.h"
+
 // This file is fully docified.
 
 #include "BCP_vector.hpp"
@@ -20,7 +22,7 @@
     If the sanity check fails the function throws a 
     \URL[<code>BCP_fatal_error</code>]{BCP_fatal_error.html} exception.
 */
-void BCP_vec_sanity_check(BCP_vec<int>::const_iterator firstpos,
+BCPLIB_EXPORT void BCP_vec_sanity_check(BCP_vec<int>::const_iterator firstpos,
 			  BCP_vec<int>::const_iterator lastpos,
 			  const int maxsize);
 

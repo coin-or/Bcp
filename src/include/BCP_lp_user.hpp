@@ -3,6 +3,8 @@
 #ifndef _BCP_LP_USER_H
 #define _BCP_LP_USER_H
 
+#include "BcpConfig.h"
+
 // This file is fully prepared for doxygen.
 
 #include <vector>
@@ -72,7 +74,7 @@ class BCP_problem_core;
    </ul>
 */
 
-class BCP_lp_user : public BCP_user_class {
+class BCPLIB_EXPORT BCP_lp_user : public BCP_user_class {
 private:
     BCP_lp_user(const BCP_lp_user&);
     BCP_lp_user& operator=(const BCP_lp_user&);

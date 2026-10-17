@@ -10,6 +10,7 @@
 #include "BCP_solution.hpp"
 #include "BCP_tm_user.hpp"
 #include "BCP_node_change.hpp"
+#include "BCP_tm_functions.hpp"
 
 static inline void
 BCP_tm_pack_root_cut(BCP_tm_prob* tm, const BCP_cut& cut)

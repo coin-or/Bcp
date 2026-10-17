@@ -3,6 +3,8 @@
 #ifndef _BCP_LP_PARAM_H
 #define _BCP_LP_PARAM_H
 
+#include "BcpConfig.h"
+
 // This file is fully docified.
 
 //-----------------------------------------------------------------------------
@@ -11,7 +13,7 @@
     in the original parameter file by including the following line: <br>
     <code>BCP_{parameter name}  {parameter value}</code>. */
 
-struct BCP_lp_par{
+struct BCPLIB_EXPORT BCP_lp_par{
    /** Character parameters. All of these variables are used as booleans
        (true = 1, false = 0). */
    enum chr_params{

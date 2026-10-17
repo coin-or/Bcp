@@ -3,6 +3,8 @@
 #ifndef _BCP_STRING_H
 #define _BCP_STRING_H
 
+#include "BcpConfig.h"
+
 // This file is fully docified.
 
 #include <cstring>
@@ -10,7 +12,7 @@
 /** This class is a very simple impelementation of a constant length string.
     Using it one can avoid some memory errors related to using functions
     operating on C style strings. */
-class BCP_string {
+class BCPLIB_EXPORT BCP_string {
 public:
    /* Return the length of the string. */
    int length() const         { return _len; }

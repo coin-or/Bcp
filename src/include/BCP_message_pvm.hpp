@@ -11,7 +11,7 @@
 
 //#############################################################################
 
-class BCP_pvm_environment : public BCP_message_environment {
+class BCPLIB_EXPORT BCP_pvm_environment : public BCP_message_environment {
 private:
     void check_error(const int code, const char* str) const;
 public:

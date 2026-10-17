@@ -3,6 +3,8 @@
 #ifndef _BCP_ERROR_H
 #define _BCP_ERROR_H
 
+#include "BcpConfig.h"
+
 // This file is fully docified.
 
 #include <string>
@@ -17,7 +19,7 @@
     core dump is created).
 */
     
-class BCP_fatal_error{
+class BCPLIB_EXPORT BCP_fatal_error{
 public:
    static bool abort_on_error;
 

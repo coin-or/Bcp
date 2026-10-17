@@ -3,6 +3,8 @@
 #ifndef _BCP_CG_USER_H
 #define _BCP_CG_USER_H
 
+#include "BcpConfig.h"
+
 // This file is fully docified.
 
 #include "BCP_math.hpp"
@@ -47,7 +49,7 @@ class BCP_cut_algo;
    </ul>
 */
 
-class BCP_cg_user : public BCP_user_class {
+class BCPLIB_EXPORT BCP_cg_user : public BCP_user_class {
 private:
   BCP_cg_prob * p;
 public:

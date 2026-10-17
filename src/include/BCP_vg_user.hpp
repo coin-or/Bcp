@@ -3,6 +3,8 @@
 #ifndef _BCP_VG_USER_H
 #define _BCP_VG_USER_H
 
+#include "BcpConfig.h"
+
 // This file is fully docified.
 
 #include "BCP_math.hpp"
@@ -48,7 +50,7 @@ class BCP_var_algo;
    </ul>
 */
 
-class BCP_vg_user : public BCP_user_class {
+class BCPLIB_EXPORT BCP_vg_user : public BCP_user_class {
 private:
   BCP_vg_prob * p;
 public:

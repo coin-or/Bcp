@@ -3,6 +3,8 @@
 #ifndef _BCP_VAR_H
 #define _BCP_VAR_H
 
+#include "BcpConfig.h"
+
 // This file is fully docified.
 
 //#############################################################################
@@ -25,7 +27,7 @@
    No object of type BCP_var can exist (having purely virtual
    members in the class enforces this restriction). */
 
-class BCP_var : public Coin::ReferencedObject {
+class BCPLIB_EXPORT BCP_var : public Coin::ReferencedObject {
 private:
   /**@name Disabled methods */
   /*@{*/
@@ -227,7 +229,7 @@ public:
    describe the variable. The only thing that has to be done here is
    overriding the pure virtual method obj_type(). */
 
-class BCP_var_core : public BCP_var {
+class BCPLIB_EXPORT BCP_var_core : public BCP_var {
 private:
    /**@name Disabled methods */
    /*@{*/
@@ -274,7 +276,7 @@ public:
    either directly by the user or by the unpacking functions of the
    \c BCP_xx_user classes. */
 
-class BCP_var_algo : public BCP_var {
+class BCPLIB_EXPORT BCP_var_algo : public BCP_var {
 private:
    /**@name Disabled methods */
    /*@{*/
@@ -313,7 +315,7 @@ public:
    This class is just a collection of pointers to variables with a number of
    methods to manipulate these variables and/or select certain entries. */
 
-class BCP_var_set : public BCP_vec<BCP_var*> {
+class BCPLIB_EXPORT BCP_var_set : public BCP_vec<BCP_var*> {
 private:
    /**@name Disabled methods */
    /*@{*/

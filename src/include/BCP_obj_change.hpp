@@ -3,6 +3,8 @@
 #ifndef _BCP_OBJ_CHANGE_H
 #define _BCP_OBJ_CHANGE_H
 
+#include "BcpConfig.h"
+
 //#############################################################################
 
 #include "BCP_enum.hpp"
@@ -20,7 +22,7 @@ class BCP_buffer;
 
 //#############################################################################
 
-class BCP_obj_change {
+class BCPLIB_EXPORT BCP_obj_change {
 public:
     double lb;
     double ub;
@@ -54,7 +56,7 @@ inline bool operator!=(const BCP_obj_change& ch0, const BCP_obj_change& ch1)
     cuts) changes
 */
 
-class BCP_obj_set_change {
+class BCPLIB_EXPORT BCP_obj_set_change {
     // _storage tells how the var_set is stored.
     // -- If wrt parent then _deleted_num tells how many are deleted from the
     // parent, and their indices are listed on the first _deleted_num slots of
@@ -100,7 +102,7 @@ public:
 #if 0
 //#############################################################################
 
-class BCP_var_set_change {
+class BCPLIB_EXPORT BCP_var_set_change {
     // _storage tells how the var_set is stored.
     // -- If wrt parent then _deleted_num tells how many are deleted from the
     // parent, and their indices are listed on the first _deleted_num slots of
@@ -149,7 +151,7 @@ public:
 
 //#############################################################################
 
-class BCP_cut_set_change {
+class BCPLIB_EXPORT BCP_cut_set_change {
     // _storage tells how the cut_set is stored.
     // -- If wrt parent then _deleted_num tells how many are deleted from the
     // parent, and their indices are listed on the first _deleted_num slots of

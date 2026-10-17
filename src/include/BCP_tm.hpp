@@ -3,6 +3,8 @@
 #ifndef _BCP_TM_H
 #define _BCP_TM_H
 
+#include "BcpConfig.h"
+
 #include <queue>
 #include <map>
 
@@ -54,7 +56,7 @@ class BCP_lp_statistics;
 
 /** NO OLD DOC */
 
-struct BCP_slave_params {
+struct BCPLIB_EXPORT BCP_slave_params {
   /** */
   BCP_parameter_set<BCP_ts_par> ts;
   /** */
@@ -71,7 +73,7 @@ struct BCP_slave_params {
 
 /** NO OLD DOC */
 
-struct BCP_tm_flags {
+struct BCPLIB_EXPORT BCP_tm_flags {
   /** Set to true if the result of root pricing is already unpacked.
       Important in a single process environment, so we don't unpack things
       twice. */
@@ -82,7 +84,7 @@ struct BCP_tm_flags {
 
 //-----------------------------------------------------------------------------
 
-class BCP_tm_stat {
+class BCPLIB_EXPORT BCP_tm_stat {
 private:
   int num_lp;
   // An array whose i-th entry indicates what was the totel wait time when
@@ -133,7 +135,7 @@ public:
 
 /** NO OLD DOC */
 
-class BCP_tm_prob : public BCP_process {
+class BCPLIB_EXPORT BCP_tm_prob : public BCP_process {
 private:
   /**@name Disabled methods */
   /*@{*/

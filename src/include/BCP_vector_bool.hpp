@@ -41,7 +41,7 @@ template<> inline void BCP_vec<bool>::deallocate() {
 	}
 }
 //------------------------------------------------------------------------------
-template<> void BCP_vec<bool>::insert_aux(iterator position, const_reference x);
+template<> BCPLIB_EXPORT void BCP_vec<bool>::insert_aux(iterator position, const_reference x);
 
 //##############################################################################
 
@@ -49,33 +49,33 @@ template<> void BCP_vec<bool>::insert_aux(iterator position, const_reference x);
 //------------------------------------------------------------------------------
 // template<> void BCP_vec<bool>::BCP_vec(const BCP_vec<bool>& x);
 //------------------------------------------------------------------------------
-template<> BCP_vec<bool>::BCP_vec(const size_t n, const_reference value);
+template<> BCPLIB_EXPORT BCP_vec<bool>::BCP_vec(const size_t n, const_reference value);
 //------------------------------------------------------------------------------
-template<> BCP_vec<bool>::BCP_vec(const_iterator first, const_iterator last);
+template<> BCPLIB_EXPORT BCP_vec<bool>::BCP_vec(const_iterator first, const_iterator last);
 //------------------------------------------------------------------------------
-template<> BCP_vec<bool>::BCP_vec(const bool* x, const size_t num);
+template<> BCPLIB_EXPORT BCP_vec<bool>::BCP_vec(const bool* x, const size_t num);
 
 //##############################################################################
 
-template<> void BCP_vec<bool>::reserve(const size_t n);
+template<> BCPLIB_EXPORT void BCP_vec<bool>::reserve(const size_t n);
 //------------------------------------------------------------------------------
 // template<> inline void BCP_vec<bool>::swap(BCP_vec<bool>& x);
 //------------------------------------------------------------------------------
-template<> BCP_vec<bool>& BCP_vec<bool>::operator=(const BCP_vec<bool>& x);
+template<> BCPLIB_EXPORT BCP_vec<bool>& BCP_vec<bool>::operator=(const BCP_vec<bool>& x);
 
 //##############################################################################
 // these two members serve to copy out entries from a buffer.
 
-template<> void BCP_vec<bool>::assign(const void* x, const size_t num);
+template<> BCPLIB_EXPORT void BCP_vec<bool>::assign(const void* x, const size_t num);
 //------------------------------------------------------------------------------
-template<> void BCP_vec<bool>::insert(bool* position,
+template<> BCPLIB_EXPORT void BCP_vec<bool>::insert(bool* position,
 									  const void* first, const size_t n);
 //------------------------------------------------------------------------------
-template<> void BCP_vec<bool>::insert(iterator position,
+template<> BCPLIB_EXPORT void BCP_vec<bool>::insert(iterator position,
 									  const_iterator first,
 									  const_iterator last);
 //------------------------------------------------------------------------------
-template<> void BCP_vec<bool>::insert(iterator position, const size_t n,
+template<> BCPLIB_EXPORT void BCP_vec<bool>::insert(iterator position, const size_t n,
 									  const_reference x);
 //------------------------------------------------------------------------------
 template<> inline BCP_vec<bool>::iterator

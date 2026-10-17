@@ -6,6 +6,7 @@
 #include "BCP_warmstart_basis.hpp"
 #include "BCP_buffer.hpp"
 #include "BCP_error.hpp"
+#include "BCP_functions.hpp"
 
 void
 BCP_pack_warmstart(const BCP_warmstart* ws, BCP_buffer& buf)
