@@ -1,0 +1,60 @@
+Description:
+  Slug: Bcp
+  ShortName: Bcp
+  LongName: Branch-Cut-Price Framework
+  ShortDescription: A framework for constructing parallel branch-cut-price algorithms for mixed-integer linear programs.
+  LongDescription: |2
+    BCP is a parallel framework for implementing branch, cut, and price
+    algorithms for solving mixed integer programs (MIPs). BCP provides the
+    user with an object-oriented framework that can be used to develop an
+    efficient problem class specific MIP solver without all the
+    implementational effort involved with implementing a branch and bound
+    framework from scratch.
+  Manager: Laszlo Ladanyi
+  Homepage: https://github.com/coin-or/Bcp
+  License: Eclipse Public License 2.0
+  LicenseURL: http://www.opensource.org/licenses/EPL-2.0
+  Zenodo:
+  IncludedIn:
+    Package: Bcp
+  Language:
+    - C++
+  Categories:
+    - Optimization deterministic linear discrete
+
+Dependencies:
+  - Description: COIN-OR Utilities
+    URL: https://github.com/coin-or/CoinUtils
+    Version: master
+    Required: Required
+  - Description: Open Solver Interface
+    URL: https://github.com/coin-or/Osi
+    Version: master
+    Required: Required
+  - Description: COIN-OR Linear Programming Solver
+    URL: https://github.com/coin-or/Clp
+    Version: master
+    Required: Required
+  - Description: Cut Generator Library
+    URL: https://github.com/coin-or/Cgl
+    Version: master
+    Required: Recommended
+  - Description: Volume Algorithm
+    URL: https://github.com/coin-or/Vol
+    Version: master
+    Required: Recommended
+
+DevelopmentStatus:
+  activityStatus: Active
+  maturityLevel: 5
+  testedPlatforms:
+  - operatingSystem: Linux
+    compiler: gcc
+  - operatingSystem: Mac OS X
+    compiler:
+    - gcc
+    - clang
+  - operatingSystem: Microsoft Windows with MSys2
+    compiler:
+    - gcc
+    - cl
