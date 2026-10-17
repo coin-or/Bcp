@@ -1,0 +1,64 @@
+#!/usr/bin/env bash
+
+# Exit when command fails
+set -e
+#Attempt to use undefined variable outputs error message, and forces an exit
+set -u
+#Causes a pipeline to return the exit status of the last command in the pipe
+#that returned a non-zero return value.
+set -o pipefail
+#set -x
+
+source $COINBREW_HOME/scripts/generate_readme
+
+pushd . > /dev/null
+cd $(dirname $0)
+SCRIPT_DIR=$PWD
+popd > /dev/null
+
+create_variables $SCRIPT_DIR/config.yml
+
+make_header
+
+echo "BCP is a parallel framework for implementing branch, cut, and price
+algorithms for solving mixed integer programs (MIPs). BCP provides the user
+with an object-oriented framework that can be used to develop an efficient
+problem class specific MIP solver without all the implementational effort
+involved with implementing a branch and bound framework from scratch.
+
+Because BCP is an open-source framework, users have the flexibility to
+customize any aspect of their BCP algorithm. BCP is appropriate for
+researchers who would like to experiment with different MIP formulations, new
+cut and/or variable generation techniques, branching strategies, etc., as well
+as power users who would like to solve intractable problems in a parallel
+environment. BCP processes the nodes of the branch-and-bound tree in parallel
+by employing a master/worker model; it can be built with MPI for parallel runs
+or run serially."
+
+# There are no binary packages of BCP in the official repositories of any
+# distribution.
+make_build_info_no_packages
+
+echo "### Examples
+
+The \`Bcp/examples\` directory has several applications of BCP:
+ * \`BAC\`: a simple branch-and-cut application (\`make test\` builds and runs
+   it as the unit test),
+ * \`MaxCut\`: a branch-and-cut algorithm for the max-cut problem,
+ * \`MCF-1\`, \`MCF-2\`, \`MCF-3\`: column generation for multicommodity flow
+   problems.
+
+After building and installing BCP, they can be built by running \`make\` in
+the corresponding subdirectory of the build directory, e.g.,
+\`\`\`
+cd build/Bcp/1.4/examples/BAC
+make
+./bac bb.par
+\`\`\`
+The \`INSTALL\` and \`README\` files in \`Bcp/examples/BAC\` give more information
+on customizing BCP.
+"
+
+make_doxygen_info
+
+make_links
