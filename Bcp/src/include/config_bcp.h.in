@@ -1,6 +1,10 @@
 #ifndef __CONFIG_BCP_H__
 #define __CONFIG_BCP_H__
 
+
+/* Library Visibility Attribute */
+#undef BCPLIB_EXPORT
+
 /* Version number of project */
 #undef BCP_VERSION
 
@@ -14,6 +18,6 @@
 #undef BCP_VERSION_RELEASE
 
 /* Define to 1 if the Mpi package is available */
-#undef COIN_HAS_MPI
+#undef BCP_HAS_MPI
 
 #endif

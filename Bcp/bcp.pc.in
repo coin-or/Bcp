@@ -1,12 +1,15 @@
-prefix=@prefix@
+@COIN_RELOCATABLE_FALSE@prefix=@prefix@
+@COIN_RELOCATABLE_TRUE@prefix=${pcfiledir}/../..
 exec_prefix=@exec_prefix@
 libdir=@libdir@
-includedir=@includedir@/coin
+includedir=@includedir@/coin-or
 
-Name: BCP
+Name: Bcp
 Description: Branch, Cut, and Price Framework
-URL: https://projects.coin-or.org/Bcp
+URL: @PACKAGE_URL@
 Version: @PACKAGE_VERSION@
-Libs: -L${libdir} -lBcp @BCPLIB_PCLIBS@
 Cflags: -I${includedir}
-Requires: @BCPLIB_PCREQUIRES@
+@COIN_STATIC_BUILD_FALSE@Libs: -L${libdir} -lBcp
+@COIN_STATIC_BUILD_FALSE@Requires.private: @BCPLIB_PCFILES@
+@COIN_STATIC_BUILD_TRUE@Libs: -L${libdir} -lBcp @BCPLIB_LFLAGS_NOPC@
+@COIN_STATIC_BUILD_TRUE@Requires: @BCPLIB_PCFILES@

@@ -7,7 +7,7 @@
 
 #include "BcpConfig.h"
 
-#if defined(COIN_HAS_MPI)
+#if defined(BCP_HAS_MPI)
 
 #include "BCP_message.hpp"
 
@@ -75,6 +75,6 @@ public:
 
 int MPIDI_BGLTS_get_num_messages();
 
-#endif /* COIN_HAS_MPI */
+#endif /* BCP_HAS_MPI */
 
 #endif
