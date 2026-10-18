@@ -7,7 +7,9 @@
 
 // #define BCP_MEMPOOL_SAVE_BLOCKHEADS
 
-class BCPLIB_EXPORT BCP_MemPool {
+// BCP_MemPool is not exported: all its methods are inline, and the library
+// itself doesn't use it, so a DLL of Bcp wouldn't contain them.
+class BCP_MemPool {
 private:
    const size_t BLOCK_SIZE;
    size_t entry_size;
