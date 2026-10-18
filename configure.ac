@@ -107,7 +107,8 @@ m4_define([BCP_LINKCOPY_FROM_FILELIST],
 [if test -r $srcdir/$2 ; then
   AC_MSG_NOTICE([Creating $3 in $1])
   bcp_dirname=`AS_DIRNAME([$2])`
-  for i in `cat $srcdir/$2` ; do
+  # strip CRs, in case git converted the file list to CRLF (Windows)
+  for i in `tr -d '\r' < $srcdir/$2` ; do
     if test ! -e $1/$i ; then
       bcp_dirn2=`AS_DIRNAME([$1/$i])`
       AS_MKDIR_P([$bcp_dirn2])
