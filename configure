@@ -21324,7 +21324,8 @@ printf "%s\n" Xexamples/BAC/testfiles.txt |
 	    q
 	  }
 	  s/.*/./; q'`
-  for i in `cat $srcdir/examples/BAC/testfiles.txt` ; do
+  # strip CRs, in case git converted the file list to CRLF (Windows)
+  for i in `tr -d '\r' < $srcdir/examples/BAC/testfiles.txt` ; do
     if test ! -e test/BAC/$i ; then
       bcp_dirn2=`$as_dirname -- test/BAC/$i ||
 $as_expr Xtest/BAC/$i : 'X\(.*[^/]\)//*[^/][^/]*/*$' \| \
@@ -21385,7 +21386,8 @@ printf "%s\n" Xexamples/BAC/examplefiles.txt |
 	    q
 	  }
 	  s/.*/./; q'`
-  for i in `cat $srcdir/examples/BAC/examplefiles.txt` ; do
+  # strip CRs, in case git converted the file list to CRLF (Windows)
+  for i in `tr -d '\r' < $srcdir/examples/BAC/examplefiles.txt` ; do
     if test ! -e examples/BAC/$i ; then
       bcp_dirn2=`$as_dirname -- examples/BAC/$i ||
 $as_expr Xexamples/BAC/$i : 'X\(.*[^/]\)//*[^/][^/]*/*$' \| \
@@ -21445,7 +21447,8 @@ printf "%s\n" Xexamples/MaxCut/examplefiles.txt |
 	    q
 	  }
 	  s/.*/./; q'`
-  for i in `cat $srcdir/examples/MaxCut/examplefiles.txt` ; do
+  # strip CRs, in case git converted the file list to CRLF (Windows)
+  for i in `tr -d '\r' < $srcdir/examples/MaxCut/examplefiles.txt` ; do
     if test ! -e examples/MaxCut/$i ; then
       bcp_dirn2=`$as_dirname -- examples/MaxCut/$i ||
 $as_expr Xexamples/MaxCut/$i : 'X\(.*[^/]\)//*[^/][^/]*/*$' \| \
@@ -21505,7 +21508,8 @@ printf "%s\n" Xexamples/MCF-1/examplefiles.txt |
 	    q
 	  }
 	  s/.*/./; q'`
-  for i in `cat $srcdir/examples/MCF-1/examplefiles.txt` ; do
+  # strip CRs, in case git converted the file list to CRLF (Windows)
+  for i in `tr -d '\r' < $srcdir/examples/MCF-1/examplefiles.txt` ; do
     if test ! -e examples/MCF-1/$i ; then
       bcp_dirn2=`$as_dirname -- examples/MCF-1/$i ||
 $as_expr Xexamples/MCF-1/$i : 'X\(.*[^/]\)//*[^/][^/]*/*$' \| \
@@ -21565,7 +21569,8 @@ printf "%s\n" Xexamples/MCF-2/examplefiles.txt |
 	    q
 	  }
 	  s/.*/./; q'`
-  for i in `cat $srcdir/examples/MCF-2/examplefiles.txt` ; do
+  # strip CRs, in case git converted the file list to CRLF (Windows)
+  for i in `tr -d '\r' < $srcdir/examples/MCF-2/examplefiles.txt` ; do
     if test ! -e examples/MCF-2/$i ; then
       bcp_dirn2=`$as_dirname -- examples/MCF-2/$i ||
 $as_expr Xexamples/MCF-2/$i : 'X\(.*[^/]\)//*[^/][^/]*/*$' \| \
@@ -21625,7 +21630,8 @@ printf "%s\n" Xexamples/MCF-3/examplefiles.txt |
 	    q
 	  }
 	  s/.*/./; q'`
-  for i in `cat $srcdir/examples/MCF-3/examplefiles.txt` ; do
+  # strip CRs, in case git converted the file list to CRLF (Windows)
+  for i in `tr -d '\r' < $srcdir/examples/MCF-3/examplefiles.txt` ; do
     if test ! -e examples/MCF-3/$i ; then
       bcp_dirn2=`$as_dirname -- examples/MCF-3/$i ||
 $as_expr Xexamples/MCF-3/$i : 'X\(.*[^/]\)//*[^/][^/]*/*$' \| \
